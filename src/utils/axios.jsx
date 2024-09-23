@@ -5,9 +5,15 @@ import { HOST_API } from 'src/config-global';
 
 const axiosInstance = axios.create({ baseURL: HOST_API });
 
-// Request interceptor (tidak perlu menambahkan header Authorization karena menggunakan cookie HTTP-only)
+
 axiosInstance.interceptors.request.use(
-  (config) => config,
+  (config) => {
+    const token = sessionStorage.getItem('accessToken'); // Get token from sessionStorage
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`; // Attach Bearer token
+    }
+    return config;
+  },
   (error) => Promise.reject(error)
 );
 
@@ -43,6 +49,16 @@ export const endpoints = {
     delete: '/api/admin/file/delete',
     addTag: '/api/admin/file/addTag',
     removeTag: '/api/admin/file/removeTag',
+    download:'/api/admin/file/download',
+    change: '/api/admin/file/change_name',
+    preview: '/api/file/preview/'
+  },
+  permission: {
+    // getPermissionFile: '/api/admin/permission/file/getAllPermission',
+    // getPermissionFolder: '/api/admin/permission/folder/getAllPermission',
+    
+    getPermissionFolder: '/api/admin/permission/folder/grantPermission/',
+    getPermissionFile: '/api/admin/permission/file/grantPermission/',
   },
   tag: {
     create: '/api/admin/tag/create',
@@ -56,7 +72,7 @@ export const endpoints = {
     create: '/api/admin/folder/create', //create list
     delete: '/api/admin/folder/delete', //delete folder
     edit: '/api/admin/folder/update', //edit folder
-    addTag:'/api/admin/folder/addTag',
+    addTag: '/api/admin/folder/addTag',
   },
   users: {
     list: '/api/admin/users/list',

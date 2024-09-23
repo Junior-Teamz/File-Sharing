@@ -238,103 +238,99 @@ export default function OverviewAppView() {
         <Grid xs={12} md={14}>
           <AppWelcome title={`Welcome back 👋 ${user?.name}`} img={<SeoIllustration />} />
         </Grid>
+        <Grid xs={12} md={12} lg={12}>
+          <FileManagerPanel
+            title="Folders"
+            link={paths.dashboard.fileManager}
+            onOpen={handleClickOpened}
+            sx={{ mt: 5 }}
+          />
+
+          <Dialog open={opened} onClose={handleClosed}>
+            <DialogTitle>Create Folder</DialogTitle>
+            <DialogContent>
+              <form onSubmit={handleSubmit(Onsubmit)}>
+                <DialogContentText sx={{ mb: 3 }}>
+                  Silahkan masukkan nama folder yang ingin dibuat disini.
+                </DialogContentText>
+                <Stack spacing={2}>
+                  <TextField
+                    autoFocus
+                    margin="dense"
+                    id="name"
+                    name="name"
+                    label="Nama Folder"
+                    type="text"
+                    fullWidth
+                    variant="outlined"
+                    {...register('name')}
+                  />
+                  <FormControl fullWidth margin="dense">
+                    <InputLabel id="tags-label">Tags</InputLabel>
+                    <Select
+                      labelId="tags-label"
+                      id="tags"
+                      multiple
+                      value={selectedTags}
+                      onChange={handleTagChange}
+                      input={<OutlinedInput id="select-multiple-chip" label="Tags" />}
+                      renderValue={(selected) => (
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: 0.5,
+                            maxHeight: 100,
+                            overflowY: 'auto',
+                          }}
+                        >
+                          {selected.map((tagId) => {
+                            const tag = tagsData.find((t) => t.id === tagId);
+                            return (
+                              <Chip
+                                key={tagId}
+                                label={tag ? tag.name : `Tag ${tagId} not found`}
+                                sx={{ mb: 0.5 }}
+                              />
+                            );
+                          })}
+                        </Box>
+                      )}
+                    >
+                      {isLoadingTags ? (
+                        <MenuItem disabled>Loading...</MenuItem>
+                      ) : tagsData.length > 0 ? (
+                        tagsData.map((tag) => (
+                          <MenuItem key={tag.id} value={tag.id}>
+                            {tag.name}
+                          </MenuItem>
+                        ))
+                      ) : (
+                        <MenuItem disabled>No tags available</MenuItem>
+                      )}
+                    </Select>
+                  </FormControl>
+                </Stack>
+                <DialogActions>
+                  <Button variant="outlined" onClick={handleClosed}>
+                    Cancel
+                  </Button>
+                  <Button variant="outlined" type="submit">
+                    {isPending ? 'Creating...' : 'Create'}
+                  </Button>
+                </DialogActions>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </Grid>
 
         {data.folders.length === 0 ? (
           <>
-            <Grid xs={12} md={12} lg={12}>
-              <FileManagerPanel
-                title="Folders"
-                link={paths.dashboard.fileManager}
-                onOpen={handleClickOpened}
-                sx={{ mt: 5 }}
-              />
-              <EmptyContent filled title="Folder Kosong" sx={{ py: 10 }} />
-              <Dialog open={opened} onClose={handleClosed}>
-                <DialogTitle>Create Folder</DialogTitle>
-                <DialogContent>
-                  <form onSubmit={handleSubmit(Onsubmit)}>
-                    <DialogContentText sx={{ mb: 3 }}>
-                      Silahkan masukkan nama folder yang ingin dibuat disini.
-                    </DialogContentText>
-                    <Stack spacing={2}>
-                      <TextField
-                        autoFocus
-                        margin="dense"
-                        id="name"
-                        name="name"
-                        label="Nama Folder"
-                        type="text"
-                        fullWidth
-                        variant="outlined"
-                        {...register('name')}
-                      />
-                      <FormControl fullWidth margin="dense">
-                        <InputLabel id="tags-label">Tags</InputLabel>
-                        <Select
-                          labelId="tags-label"
-                          id="tags"
-                          multiple
-                          value={selectedTags}
-                          onChange={handleTagChange}
-                          input={<OutlinedInput id="select-multiple-chip" label="Tags" />}
-                          renderValue={(selected) => (
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                flexWrap: 'wrap',
-                                gap: 0.5,
-                                maxHeight: 100,
-                                overflowY: 'auto',
-                              }}
-                            >
-                              {selected.map((tagId) => {
-                                const tag = tagsData.find((t) => t.id === tagId);
-                                return (
-                                  <Chip
-                                    key={tagId}
-                                    label={tag ? tag.name : `Tag ${tagId} not found`}
-                                    sx={{ mb: 0.5 }}
-                                  />
-                                );
-                              })}
-                            </Box>
-                          )}
-                        >
-                          {isLoadingTags ? (
-                            <MenuItem disabled>Loading...</MenuItem>
-                          ) : tagsData.length > 0 ? (
-                            tagsData.map((tag) => (
-                              <MenuItem key={tag.id} value={tag.id}>
-                                {tag.name}
-                              </MenuItem>
-                            ))
-                          ) : (
-                            <MenuItem disabled>No tags available</MenuItem>
-                          )}
-                        </Select>
-                      </FormControl>
-                    </Stack>
-                    <DialogActions>
-                      <Button variant="outlined" onClick={handleClosed}>
-                        Cancel
-                      </Button>
-                      <Button variant="outlined" type="submit">
-                        {isPending ? 'Creating...' : 'Create'}
-                      </Button>
-                    </DialogActions>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </Grid>
+            <EmptyContent filled title="Folder Kosong" sx={{ py: 10 }} />
           </>
         ) : (
           <Grid xs={12} md={12} lg={12}>
-            <FileManagerPanel
-              title="Folders"
-              link={paths.dashboard.fileManager}
-              onOpen={handleClickOpened}
-              sx={{ mt: 5 }}
-            />
+           
             <Dialog open={opened} onClose={handleClosed}>
               <DialogTitle>Create Folder</DialogTitle>
               <DialogContent>
@@ -616,6 +612,7 @@ export default function OverviewAppView() {
             {files?.map((file) => (
               <FileRecentItem
                 key={file.id}
+                onRefetch={refetch} // Pass the refetch function here
                 file={file}
                 onDelete={() => console.info('DELETE', file.id)}
               />

@@ -208,7 +208,7 @@ export default function TagListView() {
                       />
                     </TableCell>
                     <TableCell>Name</TableCell>
-                    <TableCell>Actions</TableCell>
+                    <TableCell align="right">Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

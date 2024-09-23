@@ -44,7 +44,7 @@ const ICONS = {
   ecommerce: icon('ic_ecommerce'),
   analytics: icon('ic_analytics'),
   dashboard: icon('ic_dashboard'),
-  drive: <AddToDriveIcon/>
+  drive: <AddToDriveIcon />,
 };
 
 // ----------------------------------------------------------------------
@@ -64,6 +64,12 @@ export function useNavData() {
             path: paths.dashboard.root,
             icon: ICONS.drive,
           },
+          {
+            title: t('file_manager'),
+            path: paths.dashboard.fileManager,
+            icon: ICONS.folder,
+          },
+
           // {
           //   title: t('ecommerce'),
           //   path: paths.dashboard.general.ecommerce,
@@ -125,7 +131,6 @@ export function useNavData() {
             ],
           },
 
-          
           {
             title: t('tag management'),
             path: paths.dashboard.tag.root,
@@ -222,11 +227,6 @@ export function useNavData() {
           // },
 
           // FILE MANAGER
-          {
-            title: t('file_manager'),
-            path: paths.dashboard.fileManager,
-            icon: ICONS.folder,
-          },
 
           // MAIL
           // {

@@ -23,13 +23,20 @@ import Scrollbar from 'src/components/scrollbar';
 import FileThumbnail, { fileFormat } from 'src/components/file-thumbnail';
 import FileManagerShareDialog from './file-manager-share-dialog';
 import FileManagerInvitedItem from './file-manager-invited-item';
-import { useAddFileTag, useRemoveTagFile } from './view/folderDetail/index';
+import {
+  useAddFileTag,
+  useRemoveTagFile,
+  useMutationDeleteFiles,
+  usePermissionsFolder,
+  usePermissionsFile,
+} from './view/folderDetail/index';
 import { useIndexTag } from '../tag/view/TagMutation';
 import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
+import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
-export default function FileManagerFileDetails({
+export default function FIleManagerFileDetails({
   item,
   open,
   favorited,
@@ -37,10 +44,23 @@ export default function FileManagerFileDetails({
   onCopyLink,
   onClose,
   onDelete,
+  folderId,
+  fileId,
   ...other
 }) {
   const { enqueueSnackbar } = useSnackbar(); // Initialize enqueueSnackbar
-  const { name, size, image_url, type, shared, modifiedAt, user, instance, tags: initialTags , updated_at} = item;
+  const {
+    name,
+    size,
+    image_url,
+    type,
+    shared,
+    modifiedAt,
+    user,
+    instance,
+    tags: initialTags,
+    updated_at,
+  } = item;
 
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
@@ -48,12 +68,15 @@ export default function FileManagerFileDetails({
   const toggleTags = useBoolean(true);
   const share = useBoolean();
   const properties = useBoolean(true);
+  const [fileIdToDelete, setFileIdToDelete] = useState(null);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
 
   const [inviteEmail, setInviteEmail] = useState('');
 
   const { data: tagData } = useIndexTag(); // Assuming this returns tag data
   const addTagFile = useAddFileTag();
   const { mutateAsync: removeTagFile } = useRemoveTagFile();
+  const { mutateAsync: deleteFile } = useMutationDeleteFiles();
 
   useEffect(() => {
     if (tagData && Array.isArray(tagData.data)) {
@@ -72,6 +95,16 @@ export default function FileManagerFileDetails({
       setTags(newValue.map((tag) => tag.id)); // Assuming newValue is an array of tag objects
     }
   }, []);
+
+  const handleOpenConfirmDialog = (fileId) => {
+    setFileIdToDelete(fileId);
+    setOpenConfirmDialog(true);
+  };
+
+  const handleCloseConfirmDialog = () => {
+    setOpenConfirmDialog(false);
+    setFileIdToDelete(null);
+  };
 
   const handleSaveTags = async () => {
     if (!addTagFile.mutateAsync) {
@@ -108,6 +141,18 @@ export default function FileManagerFileDetails({
     }
   };
 
+  const handleDeleteFile = async () => {
+    try {
+      await deleteFile({ file_id: fileIdToDelete });
+      enqueueSnackbar('File deleted successfully!', { variant: 'success' });
+      handleCloseConfirmDialog();
+      // Optionally, call a prop function to refresh the file list
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      enqueueSnackbar('Error deleting file.', { variant: 'error' });
+    }
+  };
+
   const handleRemoveTag = async (tagId) => {
     if (tags.length <= 1) {
       enqueueSnackbar('Kamu harus menyisakan satu tag', { variant: 'warning' });
@@ -123,7 +168,58 @@ export default function FileManagerFileDetails({
       enqueueSnackbar('Error removing tag.', { variant: 'error' });
     }
   };
-  
+
+  // Menggunakan usePermissionsFile atau usePermissionsFolder
+  const { permissions: filePermissions } = usePermissionsFile(fileId);
+  const { permissions: folderPermissions } = usePermissionsFolder(folderId);
+
+  const [currentPermissions, setCurrentPermissions] = useState('');
+  const [link, setLink] = useState('');
+
+  useEffect(() => {
+    console.log('folderId:', folderId);
+    console.log('fileId:', fileId);
+    if (folderId) {
+      setCurrentPermissions(folderPermissions);
+    } else if (fileId) {
+      setCurrentPermissions(filePermissions);
+    }
+  }, [folderId, fileId, folderPermissions, filePermissions]);
+
+  useEffect(() => {
+    const id = folderId || fileId;
+    if (id) {
+      const newLink = `${window.location.origin}/shared/${id}?permission=${currentPermissions}`;
+      setLink(newLink);
+    }
+  }, [folderId, fileId, currentPermissions]);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(link);
+    alert('Link copied: ' + link);
+    if (onCopyLink) onCopyLink(link); // Panggil props onCopyLink
+  };
+
+  // const handleCopyLink = () => {
+  //   const fileUrl = item.url; // Ensure this is the correct property for URL
+
+  //   console.log('File URL:', fileUrl); // Debugging line
+
+  //   if (!fileUrl) {
+  //     enqueueSnackbar('No URL to copy.', { variant: 'warning' });
+  //     return;
+  //   }
+
+  //   navigator.clipboard
+  //     .writeText(fileUrl)
+  //     .then(() => enqueueSnackbar('Link copied to clipboard!', { variant: 'success' }))
+  //     .catch((err) => {
+  //       console.error('Failed to copy link:', err);
+  //       enqueueSnackbar('Failed to copy link.', { variant: 'error' });
+  //     });
+  // };
+
+  console.log('Image URL:', image_url);
 
   const renderTags = (
     <Stack spacing={1.5}>
@@ -283,12 +379,10 @@ export default function FileManagerFileDetails({
           }}
         >
           {/* Uncomment and use for displaying file thumbnail if needed */}
-          <FileThumbnail
-            imageView
-            file={item}
-            sx={{ height: 96, width: 96, borderRadius: 1.5 }}
+          <img
             src={image_url}
             alt={name}
+            style={{ height: 96, width: 96, borderRadius: '12px', objectFit: 'cover' }} // Adjust style as needed
           />
 
           <Typography variant="subtitle2">{name}</Typography>
@@ -343,18 +437,57 @@ export default function FileManagerFileDetails({
             )}
           </Stack>
 
+          <FileManagerShareDialog
+            open={share.value}
+            shared={shared}
+            inviteEmail={inviteEmail}
+            onChangeInvite={handleChangeInvite}
+            onCopyLink={handleCopyLink}
+            onClose={() => {
+              share.onFalse();
+              setInviteEmail('');
+            }}
+          />
+
           {renderShared}
 
           <Button fullWidth size="small" color="inherit" variant="outlined" onClick={onClose}>
             Close
           </Button>
+
+          <Box sx={{ p: 2.5 }}>
+            <Button
+              fullWidth
+              variant="soft"
+              color="error"
+              size="large"
+              startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
+              onClick={() => handleOpenConfirmDialog(item.id)}
+            >
+              Delete
+            </Button>
+          </Box>
         </Stack>
       </Scrollbar>
+      <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this file?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirmDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteFile} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Drawer>
   );
 }
 
-FileManagerFileDetails.propTypes = {
+FIleManagerFileDetails.propTypes = {
   item: PropTypes.object.isRequired,
   open: PropTypes.bool,
   favorited: PropTypes.bool,

@@ -145,7 +145,7 @@ export default function InstanceListView() {
                     <TableCell>Name</TableCell>
 
                     <TableCell>Address</TableCell>
-                    <TableCell>Actions</TableCell>
+                    <TableCell align='right'>Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

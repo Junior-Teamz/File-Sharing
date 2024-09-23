@@ -29,6 +29,7 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 //
 import FileManagerShareDialog from './file-manager-share-dialog';
 import FileManagerFileDetails from './file-manager-file-details';
+//
 
 // ----------------------------------------------------------------------
 
@@ -56,8 +57,13 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
   }, []);
 
   const handleCopy = useCallback(() => {
-    enqueueSnackbar('Copied!');
-    copy(file.url);
+    console.log('File URL:', file.url); // Log the file URL to check if it's correct
+    if (file.url) {
+      enqueueSnackbar('Berhasil di Copied!');
+      copy(file.url);
+    } else {
+      enqueueSnackbar('Failed to copy: URL is undefined');
+    }
   }, [copy, enqueueSnackbar, file.url]);
 
   const renderIcon =
@@ -196,6 +202,16 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
         >
           <Iconify icon="eva:link-2-fill" />
           Copy Link
+        </MenuItem>
+
+        <MenuItem
+          onClick={() => {
+            confirm.onTrue();
+            popover.onClose();
+          }}
+        >
+          <Iconify icon="solar:download-minimalistic-bold" />
+          Download
         </MenuItem>
 
         <MenuItem

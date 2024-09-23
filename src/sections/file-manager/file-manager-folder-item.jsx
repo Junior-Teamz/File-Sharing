@@ -216,6 +216,16 @@ export default function FileManagerFolderItem({
 
         <MenuItem
           onClick={() => {
+            confirm.onTrue();
+            popover.onClose();
+          }}
+        >
+          <Iconify icon="solar:download-minimalistic-bold" />
+          Download
+        </MenuItem>
+
+        <MenuItem
+          onClick={() => {
             popover.onClose();
             share.onTrue();
           }}

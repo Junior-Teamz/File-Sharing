@@ -1,16 +1,20 @@
 import { useMutation } from '@tanstack/react-query';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
-export const useMutationDeleteFiles = ({ onSuccess, onError }) => {
+export const useMutationDeleteFiles = () => {
   return useMutation({
-    mutationKey: ['delete.files'],
-    mutationFn: async (fileIds) => {
-      const response = await axiosInstance.post(
-        `${endpoints.files.delete}?ids=${fileIds.join(',')}`
-      );
-      return response.data;
+    mutationKey: ['delete.instansi'],
+    mutationFn: async (fileIdOrIds) => {
+      const isArray = Array.isArray(fileIdOrIds);
+
+      const payload = {
+        file_ids: isArray ? fileIdOrIds : [fileIdOrIds],
+      };
+
+      const response = await axiosInstance.post(`${endpoints.files.delete}`, payload);
+
+      console.log(response);
+      return response;
     },
-    onSuccess,
-    onError,
   });
 };

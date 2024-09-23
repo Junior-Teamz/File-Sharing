@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -11,6 +11,11 @@ import IconButton from '@mui/material/IconButton';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import AvatarGroup, { avatarGroupClasses } from '@mui/material/AvatarGroup';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import TextField from '@mui/material/TextField';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
@@ -18,47 +23,107 @@ import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
 // utils
 import { fData } from 'src/utils/format-number';
 import { fDateTime } from 'src/utils/format-time';
-
 // components
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import FileThumbnail from 'src/components/file-thumbnail';
-//
 import FileManagerShareDialog from './file-manager-share-dialog';
 import FileManagerFileDetails from './file-manager-file-details';
+import { useDownloadFile, useChangeNameFile } from './view/folderDetail';
+import { Button } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
-export default function FileRecentItem({ file, onDelete, sx, ...other }) {
+export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other }) {
   const { enqueueSnackbar } = useSnackbar();
-
   const { copy } = useCopyToClipboard();
-
   const smUp = useResponsive('up', 'sm');
-
   const [inviteEmail, setInviteEmail] = useState('');
-
+  const [newFileName, setNewFileName] = useState(file.name);
   const popover = usePopover();
-
   const share = useBoolean();
-
   const edit = useBoolean();
-
   const details = useBoolean();
-
   const favorite = useBoolean(file.isFavorited);
+  const [originalFileType, setOriginalFileType] = useState(file.type);
 
-  console.log(file);
+  const { mutateAsync: updateNameFile } = useChangeNameFile();
+  const { mutateAsync: downloadFile } = useDownloadFile();
+
+  useEffect(() => {
+    setNewFileName(file.name);
+    setOriginalFileType(file.type);
+  }, [file]);
+
 
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value);
   }, []);
 
+  const handleRename = useCallback(async () => {
+    const newFileType = newFileName.split('.').pop(); // Extract new file type from name
+
+    if (newFileType !== originalFileType.split('.').pop()) {
+      enqueueSnackbar('Type file tidak boleh diubah!', { variant: 'error' });
+      return;
+    }
+
+    try {
+      await updateNameFile({ fileId: file.id, data: { name: newFileName } });
+      enqueueSnackbar('File name updated successfully!', { variant: 'success' });
+      onRefetch(); // Call to re-fetch the file data
+      edit.onFalse(); // Close the edit dialog
+    } catch (error) {
+      enqueueSnackbar('Failed to update file name!', { variant: 'error' });
+    }
+  }, [file.id, newFileName, originalFileType, updateNameFile, enqueueSnackbar, edit, onRefetch]);
+
   const handleCopy = useCallback(() => {
-    enqueueSnackbar('Copied!');
-    copy(file.url);
-  }, [copy, enqueueSnackbar, file.url]);
+    console.log(file.id)
+    if (file?.id) {
+      enqueueSnackbar('Berhasil di Copied!');
+      copy(file.id); // Mengakses file.id langsung, tanpa [0] karena file bukan array
+    } else {
+      enqueueSnackbar('File URL is undefined!', { variant: 'error' });
+    }
+  }, [copy, enqueueSnackbar, file.id]);
+
+
+  
+
+  // const handle = useCallback(() => {
+  //   enqueueSnackbar('Link copied!');
+  //   copy(folderData[0].url); // Adjust accordingly
+  // }, [copy, enqueueSnackbar,folderData]);
+
+  const handleDownload = useCallback(async () => {
+    try {
+      const idsToDownload = Array.isArray(file.ids) && file.ids.length ? file.ids : [file.id];
+      console.log('IDs to Download:', idsToDownload);
+  
+      // Send the correct payload to the API
+      const response = await downloadFile(idsToDownload);
+  
+      if (response.data) {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', file.name || 'download');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        enqueueSnackbar('Download started!', { variant: 'success' });
+      } else {
+        enqueueSnackbar('No data received for download!', { variant: 'error' });
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      const errorMessage = error.response?.data?.error || 'Download failed!'; // Use error message from server if available
+      enqueueSnackbar(errorMessage, { variant: 'error' });
+    }
+  }, [downloadFile, file, enqueueSnackbar]);
+  
 
   const renderAction = (
     <Box
@@ -79,7 +144,6 @@ export default function FileRecentItem({ file, onDelete, sx, ...other }) {
         checked={favorite.value}
         onChange={favorite.onToggle}
       />
-
       <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
         <Iconify icon="eva:more-vertical-fill" />
       </IconButton>
@@ -139,7 +203,6 @@ export default function FileRecentItem({ file, onDelete, sx, ...other }) {
     </AvatarGroup>
   );
 
-
   return (
     <>
       <Stack
@@ -163,11 +226,8 @@ export default function FileRecentItem({ file, onDelete, sx, ...other }) {
         {...other}
       >
         <FileThumbnail file={file.type} sx={{ width: 36, height: 36, mr: 1 }} />
-
         {renderText}
-
         {!!file?.shared?.length && renderAvatar}
-
         {renderAction}
       </Stack>
 
@@ -186,7 +246,15 @@ export default function FileRecentItem({ file, onDelete, sx, ...other }) {
           <Iconify icon="eva:link-2-fill" />
           Copy Link
         </MenuItem>
-
+        <MenuItem
+          onClick={() => {
+            popover.onClose();
+            handleDownload();
+          }}
+        >
+          <Iconify icon="solar:download-minimalistic-bold" />
+          Download
+        </MenuItem>
         <MenuItem
           onClick={() => {
             popover.onClose();
@@ -196,19 +264,17 @@ export default function FileRecentItem({ file, onDelete, sx, ...other }) {
           <Iconify icon="solar:share-bold" />
           Share
         </MenuItem>
-
         <MenuItem
           onClick={() => {
             popover.onClose();
+            setNewFileName(file.name); // Set current file name
             edit.onTrue();
           }}
         >
           <Iconify icon="solar:pen-bold" />
           Ganti Nama
         </MenuItem>
-
         <Divider sx={{ borderStyle: 'dashed' }} />
-
         <MenuItem
           onClick={() => {
             popover.onClose();
@@ -245,22 +311,33 @@ export default function FileRecentItem({ file, onDelete, sx, ...other }) {
           setInviteEmail('');
         }}
       />
-      <FileManagerShareDialog
-        open={edit.value}
-        shared={file.shared}
-        inviteEmail={inviteEmail}
-        onChangeInvite={handleChangeInvite}
-        onCopyLink={handleCopy}
-        onClose={() => {
-          edit.onFalse();
-        }}
-      />
+
+      <Dialog open={edit.value} onClose={edit.onFalse}>
+        <DialogTitle>Ganti Nama File</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="New File Name"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={newFileName}
+            onChange={(e) => setNewFileName(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={edit.onFalse}>Cancel</Button>
+          <Button onClick={handleRename}>Save</Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
 
 FileRecentItem.propTypes = {
-  file: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+  file: PropTypes.object.isRequired,
   onDelete: PropTypes.func,
+  onRefetch: PropTypes.func.isRequired, // Added prop type for refetch function
   sx: PropTypes.object,
 };

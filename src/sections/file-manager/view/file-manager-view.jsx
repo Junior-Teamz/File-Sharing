@@ -25,6 +25,8 @@ import FileManagerFilters from '../file-manager-filters';
 import FileManagerGridView from '../file-manager-grid-view';
 import FileManagerFiltersResult from '../file-manager-filters-result';
 import FileManagerNewFolderDialog from '../file-manager-new-folder-dialog';
+import { useFetchFolder } from 'src/sections/overview/app/view/folders';
+import { handleFolderFiles } from 'src/_mock/map/filesFolderApi';
 // ----------------------------------------------------------------------
 
 const defaultFilters = {
@@ -39,6 +41,13 @@ const defaultFilters = {
 export default function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
 
+  const {data, isLoading} = useFetchFolder()
+
+  // console.log(data);
+  const {FolderFiles} = handleFolderFiles()
+  
+  
+
   const settings = useSettingsContext();
 
   const openDateRange = useBoolean();
@@ -49,7 +58,7 @@ export default function FileManagerView() {
 
   const [view, setView] = useState('list');
 
-  const [tableData, setTableData] = useState(_allFiles);
+  const [tableData, setTableData] = useState(FolderFiles);
 
   const [filters, setFilters] = useState(defaultFilters);
 
@@ -248,6 +257,12 @@ export default function FileManagerView() {
 
 function applyFilter({ inputData, comparator, filters, dateError }) {
   const { name, type, startDate, endDate } = filters;
+  console.log(inputData); 
+  console.log(comparator); 
+  console.log(filters); 
+  console.log(dateError); 
+
+  
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 

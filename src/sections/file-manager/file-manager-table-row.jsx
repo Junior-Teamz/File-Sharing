@@ -36,7 +36,7 @@ import FileManagerFileDetails from './file-manager-file-details';
 export default function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow }) {
   const theme = useTheme();
 
-  const { name, size, type, modifiedAt, shared, isFavorited } = row;
+  const { name, size, type, updated_at, shared, isFavorited } = row;
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -66,7 +66,7 @@ export default function FileManagerTableRow({ row, selected, onSelectRow, onDele
   });
 
   const handleCopy = useCallback(() => {
-    enqueueSnackbar('Copied!');
+    enqueueSnackbar('berhasil di Copied!');
     copy(row.url);
   }, [copy, enqueueSnackbar, row.url]);
 
@@ -148,8 +148,8 @@ export default function FileManagerTableRow({ row, selected, onSelectRow, onDele
 
         <TableCell onClick={handleClick} sx={{ whiteSpace: 'nowrap' }}>
           <ListItemText
-            primary={format(new Date(modifiedAt), 'dd MMM yyyy')}
-            secondary={format(new Date(modifiedAt), 'p')}
+            primary={format(new Date(updated_at), 'dd MMM yyyy')}
+            secondary={format(new Date(updated_at), 'p')}
             primaryTypographyProps={{ typography: 'body2' }}
             secondaryTypographyProps={{
               mt: 0.5,
