@@ -4,17 +4,22 @@ import { Outlet } from 'react-router-dom';
 
 import { LoadingScreen } from 'src/components/loading-screen';
 import UsersPage from './UsersPage';
+import DashboardUserLayout from '../dashboarduser/Layout';
 
 export const DashboardUser = [
   {
     path: 'dashboarduser',
     element: (
       <AuthGuard>
-        <Suspense fallback={<LoadingScreen />}>
-          <Outlet />
-        </Suspense>
+        <DashboardUserLayout>
+          <Suspense fallback={<LoadingScreen />}>
+            <Outlet />
+          </Suspense>
+        </DashboardUserLayout>
       </AuthGuard>
     ),
-    children: [{ element: <UsersPage />, index: true }],
+    children: [
+      { element: <UsersPage />, index: true }
+    ],
   },
 ];

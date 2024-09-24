@@ -20,13 +20,12 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import { useTable, getComparator } from 'src/components/table';
 //
-import FileManagerTable from '../file-manager-table';
-import FileManagerFilters from '../file-manager-filters';
-import FileManagerGridView from '../file-manager-grid-view';
-import FileManagerFiltersResult from '../file-manager-filters-result';
-import FileManagerNewFolderDialog from '../file-manager-new-folder-dialog';
-import { useFetchFolder } from 'src/sections/overview/app/view/folders';
-import { handleFolderFiles } from 'src/_mock/map/filesFolderApi';
+import FileManagerTable from '../FileManagerTable';
+import FileManagerFilters from '../FileManagerFilters';
+import FileManagerGridView from '../FileManagerGridView';
+import FileManagerFiltersResult from '../FileManagerFiltersResult';
+import FileManagerNewFolderDialog from '../FileManagerNewFolderDialog';
+import { handleFolderFiles } from 'src/_mock/map/FilesFolderUser';
 // ----------------------------------------------------------------------
 
 const defaultFilters = {
@@ -41,7 +40,6 @@ const defaultFilters = {
 export default function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
 
-  const {data, isLoading} = useFetchFolder()
 
   // console.log(data);
   const {FolderFiles} = handleFolderFiles()
@@ -63,6 +61,13 @@ export default function FileManagerView() {
   const [filters, setFilters] = useState(defaultFilters);
 
   const [selectedTags, setSelectedTags] = useState([]);
+
+
+  const handleTagChange = (tags) => {
+    setSelectedTags(tags); // Update the selected tags state
+    console.log('Selected Tags:', tags);
+  };
+
 
   const dateError =
     filters.startDate && filters.endDate
@@ -128,12 +133,6 @@ export default function FileManagerView() {
     setFilters(defaultFilters);
   }, []);
 
-  const handleTagChange = (tags) => {
-    setSelectedTags(tags); // Update the selected tags state
-    console.log('Selected Tags:', tags);
-  };
-
-
   const renderFilters = (
     <Stack
       spacing={2}
@@ -179,8 +178,9 @@ export default function FileManagerView() {
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
+        {/* <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h4">File Manager</Typography>
+        </Stack> */}
           <Button
             variant="contained"
             startIcon={<Iconify icon="eva:cloud-upload-fill" />}
@@ -188,7 +188,6 @@ export default function FileManagerView() {
           >
             Upload
           </Button>
-        </Stack>
 
         <Stack
           spacing={2.5}
@@ -200,6 +199,7 @@ export default function FileManagerView() {
 
           {canReset && renderResults}
         </Stack>
+
 
         {notFound ? (
           <EmptyContent
@@ -233,7 +233,12 @@ export default function FileManagerView() {
         )}
       </Container>
 
-      <FileManagerNewFolderDialog onTagChange={handleTagChange} open={upload.value} onClose={upload.onFalse} />
+      <FileManagerNewFolderDialog
+        open={upload.value}
+        onClose={upload.onFalse}
+        onTagChange={handleTagChange} // Pass the handler here
+      />
+
 
       <ConfirmDialog
         open={confirm.value}

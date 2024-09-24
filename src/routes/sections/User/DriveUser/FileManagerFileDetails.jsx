@@ -21,12 +21,13 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import FileThumbnail, { fileFormat } from 'src/components/file-thumbnail';
-import FileManagerShareDialog from './file-manager-share-dialog';
-import FileManagerInvitedItem from './file-manager-invited-item';
-import { useAddFileTag, useRemoveTagFile, useMutationDeleteFiles } from './view/folderDetail/index';
-import { useIndexTag } from '../tag/view/TagMutation';
+import FileManagerShareDialog from './FileManagerShareDialog';
+import FileManagerInvitedItem from './FileManagerInvitedItem';
+import { useAddFileTag, useRemoveTagFile, useMutationDeleteFiles } from './view/FetchDriveUser/index';
 import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { useIndexTag } from './view/TagUser/useIndexTag';
+
 
 // ----------------------------------------------------------------------
 

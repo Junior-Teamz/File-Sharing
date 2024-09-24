@@ -5,7 +5,6 @@ import { HOST_API } from 'src/config-global';
 
 const axiosInstance = axios.create({ baseURL: HOST_API });
 
-
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = sessionStorage.getItem('accessToken'); // Get token from sessionStorage
@@ -38,27 +37,52 @@ export const fetcher = async (args) => {
 // ----------------------------------------------------------------------
 
 export const endpoints = {
+  //auth login,log out, info
   auth: {
-    me: '/api/admin/index',
-    login: '/api/login',
-    logout: '/api/logout',
-    register: '/api/auth/register/',
+    me: '/api/index', //untuk info
+    login: '/api/login', //untuk login
+    logout: '/api/logout', //untuk log out
+    // register: '/api/auth/register/',
   },
+
+  //user
+  Tags: {
+    ListTag: '/api/tag/index',
+  },
+
+  file: {
+    upload: '/api/file/upload',
+    delete: '/api/file/delete',
+    addTag: '/api/file/addTag',
+    removeTag: '/api/file/removeTag',
+    download: '/api/file/download',
+    change: '/api/file/change_name',
+  },
+  folders: {
+    detail: '/api/folder/info/',
+    list: '/api/folder', //folder list
+    create: '/api/folder/create', //create list
+    delete: '/api/folder/delete', //delete folder
+    edit: '/api/folder/update', //edit folder
+    addTag: '/api/folder/addTag',
+  },
+
+  //admin
   files: {
     upload: '/api/admin/file/upload',
     delete: '/api/admin/file/delete',
     addTag: '/api/admin/file/addTag',
     removeTag: '/api/admin/file/removeTag',
-    download:'/api/admin/file/download',
+    download: '/api/admin/file/download',
     change: '/api/admin/file/change_name',
-    preview: '/api/file/preview/'
+    preview: '/api/file/preview/',
   },
   permission: {
     // getPermissionFile: '/api/admin/permission/file/getAllPermission',
     // getPermissionFolder: '/api/admin/permission/folder/getAllPermission',
-    
-    getPermissionFolder: '/api/admin/permission/folder/grantPermission/',
-    getPermissionFile: '/api/admin/permission/file/grantPermission/',
+
+    getPermissionFolder: '/api/admin/permission/folder/grantPermission',
+    getPermissionFile: '/api/admin/permission/file/grantPermission',
   },
   tag: {
     create: '/api/admin/tag/create',

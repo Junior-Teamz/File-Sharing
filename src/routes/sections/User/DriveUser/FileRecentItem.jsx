@@ -28,8 +28,8 @@ import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import FileThumbnail from 'src/components/file-thumbnail';
-import FileManagerShareDialog from './file-manager-share-dialog';
-import FileManagerFileDetails from './file-manager-file-details';
+import FileManagerShareDialog from './FileManagerShareDialog';
+import FileManagerFileDetails from './FileManagerFileDetails';
 import { useDownloadFile, useChangeNameFile } from './view/folderDetail';
 import { Button } from '@mui/material';
 

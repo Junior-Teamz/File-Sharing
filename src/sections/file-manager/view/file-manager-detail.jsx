@@ -39,6 +39,9 @@ export const FIleManagerDetail = () => {
 
   // States
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
+  // Folder navigation state
+  const [folderStack, setFolderStack] = useState([]);
+
   const [openCreateFolderDialog, setOpenCreateFolderDialog] = useState(false);
   const [folderName, setFolderName] = useState('');
   const [selectedTagIds, setSelectedTagIds] = useState([]);
@@ -97,13 +100,35 @@ export const FIleManagerDetail = () => {
     setSelectedTagIds([]);
   }, []);
 
-  // Navigate to subfolders
-  const handleSubfolderClick = useCallback(
-    (folderId) => {
-      navigate(`/dashboard/file-manager/info/${folderId}`, { replace: true });
-    },
-    [navigate]
-  );
+  // Folder navigation: Move to subfolder
+ // Folder navigation: Move to subfolder
+ const handleSubfolderClick = useCallback(
+  (folderId) => {
+    setFolderStack((prev) => [...prev, id]); // Save current folder id in stack
+    navigate(`/dashboard/file-manager/info/${folderId}`, { replace: true });
+  },
+  [navigate, id]
+);
+
+// Navigate back to previous folder
+const handleBackClick = () => {
+  if (folderStack.length > 0) {
+    const previousFolderId = folderStack[folderStack.length - 1];
+    setFolderStack((prev) => prev.slice(0, -1)); // Remove last folder from stack
+    navigate(`/dashboard/file-manager/info/${previousFolderId}`, { replace: true });
+  }
+};
+
+// Show folder ID when InfoIcon is clicked
+const handleInfoClick = () => {
+  if (data && data.folder_info) {
+    enqueueSnackbar(`Folder ID: ${data.folder_info.folder_id}`, { variant: 'info' });
+  } else {
+    enqueueSnackbar('Folder data is not available.', { variant: 'warning' });
+  }
+};
+
+
 
   // Fetch folder details when ID changes
   useEffect(() => {
@@ -127,11 +152,37 @@ export const FIleManagerDetail = () => {
   return (
     <>
       <Container>
-        <Box sx={{ my: 5 }}>
+      <Box sx={{ my: 5 }}>
           <Typography variant="h6">
-            My Folders &raquo; {data.folder_info.name} <InfoIcon fontSize="medium" sx={{ mt: 3 }} />
+            My Folders &raquo; 
+            {folderStack.map((folderId, index) => (
+              <span
+                key={index}
+                style={{
+                  cursor: 'pointer',
+                  color: 'rgba(0, 0, 0, 0.5)', // Lighter color for previous folders
+                  textDecoration: 'underline',
+                  marginRight: '8px'
+                }}
+                onClick={() => {
+                  // Navigate back to the clicked folder
+                  const newStack = folderStack.slice(0, index);
+                  setFolderStack(newStack);
+                  navigate(`/dashboard/file-manager/info/${folderId}`, { replace: true });
+                }}
+              >
+                Folder {folderId} &raquo;
+              </span>
+            ))}
+
+            {/* Current folder name */}
+            <span style={{ color: 'black' }}>{data.folder_info.name}</span>
+            
+            {/* InfoIcon displays folder.id */}
+            <InfoIcon fontSize="medium" sx={{ mt: 3, cursor: 'pointer' }} onClick={handleInfoClick} />
           </Typography>
         </Box>
+
 
         {data.subfolders.length === 0 && data.files.length === 0 ? (
           <>
@@ -163,6 +214,7 @@ export const FIleManagerDetail = () => {
               <div key={folder.id} onClick={() => handleSubfolderClick(folder.id)}>
                 <FileRecentItem
                   file={{ ...folder, type: 'folder' }}
+                  onRefetch={refetch}
                   onDelete={() => console.info('DELETE', folder.id)}
                 />
               </div>
@@ -175,6 +227,7 @@ export const FIleManagerDetail = () => {
                   <FileRecentItem
                     key={file.id}
                     file={file}
+                    onRefetch={refetch}
                     onDelete={() => console.info('DELETE', file.id)}
                   />
                 ))}

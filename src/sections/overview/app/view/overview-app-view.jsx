@@ -204,9 +204,12 @@ export default function OverviewAppView() {
     setSelected(newSelected);
   };
 
-  const handleTagChange = (event) => {
-    setSelectedTags(event.target.value);
+  const handleTagChange = (tags) => {
+    setSelectedTags(tags); // Update the selected tags state
+    console.log('Selected Tags:', tags);
   };
+
+
   const Onsubmit = (data) => {
     // Ensure the folder name is valid
     if (!data.name || data.name.trim() === '') {
@@ -272,7 +275,7 @@ export default function OverviewAppView() {
                       id="tags"
                       multiple
                       value={selectedTags}
-                      onChange={handleTagChange}
+                      onChange={(event) => handleTagChange(event)} // Kirim event langsung
                       input={<OutlinedInput id="select-multiple-chip" label="Tags" />}
                       renderValue={(selected) => (
                         <Box
@@ -330,7 +333,6 @@ export default function OverviewAppView() {
           </>
         ) : (
           <Grid xs={12} md={12} lg={12}>
-           
             <Dialog open={opened} onClose={handleClosed}>
               <DialogTitle>Create Folder</DialogTitle>
               <DialogContent>

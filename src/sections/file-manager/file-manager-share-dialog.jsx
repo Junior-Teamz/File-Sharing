@@ -1,71 +1,62 @@
 import PropTypes from 'prop-types';
-// @mui
 import List from '@mui/material/List';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import InputAdornment from '@mui/material/InputAdornment';
-import Dialog from '@mui/material/Dialog';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-// components
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import Dialog from '@mui/material/Dialog';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import FileManagerInvitedItem from './file-manager-invited-item';
 import { usePermissionsFile, usePermissionsFolder } from './view/folderDetail';
-import { useEffect, useState } from 'react';
-
-// ----------------------------------------------------------------------
+import { useState } from 'react';
+import { useIndexUser } from '../user/view/UserManagement';
 
 export default function FileManagerShareDialog({
   shared,
-  inviteEmail,
-  onChangeInvite,
-  folderId,
-  fileId,
   open,
   onClose,
-  onCopyLink, // Tambahkan props untuk handle copy link
+  fileId,
+  folderId,
+  onCopyLink,
   ...other
 }) {
   const hasShared = shared && shared.length > 0;
+  const [selectedUserId, setSelectedUserId] = useState('');
+  const [permission, setPermission] = useState();
 
-  // Menggunakan usePermissionsFile atau usePermissionsFolder
-  const { permissions: filePermissions } = usePermissionsFile(fileId);
-  const { permissions: folderPermissions } = usePermissionsFolder(folderId);
+  const { data: response = {}, loading, error } = useIndexUser();
+  const users = response.data || [];
 
-  const [currentPermissions, setCurrentPermissions] = useState('');
-  const [link, setLink] = useState('');
+  const {mutateAsync: grantFilePermission } = usePermissionsFile();
+  const {mutateAsyncL: grantFolderPermission } = usePermissionsFolder();
 
-  useEffect(() => {
-    console.log('folderId:', folderId);
-    console.log('fileId:', fileId);
-    if (folderId) {
-      setCurrentPermissions(folderPermissions);
-    } else if (fileId) {
-      setCurrentPermissions(filePermissions);
+  const handleSendInvite = async () => {
+    try {
+      const shareLink = `${window.location.origin}/shared?fileId=${fileId || ''}&folderId=${folderId || ''}`;
+      navigator.clipboard.writeText(shareLink);
+
+      if (fileId) {
+        await grantFilePermission({
+          user_id: selectedUserId,
+          file_id: fileId,
+          permissions: permission,
+        });
+      } else if (folderId) {
+        await grantFolderPermission({
+          user_id: selectedUserId,
+          folder_id: folderId,
+          permissions: permission,
+        });
+      }
+
+      console.log('Invite sent successfully');
+    } catch (error) {
+      console.error('Error sending invite:', error.response?.data.errors || error.message);
     }
-  }, [folderId, fileId, folderPermissions, filePermissions]);
-
-  useEffect(() => {
-    const id = folderId || fileId;
-    if (id) {
-      const newLink = `${window.location.origin}/shared/${id}?permission=${currentPermissions}`;
-      setLink(newLink);
-    }
-  }, [folderId, fileId, currentPermissions]);
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(link);
-    alert('Link copied: ' + link);
-    if (onCopyLink) onCopyLink(link); // Panggil props onCopyLink
-  };
-
-  const handlePermissionChange = (event) => {
-    setCurrentPermissions(event.target.value);
   };
 
   return (
@@ -73,36 +64,30 @@ export default function FileManagerShareDialog({
       <DialogTitle>Invite</DialogTitle>
 
       <DialogContent sx={{ overflow: 'unset' }}>
-        {onChangeInvite && (
-          <TextField
-            fullWidth
-            value={inviteEmail}
-            placeholder="Email"
-            onChange={onChangeInvite}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <Button
-                    color="inherit"
-                    variant="contained"
-                    disabled={!inviteEmail}
-                    sx={{ mr: -0.75 }}
-                  >
-                    Send Invite
-                  </Button>
-                </InputAdornment>
-              ),
-            }}
-            sx={{ mb: 2 }}
-          />
-        )}
-
         <FormControl fullWidth sx={{ mb: 2 }}>
           <Select
-            value={currentPermissions}
-            onChange={handlePermissionChange}
+            value={selectedUserId}
+            onChange={(e) => setSelectedUserId(e.target.value)}
             displayEmpty
           >
+            <MenuItem value="" disabled>
+              Select User
+            </MenuItem>
+            {loading && <MenuItem disabled>Loading...</MenuItem>}
+            {error && <MenuItem disabled>Error loading users</MenuItem>}
+            {users.length === 0 && !loading && !error && (
+              <MenuItem disabled>No users available</MenuItem>
+            )}
+            {users.map((user) => (
+              <MenuItem key={user.id} value={user.id}>
+                {user.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <Select value={permission} onChange={(e) => setPermission(e.target.value)} displayEmpty>
             <MenuItem value="" disabled>
               Select Permission
             </MenuItem>
@@ -123,9 +108,19 @@ export default function FileManagerShareDialog({
       </DialogContent>
 
       <DialogActions sx={{ justifyContent: 'space-between' }}>
-        <Button startIcon={<Iconify icon="eva:link-2-fill" />} onClick={handleCopyLink}>
-          Copy link
+        <Button
+          variant="contained"
+          onClick={handleSendInvite}
+          disabled={!selectedUserId || !permission} // Disable if user or permission is not selected
+        >
+          Invite
         </Button>
+
+        {onCopyLink && (
+          <Button startIcon={<Iconify icon="eva:link-2-fill" />} onClick={handleSendInvite}>
+            Copy Link
+          </Button>
+        )}
 
         {onClose && (
           <Button variant="outlined" color="inherit" onClick={onClose}>
@@ -138,12 +133,10 @@ export default function FileManagerShareDialog({
 }
 
 FileManagerShareDialog.propTypes = {
-  inviteEmail: PropTypes.string,
-  onChangeInvite: PropTypes.func,
   onClose: PropTypes.func,
-  onCopyLink: PropTypes.func, // Definisikan prop untuk onCopyLink
-  folderId: PropTypes.string,
-  fileId: PropTypes.string,
+  onCopyLink: PropTypes.func,
   open: PropTypes.bool.isRequired,
   shared: PropTypes.array,
+  fileId: PropTypes.number,
+  folderId: PropTypes.number,
 };
