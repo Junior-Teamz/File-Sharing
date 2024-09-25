@@ -8,10 +8,10 @@ export const usePreviewImage = (id) => {
       const token = sessionStorage.getItem('accessToken');
 
       // Send GET request with headers
-      const response = await axiosInstance.get(`${endpoints.files.preview}${id}`, {
+      const response = await axiosInstance.get(`${endpoints.previewImage.preview}${id}`, {
         headers: {
           Authorization: `Bearer ${token}`, // Send the token from sessionStorage
-          Accept: 'image/*', // Add an 'Accept' header for images
+ 
         },
         responseType: 'blob', // Set response type to 'blob' for image data
       });

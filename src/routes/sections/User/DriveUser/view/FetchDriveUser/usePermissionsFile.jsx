@@ -5,7 +5,7 @@ export const usePermissionsFile = () => {
   return useMutation({
     mutationKey: ['permissions-file'],
     mutationFn: async (formData) => {
-      const response = await axiosInstance.post(endpoints.permission.getPermissionFile, formData);
+      const response = await axiosInstance.post(endpoints.Permissions.PermissionsFile, formData);
       return response;
     },
    

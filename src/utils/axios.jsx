@@ -5,6 +5,16 @@ import { HOST_API } from 'src/config-global';
 
 const axiosInstance = axios.create({ baseURL: HOST_API });
 
+// Function to set the token
+export const setToken = (token) => {
+  if (token) {
+    sessionStorage.setItem('accessToken', token);
+  } else {
+    sessionStorage.removeItem('accessToken');
+  }
+};
+
+// Request interceptor to attach the token
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = sessionStorage.getItem('accessToken'); // Get token from sessionStorage
@@ -37,19 +47,29 @@ export const fetcher = async (args) => {
 // ----------------------------------------------------------------------
 
 export const endpoints = {
-  //auth login,log out, info
+  //auth login, log out, info
   auth: {
-    me: '/api/index', //untuk info
-    login: '/api/login', //untuk login
-    logout: '/api/logout', //untuk log out
+    me: '/api/index', // for info
+    login: '/api/login', // for login
+    logout: '/api/logout', // for log out
     // register: '/api/auth/register/',
   },
-
+  previewImage: {
+    preview: '/api/file/preview/',
+  },
   //user
   Tags: {
     ListTag: '/api/tag/index',
   },
-
+  GetFileFolderShare:{
+    UserShare: '/api/getSharedFolderAndFile',
+  },
+  SearchUser: {
+    User: '/api/search',
+  },
+  Permissions: {
+    PermissionsFile: '/api/permission/file/grantPermission',
+  },
   file: {
     upload: '/api/file/upload',
     delete: '/api/file/delete',
@@ -60,13 +80,12 @@ export const endpoints = {
   },
   folders: {
     detail: '/api/folder/info/',
-    list: '/api/folder', //folder list
-    create: '/api/folder/create', //create list
-    delete: '/api/folder/delete', //delete folder
-    edit: '/api/folder/update', //edit folder
+    list: '/api/folder', // folder list
+    create: '/api/folder/create', // create folder
+    delete: '/api/folder/delete', // delete folder
+    edit: '/api/folder/update', // edit folder
     addTag: '/api/folder/addTag',
   },
-
   //admin
   files: {
     upload: '/api/admin/file/upload',
@@ -75,12 +94,8 @@ export const endpoints = {
     removeTag: '/api/admin/file/removeTag',
     download: '/api/admin/file/download',
     change: '/api/admin/file/change_name',
-    preview: '/api/file/preview/',
   },
   permission: {
-    // getPermissionFile: '/api/admin/permission/file/getAllPermission',
-    // getPermissionFolder: '/api/admin/permission/folder/getAllPermission',
-
     getPermissionFolder: '/api/admin/permission/folder/grantPermission',
     getPermissionFile: '/api/admin/permission/file/grantPermission',
   },
@@ -92,10 +107,10 @@ export const endpoints = {
   },
   folder: {
     detail: '/api/admin/folder/info/',
-    list: '/api/admin/folder', //folder list
-    create: '/api/admin/folder/create', //create list
-    delete: '/api/admin/folder/delete', //delete folder
-    edit: '/api/admin/folder/update', //edit folder
+    list: '/api/admin/folder', // folder list
+    create: '/api/admin/folder/create', // create folder
+    delete: '/api/admin/folder/delete', // delete folder
+    edit: '/api/admin/folder/update', // edit folder
     addTag: '/api/admin/folder/addTag',
   },
   users: {
@@ -110,15 +125,4 @@ export const endpoints = {
     update: 'api/admin/instance/update',
     delete: 'api/admin/instance/delete',
   },
-  // post: {
-  //   list: '/api/post/list',
-  //   details: '/api/post/details',
-  //   latest: '/api/post/latest',
-  //   search: '/api/post/search',
-  // },
-  // product: {
-  //   list: '/api/product/list',
-  //   details: '/api/product/details',
-  //   search: '/api/product/search',
-  // },
 };

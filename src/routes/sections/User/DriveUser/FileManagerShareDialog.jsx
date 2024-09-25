@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 // @mui
 import List from '@mui/material/List';
@@ -8,63 +9,151 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import InputAdornment from '@mui/material/InputAdornment';
 import Dialog from '@mui/material/Dialog';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 // components
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
-//
 import FileManagerInvitedItem from './FileManagerInvitedItem';
-
-// ----------------------------------------------------------------------
+import { useSearchUser, usePermissionsFile } from './view/FetchDriveUser';
 
 export default function FileManagerShareDialog({
   shared,
   inviteEmail,
   onCopyLink,
   onChangeInvite,
-  //
+  fileId,
   open,
   onClose,
   ...other
 }) {
   const hasShared = shared && !!shared.length;
 
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [permissions, setPermission] = useState('view');
+  const [inputSearch, setInputSearch] = useState('');
+  const [searchResults, setSearchResults] = useState([]); // Local state for search results
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(inputSearch);
+
+  const { refetch: searchUsers, isLoading } = useSearchUser({ email: debouncedSearchTerm });
+  const { mutate: setPermissions } = usePermissionsFile();
+
+  const permissionsOptions = {
+    view: 'read',
+    edit: 'write',
+  };
+
+  // Effect to debounce input search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(inputSearch);
+    }, 300); // Delay of 300ms for the API call
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [inputSearch]);
+
+  // Effect to fetch search results when debounced search term changes
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      searchUsers({ email: debouncedSearchTerm }).then((results) => {
+        setSearchResults(results.data); // Assuming your API returns the data directly
+      });
+    } else {
+      setSearchResults([]); // Clear results if input is empty
+    }
+  }, [debouncedSearchTerm, searchUsers]); // Trigger search on debounced input change
+
+  const handleInviteChange = (e) => {
+    setInputSearch(e.target.value); // Update input search immediately
+  };
+
+  const handleUserSelect = (user) => {
+    setSelectedUser(user);
+    setInputSearch(user.email); // Populate input with selected user's email
+    setPermission('view'); // Reset permission to default
+  };
+
+  const handlePermissionChange = (event) => {
+    setPermission(event.target.value);
+  };
+
+  const handleSendInvite = () => {
+    if (selectedUser && fileId) {
+      setPermissions({
+        user_id: selectedUser.id,
+        permissions: permissionsOptions[permissions],
+        file_id: fileId,
+      });
+      setInputSearch(''); // Clear search input after invite
+      setSearchResults([]); // Clear search results after invite
+      setSelectedUser(null); // Clear selected user after invite
+    }
+  };
+
   return (
     <Dialog fullWidth maxWidth="xs" open={open} onClose={onClose} {...other}>
       <DialogTitle> Invite </DialogTitle>
 
       <DialogContent sx={{ overflow: 'unset' }}>
-        {onChangeInvite && (
-          <TextField
-            fullWidth
-            value={inviteEmail}
-            placeholder="Email"
-            onChange={onChangeInvite}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <Button
-                    color="inherit"
-                    variant="contained"
-                    disabled={!inviteEmail}
-                    sx={{ mr: -0.75 }}
-                  >
-                    Send Invite
-                  </Button>
-                </InputAdornment>
-              ),
-            }}
-            sx={{ mb: 2 }}
-          />
-        )}
+        <TextField
+          fullWidth
+          value={inputSearch}
+          placeholder="Search user by email"
+          onChange={handleInviteChange}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Button
+                  color="inherit"
+                  variant="contained"
+                  disabled={!selectedUser}
+                  sx={{ mr: -0.75 }}
+                  onClick={handleSendInvite}
+                >
+                  Send Invite
+                </Button>
+              </InputAdornment>
+            ),
+          }}
+          sx={{ mb: 2 }}
+        />
 
-        {hasShared && (
+        {/* Display search results dynamically */}
+        {isLoading ? (
+          <p>Loading...</p> // Show loading state
+        ) : (
           <Scrollbar sx={{ maxHeight: 60 * 6 }}>
             <List disablePadding>
-              {shared.map((person) => (
-                <FileManagerInvitedItem key={person.id} person={person} />
-              ))}
+              {searchResults.length > 0 ? (
+                searchResults.map((user) => (
+                  <FileManagerInvitedItem
+                    key={user.id}
+                    person={user}
+                    onClick={() => handleUserSelect(user)} // Ensure onClick works
+                  />
+                ))
+              ) : (
+                <p>No users found</p> // Message when no users are found
+              )}
             </List>
           </Scrollbar>
+        )}
+
+        {/* Permission Selection */}
+        {selectedUser && (
+          <div>
+            <Select
+              fullWidth
+              value={permissions}
+              onChange={handlePermissionChange}
+              displayEmpty
+            >
+              <MenuItem value="view">View (Read)</MenuItem>
+              <MenuItem value="edit">Edit (Write)</MenuItem>
+            </Select>
+          </div>
         )}
       </DialogContent>
 
@@ -92,4 +181,5 @@ FileManagerShareDialog.propTypes = {
   onCopyLink: PropTypes.func,
   open: PropTypes.bool,
   shared: PropTypes.array,
+  fileId: PropTypes.string.isRequired, // Mark as required
 };

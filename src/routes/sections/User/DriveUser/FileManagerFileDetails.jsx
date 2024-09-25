@@ -23,7 +23,11 @@ import Scrollbar from 'src/components/scrollbar';
 import FileThumbnail, { fileFormat } from 'src/components/file-thumbnail';
 import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerInvitedItem from './FileManagerInvitedItem';
-import { useAddFileTag, useRemoveTagFile, useMutationDeleteFiles } from './view/FetchDriveUser/index';
+import {
+  useAddFileTag,
+  useRemoveTagFile,
+  useMutationDeleteFiles,
+} from './view/FetchDriveUser/index';
 import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import { useIndexTag } from './view/TagUser/useIndexTag';
@@ -48,12 +52,13 @@ export default function FIleManagerFileDetails({
     image_url,
     id,
     type,
-    shared,
+    shared_with,
     modifiedAt,
     user,
     instance,
     tags: initialTags,
     updated_at,
+    email,
   } = item;
 
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
@@ -297,10 +302,10 @@ export default function FIleManagerFileDetails({
         </IconButton>
       </Stack>
 
-      {shared && shared.length > 0 && (
+      {shared_with && shared_with.length > 0 && (
         <Box sx={{ pl: 2.5, pr: 1 }}>
-          {shared.map((person) => (
-            <FileManagerInvitedItem key={person.id} person={person} />
+          {shared_with.map((user) => (
+            <FileManagerInvitedItem key={user.id} user={user} />
           ))}
         </Box>
       )}
@@ -372,6 +377,12 @@ export default function FIleManagerFileDetails({
               </Box>
               {user?.name}
             </Stack>
+            <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
+              <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
+                Email
+              </Box>
+              {user?.email}
+            </Stack>
 
             {/* <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
                 <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
@@ -402,7 +413,8 @@ export default function FIleManagerFileDetails({
 
           <FileManagerShareDialog
             open={share.value}
-            shared={shared}
+            fileId={id}
+            shared={shared_with}
             inviteEmail={inviteEmail}
             onChangeInvite={handleChangeInvite}
             onCopyLink={handleCopyLink}

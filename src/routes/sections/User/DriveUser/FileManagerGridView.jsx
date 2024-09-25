@@ -52,6 +52,14 @@ export default function FileManagerGridView({
     setFolderName(event.target.value);
   }, []);
 
+  const [selectedTags, setSelectedTags] = useState([]);
+
+  const handleTagChange = (tags) => {
+    setSelectedTags(tags); // Update the selected tags state
+    console.log('Selected Tags:', tags);
+  };
+
+
   return (
     <>
       <Box ref={containerRef}>
@@ -174,12 +182,13 @@ export default function FileManagerGridView({
         }}
       />
 
-      <FileManagerNewFolderDialog open={upload.value} onClose={upload.onFalse} />
+      <FileManagerNewFolderDialog onTagChange={handleTagChange}  open={upload.value} onClose={upload.onFalse} />
 
       <FileManagerNewFolderDialog
         open={newFolder.value}
         onClose={newFolder.onFalse}
         title="New Folder"
+        onTagChange={handleTagChange} 
         onCreate={() => {
           newFolder.onFalse();
           setFolderName('');

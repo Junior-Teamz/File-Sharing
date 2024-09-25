@@ -36,7 +36,7 @@ import FileManagerFileDetails from './FileManagerFileDetails';
 export default function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow }) {
   const theme = useTheme();
 
-  const { name, size, type, updated_at, shared, isFavorited } = row;
+  const { name, size, type, updated_at, shared_with, isFavorited } = row;
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -173,8 +173,8 @@ export default function FileManagerTableRow({ row, selected, onSelectRow, onDele
               },
             }}
           >
-            {shared &&
-              shared.map((person) => (
+            {shared_with &&
+              shared_with.map((person) => (
                 <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
               ))}
           </AvatarGroup>
@@ -253,18 +253,18 @@ export default function FileManagerTableRow({ row, selected, onSelectRow, onDele
         
       />
 
-      <FileManagerShareDialog
-        open={share.value}
-        shared={shared}
-        inviteEmail={inviteEmail}
-        onChangeInvite={handleChangeInvite}
-        onCopyLink={handleCopy}
-        onClose={() => {
-          share.onFalse();
-          setInviteEmail('');
-        }}
-      />
-
+<FileManagerShareDialog
+    open={share.value}
+    fileId={row.id} // Ensure this ID exists in the row object
+    shared={shared_with}
+    inviteEmail={inviteEmail}
+    onChangeInvite={handleChangeInvite}
+    onCopyLink={handleCopy}
+    onClose={() => {
+        share.onFalse();
+        setInviteEmail('');
+    }}
+/>
       <ConfirmDialog
         open={confirm.value}
         onClose={confirm.onFalse}

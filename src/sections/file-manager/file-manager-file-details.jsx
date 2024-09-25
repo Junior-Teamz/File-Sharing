@@ -49,6 +49,7 @@ export default function FIleManagerFileDetails({
     type,
     shared,
     modifiedAt,
+    email,
     user,
     instance,
     tags: initialTags,
@@ -257,7 +258,7 @@ export default function FIleManagerFileDetails({
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Modified
+              Updated
             </Box>
             {fDateTime(updated_at)}
           </Stack>
@@ -371,7 +372,12 @@ export default function FIleManagerFileDetails({
               </Box>
               {user?.name}
             </Stack>
-
+            <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
+              <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
+                Email
+              </Box>
+              {user?.email}
+            </Stack>
             {/* <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
                 <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
                   Email

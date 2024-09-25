@@ -14,8 +14,8 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 // ----------------------------------------------------------------------
 
-export default function FileManagerInvitedItem({ person }) {
-  const [permission, setPermission] = useState(person.permission);
+export default function FileManagerInvitedItem({ person, onClick }) {
+  const [permissions, setPermission] = useState(person?.permissions || 'view');
 
   const popover = usePopover();
 
@@ -29,15 +29,17 @@ export default function FileManagerInvitedItem({ person }) {
         sx={{
           px: 0,
           py: 1,
+          cursor: 'pointer', // Change cursor to pointer for better UX
         }}
+        onClick={onClick} // Handle click event
       >
-        <Avatar alt={person.name} src={person.avatarUrl} sx={{ mr: 2 }} />
+        <Avatar alt={person?.name || 'Unknown'} src={person?.avatarUrl} sx={{ mr: 2 }} />
 
         <ListItemText
-          primary={person.name}
+          primary={person?.name || 'Unknown'}
           secondary={
-            <Tooltip title={person.email}>
-              <span>{person.email}</span>
+            <Tooltip title={person?.email || 'No email'}>
+              <span>{person?.email || 'No email'}</span>
             </Tooltip>
           }
           primaryTypographyProps={{ noWrap: true, typography: 'subtitle2' }}
@@ -63,14 +65,14 @@ export default function FileManagerInvitedItem({ person }) {
             }),
           }}
         >
-          Can {permission}
+          Can {permissions}
         </Button>
       </ListItem>
 
       <CustomPopover open={popover.open} onClose={popover.onClose} sx={{ width: 160 }}>
         <>
           <MenuItem
-            selected={permission === 'view'}
+            selected={permissions === 'view'}
             onClick={() => {
               popover.onClose();
               handleChangePermission('view');
@@ -81,7 +83,7 @@ export default function FileManagerInvitedItem({ person }) {
           </MenuItem>
 
           <MenuItem
-            selected={permission === 'edit'}
+            selected={permissions === 'edit'}
             onClick={() => {
               popover.onClose();
               handleChangePermission('edit');
@@ -110,4 +112,5 @@ export default function FileManagerInvitedItem({ person }) {
 
 FileManagerInvitedItem.propTypes = {
   person: PropTypes.object,
+  onClick: PropTypes.func, // Add onClick prop type
 };
