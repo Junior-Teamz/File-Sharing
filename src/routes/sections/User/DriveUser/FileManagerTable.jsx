@@ -42,6 +42,7 @@ export default function FileManagerTable({
   notFound,
   onDeleteRow,
   dataFiltered,
+  onRefetch,
   onOpenConfirm,
 }) {
   const theme = useTheme();
@@ -206,4 +207,5 @@ FileManagerTable.propTypes = {
   onOpenConfirm: PropTypes.func,
   table: PropTypes.object,
   tableData: PropTypes.array,
+  onRefetch: PropTypes.func,
 };

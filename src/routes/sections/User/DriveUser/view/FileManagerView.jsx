@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -40,11 +40,8 @@ const defaultFilters = {
 export default function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
 
-
   // console.log(data);
-  const {FolderFiles} = handleFolderFiles()
-  
-  
+  const { FolderFiles, refetch } = handleFolderFiles();
 
   const settings = useSettingsContext();
 
@@ -62,12 +59,19 @@ export default function FileManagerView() {
 
   const [selectedTags, setSelectedTags] = useState([]);
 
-
   const handleTagChange = (tags) => {
     setSelectedTags(tags); // Update the selected tags state
     console.log('Selected Tags:', tags);
   };
 
+  useEffect(() => {
+    setTableData(FolderFiles); // Update state whenever FolderFiles changes
+  }, [FolderFiles]);
+
+  const handleRefetch = async () => {
+    const updatedFiles = await refetch(); // Ensure refetch returns updated files
+    setTableData(updatedFiles); // Update state with new data
+  };
 
   const dateError =
     filters.startDate && filters.endDate
@@ -177,17 +181,22 @@ export default function FileManagerView() {
 
   return (
     <>
-      <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+      <Container
+        sx={{
+          mt: 10,
+        }}
+        maxWidth={settings.themeStretch ? false : 'lg'}
+      >
         {/* <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h4">File Manager</Typography>
         </Stack> */}
-          <Button
-            variant="contained"
-            startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-            onClick={upload.onTrue}
-          >
-            Upload
-          </Button>
+        <Button
+          variant="contained"
+          startIcon={<Iconify icon="eva:cloud-upload-fill" />}
+          onClick={upload.onTrue}
+        >
+          Upload
+        </Button>
 
         <Stack
           spacing={2.5}
@@ -199,7 +208,6 @@ export default function FileManagerView() {
 
           {canReset && renderResults}
         </Stack>
-
 
         {notFound ? (
           <EmptyContent
@@ -214,6 +222,7 @@ export default function FileManagerView() {
             {view === 'list' ? (
               <FileManagerTable
                 table={table}
+                onRefetch={refetch}
                 tableData={tableData}
                 dataFiltered={dataFiltered}
                 onDeleteRow={handleDeleteItem}
@@ -223,6 +232,7 @@ export default function FileManagerView() {
             ) : (
               <FileManagerGridView
                 table={table}
+                onRefetch={refetch}
                 data={tableData}
                 dataFiltered={dataFiltered}
                 onDeleteItem={handleDeleteItem}
@@ -235,10 +245,10 @@ export default function FileManagerView() {
 
       <FileManagerNewFolderDialog
         open={upload.value}
+        refetch={refetch}
         onClose={upload.onFalse}
         onTagChange={handleTagChange} // Pass the handler here
       />
-
 
       <ConfirmDialog
         open={confirm.value}
@@ -270,12 +280,10 @@ export default function FileManagerView() {
 
 function applyFilter({ inputData, comparator, filters, dateError }) {
   const { name, type, startDate, endDate } = filters;
-  console.log(inputData); 
-  console.log(comparator); 
-  console.log(filters); 
-  console.log(dateError); 
-
-  
+  console.log(inputData);
+  console.log(comparator);
+  console.log(filters);
+  console.log(dateError);
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 

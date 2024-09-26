@@ -53,7 +53,7 @@ export const paths = {
   },
   dashboarduser: {
     root: ROOTS.DashboardUser,
-
+    shared: `${ROOTS.DashboardUser}/shared-with-me`,
   },
   // DASHBOARD
   dashboard: {
@@ -96,6 +96,11 @@ export const paths = {
       root: `${ROOTS.DASHBOARD}/tag`,
       list: `${ROOTS.DASHBOARD}/tag/list`,
       create: `${ROOTS.DASHBOARD}/tag/create`,
+    },
+    legal: {
+      root: `${ROOTS.DASHBOARD}/legal`,
+      list: `${ROOTS.DASHBOARD}/legal/list`,
+      create: `${ROOTS.DASHBOARD}/legal/create`,
     },
    
   },

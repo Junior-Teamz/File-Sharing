@@ -24,6 +24,7 @@ export default function FileManagerGridView({
   data,
   dataFiltered,
   onDeleteItem,
+  onRefetch,
   onOpenConfirm,
 }) {
   const { selected, onSelectRow: onSelectItem, onSelectAllRows: onSelectAllItems } = table;
@@ -206,5 +207,6 @@ FileManagerGridView.propTypes = {
   dataFiltered: PropTypes.array,
   onDeleteItem: PropTypes.func,
   onOpenConfirm: PropTypes.func,
+  onRefetch: PropTypes.func,
   table: PropTypes.object,
 };

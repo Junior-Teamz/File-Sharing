@@ -144,6 +144,20 @@ export function useNavData() {
             ],
           },
 
+          {
+            title: t('landasan hukum management'),
+            path: paths.dashboard.legal.root,
+            icon: ICONS.user,
+            children: [
+              // { title: t('profile'), path: paths.dashboard.user.root },
+              // { title: t('cards'), path: paths.dashboard.user.cards },
+              { title: t('legal list'), path: paths.dashboard.legal.list },
+              { title: t('legal create'), path: paths.dashboard.legal.create },
+              // { title: t('instance edit'), path: paths.dashboard.instance.edit },
+            ],
+          },
+
+
           // PRODUCT
           // {
           //   title: t('product'),

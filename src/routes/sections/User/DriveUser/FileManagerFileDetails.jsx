@@ -26,12 +26,12 @@ import FileManagerInvitedItem from './FileManagerInvitedItem';
 import {
   useAddFileTag,
   useRemoveTagFile,
+  usePreviewImage,
   useMutationDeleteFiles,
 } from './view/FetchDriveUser/index';
 import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import { useIndexTag } from './view/TagUser/useIndexTag';
-
 
 // ----------------------------------------------------------------------
 
@@ -60,6 +60,8 @@ export default function FIleManagerFileDetails({
     updated_at,
     email,
   } = item;
+
+  const { previewImage } = usePreviewImage(image_url); // Passing the image URL to fetch the preview
 
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
@@ -346,12 +348,23 @@ export default function FIleManagerFileDetails({
             bgcolor: 'background.neutral',
           }}
         >
-          {/* Uncomment and use for displaying file thumbnail if needed */}
-          <img
-            src={image_url}
-            alt={name}
-            style={{ height: 96, width: 96, borderRadius: '12px', objectFit: 'cover' }} // Adjust style as needed
-          />
+          {type === 'folder' ? (
+            <FileThumbnail
+              type="folder"
+              sx={{ width: 64, height: 64 }} // Add any specific styling you need for folder thumbnails
+            />
+          ) : previewImage ? (
+            <img
+              src={previewImage} // Display the preview image
+              alt={name}
+              style={{ height: 96, width: 96, borderRadius: '12px', objectFit: 'cover' }}
+            />
+          ) : (
+            <FileThumbnail
+              file={type} // Pass the type of the file for thumbnail display
+              sx={{ width: 64, height: 64 }}
+            />
+          )}
 
           <Typography variant="subtitle2">{name}</Typography>
           <Typography variant="body2" color="text.secondary">

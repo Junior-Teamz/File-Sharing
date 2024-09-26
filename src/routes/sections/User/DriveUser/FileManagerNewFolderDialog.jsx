@@ -34,7 +34,7 @@ export default function FileManagerNewFolderDialog({
   folderName,
   onChangeFolderName,
   onTagChange,
-  refetch,
+  refetch = () => {}, // Provide a fallback function
   ...other
 }) {
   const [files, setFiles] = useState([]);
@@ -105,17 +105,16 @@ export default function FileManagerNewFolderDialog({
   const handleTagChange = (event) => {
     const value = event.target.value;
     if (Array.isArray(value)) {
-        setSelectedTags(value);
-        if (typeof onTagChange === 'function') {
-            onTagChange(value);
-        } else {
-            console.warn('onTagChange is not a function');
-        }
+      setSelectedTags(value);
+      if (typeof onTagChange === 'function') {
+        onTagChange(value);
+      } else {
+        console.warn('onTagChange is not a function');
+      }
     } else {
-        console.error('Unexpected value type:', value);
+      console.error('Unexpected value type:', value);
     }
-};
-
+  };
 
   return (
     <Dialog fullWidth maxWidth="sm" open={open} onClose={onClose} {...other}>
@@ -216,7 +215,7 @@ FileManagerNewFolderDialog.propTypes = {
   onUpdate: PropTypes.func,
   open: PropTypes.bool,
   title: PropTypes.string,
-  refetch: PropTypes.func,
+  refetch: PropTypes.func, // Ensure refetch is passed as a function
   onTagChange: PropTypes.func.isRequired,
   tagsData: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string.isRequired,

@@ -22,7 +22,7 @@ export default function TagCreateForm() {
       enqueueSnackbar('Tag berhasil dibuat', { variant: 'success' });
       reset();
       refetch();
-      router.push(returnTo || paths.dashboard.tag.list);
+      router.push(paths.dashboard.tag.list);
     },
     onError: (error) => {
       enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });

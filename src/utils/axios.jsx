@@ -54,15 +54,21 @@ export const endpoints = {
     logout: '/api/logout', // for log out
     // register: '/api/auth/register/',
   },
-  previewImage: {
-    preview: '/api/file/preview/',
-  },
+
+  // previewImage: {
+  //   preview: (hashedId) => `/api/file/preview/${hashedId}`,
+  // },
+
   //user
   Tags: {
     ListTag: '/api/tag/index',
   },
+  previewImage: {
+    preview: '/api/file/preview/',
+  },
   GetFileFolderShare:{
     UserShare: '/api/getSharedFolderAndFile',
+    GetShareFolderFile:'/api/getSharedFolderAndFile',
   },
   SearchUser: {
     User: '/api/search',
@@ -80,6 +86,9 @@ export const endpoints = {
   },
   folders: {
     detail: '/api/folder/info/',
+    getFavoritUser: '/api/folder/favorite',
+    addFavoritUser: '/api/folder/addToFavorite',
+    deleteFavoritUser: '/api/folder/deleteFavorite',
     list: '/api/folder', // folder list
     create: '/api/folder/create', // create folder
     delete: '/api/folder/delete', // delete folder
@@ -87,6 +96,12 @@ export const endpoints = {
     addTag: '/api/folder/addTag',
   },
   //admin
+  Legal:{
+    ListLegal:'/api/admin/legal_basis/all',
+    SaveLegal:'/api/admin/legal_basis/save',
+    UpdateLegal:'/api/admin/legal_basis/update',
+    DeleteLegal:'/api/admin/legal_basis/delete',
+  },
   files: {
     upload: '/api/admin/file/upload',
     delete: '/api/admin/file/delete',

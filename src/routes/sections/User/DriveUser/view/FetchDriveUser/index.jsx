@@ -8,6 +8,7 @@ export * from './usePermissionsFolder'; //permission
 export * from './useDownloadFile'; //download
 export * from './useChangeNameFile'; //change name
 export * from './useSearchUser'; //search user
+export * from './usePreviewImage'; //search user
 
 
 
