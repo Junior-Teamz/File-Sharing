@@ -51,20 +51,17 @@ export default function FileManagerNewFolderDialog({
     }
   }, [open, reset]);
 
-  const handleDrop = useCallback(
-    (acceptedFiles) => {
-      const newFiles = acceptedFiles.map((file) =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file),
-        })
-      );
-      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-    },
-    []
-  );
+  const handleDrop = useCallback((acceptedFiles) => {
+    const newFiles = acceptedFiles.map((file) =>
+      Object.assign(file, {
+        preview: URL.createObjectURL(file),
+      })
+    );
+    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+  }, []);
 
   const { mutate: UploadFiles, isPending: loadingUpload } = useMutationUploadFiles({
-    onSuccess: () => {
+    onSuccess: async () => {
       enqueueSnackbar('Files Uploaded Successfully');
       handleRemoveAllFiles();
       reset(); // Reset form after successful upload
@@ -72,7 +69,7 @@ export default function FileManagerNewFolderDialog({
       onClose(); // Close dialog after successful upload
     },
     onError: (error) => {
-      enqueueSnackbar(error.message, { variant: 'error' });
+      enqueueSnackbar(`${error.errors.tag_ids}`, { variant: 'error' });
     },
   });
 
@@ -213,10 +210,12 @@ FileManagerNewFolderDialog.propTypes = {
   title: PropTypes.string,
   refetch: PropTypes.func,
   onTagChange: PropTypes.func.isRequired,
-  tagsData: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-  })),
+  tagsData: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+    })
+  ),
   selectedTags: PropTypes.arrayOf(PropTypes.string),
   isLoadingTags: PropTypes.bool,
 };

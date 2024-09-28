@@ -204,11 +204,15 @@ export default function OverviewAppView() {
     setSelected(newSelected);
   };
 
-  const handleTagChange = (tags) => {
-    setSelectedTags(tags); // Update the selected tags state
-    console.log('Selected Tags:', tags);
+  const handleTagChange = (event) => {
+    const value = event.target.value;
+    if (Array.isArray(value)) {
+      setSelectedTags(value); // Update local state with selected tag IDs
+      onTagChange(value); // Pass the tag IDs to the parent
+    } else {
+      console.error('Unexpected value type:', value);
+    }
   };
-
 
   const Onsubmit = (data) => {
     // Ensure the folder name is valid
@@ -277,28 +281,30 @@ export default function OverviewAppView() {
                       value={selectedTags}
                       onChange={(event) => handleTagChange(event)} // Kirim event langsung
                       input={<OutlinedInput id="select-multiple-chip" label="Tags" />}
-                      renderValue={(selected) => (
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 0.5,
-                            maxHeight: 100,
-                            overflowY: 'auto',
-                          }}
-                        >
-                          {selected.map((tagId) => {
-                            const tag = tagsData.find((t) => t.id === tagId);
-                            return (
-                              <Chip
-                                key={tagId}
-                                label={tag ? tag.name : `Tag ${tagId} not found`}
-                                sx={{ mb: 0.5 }}
-                              />
-                            );
-                          })}
-                        </Box>
-                      )}
+                      // renderValue={(selected) => (
+                      //   <Box
+                      //     sx={{
+                      //       display: 'flex',
+                      //       flexWrap: 'wrap',
+                      //       gap: 0.5,
+                      //       maxHeight: 100,
+                      //       overflowY: 'auto',
+                      //     }}
+                      //   >
+                      //     {selected?.map((tagId) => {
+                      //       console.log(tagId);
+                      //       const tag = tagsData.find((t) => t.id === tagId);
+                      //       console.log(tag);
+                      //       return (
+                      //         <Chip
+                      //           key={tagId}
+                      //           label={tag ? tag.name : `Tag ${tagId} not found`}
+                      //           sx={{ mb: 0.5 }}
+                      //         />
+                      //       );
+                      //     })}
+                      //   </Box>
+                      // )}
                     >
                       {isLoadingTags ? (
                         <MenuItem disabled>Loading...</MenuItem>
@@ -611,10 +617,15 @@ export default function OverviewAppView() {
           />
 
           <Stack spacing={2}>
+            {files.length === 0 && (
+              <>
+                <EmptyContent filled title="Files Kosong" sx={{ py: 10 }} />
+              </>
+            )}
             {files?.map((file) => (
               <FileRecentItem
                 key={file.id}
-                onRefetch={refetch} // Pass the refetch function here
+                // onRefetch={refetch}
                 file={file}
                 onDelete={() => console.info('DELETE', file.id)}
               />

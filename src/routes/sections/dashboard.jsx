@@ -43,7 +43,8 @@ const FileManagerPage = lazy(() => import('src/pages/dashboard/file-manager'));
 const  LegalListView   = lazy(() => import ('src/sections/legalbasis/view/LegalListView'))
 const  LegalCreateView   = lazy(() => import ('src/sections/legalbasis/view/LegalCreateView'))
 
-
+//news admin
+const  AdminListNews   = lazy(() => import ('src/sections/AdminNews/view/AdminListNews'))
 // ----------------------------------------------------------------------
 
 export const dashboardRoutes = [
@@ -99,6 +100,15 @@ export const dashboardRoutes = [
         children: [
           { element: <LegalListView />, index: true, path: 'list' },
           { path: 'create', element: <LegalCreateView /> },
+          // { path: 'edit', element: <InstanceEdit /> },
+        ],
+      },
+
+      {
+        path: 'News',
+        children: [
+          { element: <AdminListNews />, index: true, path: 'list' },
+          // { path: 'create', element: <LegalCreateView /> },
           // { path: 'edit', element: <InstanceEdit /> },
         ],
       },

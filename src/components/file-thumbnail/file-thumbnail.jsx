@@ -14,7 +14,7 @@ export default function FileThumbnail({ file, tooltip, imageView, onDownload, sx
 
   console.log(preview);
 
-  const format = fileFormat(path || preview); 
+  const format = fileFormat(path || preview);
 
   const renderContent =
     format === 'image' && imageView ? (
@@ -34,8 +34,8 @@ export default function FileThumbnail({ file, tooltip, imageView, onDownload, sx
         component="img"
         src={fileThumb(format)}
         sx={{
-          width: 32,
-          height: 32,
+          width: 200,
+          height: 200,
           flexShrink: 0,
           ...sx,
         }}

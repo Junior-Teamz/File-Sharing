@@ -55,7 +55,7 @@ export default function InstanceListView() {
     onSuccess: () => {
       enqueueSnackbar('Instansi Berhasil Diperbarui', { variant: 'success' });
       refetch();
-      onclose()
+      onclose();
     },
     onError: (error) => {
       enqueueSnackbar(`Gagal memperbarui instansi: ${error.message}`, { variant: 'error' });
@@ -145,7 +145,7 @@ export default function InstanceListView() {
                     <TableCell>Name</TableCell>
 
                     <TableCell>Address</TableCell>
-                    <TableCell align='right'>Action</TableCell>
+                    <TableCell align="right">Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

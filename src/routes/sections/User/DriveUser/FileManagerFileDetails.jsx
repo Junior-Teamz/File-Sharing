@@ -61,7 +61,7 @@ export default function FIleManagerFileDetails({
     email,
   } = item;
 
-  const { previewImage } = usePreviewImage(image_url); // Passing the image URL to fetch the preview
+  const { previewImage } = usePreviewImage(image_url);
 
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
@@ -351,18 +351,18 @@ export default function FIleManagerFileDetails({
           {type === 'folder' ? (
             <FileThumbnail
               type="folder"
-              sx={{ width: 64, height: 64 }} // Add any specific styling you need for folder thumbnails
+              sx={{ width: 200, height: 200 }} // Add any specific styling you need for folder thumbnails
             />
           ) : previewImage ? (
             <img
               src={previewImage} // Display the preview image
               alt={name}
-              style={{ height: 96, width: 96, borderRadius: '12px', objectFit: 'cover' }}
+              style={{ height: 200, width: 200, borderRadius: '12px', objectFit: 'cover' }}
             />
           ) : (
             <FileThumbnail
               file={type} // Pass the type of the file for thumbnail display
-              sx={{ width: 64, height: 64 }}
+              sx={{ width: 200, height: 200 }}
             />
           )}
 

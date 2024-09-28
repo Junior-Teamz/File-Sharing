@@ -6,10 +6,12 @@ export const usePreviewImage = (id) => {
     queryKey: ['preview-image', id],
     queryFn: async () => {
       const token = sessionStorage.getItem('accessToken');
+      console.log(token);
 
       // Send GET request with Authorization header
       const response = await axiosInstance.get(`${endpoints.previewImage.preview}${id}`, {
         headers: {
+          'Content-Type': '/',
           Authorization: `Bearer ${token}`, // Token dari sessionStorage
         },
         responseType: 'blob', // Mendapatkan respon sebagai Blob
@@ -23,9 +25,9 @@ export const usePreviewImage = (id) => {
   });
 
   return {
-    data,      // URL gambar yang dihasilkan
+    data, // URL gambar yang dihasilkan
     isLoading, // Status loading
-    isError,   // Status error jika ada masalah
-    refetch,   // Untuk manual refetch jika diperlukan
+    isError, // Status error jika ada masalah
+    refetch, // Untuk manual refetch jika diperlukan
   };
 };

@@ -157,6 +157,19 @@ export function useNavData() {
             ],
           },
 
+          {
+            title: t('News Management'),
+            path: paths.dashboard.AdminNews.root,
+            icon: ICONS.blog,
+            children: [
+              // { title: t('profile'), path: paths.dashboard.user.root },
+              // { title: t('cards'), path: paths.dashboard.user.cards },
+              { title: t('list News'), path: paths.dashboard.AdminNews.list },
+              // { title: t('Create News'), path: paths.dashboard.legal.create },
+              // { title: t('Update News'), path: paths.dashboard.legal.create },
+              // { title: t('instance edit'), path: paths.dashboard.instance.edit },
+            ],
+          },
 
           // PRODUCT
           // {

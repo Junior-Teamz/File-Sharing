@@ -66,9 +66,9 @@ export const endpoints = {
   previewImage: {
     preview: '/api/file/preview/',
   },
-  GetFileFolderShare:{
+  GetFileFolderShare: {
     UserShare: '/api/getSharedFolderAndFile',
-    GetShareFolderFile:'/api/getSharedFolderAndFile',
+    GetShareFolderFile: '/api/getSharedFolderAndFile',
   },
   SearchUser: {
     User: '/api/search',
@@ -96,11 +96,11 @@ export const endpoints = {
     addTag: '/api/folder/addTag',
   },
   //admin
-  Legal:{
-    ListLegal:'/api/admin/legal_basis/all',
-    SaveLegal:'/api/admin/legal_basis/save',
-    UpdateLegal:'/api/admin/legal_basis/update',
-    DeleteLegal:'/api/admin/legal_basis/delete',
+  Legal: {
+    ListLegal: '/api/admin/legal_basis/all',
+    SaveLegal: '/api/admin/legal_basis/save',
+    UpdateLegal: '/api/admin/legal_basis/update',
+    DeleteLegal: '/api/admin/legal_basis/delete',
   },
   files: {
     upload: '/api/admin/file/upload',
@@ -139,5 +139,13 @@ export const endpoints = {
     create: 'api/admin/instance/create',
     update: 'api/admin/instance/update',
     delete: 'api/admin/instance/delete',
+  },
+  AdminNews: {
+    list: 'api/admin/news/getAllNews',
+    detail: 'api/admin/news/getNewsDetail/',
+    create: 'api/admin/news/create',
+    Update: 'api/admin/news/update',
+    UpdateStatus: 'api/admin/news/update/changeStatus',
+    delete: 'api/admin/news/delete',
   },
 };
