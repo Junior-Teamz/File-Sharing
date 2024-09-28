@@ -13,16 +13,11 @@ import { useCreateUser } from './view/UserManagement';
 import { Button, MenuItem } from '@mui/material';
 import { useIndexInstance } from '../instancepages/view/Instance';
 import { paths } from 'src/routes/paths';
-import { useRouter, useSearchParams } from 'src/routes/hooks';
+import { useRouter } from 'src/routes/hooks';
 
 export default function UserNewEditForm({ currentUser }) {
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const returnTo = searchParams.get('returnTo');
-
-  // Ambil data instansi menggunakan hook useIndexInstance
   const { data: instansiList, isLoading: isLoadingInstansi } = useIndexInstance();
 
   const { mutate: CreateUser, isPending } = useCreateUser({
@@ -33,8 +28,21 @@ export default function UserNewEditForm({ currentUser }) {
       router.push(paths.dashboard.user.list);
     },
     onError: (error) => {
-      enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
+      console.log('API Error Response:', error); // Log the entire error response
+      console.log('Error Response Data:', error?.response?.data); // Log the error data for more context
+    
+      const emailErrors = error?.response?.data?.errors?.email;
+      console.log('Email Errors:', emailErrors); // Log the email errors
+    
+      if (emailErrors && emailErrors.length > 0) {
+        enqueueSnackbar(emailErrors[0], { variant: 'error' });
+      } else {
+        const message =
+          error.response?.status === 409 ? 'User already exists' : `Error: ${error.message}`;
+        enqueueSnackbar(message, { variant: 'error' });
+      }
     },
+    
   });
 
   const allowedDomains = [
@@ -93,23 +101,22 @@ export default function UserNewEditForm({ currentUser }) {
   const { reset, refetch, handleSubmit } = methods;
 
   const onSubmit = async (data) => {
-    try {
-      const { confirmPassword, ...restData } = data;
-      const payload = {
-        ...restData,
-        password_confirmation: confirmPassword,
-        instance_id: restData.instansi,
-      };
-      CreateUser(payload);
-    } catch (error) {
-      console.error(error);
-    }
+    console.log('Form submitted with data:', data);
+    const { confirmPassword, ...restData } = data;
+    const payload = {
+      ...restData,
+      password_confirmation: confirmPassword,
+      instance_id: restData.instansi,
+    };
+    console.log('Payload:', payload); // Add this line to log the payload
+    CreateUser(payload);
   };
+  
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
-        <Grid xs={12} md={12}>
+        <Grid  xs={12}>
           <Card sx={{ p: 3 }}>
             <Box
               rowGap={3}
@@ -128,18 +135,15 @@ export default function UserNewEditForm({ currentUser }) {
                 <MenuItem value="admin">Admin</MenuItem>
                 <MenuItem value="user">User</MenuItem>
               </RHFSelect>
-
-              {/* Dropdown untuk Instansi */}
               <RHFSelect name="instansi" label="Instansi" disabled={isLoadingInstansi}>
                 {!isLoadingInstansi &&
                   instansiList?.data?.map((instansi) => (
                     <MenuItem key={instansi.id} value={instansi.id}>
-                      {instansi.name} {/* Nama instansi yang ditampilkan */}
+                      {instansi.name}
                     </MenuItem>
                   ))}
               </RHFSelect>
             </Box>
-
             <Stack alignItems="flex-end" sx={{ mt: 3 }}>
               <Button variant="outlined" type="submit">
                 {isPending ? 'Creating User...' : 'Create User'}

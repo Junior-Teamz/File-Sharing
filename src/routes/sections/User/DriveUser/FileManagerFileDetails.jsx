@@ -61,7 +61,7 @@ export default function FIleManagerFileDetails({
     email,
   } = item;
 
-  const { previewImage } = usePreviewImage(image_url); // Passing the image URL to fetch the preview
+  const { previewImage } = usePreviewImage(image_url);
 
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
@@ -348,20 +348,15 @@ export default function FIleManagerFileDetails({
             bgcolor: 'background.neutral',
           }}
         >
-          {type === 'folder' ? (
-            <FileThumbnail
-              type="folder"
-              sx={{ width: 64, height: 64 }} // Add any specific styling you need for folder thumbnails
-            />
-          ) : previewImage ? (
+          {previewImage ? (
             <img
-              src={previewImage} // Display the preview image
+              src={previewImage} // Tampilkan preview gambar jika tersedia
               alt={name}
               style={{ height: 96, width: 96, borderRadius: '12px', objectFit: 'cover' }}
             />
           ) : (
             <FileThumbnail
-              file={type} // Pass the type of the file for thumbnail display
+              file={type} // Menampilkan thumbnail berdasarkan tipe file
               sx={{ width: 64, height: 64 }}
             />
           )}
@@ -396,13 +391,6 @@ export default function FIleManagerFileDetails({
               </Box>
               {user?.email}
             </Stack>
-
-            {/* <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
-                <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-                  Email
-                </Box>
-                {user?.email}
-              </Stack> */}
 
             <Stack direction="row" alignItems="center" sx={{ typography: 'subtitle2' }}>
               Instansi

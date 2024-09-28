@@ -20,12 +20,12 @@ import Iconify from 'src/components/iconify';
 import { Upload } from 'src/components/upload';
 import { enqueueSnackbar } from 'notistack';
 import { useForm } from 'react-hook-form';
+import { useMutationUploadFiles } from './view/FetchDriveUser/useMutationUploadFiles';
 import { useIndexTag } from './view/TagUser/useIndexTag';
-import { useMutationFolder } from './view/FetchFolderUser';
 
 // ----------------------------------------------------------------------
 
-export default function FileManagerNewFolderDialog({
+export default function FileManagerNewFileDialog({
   title,
   open,
   onClose,
@@ -38,19 +38,18 @@ export default function FileManagerNewFolderDialog({
   ...other
 }) {
   const [files, setFiles] = useState([]);
-  const { register, handleSubmit, reset, setValue, getValues } = useForm();
-  const { data, isLoading: isLoadingTags } = useIndexTag();
-  const tagsData = data?.data || [];
+  const { register, handleSubmit, reset, setValue } = useForm();
+  const { data, isLoading: isLoadingTags } = useIndexTag(); // Use useIndexTag
+  const tagsData = data?.data || []; // Ensure data is accessed properly
+
   const [selectedTags, setSelectedTags] = useState([]);
 
   useEffect(() => {
-    if (open) {
-      reset(); // Reset form when dialog is opened
-      setFiles([]); // Clear files on dialog open
-      setSelectedTags([]); // Reset selected tags on dialog open
-      setValue('name', ''); // Ensure the folder name is also reset
+    if (!open) {
+      setFiles([]);
+      reset(); // Reset form when dialog is closed
     }
-  }, [open, reset, setValue]);
+  }, [open, reset]);
 
   const handleDrop = useCallback((acceptedFiles) => {
     const newFiles = acceptedFiles.map((file) =>
@@ -58,20 +57,12 @@ export default function FileManagerNewFolderDialog({
         preview: URL.createObjectURL(file),
       })
     );
-
-    if (acceptedFiles.length && !getValues('name')) {
-      const folderName = acceptedFiles[0].webkitRelativePath
-        ? acceptedFiles[0].webkitRelativePath.split('/')[0]
-        : acceptedFiles[0].name;
-      setValue('name', folderName); // Set the folder name
-    }
-
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-  }, [getValues, setValue]);
+  }, []);
 
-  const { mutate: CreateFolder, isPending: loadingUpload } = useMutationFolder({
+  const { mutate: uploadFiles, isPending: loadingUpload } = useMutationUploadFiles({
     onSuccess: () => {
-      enqueueSnackbar('Folder Created Successfully');
+      enqueueSnackbar('Files Uploaded Successfully');
       handleRemoveAllFiles();
       reset(); // Reset form after successful upload
       refetch(); // Trigger refetch after successful upload
@@ -82,25 +73,22 @@ export default function FileManagerNewFolderDialog({
     },
   });
 
-  const handleCreate = () => {
-    const nameValue = getValues('name');
-    if (!nameValue || !selectedTags.length) {
-      enqueueSnackbar('Please fill in the required fields: name and tags', { variant: 'warning' });
+  const handleUpload = () => {
+    if (!files.length) {
+      enqueueSnackbar('Please select files to upload', { variant: 'warning' });
       return;
     }
 
     const formData = new FormData();
     files.forEach((file) => {
-      formData.append('file[]', file);
+      formData.append('file[]', file); // Adjust according to server-side expectations
     });
 
     selectedTags.forEach((tagId) => {
-      formData.append('tag_ids[]', tagId);
+      formData.append('tag_ids[]', tagId); // Change 'tags[]' to 'tag_ids[]'
     });
 
-    formData.append('name', nameValue);
-
-    CreateFolder(formData);
+    uploadFiles(formData);
   };
 
   const handleRemoveFile = (inputFile) => {
@@ -113,9 +101,15 @@ export default function FileManagerNewFolderDialog({
 
   const handleTagChange = (event) => {
     const value = event.target.value;
-    setSelectedTags(value);
-    if (typeof onTagChange === 'function') {
-      onTagChange(value);
+    if (Array.isArray(value)) {
+      setSelectedTags(value);
+      if (typeof onTagChange === 'function') {
+        onTagChange(value); // Ensure onTagChange is called with the new value
+      } else {
+        console.warn('onTagChange is not a function');
+      }
+    } else {
+      console.error('Unexpected value type:', value);
     }
   };
 
@@ -124,7 +118,15 @@ export default function FileManagerNewFolderDialog({
       <DialogTitle sx={{ p: (theme) => theme.spacing(3, 3, 2, 3) }}>{title}</DialogTitle>
 
       <DialogContent dividers sx={{ pt: 1, pb: 0, border: 'none' }}>
-        <TextField fullWidth label="Name" {...register('name')} required sx={{ mb: 3 }} />
+        {(onCreate || onUpdate) && (
+          <TextField
+            fullWidth
+            label="Folder name"
+            value={folderName}
+            onChange={onChangeFolderName}
+            sx={{ mb: 3 }}
+          />
+        )}
         <FormControl fullWidth margin="dense">
           <InputLabel id="tags-label">Tags</InputLabel>
           <Select
@@ -170,9 +172,7 @@ export default function FileManagerNewFolderDialog({
             )}
           </Select>
         </FormControl>
-        <Box sx={{ mt: 2, mb: 1 }}>
-          <strong>Optional: Drag folder here to upload</strong>
-        </Box>
+
         <Upload multiple files={files} onDrop={handleDrop} onRemove={handleRemoveFile} />
       </DialogContent>
 
@@ -181,9 +181,9 @@ export default function FileManagerNewFolderDialog({
           type="submit"
           variant="contained"
           startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-          onClick={handleCreate}
+          onClick={handleUpload}
         >
-          {loadingUpload ? 'Loading...' : 'Create Folder'}
+          {loadingUpload ? 'Loading...' : 'Upload Files'}
         </Button>
 
         {!!files.length && (
@@ -194,7 +194,7 @@ export default function FileManagerNewFolderDialog({
 
         {(onCreate || onUpdate) && (
           <Stack direction="row" justifyContent="flex-end" flexGrow={1}>
-            <Button variant="soft" onClick={onCreate || onUpdate}>
+            <Button variant="soft" onClick={onUpdate || onCreate}>
               {onUpdate ? 'Save' : 'Create'}
             </Button>
           </Stack>
@@ -204,7 +204,7 @@ export default function FileManagerNewFolderDialog({
   );
 }
 
-FileManagerNewFolderDialog.propTypes = {
+FileManagerNewFileDialog.propTypes = {
   folderName: PropTypes.string,
   onChangeFolderName: PropTypes.func,
   onClose: PropTypes.func,
@@ -212,14 +212,12 @@ FileManagerNewFolderDialog.propTypes = {
   onUpdate: PropTypes.func,
   open: PropTypes.bool,
   title: PropTypes.string,
-  refetch: PropTypes.func,
+  refetch: PropTypes.func, // Ensure refetch is passed as a function
   onTagChange: PropTypes.func.isRequired,
-  tagsData: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-    })
-  ),
+  tagsData: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+  })),
   selectedTags: PropTypes.arrayOf(PropTypes.string),
   isLoadingTags: PropTypes.bool,
 };

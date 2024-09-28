@@ -71,7 +71,7 @@ export const endpoints = {
     GetShareFolderFile:'/api/getSharedFolderAndFile',
   },
   SearchUser: {
-    User: '/api/search',
+    User: '/api/searchUser',
   },
   Permissions: {
     PermissionsFile: '/api/permission/file/grantPermission',

@@ -125,6 +125,7 @@ export default function OverviewAppView() {
       </Container>
     );
   }
+
   const handleClickOpen = () => {
     reset();
     setOpen(true); // Untuk FileManagerNewFolderDialog
@@ -209,7 +210,6 @@ export default function OverviewAppView() {
     console.log('Selected Tags:', tags);
   };
 
-
   const Onsubmit = (data) => {
     // Ensure the folder name is valid
     if (!data.name || data.name.trim() === '') {
@@ -287,7 +287,7 @@ export default function OverviewAppView() {
                             overflowY: 'auto',
                           }}
                         >
-                          {selected.map((tagId) => {
+                          {selected?.map((tagId) => {
                             const tag = tagsData.find((t) => t.id === tagId);
                             return (
                               <Chip

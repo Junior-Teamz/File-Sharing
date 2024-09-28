@@ -26,6 +26,7 @@ import FileManagerGridView from '../FileManagerGridView';
 import FileManagerFiltersResult from '../FileManagerFiltersResult';
 import FileManagerNewFolderDialog from '../FileManagerNewFolderDialog';
 import { handleFolderFiles } from 'src/_mock/map/FilesFolderUser';
+import FileManagerNewFileDialog from '../FileManagerNewFileDialog';
 // ----------------------------------------------------------------------
 
 const defaultFilters = {
@@ -65,7 +66,9 @@ export default function FileManagerView() {
   };
 
   useEffect(() => {
-    setTableData(FolderFiles); // Update state whenever FolderFiles changes
+    if (FolderFiles) {
+      setTableData(FolderFiles);
+    }
   }, [FolderFiles]);
 
   const handleRefetch = async () => {
@@ -190,10 +193,11 @@ export default function FileManagerView() {
         {/* <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h4">File Manager</Typography>
         </Stack> */}
+
         <Button
           variant="contained"
           startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-          onClick={upload.onTrue}
+          onClick={() => upload.onTrue()} // Ensure this does not trigger a re-render loop
         >
           Upload
         </Button>
@@ -243,11 +247,11 @@ export default function FileManagerView() {
         )}
       </Container>
 
-      <FileManagerNewFolderDialog
+      <FileManagerNewFileDialog
+        onTagChange={handleTagChange}
         open={upload.value}
         refetch={refetch}
         onClose={upload.onFalse}
-        onTagChange={handleTagChange} // Pass the handler here
       />
 
       <ConfirmDialog
@@ -264,8 +268,8 @@ export default function FileManagerView() {
             variant="contained"
             color="error"
             onClick={() => {
-              handleDeleteItems();
-              confirm.onFalse();
+              handleDeleteItems(); // Ensure this handles state correctly
+              confirm.onFalse(); // Close dialog after handling deletion
             }}
           >
             Delete

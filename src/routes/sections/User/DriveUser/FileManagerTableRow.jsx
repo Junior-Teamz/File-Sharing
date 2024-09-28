@@ -250,21 +250,20 @@ export default function FileManagerTableRow({ row, selected, onSelectRow, onDele
         open={details.value}
         onClose={details.onFalse}
         onDelete={onDeleteRow}
-        
       />
 
-<FileManagerShareDialog
-    open={share.value}
-    fileId={row.id} // Ensure this ID exists in the row object
-    shared={shared_with}
-    inviteEmail={inviteEmail}
-    onChangeInvite={handleChangeInvite}
-    onCopyLink={handleCopy}
-    onClose={() => {
-        share.onFalse();
-        setInviteEmail('');
-    }}
-/>
+      <FileManagerShareDialog
+        open={share.value}
+        fileId={row.id} // Ensure this ID exists in the row object
+        shared={shared_with}
+        inviteEmail={inviteEmail}
+        onChangeInvite={handleChangeInvite}
+        onCopyLink={handleCopy}
+        onClose={() => {
+          share.onFalse();
+          setInviteEmail('');
+        }}
+      />
       <ConfirmDialog
         open={confirm.value}
         onClose={confirm.onFalse}
