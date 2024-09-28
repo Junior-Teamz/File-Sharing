@@ -8,6 +8,7 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import SvgColor from 'src/components/svg-color';
 import AddToDriveIcon from '@mui/icons-material/AddToDrive';
+import Groups2Icon from '@mui/icons-material/Groups2';
 
 // ----------------------------------------------------------------------
 
@@ -27,6 +28,7 @@ const ICONS = {
   analytics: icon('ic_analytics'),
   dashboard: icon('ic_dashboard'),
   drive: <AddToDriveIcon />,
+  share: <Groups2Icon/>
 };
 
 // ----------------------------------------------------------------------
@@ -73,7 +75,7 @@ export function useNavData() {
           {
             title: t('shared with me'),
             path: paths.dashboard.user.root,
-            icon: ICONS.user,
+            icon: ICONS.share,
             children: [
             //   { title: t('profile'), path: paths.dashboard.user.root },
             //   { title: t('cards'), path: paths.dashboard.user.cards },

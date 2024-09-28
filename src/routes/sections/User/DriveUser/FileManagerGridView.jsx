@@ -16,6 +16,7 @@ import FileManagerFolderItem from './FileManagerFolderItem';
 import FileManagerActionSelected from './FileManagerActionSelected';
 import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerNewFolderDialog from './FileManagerNewFolderDialog';
+import FileManagerNewFileDialog from './FileManagerNewFileDialog';
 
 // ----------------------------------------------------------------------
 
@@ -32,17 +33,12 @@ export default function FileManagerGridView({
   const containerRef = useRef(null);
 
   const [folderName, setFolderName] = useState('');
-
   const [inviteEmail, setInviteEmail] = useState('');
 
   const share = useBoolean();
-
   const newFolder = useBoolean();
-
   const upload = useBoolean();
-
   const files = useBoolean();
-
   const folders = useBoolean();
 
   const handleChangeInvite = useCallback((event) => {
@@ -55,11 +51,10 @@ export default function FileManagerGridView({
 
   const [selectedTags, setSelectedTags] = useState([]);
 
-  const handleTagChange = (tags) => {
+  const handleTagChange = useCallback((tags) => {
     setSelectedTags(tags); // Update the selected tags state
     console.log('Selected Tags:', tags);
-  };
-
+  }, []); // Added useCallback for stable function reference
 
   return (
     <>
@@ -179,20 +174,24 @@ export default function FileManagerGridView({
         onChangeInvite={handleChangeInvite}
         onClose={() => {
           share.onFalse();
-          setInviteEmail('');
+          setInviteEmail(''); // Clear invite email on close
         }}
       />
 
-      <FileManagerNewFolderDialog onTagChange={handleTagChange}  open={upload.value} onClose={upload.onFalse} />
+      <FileManagerNewFileDialog
+        onTagChange={handleTagChange}
+        open={upload.value}
+        onClose={upload.onFalse}
+      />
 
       <FileManagerNewFolderDialog
         open={newFolder.value}
         onClose={newFolder.onFalse}
         title="New Folder"
-        onTagChange={handleTagChange} 
+        onTagChange={handleTagChange}
         onCreate={() => {
           newFolder.onFalse();
-          setFolderName('');
+          setFolderName(''); // Clear folder name after creation
           console.info('CREATE NEW FOLDER', folderName);
         }}
         folderName={folderName}
@@ -203,10 +202,10 @@ export default function FileManagerGridView({
 }
 
 FileManagerGridView.propTypes = {
-  data: PropTypes.array,
-  dataFiltered: PropTypes.array,
-  onDeleteItem: PropTypes.func,
-  onOpenConfirm: PropTypes.func,
+  data: PropTypes.array.isRequired,
   onRefetch: PropTypes.func,
-  table: PropTypes.object,
+  dataFiltered: PropTypes.array.isRequired,
+  onDeleteItem: PropTypes.func.isRequired,
+  onOpenConfirm: PropTypes.func.isRequired,
+  table: PropTypes.object.isRequired,
 };

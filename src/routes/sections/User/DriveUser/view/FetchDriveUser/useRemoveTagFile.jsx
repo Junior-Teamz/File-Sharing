@@ -5,7 +5,7 @@ export const useRemoveTagFile = () => {
   return useMutation({
     mutationKey: ['remove.file'],
     mutationFn: async (formData) => {
-      const response = await axiosInstance.post(endpoints.files.removeTag, formData);
+      const response = await axiosInstance.post(endpoints.file.removeTag, formData);
       return response;
     },
     

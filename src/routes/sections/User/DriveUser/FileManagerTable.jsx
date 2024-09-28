@@ -19,9 +19,8 @@ import {
   TableSelectedAction,
   TablePaginationCustom,
 } from 'src/components/table';
-//
 import FileManagerTableRow from './FileManagerTableRow';
-
+import { useMemo, useCallback } from 'react';
 
 // ----------------------------------------------------------------------
 
@@ -42,7 +41,6 @@ export default function FileManagerTable({
   notFound,
   onDeleteRow,
   dataFiltered,
-  onRefetch,
   onOpenConfirm,
 }) {
   const theme = useTheme();
@@ -53,11 +51,9 @@ export default function FileManagerTable({
     order,
     orderBy,
     rowsPerPage,
-    //
     selected,
     onSelectRow,
     onSelectAllRows,
-    //
     onSort,
     onChangeDense,
     onChangePage,
@@ -65,6 +61,20 @@ export default function FileManagerTable({
   } = table;
 
   const denseHeight = dense ? 58 : 78;
+
+  // Memoize filtered data
+  const filteredData = useMemo(() => {
+    return dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [dataFiltered, page, rowsPerPage]);
+
+  // Memoize row select and delete handlers
+  const handleSelectRow = useCallback((rowId) => {
+    onSelectRow(rowId);
+  }, [onSelectRow]);
+
+  const handleDeleteRow = useCallback((rowId) => {
+    onDeleteRow(rowId);
+  }, [onDeleteRow]);
 
   return (
     <>
@@ -151,17 +161,15 @@ export default function FileManagerTable({
             />
 
             <TableBody>
-              {dataFiltered
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row) => (
-                  <FileManagerTableRow
-                    key={row.id}
-                    row={row}
-                    selected={selected.includes(row.id)}
-                    onSelectRow={() => onSelectRow(row.id)}
-                    onDeleteRow={() => onDeleteRow(row.id)}
-                  />
-                ))}
+              {filteredData.map((row) => (
+                <FileManagerTableRow
+                  key={row.id}
+                  row={row}
+                  selected={selected.includes(row.id)}
+                  onSelectRow={() => handleSelectRow(row.id)}
+                  onDeleteRow={() => handleDeleteRow(row.id)}
+                />
+              ))}
 
               <TableEmptyRows
                 height={denseHeight}
@@ -187,7 +195,6 @@ export default function FileManagerTable({
         rowsPerPage={rowsPerPage}
         onPageChange={onChangePage}
         onRowsPerPageChange={onChangeRowsPerPage}
-        //
         dense={dense}
         onChangeDense={onChangeDense}
         sx={{
@@ -207,5 +214,4 @@ FileManagerTable.propTypes = {
   onOpenConfirm: PropTypes.func,
   table: PropTypes.object,
   tableData: PropTypes.array,
-  onRefetch: PropTypes.func,
 };

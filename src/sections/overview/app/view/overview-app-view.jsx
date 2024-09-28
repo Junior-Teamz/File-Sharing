@@ -125,6 +125,7 @@ export default function OverviewAppView() {
       </Container>
     );
   }
+
   const handleClickOpen = () => {
     reset();
     setOpen(true); // Untuk FileManagerNewFolderDialog
@@ -281,30 +282,28 @@ export default function OverviewAppView() {
                       value={selectedTags}
                       onChange={(event) => handleTagChange(event)} // Kirim event langsung
                       input={<OutlinedInput id="select-multiple-chip" label="Tags" />}
-                      // renderValue={(selected) => (
-                      //   <Box
-                      //     sx={{
-                      //       display: 'flex',
-                      //       flexWrap: 'wrap',
-                      //       gap: 0.5,
-                      //       maxHeight: 100,
-                      //       overflowY: 'auto',
-                      //     }}
-                      //   >
-                      //     {selected?.map((tagId) => {
-                      //       console.log(tagId);
-                      //       const tag = tagsData.find((t) => t.id === tagId);
-                      //       console.log(tag);
-                      //       return (
-                      //         <Chip
-                      //           key={tagId}
-                      //           label={tag ? tag.name : `Tag ${tagId} not found`}
-                      //           sx={{ mb: 0.5 }}
-                      //         />
-                      //       );
-                      //     })}
-                      //   </Box>
-                      // )}
+                      renderValue={(selected) => (
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: 0.5,
+                            maxHeight: 100,
+                            overflowY: 'auto',
+                          }}
+                        >
+                          {selected?.map((tagId) => {
+                            const tag = tagsData.find((t) => t.id === tagId);
+                            return (
+                              <Chip
+                                key={tagId}
+                                label={tag ? tag.name : `Tag ${tagId} not found`}
+                                sx={{ mb: 0.5 }}
+                              />
+                            );
+                          })}
+                        </Box>
+                      )}
                     >
                       {isLoadingTags ? (
                         <MenuItem disabled>Loading...</MenuItem>
