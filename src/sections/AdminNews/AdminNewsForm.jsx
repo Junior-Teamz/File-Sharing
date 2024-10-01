@@ -20,7 +20,7 @@ import {
 import FormProvider, { RHFTextField, RHFSelect } from 'src/components/hook-form';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
-import { useCreateNews, useFetchNews } from './view/fetchNews';
+import { useCreateNews} from './view/fetchNews';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { useFetchTagNews } from '../newsTag/view/fetchNewsTag';
 
