@@ -45,6 +45,10 @@ const  LegalCreateView   = lazy(() => import ('src/sections/legalbasis/view/Lega
 
 //news admin
 const  AdminListNews   = lazy(() => import ('src/sections/AdminNews/view/AdminListNews'))
+const  NewsCreateView   = lazy(() => import ('src/sections/AdminNews/view/NewsCreateView'))
+const  TagNewsCreateView   = lazy(() => import ('src/sections/newsTag/view/TagNewsCreateView'))
+const  TagNewsListView   = lazy(() => import ('src/sections/newsTag/view/TagNewsListView'))
+
 // ----------------------------------------------------------------------
 
 export const dashboardRoutes = [
@@ -96,6 +100,15 @@ export const dashboardRoutes = [
       },
 
       {
+        path: 'NewsTag',
+        children: [
+          { element: <TagNewsListView />, index: true, path: 'list' },
+          { path: 'create', element: <TagNewsCreateView /> },
+          // { path: 'edit', element: <InstanceEdit /> },
+        ],
+      },
+
+      {
         path: 'legal',
         children: [
           { element: <LegalListView />, index: true, path: 'list' },
@@ -108,7 +121,7 @@ export const dashboardRoutes = [
         path: 'News',
         children: [
           { element: <AdminListNews />, index: true, path: 'list' },
-          // { path: 'create', element: <LegalCreateView /> },
+          { path: 'create', element: <NewsCreateView /> },
           // { path: 'edit', element: <InstanceEdit /> },
         ],
       },

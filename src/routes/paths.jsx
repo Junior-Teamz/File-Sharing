@@ -102,6 +102,11 @@ export const paths = {
       list: `${ROOTS.DASHBOARD}/legal/list`,
       create: `${ROOTS.DASHBOARD}/legal/create`,
     },
+    TagNews:{
+      root: `${ROOTS.DASHBOARD}/NewsTag`,
+      list: `${ROOTS.DASHBOARD}/NewsTag/list`,
+      create: `${ROOTS.DASHBOARD}/NewsTag/create`,
+    },
     AdminNews: {
       root: `${ROOTS.DASHBOARD}/News`,
       list: `${ROOTS.DASHBOARD}/News/list`,

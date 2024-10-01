@@ -145,7 +145,21 @@ export function useNavData() {
           },
 
           {
-            title: t('landasan hukum management'),
+            title: t('news tag management'),
+            path: paths.dashboard.TagNews.root,
+            icon: ICONS.user,
+            children: [
+              // { title: t('profile'), path: paths.dashboard.user.root },
+              // { title: t('cards'), path: paths.dashboard.user.cards },
+              { title: t('news tag list'), path: paths.dashboard.TagNews.list },
+              { title: t('news tag create'), path: paths.dashboard.TagNews.create },
+              // { title: t('instance edit'), path: paths.dashboard.instance.edit },
+            ],
+          },
+
+
+          {
+            title: t('legal basis management'),
             path: paths.dashboard.legal.root,
             icon: ICONS.user,
             children: [
@@ -158,13 +172,14 @@ export function useNavData() {
           },
 
           {
-            title: t('News Management'),
+            title: t('news management'),
             path: paths.dashboard.AdminNews.root,
             icon: ICONS.blog,
             children: [
               // { title: t('profile'), path: paths.dashboard.user.root },
               // { title: t('cards'), path: paths.dashboard.user.cards },
               { title: t('list News'), path: paths.dashboard.AdminNews.list },
+              { title: t('create News'), path: paths.dashboard.AdminNews.create },
               // { title: t('Create News'), path: paths.dashboard.legal.create },
               // { title: t('Update News'), path: paths.dashboard.legal.create },
               // { title: t('instance edit'), path: paths.dashboard.instance.edit },

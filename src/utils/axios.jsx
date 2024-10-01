@@ -59,6 +59,16 @@ export const endpoints = {
   //   preview: (hashedId) => `/api/file/preview/${hashedId}`,
   // },
 
+  //get data di landing page
+  Legalbasis: {
+    getLegal: '/api/legal_basis/all',
+  },
+
+  News: {
+    getNews: '/api/news/all',
+    getNewsId: '/api/news/',
+  },
+
   //user
   Tags: {
     ListTag: '/api/tag/index',
@@ -102,6 +112,14 @@ export const endpoints = {
     UpdateLegal: '/api/admin/legal_basis/update',
     DeleteLegal: '/api/admin/legal_basis/delete',
   },
+
+  NewsTag:{
+    list: '/api/admin/news_tag/index',
+    create: '/api/admin/news_tag/create',
+    update: '/api/admin/news_tag/update',
+    delete: '/api/admin/news_tag/delete',
+  },
+
   files: {
     upload: '/api/admin/file/upload',
     delete: '/api/admin/file/delete',
@@ -135,17 +153,17 @@ export const endpoints = {
     delete: '/api/admin/users/delete_user',
   },
   instance: {
-    list: 'api/admin/instance/index',
-    create: 'api/admin/instance/create',
-    update: 'api/admin/instance/update',
-    delete: 'api/admin/instance/delete',
+    list: '/api/admin/instance/index',
+    create: '/api/admin/instance/create',
+    update: '/api/admin/instance/update',
+    delete: '/api/admin/instance/delete',
   },
   AdminNews: {
-    list: 'api/admin/news/getAllNews',
-    detail: 'api/admin/news/getNewsDetail/',
-    create: 'api/admin/news/create',
-    Update: 'api/admin/news/update',
-    UpdateStatus: 'api/admin/news/update/changeStatus',
-    delete: 'api/admin/news/delete',
+    list: '/api/admin/news/getAllNews',
+    detail: '/api/admin/news/getNewsDetail/',
+    create: '/api/admin/news/create',
+    Update: '/api/admin/news/update',
+    UpdateStatus: '/api/admin/news/update/changeStatus',
+    delete: '/api/admin/news/delete',
   },
 };

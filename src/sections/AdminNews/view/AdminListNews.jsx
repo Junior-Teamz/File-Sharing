@@ -1,6 +1,5 @@
 import {
   Button,
-  CircularProgress,
   Container,
   Paper,
   Table,
@@ -9,8 +8,18 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TableBody,
+  IconButton,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  TextField,
+  DialogActions,
+  MenuItem,
 } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import CustomPopover from 'src/components/custom-popover';
 import Iconify from 'src/components/iconify';
@@ -18,9 +27,71 @@ import Scrollbar from 'src/components/scrollbar';
 import { useSettingsContext } from 'src/components/settings';
 import { RouterLink } from 'src/routes/components';
 import { paths } from 'src/routes/paths';
+import { useDeleteLegal, useFetchNews, useUpdateNews } from './fetchNews';
 
 export default function AdminListNews() {
   const settings = useSettingsContext();
+  const { data: newsData, isLoading } = useFetchNews(); // Fetch news data
+  const deleteNews = useDeleteLegal(); // Delete API
+  const updateNews = useUpdateNews(); // Update API
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [popover, setPopover] = useState({ open: false, anchorEl: null, currentId: null });
+  const [editingNews, setEditingNews] = useState(null); // State for the news being edited
+
+  const handleDelete = (id) => {
+    deleteNews.mutate(id, {
+      onSuccess: () => {
+        alert('News deleted successfully');
+      },
+      onError: () => {
+        alert('Failed to delete news');
+      },
+    });
+  };
+
+  const handleEdit = (id) => {
+    const newsToEdit = newsData?.data?.find((news) => news.id === id);
+    setEditingNews(newsToEdit);
+    setEditDialogOpen(true);
+  };
+
+  const handlePopoverOpen = (event, id) => {
+    setPopover({ open: true, anchorEl: event.currentTarget, currentId: id });
+  };
+
+  const handlePopoverClose = () => {
+    setPopover({ open: false, anchorEl: null, currentId: null });
+  };
+
+  const handleEditDialogClose = () => {
+    setEditDialogOpen(false);
+    setEditingNews(null);
+  };
+
+  const handleEditSubmit = () => {
+    updateNews.mutate(editingNews, {
+      onSuccess: () => {
+        alert('News updated successfully');
+        handleEditDialogClose();
+      },
+      onError: () => {
+        alert('Failed to update news');
+      },
+    });
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -33,11 +104,11 @@ export default function AdminListNews() {
           action={
             <Button
               component={RouterLink}
-              href={paths.dashboard.instance.create}
+              href={paths.dashboard.AdminNews.create}
               variant="contained"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
-              New Instance
+              New News
             </Button>
           }
           sx={{ mb: { xs: 3, md: 5 } }}
@@ -55,89 +126,84 @@ export default function AdminListNews() {
                   <TableCell align="right">Action</TableCell>
                 </TableRow>
               </TableHead>
-              {/* <TableBody>
-                  {instances
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((instance) => (
-                      <TableRow key={instance.id}>
-                        <TableCell>{instance.name}</TableCell>
-
-                        <TableCell sx={{ maxWidth: 200, padding: '0', whiteSpace: 'nowrap' }}>
-                          <div
-                            style={{ overflowX: 'auto', maxWidth: '100%', display: 'inline-block' }}
-                          >
-                            {instance.address}
-                          </div>
-                        </TableCell>
-
-                        <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                          <Tooltip title="More Actions" placement="top">
-                            <IconButton onClick={(event) => handlePopoverOpen(event, instance.id)}>
-                              <Iconify icon="eva:more-vertical-fill" />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody> */}
+              <TableBody>
+                {newsData?.data
+                  ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((news) => (
+                    <TableRow key={news.id}>
+                      <TableCell>{news.title}</TableCell>
+                      <TableCell>{news.content}</TableCell>
+                      <TableCell>{news.status}</TableCell>
+                      <TableCell>{news.thumbnail}</TableCell>
+                      <TableCell align="right">
+                        <Tooltip title="More Actions" placement="top">
+                          <IconButton onClick={(event) => handlePopoverOpen(event, news.id)}>
+                            <Iconify icon="eva:more-vertical-fill" />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
             </Table>
           </TableContainer>
-          {/* <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={instances.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            /> */}
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={newsData?.total || 0}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </Scrollbar>
 
-        {/* Modal for editing instance */}
-        {/* <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
-          <DialogTitle>Edit Instance</DialogTitle>
+        {/* Modal for editing news */}
+        <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
+          <DialogTitle>Edit News</DialogTitle>
           <DialogContent>
-            <form onSubmit={handleSubmit(handleEditSubmit)}>
+            <form onSubmit={handleEditSubmit}>
               <DialogContentText sx={{ mb: 3 }}>
-                Silahkan masukkan data yang ingin diubah.
+                Please update the news information below.
               </DialogContentText>
               <TextField
                 autoFocus
                 margin="dense"
-                id="name"
-                name="name"
-                label="Nama Instance"
+                id="title"
+                name="title"
+                label="Title"
                 type="text"
                 fullWidth
                 variant="outlined"
-                {...register('name')}
+                value={editingNews?.title || ''}
+                onChange={(e) => setEditingNews({ ...editingNews, title: e.target.value })}
               />
-
               <TextField
                 margin="dense"
-                id="address"
-                name="address"
-                label="Address Instance"
+                id="content"
+                name="content"
+                label="Content"
                 type="text"
                 fullWidth
                 variant="outlined"
-                {...register('address')}
+                value={editingNews?.content || ''}
+                onChange={(e) => setEditingNews({ ...editingNews, content: e.target.value })}
               />
               <DialogActions>
                 <Button variant="outlined" onClick={handleEditDialogClose}>
                   Cancel
                 </Button>
                 <Button variant="outlined" type="submit">
-                  {loadingEdit ? 'Editing' : 'Edit'}
+                  {updateNews.isLoading ? 'Updating...' : 'Update'}
                 </Button>
               </DialogActions>
             </form>
           </DialogContent>
-        </Dialog> */}
+        </Dialog>
 
-        {/* <CustomPopover
-          open={popover.open} // boolean for open
-          anchorEl={popover.anchorEl} // element for anchorEl
+        <CustomPopover
+          open={popover.open}
+          anchorEl={popover.anchorEl}
           onClose={handlePopoverClose}
           arrow="right-top"
           sx={{ width: 140 }}
@@ -150,7 +216,7 @@ export default function AdminListNews() {
             <Iconify icon="solar:pen-bold" />
             Edit
           </MenuItem>
-        </CustomPopover> */}
+        </CustomPopover>
       </Container>
     </>
   );
