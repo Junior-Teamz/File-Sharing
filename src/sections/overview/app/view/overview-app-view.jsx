@@ -205,14 +205,9 @@ export default function OverviewAppView() {
     setSelected(newSelected);
   };
 
-  const handleTagChange = (event) => {
-    const value = event.target.value;
-    if (Array.isArray(value)) {
-      setSelectedTags(value); // Update local state with selected tag IDs
-      onTagChange(value); // Pass the tag IDs to the parent
-    } else {
-      console.error('Unexpected value type:', value);
-    }
+  const handleTagChange = (tags) => {
+    setSelectedTags(tags); // Update the selected tags state
+    console.log('Selected Tags:', tags);
   };
 
   const Onsubmit = (data) => {
@@ -624,7 +619,7 @@ export default function OverviewAppView() {
             {files?.map((file) => (
               <FileRecentItem
                 key={file.id}
-                // onRefetch={refetch}
+                onRefetch={refetch}
                 file={file}
                 onDelete={() => console.info('DELETE', file.id)}
               />

@@ -1,21 +1,11 @@
-import { Button, Stack, Typography, Grid } from '@mui/material';
+import { Button, Stack, Typography, Grid, CircularProgress } from '@mui/material';
 import { paths } from 'src/routes/paths';
 import { m } from 'framer-motion';
 import { varFade } from 'src/components/animate';
+import { useFetchNewsLandingPage } from './view/fetchNews.jsx/useFetchNewsLandingPage';
 
 export default function Informasi() {
-  const latestNews = [
-    {
-      id: 1,
-      title: 'Pengumuman Ujian Nasional',
-      summary: 'Persiapan untuk ujian nasional akan dilaksanakan pada akhir bulan.',
-    },
-    {
-      id: 2,
-      title: 'Informasi Libur Sekolah',
-      summary: 'Sekolah akan diliburkan selama satu minggu untuk perayaan hari besar nasional.',
-    },
-  ];
+  const { data, isLoading, refetch, isFetching } = useFetchNewsLandingPage();
 
   return (
     <Grid
@@ -29,27 +19,34 @@ export default function Informasi() {
       <div
         style={{
           position: 'absolute',
-          top: '-50px', // Adjust position to make it more visible
+          top: '-50px',
           left: '-50px',
-          width: '200px',
-          height: '100px',
-          backgroundColor: '#8FAF3E', // Hijau Avocado
+          width: '180px',
+          height: '150px',
+          backgroundColor: '#e2e8f0', // Hijau Avocado
           borderRadius: '0 0 300px 0',
           zIndex: 1,
         }}
       />
-      <div
+
+      {/* New Wave Shape */}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 1440 320"
         style={{
           position: 'absolute',
-          top: '-50px', // Adjust position to make it more visible
-          right: '-50px',
-          width: '100px',
-          height: '200px',
-          backgroundColor: '#e2e8f0', // Abu-abu
-          borderRadius: '0 0 0 300px',
-          zIndex: 1,
+          bottom: -200,
+          width: '180%',
+          height: '500px',
+          zIndex: 0,
         }}
-      />
+      >
+        <path
+          fill="#6EC207"
+          fillOpacity="1"
+          d="M0,224L60,213.3C120,203,240,181,360,160C480,139,600,117,720,122.7C840,128,960,160,1080,165.3C1200,171,1320,149,1380,138.7L1440,128V320H1380H1200H1080H960H840H720H600H480H360H240H120H60H0Z"
+        />
+      </svg>
 
       <Grid item xs={12}>
         <m.div variants={varFade().inUp}>
@@ -62,53 +59,63 @@ export default function Informasi() {
       {/* News Cards */}
       <Grid item xs={12}>
         <Grid container spacing={2} justifyContent="center">
-          {latestNews.map((news) => (
-            <Grid item xs={12} sm={6} md={5} key={news.id}>
-              <m.div variants={varFade().inUp}>
-                <Stack
-                  alignItems="flex-start"
-                  spacing={2}
-                  sx={{
-                    p: 4, // Reduced padding
-                    borderRadius: 2, // Adjust border radius
-                    backgroundColor: 'primary.main',
-                    color: 'common.white',
-                    cursor: 'pointer',
-                    textAlign: 'center', // Center the text inside the card
-                    mx: 'auto', // Center horizontally
-                    zIndex: 1,
-                  }}
-                >
-                  <Typography variant="h4">{news.title}</Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      maxWidth: 400, // Tentukan batas lebar maksimum untuk kolom address
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'initial',
-                    }}
-                  >
-                    {news.summary}
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={() => (window.location.href = `/berita/${news.id}`)}
-                    sx={{
-                      mt: 2,
-                      backgroundColor: '#80b918',
-                      '&:hover': {
-                        backgroundColor: '#55a630',
-                      },
-                    }}
-                  >
-                    Baca Selengkapnya
-                  </Button>
-                </Stack>
-              </m.div>
+          {isLoading ? ( 
+            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
+              <CircularProgress />
             </Grid>
-          ))}
+          ) : data?.data.length > 0 ? ( 
+            data.data.map((news) => (  
+              <Grid item xs={12} sm={6} md={5} key={news.id}>
+                <m.div variants={varFade().inUp}>
+                  <Stack
+                    alignItems="flex-start"
+                    spacing={2}
+                    sx={{
+                      p: 4, 
+                      borderRadius: 2, 
+                      backgroundColor: 'primary.main',
+                      color: 'common.white',
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      mx: 'auto',
+                      zIndex: 1,
+                    }}
+                  >
+                    <Typography variant="h4">{news.title}</Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        maxWidth: 400, // Tentukan batas lebar maksimum untuk kolom address
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'initial',
+                      }}
+                    >
+                      {news.content} {/* Use news.content for the summary */}
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => (window.location.href = `/berita/${news.slug}`)} // Use slug for URL
+                      sx={{
+                        mt: 2,
+                        backgroundColor: '#80b918',
+                        '&:hover': {
+                          backgroundColor: '#55a630',
+                        },
+                      }}
+                    >
+                      Baca Selengkapnya
+                    </Button>
+                  </Stack>
+                </m.div>
+              </Grid>
+            ))
+          ) : ( // No news available
+            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
+              <Typography variant="h6">Tidak ada berita saat ini.</Typography>
+            </Grid>
+          )}
         </Grid>
       </Grid>
 
@@ -117,7 +124,7 @@ export default function Informasi() {
         <m.div variants={varFade().inUp}>
           <Button
             variant="contained"
-            onClick={() => (window.location.href = paths.informasi)}
+            onClick={() => (window.location.href = paths.news.informasi)}
             sx={{
               backgroundColor: 'primary.main',
               color: 'common.white',

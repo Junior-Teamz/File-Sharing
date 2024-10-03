@@ -28,42 +28,61 @@ import { useSettingsContext } from 'src/components/settings';
 import { RouterLink } from 'src/routes/components';
 import { paths } from 'src/routes/paths';
 import { useDeleteLegal, useFetchNews, useUpdateNews } from './fetchNews';
+import { useSnackbar } from 'notistack';
 
 export default function AdminListNews() {
   const settings = useSettingsContext();
-  const { data: newsData, isLoading } = useFetchNews(); // Fetch news data
-  const deleteNews = useDeleteLegal(); // Delete API
-  const updateNews = useUpdateNews(); // Update API
+  const { data: newsData, isLoading } = useFetchNews();
+  const deleteNews = useDeleteLegal();
+  const { mutateAsync: updateNews, isLoading: isUpdating } = useUpdateNews();
+  const { enqueueSnackbar } = useSnackbar();
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [popover, setPopover] = useState({ open: false, anchorEl: null, currentId: null });
-  const [editingNews, setEditingNews] = useState(null); // State for the news being edited
+  const [editingNews, setEditingNews] = useState(null);
 
-  const handleDelete = (id) => {
-    deleteNews.mutate(id, {
-      onSuccess: () => {
-        alert('News deleted successfully');
-      },
-      onError: () => {
-        alert('Failed to delete news');
-      },
-    });
+  const handleDelete = async (id) => {
+    try {
+      await deleteNews.mutateAsync(id);
+      enqueueSnackbar('News deleted successfully', { variant: 'success' });
+    } catch {
+      enqueueSnackbar('Failed to delete news', { variant: 'error' });
+    }
   };
 
-  const handleEdit = (id) => {
-    if (!isLoading && Array.isArray(newsData?.data?.data)) {
-      // Change from items to data
-      const newsToEdit = newsData.data.data.find((news) => news.id === id);
-      if (newsToEdit) {
-        setEditingNews(newsToEdit);
-        setEditDialogOpen(true);
-      } else {
-        console.error(`No news found with id: ${id}`);
+  const handleEditAction = async (id) => {
+    if (!id) {
+      console.error('News ID is required for update');
+      enqueueSnackbar('News ID is required', { variant: 'error' });
+      return;
+    }
+
+    if (editingNews) {
+      try {
+        const { title, content, status, thumbnail } = editingNews;
+
+        // Construct data for the API call
+        const updateData = {
+          title: title || undefined,
+          content: content || undefined,
+          status: status || undefined,
+          thumbnail: thumbnail || undefined,
+          news_tag_ids: editingNews.news_tag_ids || undefined,
+        };
+
+        await updateNews({ newsId: id, data: updateData });
+        enqueueSnackbar('News updated successfully', { variant: 'success' });
+        handleEditDialogClose();
+      } catch (error) {
+        console.error('Error updating news:', error);
+        enqueueSnackbar('Failed to update news', { variant: 'error' });
       }
     } else {
-      console.error('Data is still loading or newsData.data.data is not an array:', newsData);
+      const newsToEdit = newsData?.data?.data.find((news) => news.id === id);
+      setEditingNews(newsToEdit);
+      setEditDialogOpen(true);
     }
   };
 
@@ -80,23 +99,7 @@ export default function AdminListNews() {
     setEditingNews(null);
   };
 
-  const handleEditSubmit = (e) => {
-    e.preventDefault(); // Prevent default form submission
-    updateNews.mutate(editingNews, {
-      onSuccess: () => {
-        alert('News updated successfully');
-        handleEditDialogClose();
-      },
-      onError: () => {
-        alert('Failed to update news');
-      },
-    });
-  };
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
+  const handleChangePage = (event, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(+event.target.value);
     setPage(0);
@@ -136,20 +139,26 @@ export default function AdminListNews() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {newsData?.data?.data?.length > 0 ? (
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    Loading...
+                  </TableCell>
+                </TableRow>
+              ) : newsData?.data?.data.length > 0 ? (
                 newsData.data.data
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((news) => (
-                    <TableRow key={news.id}>
-                      <TableCell>{news.title}</TableCell>
-                      <TableCell>{news.content}</TableCell>
-                      <TableCell>{news.status}</TableCell>
+                  .map(({ id, title, content, status, thumbnail }) => (
+                    <TableRow key={id}>
+                      <TableCell>{title}</TableCell>
+                      <TableCell>{content}</TableCell>
+                      <TableCell>{status}</TableCell>
                       <TableCell>
-                        <img src={news.thumbnail} alt={news.title} style={{ width: '100px' }} />
+                        <img src={thumbnail} alt={title} style={{ width: '100px' }} />
                       </TableCell>
                       <TableCell align="right">
                         <Tooltip title="More Actions" placement="top">
-                          <IconButton onClick={(event) => handlePopoverOpen(event, news.id)}>
+                          <IconButton onClick={(event) => handlePopoverOpen(event, id)}>
                             <Iconify icon="eva:more-vertical-fill" />
                           </IconButton>
                         </Tooltip>
@@ -181,42 +190,71 @@ export default function AdminListNews() {
       <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
         <DialogTitle>Edit News</DialogTitle>
         <DialogContent>
-          <form onSubmit={handleEditSubmit}>
-            <DialogContentText sx={{ mb: 3 }}>
-              Please update the news information below.
-            </DialogContentText>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="title"
-              name="title"
-              label="Title"
-              type="text"
-              fullWidth
+          <DialogContentText sx={{ mb: 3 }}>
+            Please update the news information below.
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="title"
+            name="title"
+            label="Title"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={editingNews?.title || ''}
+            onChange={(e) => setEditingNews({ ...editingNews, title: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            id="content"
+            name="content"
+            label="Content"
+            type="text"
+            fullWidth
+            variant="outlined"
+            multiline
+            rows={4}
+            value={editingNews?.content || ''}
+            onChange={(e) => setEditingNews({ ...editingNews, content: e.target.value })}
+          />
+          <TextField
+            select
+            margin="dense"
+            id="status"
+            name="status"
+            label="Status"
+            fullWidth
+            variant="outlined"
+            value={editingNews?.status || ''}
+            onChange={(e) => setEditingNews({ ...editingNews, status: e.target.value })}
+          >
+            <MenuItem value="published">Published</MenuItem>
+            <MenuItem value="archived">Archived</MenuItem>
+          </TextField>
+          <TextField
+            margin="dense"
+            id="thumbnail"
+            name="thumbnail"
+            label="Thumbnail URL"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={editingNews?.thumbnail || ''}
+            onChange={(e) => setEditingNews({ ...editingNews, thumbnail: e.target.value })}
+          />
+          <DialogActions>
+            <Button variant="outlined" onClick={handleEditDialogClose}>
+              Cancel
+            </Button>
+            <Button
               variant="outlined"
-              value={editingNews?.title || ''}
-              onChange={(e) => setEditingNews({ ...editingNews, title: e.target.value })}
-            />
-            <TextField
-              margin="dense"
-              id="content"
-              name="content"
-              label="Content"
-              type="text"
-              fullWidth
-              variant="outlined"
-              value={editingNews?.content || ''}
-              onChange={(e) => setEditingNews({ ...editingNews, content: e.target.value })}
-            />
-            <DialogActions>
-              <Button variant="outlined" onClick={handleEditDialogClose}>
-                Cancel
-              </Button>
-              <Button variant="outlined" type="submit" disabled={updateNews.isLoading}>
-                {updateNews.isLoading ? 'Updating...' : 'Update'}
-              </Button>
-            </DialogActions>
-          </form>
+              onClick={() => handleEditAction(editingNews?.id)}
+              disabled={isUpdating}
+            >
+              {isUpdating ? 'Updating...' : 'Update'}
+            </Button>
+          </DialogActions>
         </DialogContent>
       </Dialog>
 
@@ -228,12 +266,10 @@ export default function AdminListNews() {
         sx={{ width: 140 }}
       >
         <MenuItem onClick={() => handleDelete(popover.currentId)} sx={{ color: 'error.main' }}>
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          Delete
+          <Iconify icon="solar:trash-bin-trash-bold" /> Delete
         </MenuItem>
-        <MenuItem onClick={() => handleEdit(popover.currentId)}>
-          <Iconify icon="solar:pen-bold" />
-          Edit
+        <MenuItem onClick={() => handleEditAction(popover.currentId)}>
+          <Iconify icon="solar:pen-bold" /> Edit
         </MenuItem>
       </CustomPopover>
     </Container>

@@ -5,7 +5,7 @@ export const useMutationFolder = ({ onSuccess, onError }) => {
   return useMutation({
     mutationKey: ['create.folder'],
     mutationFn: async (data) => {
-      const response = await axiosInstance.post(endpoints.folders.create, data);
+      const response = await axiosInstance.post(endpoints.folder.create, data);
       return response;
     },
     onSuccess,

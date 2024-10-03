@@ -14,7 +14,7 @@ export const useDeleteFolder = ({ onSuccess, onError }) => {
 
       // Mengirim data payload sebagai body request
       const response = await axiosInstance.post(
-        `${endpoints.folders.delete}`, // URL endpoint
+        `${endpoints.folder.delete}`, // URL endpoint
         payload // Kirim payload langsung, bukan dalam objek data
       );
 

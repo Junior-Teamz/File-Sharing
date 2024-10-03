@@ -20,7 +20,10 @@ const ROOTS = {
 export const paths = {
   comingSoon: '/coming-soon',
   maintenance: '/maintenance',
-  informasi: '/informasi-pengumuman',
+  news: {
+    informasi: '/informasi-pengumuman',
+    detail:'/informasi-pengumuman/:id'
+  },
   about: '/about-us',
   contact: '/contact-us',
   faqs: '/faqs',
@@ -102,7 +105,7 @@ export const paths = {
       list: `${ROOTS.DASHBOARD}/legal/list`,
       create: `${ROOTS.DASHBOARD}/legal/create`,
     },
-    TagNews:{
+    TagNews: {
       root: `${ROOTS.DASHBOARD}/NewsTag`,
       list: `${ROOTS.DASHBOARD}/NewsTag/list`,
       create: `${ROOTS.DASHBOARD}/NewsTag/create`,

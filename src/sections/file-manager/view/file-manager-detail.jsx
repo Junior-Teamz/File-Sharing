@@ -101,34 +101,31 @@ export const FIleManagerDetail = () => {
   }, []);
 
   // Folder navigation: Move to subfolder
- // Folder navigation: Move to subfolder
- const handleSubfolderClick = useCallback(
-  (folderId) => {
-    setFolderStack((prev) => [...prev, id]); // Save current folder id in stack
-    navigate(`/dashboard/file-manager/info/${folderId}`, { replace: true });
-  },
-  [navigate, id]
-);
+  const handleSubfolderClick = useCallback(
+    (folderId, folderName) => {
+      setFolderStack((prev) => [...prev, { id, name: data.folder_info.name }]); // Save current folder id and name in stack
+      navigate(`/dashboard/file-manager/info/${folderId}`, { replace: true });
+    },
+    [navigate, id, data]
+  );
 
-// Navigate back to previous folder
-const handleBackClick = () => {
-  if (folderStack.length > 0) {
-    const previousFolderId = folderStack[folderStack.length - 1];
-    setFolderStack((prev) => prev.slice(0, -1)); // Remove last folder from stack
-    navigate(`/dashboard/file-manager/info/${previousFolderId}`, { replace: true });
-  }
-};
+  // Navigate back to previous folder
+  const handleBackClick = () => {
+    if (folderStack.length > 0) {
+      const previousFolderId = folderStack[folderStack.length - 1];
+      setFolderStack((prev) => prev.slice(0, -1)); // Remove last folder from stack
+      navigate(`/dashboard/file-manager/info/${previousFolderId}`, { replace: true });
+    }
+  };
 
-// Show folder ID when InfoIcon is clicked
-const handleInfoClick = () => {
-  if (data && data.folder_info) {
-    enqueueSnackbar(`Folder ID: ${data.folder_info.folder_id}`, { variant: 'info' });
-  } else {
-    enqueueSnackbar('Folder data is not available.', { variant: 'warning' });
-  }
-};
-
-
+  // Show folder ID when InfoIcon is clicked
+  const handleInfoClick = () => {
+    if (data && data.folder_info) {
+      enqueueSnackbar(`Folder ID: ${data.folder_info.folder_id}`, { variant: 'info' });
+    } else {
+      enqueueSnackbar('Folder data is not available.', { variant: 'warning' });
+    }
+  };
 
   // Fetch folder details when ID changes
   useEffect(() => {
@@ -152,37 +149,51 @@ const handleInfoClick = () => {
   return (
     <>
       <Container>
-      <Box sx={{ my: 5 }}>
+        <Box sx={{ my: 5 }}>
           <Typography variant="h6">
-            My Folders &raquo; 
-            {folderStack.map((folderId, index) => (
+            <span
+              style={{
+                cursor: 'pointer',
+                color: 'rgba(0, 0, 0, 0.5)', // Warna lebih terang untuk navigasi breadcrumb sebelumnya
+                textDecoration: 'underline', // Teks underline untuk menunjukkan bahwa bisa diklik
+                marginRight: '8px',
+              }}
+              onClick={() => navigate(paths.dashboard.root)} // Navigasi ke root dashboard
+            >
+              My Drive &raquo;
+            </span>
+
+            {folderStack.map((folder, index) => (
               <span
-                key={index}
+                key={folder.id} // Use `folder.id` instead of `folderId`
                 style={{
                   cursor: 'pointer',
                   color: 'rgba(0, 0, 0, 0.5)', // Lighter color for previous folders
                   textDecoration: 'underline',
-                  marginRight: '8px'
+                  marginRight: '8px',
                 }}
                 onClick={() => {
                   // Navigate back to the clicked folder
                   const newStack = folderStack.slice(0, index);
                   setFolderStack(newStack);
-                  navigate(`/dashboard/file-manager/info/${folderId}`, { replace: true });
+                  navigate(`/dashboard/file-manager/info/${folder.id}`, { replace: true });
                 }}
               >
-                Folder {folderId} &raquo;
+               {folder.name} &raquo; {/* Use `folder.name` instead of `folderId` */}
               </span>
             ))}
 
             {/* Current folder name */}
             <span style={{ color: 'black' }}>{data.folder_info.name}</span>
-            
+
             {/* InfoIcon displays folder.id */}
-            <InfoIcon fontSize="medium" sx={{ mt: 3, cursor: 'pointer' }} onClick={handleInfoClick} />
+            <InfoIcon
+              fontSize="medium"
+              sx={{ mt: 3, cursor: 'pointer' }}
+              onClick={handleInfoClick}
+            />
           </Typography>
         </Box>
-
 
         {data.subfolders.length === 0 && data.files.length === 0 ? (
           <>
@@ -211,7 +222,7 @@ const handleInfoClick = () => {
 
             <Typography sx={{ mb: 2, mt: 10 }}>Subfolders</Typography>
             {data.subfolders.map((folder) => (
-              <div key={folder.id} onClick={() => handleSubfolderClick(folder.id)}>
+              <div key={folder.id} onClick={() => handleSubfolderClick(folder.id, folder.name)}>
                 <FileRecentItem
                   file={{ ...folder, type: 'folder' }}
                   onRefetch={refetch}
