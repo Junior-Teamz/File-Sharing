@@ -1,18 +1,17 @@
 import { useMutation } from '@tanstack/react-query';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
-export const useEditLegal = ({ onSuccess, onError }) => {
+export const useEditLegal = () => {
   return useMutation({
     mutationKey: ['edit.legal'],
-    mutationFn: async ({ legalId, data }) => {
-      if (!legalId) {
+    mutationFn: async ({ id, data }) => {
+      if (!id) {
         throw new Error('Legal ID is required');
       }
-      const response = await axiosInstance.put(`${endpoints.Legal.UpdateLegal}/${legalId}`, data);
+      const response = await axiosInstance.put(`${endpoints.Legal.UpdateLegal}/${id}`, data);
 
       return response;
     },
-    onSuccess,
-    onError,
+   
   });
 };

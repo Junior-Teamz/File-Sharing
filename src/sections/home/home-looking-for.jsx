@@ -18,14 +18,35 @@ export default function HomeLookingFor() {
     setPdfToShow(selectedBasis ? selectedBasis.file_url : null);
   };
 
-
   const handleClose = () => setPdfToShow(null);
 
   return (
     <Container component={MotionViewport} sx={{ py: { xs: 10, md: 15 }, position: 'relative' }}>
       {/* Decorative Elements */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100px', height: '80px', backgroundColor: '#8FAF3E', borderRadius: '0 300px 0 0', zIndex: 1 }} />
-      <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '200px', height: '200px', backgroundColor: '#e2e8f0', borderRadius: '0 0 0 300px', zIndex: 1 }} />
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: '-50px',
+          width: '100px',
+          height: '80px',
+          backgroundColor: '#8FAF3E',
+          borderRadius: '0 300px 0 0',
+          zIndex: 1,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          top: '-50px',
+          right: '-50px',
+          width: '200px',
+          height: '200px',
+          backgroundColor: '#e2e8f0',
+          borderRadius: '0 0 0 300px',
+          zIndex: 1,
+        }}
+      />
 
       {/* Title: Dasar Hukum */}
       <Grid container spacing={4}>
@@ -42,7 +63,7 @@ export default function HomeLookingFor() {
           {isLoading && <Typography>Loading...</Typography>}
           {error && <Typography>Error loading data!</Typography>}
           {Array.isArray(legalBasisData) && legalBasisData.length > 0 ? (
-            legalBasisData.map((legalBasis) => (
+            legalBasisData?.map((legalBasis) => (
               <Grid item xs={12} sm={6} md={6} key={legalBasis.id}>
                 <m.div variants={varFade().inUp}>
                   <Stack
@@ -79,18 +100,19 @@ export default function HomeLookingFor() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   minHeight: '200px',
-                  backgroundColor: '#f9f9f9',
+                  backgroundColor: 'primary.main',
+                  color: 'common.white',
                   borderRadius: 2,
                   boxShadow: 3,
                   p: 3,
                 }}
               >
-                <PictureAsPdfIcon fontSize="large" sx={{ color: '#BDBDBD', mb: 2 }} />
-                <Typography variant="h6" align="center" sx={{ color: '#757575' }}>
-                  No PDF data available.
+                <PictureAsPdfIcon fontSize="large" sx={{ mb: 2 }} />
+                <Typography variant="h6" align="center">
+                  Tidak ada data PDF yang tersedia.
                 </Typography>
-                <Typography variant="body2" align="center" sx={{ color: '#9E9E9E', mt: 1 }}>
-                  Please check back later or contact support for assistance.
+                <Typography variant="body2" align="center" sx={{ mt: 1 }}>
+                  Silakan periksa kembali nanti atau hubungi dukungan untuk bantuan.
                 </Typography>
               </Box>
             </Grid>

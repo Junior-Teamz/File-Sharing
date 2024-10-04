@@ -1,75 +1,52 @@
-import Scrollbar from 'src/components/scrollbar';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import Iconify from 'src/components/iconify';
-import { paths } from 'src/routes/paths';
-import { RouterLink } from 'src/routes/components';
-import { useSettingsContext } from 'src/components/settings';
-import Container from '@mui/material/Container';
+import React, { useState } from 'react';
 import {
   Button,
-  CircularProgress,
+  Container,
+  Paper,
   Table,
-  TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
   TablePagination,
-  Paper,
+  TableRow,
+  TableBody,
   IconButton,
   Tooltip,
-  MenuItem,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
   TextField,
   DialogActions,
-  Checkbox,
-  Toolbar,
-  Typography,
+  MenuItem,
+  CircularProgress,
+  Snackbar,
 } from '@mui/material';
-import { useState } from 'react';
-import { useSnackbar } from 'notistack';
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import CustomPopover from 'src/components/custom-popover';
-import { useForm } from 'react-hook-form';
-import { useDeleteLegal, useEditLegal, useFetchLegal } from './fetchLegalBasis';
+import Iconify from 'src/components/iconify';
+import Scrollbar from 'src/components/scrollbar';
+import { useSettingsContext } from 'src/components/settings';
+import { RouterLink } from 'src/routes/components';
+import { paths } from 'src/routes/paths';
+import { useDeleteLegal, useFetchLegal, useEditLegal } from './fetchLegalBasis';
+import { useSnackbar } from 'notistack';
 
 export default function LegalListView() {
   const settings = useSettingsContext();
+  const { data: legalDocuments, refetch, isLoading } = useFetchLegal();
+  const deleteLegal = useDeleteLegal();
+  const { mutateAsync: editLegal, isLoading: isUpdating } = useEditLegal();
   const { enqueueSnackbar } = useSnackbar();
-  const { register, handleSubmit, setValue } = useForm();
+
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [popover, setPopover] = useState({ open: false, anchorEl: null, currentId: null });
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [selectedDocuments, setSelectedDocuments] = useState([]);
-
-  // Fetch legal documents data
-  const { data, isLoading, isFetching, refetch } = useFetchLegal();
-
-  const { mutate: deleteLegal, isPending: loadingDelete } = useDeleteLegal({
-    onSuccess: () => {
-      enqueueSnackbar('Legal document successfully deleted', { variant: 'success' });
-      refetch();
-    },
-    onError: (error) => {
-      enqueueSnackbar(`Failed to delete document: ${error.message}`, { variant: 'error' });
-    },
-  });
-
-  const { mutate: editLegal, isPending: loadingEdit } = useEditLegal({
-    onSuccess: () => {
-      enqueueSnackbar('Legal document successfully updated', { variant: 'success' });
-      refetch();
-      handleEditDialogClose();
-    },
-    onError: (error) => {
-      enqueueSnackbar(`Failed to update document: ${error.message}`, { variant: 'error' });
-    },
-  });
-
-  const documents = data?.data || [];
+  const [popover, setPopover] = useState({ open: false, anchorEl: null, currentId: null });
+  const [editingDocument, setEditingDocument] = useState(null);
+  const [file, setFile] = useState(null);
+  const [fileError, setFileError] = useState('');
+  const [viewPdfOpen, setViewPdfOpen] = useState(false);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -80,75 +57,67 @@ export default function LegalListView() {
     setPage(0);
   };
 
-  const handleEdit = (id) => {
-    const documentToEdit = documents.find((doc) => doc.id === id);
-    if (documentToEdit) {
-      setValue('name', documentToEdit.name);
-      setPopover((prev) => ({ ...prev, currentId: id }));
-      setEditDialogOpen(true);
-    } else {
-      enqueueSnackbar('Document not found', { variant: 'error' });
-    }
-  };
-
   const handleDelete = (id) => {
-    deleteLegal(id);
-    setPopover((prev) => ({ ...prev, open: false }));
-  };
-
-  const handlePopoverOpen = (event, id) => {
-    setPopover({ open: true, anchorEl: event.currentTarget, currentId: id });
-  };
-
-  const handlePopoverClose = () => {
-    setPopover({ ...popover, open: false });
+    deleteLegal.mutate(id, {
+      onSuccess: () => {
+        enqueueSnackbar('Legal document successfully deleted', { variant: 'success' });
+        refetch(); // Refetch documents after deletion
+      },
+      onError: (error) => {
+        enqueueSnackbar(`Failed to delete document: ${error.message}`, { variant: 'error' });
+      },
+    });
   };
 
   const handleEditDialogClose = () => {
     setEditDialogOpen(false);
+    setEditingDocument(null);
+    setFile(null);
+    setFileError('');
   };
 
-  const handleEditSubmit = (data) => {
-    if (popover.currentId) {
-      editLegal({ documentId: popover.currentId, data });
-      setEditDialogOpen(false);
-    } else {
-      enqueueSnackbar('ID not found for editing document', { variant: 'error' });
+  const handleViewPdfOpen = () => {
+    setViewPdfOpen(true);
+  };
+
+  const handleViewPdfClose = () => {
+    setViewPdfOpen(false);
+  };
+
+  const handleEdit = (document) => {
+    setEditingDocument(document);
+    setEditDialogOpen(true);
+  };
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setFileError(''); // Clear error if a file is selected
+      setEditingDocument({ ...editingDocument, file: selectedFile }); // Update state with the new file
     }
   };
 
-  const handleSelectAll = (event) => {
-    if (event.target.checked) {
-      const allIds = documents.map((doc) => doc.id);
-      setSelectedDocuments(allIds);
-    } else {
-      setSelectedDocuments([]);
-    }
+  const handleNameChange = (e) => {
+    setEditingDocument({ ...editingDocument, name: e.target.value });
   };
 
-  const handleSelectOne = (id) => {
-    const selectedIndex = selectedDocuments.indexOf(id);
-    let newSelectedDocuments = [];
+  const onSubmit = async () => {
+    try {
+      // Ensure the file and name are present in editingDocument
+      const updatedDocument = { 
+        ...editingDocument, 
+        file: file ? file : editingDocument.file ,
+        name: name ? name : editingDocument.name 
+      };
 
-    if (selectedIndex === -1) {
-      newSelectedDocuments = newSelectedDocuments.concat(selectedDocuments, id);
-    } else if (selectedIndex === 0) {
-      newSelectedDocuments = newSelectedDocuments.concat(selectedDocuments.slice(1));
-    } else if (selectedIndex === selectedDocuments.length - 1) {
-      newSelectedDocuments = newSelectedDocuments.concat(selectedDocuments.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelectedDocuments = newSelectedDocuments.concat(
-        selectedDocuments.slice(0, selectedIndex),
-        selectedDocuments.slice(selectedIndex + 1)
-      );
+      await editLegal(updatedDocument); // Send the updated data
+      enqueueSnackbar('Document updated successfully', { variant: 'success' });
+      handleEditDialogClose();
+      refetch(); // Refetch documents after update
+    } catch (error) {
+      enqueueSnackbar(`Failed to update document: ${error.message}`, { variant: 'error' });
     }
-
-    setSelectedDocuments(newSelectedDocuments);
-  };
-
-  const handleDeleteSelected = () => {
-    selectedDocuments.forEach((id) => deleteLegal(id));
-    setSelectedDocuments([]);
   };
 
   return (
@@ -172,80 +141,64 @@ export default function LegalListView() {
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
-      {isLoading || isFetching ? (
+      {isLoading ? (
         <CircularProgress />
       ) : (
-        <>
-          <Toolbar>
-            {selectedDocuments.length > 0 ? (
-              <Typography
-                sx={{ flex: '1 1 100%' }}
-                color="inherit"
-                variant="subtitle1"
-                component="div"
-              >
-                {selectedDocuments.length} selected
-              </Typography>
-            ) : null}
-            {selectedDocuments.length > 0 && (
-              <Button variant="contained" color="error" onClick={handleDeleteSelected}>
-                Delete Selected
-              </Button>
-            )}
-          </Toolbar>
-
-          <Scrollbar>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        color="primary"
-                        indeterminate={selectedDocuments.length > 0 && selectedDocuments.length < documents.length}
-                        checked={documents.length > 0 && selectedDocuments.length === documents.length}
-                        onChange={handleSelectAll}
-                      />
+        <Scrollbar>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>File</TableCell>
+                  <TableCell align="right">Action</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {legalDocuments?.data.map((doc) => (
+                  <TableRow key={doc.id}>
+                    <TableCell>{doc.name}</TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() => {
+                          handleViewPdfOpen();
+                          setEditingDocument(doc);
+                        }}
+                      >
+                        View File
+                      </Button>
                     </TableCell>
-                    <TableCell>Name</TableCell>
-                    <TableCell align="right">Action</TableCell>
+                    <TableCell align="right">
+                      <Tooltip title="More Actions" placement="top">
+                        <IconButton
+                          onClick={(event) => {
+                            setPopover({
+                              open: true,
+                              anchorEl: event.currentTarget,
+                              currentId: doc.id,
+                            });
+                          }}
+                        >
+                          <Iconify icon="eva:more-vertical-fill" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {documents.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((doc) => (
-                    <TableRow key={doc.id}>
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          color="primary"
-                          checked={selectedDocuments.indexOf(doc.id) !== -1}
-                          onChange={() => handleSelectOne(doc.id)}
-                        />
-                      </TableCell>
-                      <TableCell>{doc.name}</TableCell>
-                      <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                        <Tooltip title="More Actions" placement="top">
-                          <IconButton onClick={(event) => handlePopoverOpen(event, doc.id)}>
-                            <Iconify icon="eva:more-vertical-fill" />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={documents.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </Scrollbar>
-        </>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={legalDocuments?.total || 0}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Scrollbar>
       )}
 
       {/* Edit Dialog */}
@@ -253,45 +206,78 @@ export default function LegalListView() {
         <DialogTitle>Edit Legal Document</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            To edit this document, please modify the name below and click save.
+            To edit this document, please enter the new details.
           </DialogContentText>
           <TextField
             autoFocus
             margin="dense"
             label="Document Name"
+            type="text"
             fullWidth
-            variant="outlined"
-            {...register('name')}
+            variant="standard"
+            defaultValue={editingDocument?.name}
+            onChange={handleNameChange} // Update name change handling
+          />
+          <TextField
+            margin="dense"
+            label="Upload File"
+            type="file"
+            fullWidth
+            error={Boolean(fileError)}
+            helperText={fileError}
+            onChange={handleFileChange} // Update file change handling
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleEditDialogClose}>Cancel</Button>
-          <Button onClick={handleSubmit(handleEditSubmit)} color="primary">
-            Save
+          <Button onClick={handleEditDialogClose} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={onSubmit}
+            color="primary"
+            disabled={isUpdating}
+          >
+            {isUpdating ? <CircularProgress size={24} /> : 'Submit'}
           </Button>
         </DialogActions>
       </Dialog>
 
+      {/* PDF Viewer Dialog */}
+      <Dialog open={viewPdfOpen} onClose={handleViewPdfClose} maxWidth="md" fullWidth>
+        <DialogTitle>View PDF Document</DialogTitle>
+        <DialogContent>
+          <iframe
+            src={editingDocument?.file_url}
+            width="100%"
+            height="500px"
+            title="PDF Document"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleViewPdfClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Popover for Actions */}
       <CustomPopover
         open={popover.open}
-        onClose={handlePopoverClose}
+        onClose={() => setPopover({ ...popover, open: false })}
         anchorEl={popover.anchorEl}
         arrow="right-top"
         sx={{ width: 160 }}
       >
         <MenuItem
           onClick={() => {
-            handlePopoverClose();
-            handleEdit(popover.currentId);
+            handleEdit(legalDocuments.data.find((doc) => doc.id === popover.currentId));
+            setPopover({ ...popover, open: false });
           }}
         >
           <Iconify icon="solar:pen-bold" />
           Edit
         </MenuItem>
-        <MenuItem
-          onClick={() => handleDelete(popover.currentId)}
-          sx={{ color: 'error.main' }}
-        >
+        <MenuItem onClick={() => handleDelete(popover.currentId)} sx={{ color: 'error.main' }}>
           <Iconify icon="solar:trash-bin-minimalistic-bold" />
           Delete
         </MenuItem>

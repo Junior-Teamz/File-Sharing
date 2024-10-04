@@ -103,7 +103,7 @@ export default function FileManagerNewFolderDialog({
     const value = event.target.value;
     if (Array.isArray(value)) {
       setSelectedTags(value); // Update local state with selected tag IDs
-      onTagChange(value); // Pass the tag IDs to the parent
+     
     } else {
       console.error('Unexpected value type:', value);
     }
@@ -209,7 +209,7 @@ FileManagerNewFolderDialog.propTypes = {
   open: PropTypes.bool,
   title: PropTypes.string,
   refetch: PropTypes.func,
-  onTagChange: PropTypes.func.isRequired,
+  onTagChange: PropTypes.func,
   tagsData: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,

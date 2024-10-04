@@ -67,18 +67,19 @@ export default function FIleManagerFileDetails({
 
   const [inviteEmail, setInviteEmail] = useState('');
 
-  const { data: tagData } = useIndexTag(); // Assuming this returns tag data
+  const { data: tagData, isLoading, isError } = useIndexTag();
   const addTagFile = useAddFileTag();
   const { mutateAsync: removeTagFile } = useRemoveTagFile();
   const { mutateAsync: deleteFile } = useMutationDeleteFiles();
 
   useEffect(() => {
-    if (tagData && Array.isArray(tagData.data)) {
-      setAvailableTags(tagData.data); // Extract and set the tags array
-    } else {
-      console.error('Expected tagData.data to be an array, but got:', tagData);
+    if (!isLoading && !isError && tagData && Array.isArray(tagData.data)) {
+      setAvailableTags(tagData.data);
+    } else if (isError) {
+      console.error('Error fetching tag data:', isError);
     }
-  }, [tagData]);
+  }, [tagData, isLoading, isError]);
+  
 
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value);
@@ -140,6 +141,7 @@ export default function FIleManagerFileDetails({
       await deleteFile({ file_id: fileIdToDelete });
       enqueueSnackbar('File deleted successfully!', { variant: 'success' });
       handleCloseConfirmDialog();
+      onDelete();
       // Optionally, call a prop function to refresh the file list
     } catch (error) {
       console.error('Error deleting file:', error);

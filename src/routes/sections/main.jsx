@@ -17,6 +17,7 @@ const FaqsPage = lazy(() => import('src/pages/faqs'));
 const AboutPage = lazy(() => import('src/pages/about-us'));
 const ContactPage = lazy(() => import('src/pages/contact-us'));
 const Informasi = lazy(() => import('src/sections/home/home-informasi'));
+const NewsId = lazy(() => import('src/sections/home/NewsId'));
 const PricingPage = lazy(() => import('src/pages/pricing'));
 const PaymentPage = lazy(() => import('src/pages/payment'));
 const ComingSoonPage = lazy(() => import('src/pages/coming-soon'));
@@ -42,7 +43,8 @@ export const mainRoutes = [
     ),
     children: [
       { path: 'about-us', element: <AboutPage /> },
-      { path: 'informasi-pengumuman', element: <Informasi /> },
+      { path: 'berita', element: <Informasi /> },
+      { path: 'berita/:slug', element: <NewsId /> },
       { path: 'contact-us', element: <ContactPage /> },
       { path: 'faqs', element: <FaqsPage /> },
       {

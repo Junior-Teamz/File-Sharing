@@ -16,7 +16,7 @@ import Chip from '@mui/material/Chip';
 
 // hooks
 import { useResponsive } from 'src/hooks/use-responsive';
-import { useFetchNews } from './view/fetchNews.jsx/useFetchNews';
+import { useFetchNews } from './view/fetchNews/useFetchNews';
 
 // components
 import { MotionViewport, varFade } from 'src/components/animate';

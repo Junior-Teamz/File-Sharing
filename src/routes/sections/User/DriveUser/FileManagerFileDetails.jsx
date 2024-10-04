@@ -61,7 +61,7 @@ export default function FIleManagerFileDetails({
     email,
   } = item;
 
-  const { previewImage } = usePreviewImage(image_url);
+  // const { previewImage } = usePreviewImage(image_url);
 
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
@@ -348,18 +348,11 @@ export default function FIleManagerFileDetails({
             bgcolor: 'background.neutral',
           }}
         >
-          {previewImage ? (
-            <img
-              src={previewImage} // Tampilkan preview gambar jika tersedia
-              alt={name}
-              style={{ height: 200, width: 200, borderRadius: '12px', objectFit: 'cover' }}
-            />
-          ) : (
-            <FileThumbnail
-              file={type} // Menampilkan thumbnail berdasarkan tipe file
-              sx={{ width: 64, height: 64 }}
-            />
-          )}
+          <img
+            src={image_url}
+            alt={name}
+            style={{ height: 96, width: 96, borderRadius: '12px', objectFit: 'cover' }} // Adjust style as needed
+          />
 
           <Typography variant="subtitle2">{name}</Typography>
           <Typography variant="body2" color="text.secondary">

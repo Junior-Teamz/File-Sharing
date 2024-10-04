@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
-export const useDeleteLegal = ({ onSuccess, onError }) => {
+export const useDeleteLegal = () => {
   return useMutation({
     mutationKey: ['delete.legal'],
     mutationFn: async (legalIdOrIds) => {
@@ -16,7 +16,6 @@ export const useDeleteLegal = ({ onSuccess, onError }) => {
       console.log(response);
       return response;
     },
-    onSuccess,
-    onError,
+ 
   });
 };

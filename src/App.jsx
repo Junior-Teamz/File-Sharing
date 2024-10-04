@@ -1,6 +1,8 @@
 // i18n
 import 'src/locales/i18n';
 
+import { useMemo } from 'react';
+
 // scrollbar
 import 'simplebar-react/dist/simplebar.min.css';
 
@@ -61,24 +63,20 @@ export default function App() {
 
   useScrollToTop();
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        refetchOnWindowFocus: false,
-        staleTime: 60000,
-        retry: 3,
-        retryDelay: 2000,
-        refetchOnReconnect: true,
-        refetchIntervalInBackground: true,
-        throwOnError: false,
-        useErrorBoundary: true,
-        suspense: true,
-        onError: (error, variables) => {
-          console.error('Error during query:', error, variables);
+  const queryClient = useMemo(() => {
+    return new QueryClient({
+      defaultOptions: {
+        queries: {
+          refetchOnWindowFocus: false,
+          refetchOnReconnect: true,
+          suspense: true,
+          onError: (error, variables) => {
+            console.error('Error during query:', error, variables);
+          },
         },
       },
-    },
-  });
+    });
+  }, []); // Empty dependency array ensures it only runs once.
 
   return (
     <QueryClientProvider client={queryClient}>

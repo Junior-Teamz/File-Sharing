@@ -21,8 +21,8 @@ export const paths = {
   comingSoon: '/coming-soon',
   maintenance: '/maintenance',
   news: {
-    informasi: '/informasi-pengumuman',
-    detail:'/informasi-pengumuman/:id'
+    informasi: '/berita',
+    detail:'/berita'
   },
   about: '/about-us',
   contact: '/contact-us',

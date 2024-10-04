@@ -61,12 +61,12 @@ export const endpoints = {
 
   //get data di landing page
   Legalbasis: {
-    getLegal: '/api/legal_basis/all',
+    getLegal: '/api/legal_basis/getAllLegalBasis',
   },
 
   News: {
-    getNews: '/api/news/all',
-    getNewsId: '/api/news/',
+    getNews: '/api/news/getAllNews',
+    getNewsSlug: '/api/news/detail/slug',
   },
 
   //user
@@ -107,7 +107,7 @@ export const endpoints = {
   },
   //admin
   Legal: {
-    ListLegal: '/api/admin/legal_basis/all',
+    ListLegal: '/api/legal_basis/getAllLegalBasis',
     SaveLegal: '/api/admin/legal_basis/save',
     UpdateLegal: '/api/admin/legal_basis/update',
     DeleteLegal: '/api/admin/legal_basis/delete',

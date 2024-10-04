@@ -145,7 +145,7 @@ export default function AdminListNews() {
                     Loading...
                   </TableCell>
                 </TableRow>
-              ) : newsData?.data?.data.length > 0 ? (
+              ) : newsData?.data?.data?.length > 0 ? (
                 newsData.data.data
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map(({ id, title, content, status, thumbnail }) => (

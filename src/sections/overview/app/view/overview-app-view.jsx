@@ -113,8 +113,9 @@ export default function OverviewAppView() {
   });
 
   const { data, isLoading, refetch, isFetching } = useFetchFolder(); // Fetch Folder
-  const { files } = data;
+  const files = data?.files || []; // Use optional chaining to safely access files
   console.log(files);
+  
 
   if (isLoading || isFetching) {
     return (
@@ -205,11 +206,14 @@ export default function OverviewAppView() {
     setSelected(newSelected);
   };
 
-  const handleTagChange = (tags) => {
-    setSelectedTags(tags); // Update the selected tags state
-    console.log('Selected Tags:', tags);
+  const handleTagChange = (event) => {
+    const value = event.target.value;
+    if (Array.isArray(value)) {
+      setSelectedTags(value);
+    } else {
+      console.error('Unexpected value type:', value);
+    }
   };
-
   const Onsubmit = (data) => {
     // Ensure the folder name is valid
     if (!data.name || data.name.trim() === '') {
@@ -607,7 +611,6 @@ export default function OverviewAppView() {
             open={open} // Use the same state
             onClose={handleClose} // Ensure the dialog can close properly
             refetch={refetch} // Tambahkan refetch prop
-            onTagChange={handleTagChange} // Ensure 'handleTagChange' is used here
           />
 
           <Stack spacing={2}>

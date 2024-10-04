@@ -30,7 +30,7 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import FileThumbnail from 'src/components/file-thumbnail';
 import FileManagerShareDialog from './file-manager-share-dialog';
 import FileManagerFileDetails from './file-manager-file-details';
-import { useDownloadFile, useChangeNameFile } from './view/folderDetail';
+import { useDownloadFile, useChangeNameFile, useMutationDeleteFiles } from './view/folderDetail';
 import { Button } from '@mui/material';
 
 // ----------------------------------------------------------------------
@@ -50,16 +50,31 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
 
   const { mutateAsync: updateNameFile } = useChangeNameFile();
   const { mutateAsync: downloadFile } = useDownloadFile();
+  const { mutateAsync: deleteFile } = useMutationDeleteFiles();
 
   useEffect(() => {
     setNewFileName(file.name);
     setOriginalFileType(file.type);
   }, [file]);
 
-
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value);
   }, []);
+
+  const handleDelete = useCallback(async () => {
+    try {
+      // Perform the delete operation
+      await deleteFile(file.id);
+
+      // Notify user of successful deletion
+      enqueueSnackbar('File deleted successfully!', { variant: 'success' });
+
+      // Refetch to update the file list
+      onRefetch();
+    } catch (error) {
+      enqueueSnackbar('Failed to delete file!', { variant: 'error' });
+    }
+  }, [deleteFile, file.id, enqueueSnackbar, onRefetch]);
 
   const handleRename = useCallback(async () => {
     const newFileType = newFileName.split('.').pop(); // Extract new file type from name
@@ -80,7 +95,7 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
   }, [file.id, newFileName, originalFileType, updateNameFile, enqueueSnackbar, edit, onRefetch]);
 
   const handleCopy = useCallback(() => {
-    console.log(file.id)
+    console.log(file.id);
     if (file?.id) {
       enqueueSnackbar('Berhasil di Copied!');
       copy(file.id); // Mengakses file.id langsung, tanpa [0] karena file bukan array
@@ -88,9 +103,6 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
       enqueueSnackbar('File URL is undefined!', { variant: 'error' });
     }
   }, [copy, enqueueSnackbar, file.id]);
-
-
-  
 
   // const handle = useCallback(() => {
   //   enqueueSnackbar('Link copied!');
@@ -101,10 +113,10 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
     try {
       const idsToDownload = Array.isArray(file.ids) && file.ids.length ? file.ids : [file.id];
       console.log('IDs to Download:', idsToDownload);
-  
+
       // Send the correct payload to the API
       const response = await downloadFile(idsToDownload);
-  
+
       if (response.data) {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
@@ -123,7 +135,6 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
       enqueueSnackbar(errorMessage, { variant: 'error' });
     }
   }, [downloadFile, file, enqueueSnackbar]);
-  
 
   const renderAction = (
     <Box
@@ -278,7 +289,7 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
         <MenuItem
           onClick={() => {
             popover.onClose();
-            onDelete();
+            handleDelete();
           }}
           sx={{ color: 'error.main' }}
         >

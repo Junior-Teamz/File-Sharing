@@ -1,19 +1,25 @@
-import { Button, Stack, Typography, Grid, CircularProgress } from '@mui/material';
+import { Button, Stack, Typography, Grid, CircularProgress, Box } from '@mui/material';
 import { paths } from 'src/routes/paths';
 import { m } from 'framer-motion';
 import { varFade } from 'src/components/animate';
-import { useFetchNewsLandingPage } from './view/fetchNews.jsx/useFetchNewsLandingPage';
+import ArticleIcon from '@mui/icons-material/Article';
+import { useFetchNewsLandingPage } from './view/fetchNews/useFetchNewsLandingPage';
 
 export default function Informasi() {
   const { data, isLoading, refetch, isFetching } = useFetchNewsLandingPage();
 
   return (
     <Grid
-      container
       item
+      container
       xs={12}
       md={12}
-      sx={{ position: 'relative', backgroundColor: '#f9f9f9', overflow: 'hidden', minHeight: '100vh' }}
+      sx={{
+        position: 'relative',
+        backgroundColor: '#f9f9f9',
+        overflow: 'hidden',
+        minHeight: '100vh',
+      }}
     >
       {/* Background Shapes */}
       <div
@@ -50,7 +56,12 @@ export default function Informasi() {
 
       <Grid item xs={12}>
         <m.div variants={varFade().inUp}>
-          <Typography variant="h4" align="center" sx={{ mt: 10, mb: 5, color: '#6EC207' }} gutterBottom>
+          <Typography
+            variant="h4"
+            align="center"
+            sx={{ mt: 10, mb: 5, color: '#6EC207' }}
+            gutterBottom
+          >
             Informasi & Pengumuman
           </Typography>
         </m.div>
@@ -58,21 +69,21 @@ export default function Informasi() {
 
       {/* News Cards */}
       <Grid item xs={12}>
-        <Grid container spacing={2} justifyContent="center">
-          {isLoading ? ( 
+        <Grid item container spacing={2} justifyContent="center">
+          {isLoading ? (
             <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
               <CircularProgress />
             </Grid>
-          ) : data?.data.length > 0 ? ( 
-            data.data.map((news) => (  
+          ) : data && data.data && data.data.length > 0 ? ( // Safely check for data and data.data
+            data.data.map((news) => (
               <Grid item xs={12} sm={6} md={5} key={news.id}>
                 <m.div variants={varFade().inUp}>
                   <Stack
                     alignItems="flex-start"
                     spacing={2}
                     sx={{
-                      p: 4, 
-                      borderRadius: 2, 
+                      p: 4,
+                      borderRadius: 2,
                       backgroundColor: 'primary.main',
                       color: 'common.white',
                       cursor: 'pointer',
@@ -85,18 +96,18 @@ export default function Informasi() {
                     <Typography
                       variant="body1"
                       sx={{
-                        maxWidth: 400, // Tentukan batas lebar maksimum untuk kolom address
+                        maxWidth: 400,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'initial',
                       }}
                     >
-                      {news.content} {/* Use news.content for the summary */}
+                      {news.content}
                     </Typography>
                     <Button
                       variant="contained"
                       color="secondary"
-                      onClick={() => (window.location.href = `/berita/${news.slug}`)} // Use slug for URL
+                      onClick={() => (window.location.href = `${paths.news.detail}/${news.slug}`)}
                       sx={{
                         mt: 2,
                         backgroundColor: '#80b918',
@@ -111,9 +122,31 @@ export default function Informasi() {
                 </m.div>
               </Grid>
             ))
-          ) : ( // No news available
-            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-              <Typography variant="h6">Tidak ada berita saat ini.</Typography>
+          ) : (
+            // No news available
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: '200px',
+                  backgroundColor: 'primary.main',
+                  color: 'common.white',
+                  borderRadius: 2,
+                  boxShadow: 3,
+                  p: 3,
+                }}
+              >
+                <ArticleIcon fontSize="large" sx={{ mb: 2 }} />
+                <Typography variant="h6" align="center">
+                  Tidak ada data Berita yang tersedia.
+                </Typography>
+                <Typography variant="body2" align="center" sx={{ mt: 1 }}>
+                  Silakan periksa kembali nanti atau hubungi dukungan untuk bantuan.
+                </Typography>
+              </Box>
             </Grid>
           )}
         </Grid>

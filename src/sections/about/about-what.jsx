@@ -74,10 +74,19 @@ export default function AboutWhat() {
         )}
 
         <Grid xs={12} md={6} lg={5}>
-          <Stack spacing={2} display="inline-flex" direction="row" sx={{ color: 'common.white', mb:4, mt: 4, }}>
-            <TextAnimate text="Apa" />
-            <TextAnimate text="Itu" />
-            <TextAnimate text="File Sharing?" variants={varFade().inUp} sx={{ color: 'primary.main' }} />
+          <Stack
+            spacing={1}
+            display="inline-flex"
+            direction="row"
+            sx={{ color: 'common.white', mb: 4, mt: 4, }}
+          >
+            <TextAnimate text="Apa" variants={varFade().inUp} sx={{ color: 'primary.main' }} />
+            <TextAnimate text="Itu" variants={varFade().inUp} sx={{ color: 'primary.main' }} />
+            <TextAnimate
+              text="File Sharing?"
+              variants={varFade().inUp}
+              sx={{ color: 'primary.main' }}
+            />
           </Stack>
 
           <m.div variants={varFade().inUp}>

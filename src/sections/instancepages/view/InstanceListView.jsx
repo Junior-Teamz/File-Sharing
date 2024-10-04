@@ -86,17 +86,23 @@ export default function InstanceListView() {
     }
   };
 
-  const handleDelete = (id) => {
-    deleteInstansi(id);
-    setPopover((prev) => ({ ...prev, open: false }));
+  const handleDelete = () => {
+    const instansiId = popover.currentId;
+    if (instansiId) {
+      deleteInstansi(instansiId); // Pass only the ID, no additional data
+      setPopover((prev) => ({ ...prev, open: false }));
+    } else {
+      enqueueSnackbar('ID tidak ditemukan untuk menghapus instance', { variant: 'error' });
+    }
   };
-
+  
+  
   const handlePopoverOpen = (event, id) => {
     setPopover({ open: true, anchorEl: event.currentTarget, currentId: id });
   };
-
+  
   const handlePopoverClose = () => {
-    setPopover({ ...popover, open: false });
+    setPopover((prev) => ({ ...prev, open: false, currentId: null }));
   };
 
   const handleEditDialogClose = () => {
