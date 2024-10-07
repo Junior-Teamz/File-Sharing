@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { HOST_API } from 'src/config-global';
 
+
 // ----------------------------------------------------------------------
 
 const axiosInstance = axios.create({ baseURL: HOST_API });
@@ -29,7 +30,16 @@ axiosInstance.interceptors.request.use(
 // Response interceptor
 axiosInstance.interceptors.response.use(
   (res) => res,
-  (error) => Promise.reject((error.response && error.response.data) || 'Something went wrong')
+  (error) => {
+    // Check for 403 Forbidden status
+    if (error.response) {
+      if (error.response.status === 403) {
+        // Redirect to the 403 page
+        window.location = "/403"; // Adjust the path as needed
+      }
+    }
+    return Promise.reject((error.response && error.response.data) || 'Something went wrong');
+  }
 );
 
 export default axiosInstance;

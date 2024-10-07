@@ -46,16 +46,16 @@ export default function AdminListNews() {
   const handleDelete = async (id) => {
     try {
       await deleteNews.mutateAsync(id);
-      enqueueSnackbar('News deleted successfully', { variant: 'success' });
+      enqueueSnackbar('Berita berhasil di hapus', { variant: 'success' });
     } catch {
-      enqueueSnackbar('Failed to delete news', { variant: 'error' });
+      enqueueSnackbar('Gagal menghapus berita', { variant: 'error' });
     }
   };
 
   const handleEditAction = async (id) => {
     if (!id) {
       console.error('News ID is required for update');
-      enqueueSnackbar('News ID is required', { variant: 'error' });
+      enqueueSnackbar('News ID harus terisi!', { variant: 'error' });
       return;
     }
 
@@ -73,11 +73,11 @@ export default function AdminListNews() {
         };
 
         await updateNews({ newsId: id, data: updateData });
-        enqueueSnackbar('News updated successfully', { variant: 'success' });
+        enqueueSnackbar('Berita berhasil di perbarui', { variant: 'success' });
         handleEditDialogClose();
       } catch (error) {
-        console.error('Error updating news:', error);
-        enqueueSnackbar('Failed to update news', { variant: 'error' });
+        console.error('Error perbarui berita:', error);
+        enqueueSnackbar('Gagal Perbarui berita', { variant: 'error' });
       }
     } else {
       const newsToEdit = newsData?.data?.data.find((news) => news.id === id);
@@ -111,7 +111,7 @@ export default function AdminListNews() {
         heading="List"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'News List', href: paths.dashboard.AdminNews },
+          { name: 'Daftar Berita', href: paths.dashboard.AdminNews },
         ]}
         action={
           <Button
@@ -120,7 +120,7 @@ export default function AdminListNews() {
             variant="contained"
             startIcon={<Iconify icon="mingcute:add-line" />}
           >
-            New News
+            Buat Berita baru
           </Button>
         }
         sx={{ mb: { xs: 3, md: 5 } }}
@@ -131,11 +131,11 @@ export default function AdminListNews() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Title</TableCell>
+                <TableCell>Judul</TableCell>
                 <TableCell>Content</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Thumbnail</TableCell>
-                <TableCell align="right">Action</TableCell>
+                <TableCell align="right">Aksi</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -150,8 +150,12 @@ export default function AdminListNews() {
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map(({ id, title, content, status, thumbnail }) => (
                     <TableRow key={id}>
-                      <TableCell>{title}</TableCell>
-                      <TableCell>{content}</TableCell>
+                      <TableCell>
+                        <div dangerouslySetInnerHTML={{ __html: title }} />
+                      </TableCell>
+                      <TableCell>
+                        <div dangerouslySetInnerHTML={{ __html: content }} />
+                      </TableCell>
                       <TableCell>{status}</TableCell>
                       <TableCell>
                         <img src={thumbnail} alt={title} style={{ width: '100px' }} />
@@ -168,7 +172,7 @@ export default function AdminListNews() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={5} align="center">
-                    No news available
+                    Tidak ada berita
                   </TableCell>
                 </TableRow>
               )}
@@ -232,6 +236,7 @@ export default function AdminListNews() {
             <MenuItem value="published">Published</MenuItem>
             <MenuItem value="archived">Archived</MenuItem>
           </TextField>
+
           <TextField
             margin="dense"
             id="thumbnail"

@@ -58,7 +58,6 @@ export default function HomeView() {
       <ScrollProgress scrollYProgress={scrollYProgress} />
 
       <HomeHero />
-      
 
       <Box
         sx={{
@@ -83,7 +82,7 @@ export default function HomeView() {
         sx={{
           overflow: 'hidden',
           position: 'relative',
-          background: 'linear-gradient(to right, #43e97b 0%, #38f9d7 100%)',
+          background: 'linear-gradient(120deg, #d4fc79 0%, #43e97b 100%)',
         }}
       >
         <HomeAdvertisement />

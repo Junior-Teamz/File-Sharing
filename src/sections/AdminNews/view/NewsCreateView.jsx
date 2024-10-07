@@ -15,17 +15,17 @@ export default function NewsCreateView() {
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
-        heading="Create a new instance"
+        heading="Buat berita baru"
         links={[
           {
             name: 'Dashboard',
             href: paths.dashboard.root,
           },
           {
-            name: 'Instance List',
+            name: 'Daftar Berita',
             href: paths.dashboard.AdminNews.list,
           },
-          { name: 'News Create' },
+          { name: 'Berita Baru' },
         ]}
         sx={{
           mb: { xs: 3, md: 5 },

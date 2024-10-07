@@ -4,14 +4,9 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 export const useDeleteLegal = () => {
   return useMutation({
     mutationKey: ['delete.legal'],
-    mutationFn: async (legalIdOrIds) => {
-      const isArray = Array.isArray(legalIdOrIds);
-
-      const payload = {
-        legal_ids: isArray ? legalIdOrIds : [legalIdOrIds],
-      };
-
-      const response = await axiosInstance.post(`${endpoints.Legal.DeleteLegal}`, payload);
+    mutationFn: async (legalId) => {
+     
+      const response = await axiosInstance.delete(`${endpoints.Legal.DeleteLegal}/${legalId}`);
 
       console.log(response);
       return response;

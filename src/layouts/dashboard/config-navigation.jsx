@@ -8,6 +8,10 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import SvgColor from 'src/components/svg-color';
 import AddToDriveIcon from '@mui/icons-material/AddToDrive';
+import ApartmentIcon from '@mui/icons-material/Apartment';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import StyleIcon from '@mui/icons-material/Style';
+import GavelIcon from '@mui/icons-material/Gavel';
 
 // ----------------------------------------------------------------------
 
@@ -45,6 +49,10 @@ const ICONS = {
   analytics: icon('ic_analytics'),
   dashboard: icon('ic_dashboard'),
   drive: <AddToDriveIcon />,
+  instance: <ApartmentIcon />,
+  tags: <LocalOfferIcon />,
+  tagsnews: <StyleIcon />,
+  legalbasis: <GavelIcon/>,
 };
 
 // ----------------------------------------------------------------------
@@ -60,12 +68,12 @@ export function useNavData() {
         subheader: t('overview'),
         items: [
           {
-            title: t('My Drive'),
+            title: t('drive saya'),
             path: paths.dashboard.root,
             icon: ICONS.drive,
           },
           {
-            title: t('file_manager'),
+            title: t('file manajer'),
             path: paths.dashboard.fileManager,
             icon: ICONS.folder,
           },
@@ -101,85 +109,84 @@ export function useNavData() {
       // MANAGEMENT
       // ----------------------------------------------------------------------
       {
-        subheader: t('management'),
+        subheader: t('manajemen'),
         items: [
           // USER
           {
-            title: t('user management'),
+            title: t('manajemen user'),
             path: paths.dashboard.user.root,
             icon: ICONS.user,
             children: [
               // { title: t('profile'), path: paths.dashboard.user.root },
               // { title: t('cards'), path: paths.dashboard.user.cards },
-              { title: t('list user'), path: paths.dashboard.user.list },
-              { title: t('create user'), path: paths.dashboard.user.new },
+              { title: t('daftar user'), path: paths.dashboard.user.list },
+              { title: t('membuat user'), path: paths.dashboard.user.new },
               // { title: t('edit'), path: paths.dashboard.user.demo.edit },
               { title: t('account'), path: paths.dashboard.user.account },
             ],
           },
 
           {
-            title: t('instance management'),
+            title: t('manajemen instansi'),
             path: paths.dashboard.instance.root,
-            icon: ICONS.user,
+            icon: ICONS.instance,
             children: [
               // { title: t('profile'), path: paths.dashboard.user.root },
               // { title: t('cards'), path: paths.dashboard.user.cards },
-              { title: t('instance list'), path: paths.dashboard.instance.list },
-              { title: t('instance create'), path: paths.dashboard.instance.create },
+              { title: t('daftar instansi'), path: paths.dashboard.instance.list },
+              { title: t('membuat instansi'), path: paths.dashboard.instance.create },
               // { title: t('instance edit'), path: paths.dashboard.instance.edit },
             ],
           },
 
           {
-            title: t('tag management'),
+            title: t('manajemen tag folder dan file'),
             path: paths.dashboard.tag.root,
-            icon: ICONS.user,
+            icon: ICONS.tags,
             children: [
               // { title: t('profile'), path: paths.dashboard.user.root },
               // { title: t('cards'), path: paths.dashboard.user.cards },
-              { title: t('tag list'), path: paths.dashboard.tag.list },
-              { title: t('tag create'), path: paths.dashboard.tag.create },
+              { title: t('daftar tag folder dan file'), path: paths.dashboard.tag.list },
+              { title: t('membuat tag folder dan file'), path: paths.dashboard.tag.create },
               // { title: t('instance edit'), path: paths.dashboard.instance.edit },
             ],
           },
 
           {
-            title: t('news tag management'),
+            title: t('manajemen tag berita'),
             path: paths.dashboard.TagNews.root,
-            icon: ICONS.user,
+            icon: ICONS.tagsnews,
             children: [
               // { title: t('profile'), path: paths.dashboard.user.root },
               // { title: t('cards'), path: paths.dashboard.user.cards },
-              { title: t('news tag list'), path: paths.dashboard.TagNews.list },
-              { title: t('news tag create'), path: paths.dashboard.TagNews.create },
+              { title: t('daftar tag berita'), path: paths.dashboard.TagNews.list },
+              { title: t('membuat tag berita'), path: paths.dashboard.TagNews.create },
               // { title: t('instance edit'), path: paths.dashboard.instance.edit },
             ],
           },
 
-
           {
-            title: t('legal basis management'),
+            title: t('manajemen dasar hukum'),
             path: paths.dashboard.legal.root,
-            icon: ICONS.user,
+            icon: ICONS.legalbasis,
             children: [
               // { title: t('profile'), path: paths.dashboard.user.root },
               // { title: t('cards'), path: paths.dashboard.user.cards },
-              { title: t('legal list'), path: paths.dashboard.legal.list },
-              { title: t('legal create'), path: paths.dashboard.legal.create },
+              { title: t('daftar dasar hukum'), path: paths.dashboard.legal.list },
+              { title: t('membuat dasar hukum'), path: paths.dashboard.legal.create },
               // { title: t('instance edit'), path: paths.dashboard.instance.edit },
             ],
           },
 
           {
-            title: t('news management'),
+            title: t('manajemen berita'),
             path: paths.dashboard.AdminNews.root,
             icon: ICONS.blog,
             children: [
               // { title: t('profile'), path: paths.dashboard.user.root },
               // { title: t('cards'), path: paths.dashboard.user.cards },
-              { title: t('list News'), path: paths.dashboard.AdminNews.list },
-              { title: t('create News'), path: paths.dashboard.AdminNews.create },
+              { title: t('daftar berita'), path: paths.dashboard.AdminNews.list },
+              { title: t('membuat berita'), path: paths.dashboard.AdminNews.create },
               // { title: t('Create News'), path: paths.dashboard.legal.create },
               // { title: t('Update News'), path: paths.dashboard.legal.create },
               // { title: t('instance edit'), path: paths.dashboard.instance.edit },

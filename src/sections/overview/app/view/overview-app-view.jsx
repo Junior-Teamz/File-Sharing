@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from 'react';
-import { useTheme } from '@mui/material/styles';
 import Container from '@mui/material/Container';
 import Grid from '@mui/system/Unstable_Grid/Grid';
 import Table from '@mui/material/Table';
@@ -16,7 +15,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Tooltip from '@mui/material/Tooltip';
 import { useSettingsContext } from 'src/components/settings';
 import { SeoIllustration } from 'src/assets/illustrations';
-import AppWidgetSummary from '../app-widget-summary';
 import AppWelcome from '../app-welcome';
 import EmptyContent from 'src/components/empty-content';
 import {
@@ -68,7 +66,7 @@ export default function OverviewAppView() {
   const [tagsInput, setTagsInput] = useState(''); // To handle input as a string
   const { mutate: CreateFolder, isPending } = useMutationFolder({
     onSuccess: () => {
-      enqueueSnackbar('Folder Created Successfully');
+      enqueueSnackbar('Folder berhasil dibuat');
       reset();
       refetch();
       handleClosed();
@@ -80,7 +78,7 @@ export default function OverviewAppView() {
     },
   });
 
-  useEffect(() => {
+  useEffect(() => { 
     if (tags.data && Array.isArray(tags.data)) {
       setTagsData(tags.data);
     } else if (tagsError) {
@@ -90,7 +88,7 @@ export default function OverviewAppView() {
 
   const { mutate: deleteFolder, isPending: loadingDelete } = useDeleteFolder({
     onSuccess: () => {
-      enqueueSnackbar('Folder Berhasil Dihapus', { variant: 'success' });
+      enqueueSnackbar('Folder berhasil dihapus', { variant: 'success' });
       setSelected([]); // Reset checkbox
       refetch();
       handleDeleteConfirmClose();
@@ -102,7 +100,7 @@ export default function OverviewAppView() {
 
   const { mutate: editFolder, isPending: loadingEditFolder } = useEditFolder({
     onSuccess: () => {
-      enqueueSnackbar('Folder Berhasil diupdate', { variant: 'success' });
+      enqueueSnackbar('Folder berhasil diupdate', { variant: 'success' });
       setSelected([]); // Reset checkbox
       refetch();
       handleEditDialogClose();
@@ -164,7 +162,7 @@ export default function OverviewAppView() {
   const handleEditSubmit = (data) => {
     // Ensure the folder name is valid
     if (!data.name || data.name.trim() === '') {
-      enqueueSnackbar('Folder name is required', {
+      enqueueSnackbar('Nama folder harus di isi', {
         variant: 'warning',
         anchorOrigin: {
           vertical: 'top',
@@ -217,7 +215,7 @@ export default function OverviewAppView() {
   const Onsubmit = (data) => {
     // Ensure the folder name is valid
     if (!data.name || data.name.trim() === '') {
-      enqueueSnackbar('Folder name is required', {
+      enqueueSnackbar('Nama folder harus di isi', {
         variant: 'warning',
         anchorOrigin: {
           vertical: 'top',
@@ -243,18 +241,18 @@ export default function OverviewAppView() {
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
       <Grid container spacing={3}>
         <Grid xs={12} md={14}>
-          <AppWelcome title={`Welcome back 👋 ${user?.name}`} img={<SeoIllustration />} />
+          <AppWelcome title={`Selamat datang ${user?.name} 👋`} img={<SeoIllustration />} />
         </Grid>
         <Grid xs={12} md={12} lg={12}>
           <FileManagerPanel
-            title="Folders"
+            title="Folder"
             link={paths.dashboard.fileManager}
             onOpen={handleClickOpened}
             sx={{ mt: 5 }}
           />
 
           <Dialog open={opened} onClose={handleClosed}>
-            <DialogTitle>Create Folder</DialogTitle>
+            <DialogTitle>Buat Folder</DialogTitle>
             <DialogContent>
               <form onSubmit={handleSubmit(Onsubmit)}>
                 <DialogContentText sx={{ mb: 3 }}>
@@ -273,7 +271,7 @@ export default function OverviewAppView() {
                     {...register('name')}
                   />
                   <FormControl fullWidth margin="dense">
-                    <InputLabel id="tags-label">Tags</InputLabel>
+                    <InputLabel id="tags-label">Tag folder</InputLabel>
                     <Select
                       labelId="tags-label"
                       id="tags"
@@ -296,7 +294,7 @@ export default function OverviewAppView() {
                             return (
                               <Chip
                                 key={tagId}
-                                label={tag ? tag.name : `Tag ${tagId} not found`}
+                                label={tag ? tag.name : `Tag ${tagId} tidak di temukan`}
                                 sx={{ mb: 0.5 }}
                               />
                             );
@@ -313,7 +311,7 @@ export default function OverviewAppView() {
                           </MenuItem>
                         ))
                       ) : (
-                        <MenuItem disabled>No tags available</MenuItem>
+                        <MenuItem disabled>Tidak ada tag yang tersedia</MenuItem>
                       )}
                     </Select>
                   </FormControl>
@@ -323,7 +321,7 @@ export default function OverviewAppView() {
                     Cancel
                   </Button>
                   <Button variant="outlined" type="submit">
-                    {isPending ? 'Creating...' : 'Create'}
+                    {isPending ? 'Membuat...' : 'Buat'}
                   </Button>
                 </DialogActions>
               </form>
@@ -338,7 +336,7 @@ export default function OverviewAppView() {
         ) : (
           <Grid xs={12} md={12} lg={12}>
             <Dialog open={opened} onClose={handleClosed}>
-              <DialogTitle>Create Folder</DialogTitle>
+              <DialogTitle>Buat Folder</DialogTitle>
               <DialogContent>
                 <form onSubmit={handleSubmit(Onsubmit)}>
                   <DialogContentText sx={{ mb: 3 }}>
@@ -357,7 +355,7 @@ export default function OverviewAppView() {
                       {...register('name')}
                     />
                     <FormControl fullWidth margin="dense">
-                      <InputLabel id="tags-label">Tags</InputLabel>
+                      <InputLabel id="tags-label">Tag folder</InputLabel>
                       <Select
                         labelId="tags-label"
                         id="tags"
@@ -380,7 +378,7 @@ export default function OverviewAppView() {
                               return (
                                 <Chip
                                   key={tagId}
-                                  label={tag ? tag.name : `Tag ${tagId} not found`}
+                                  label={tag ? tag.name : `Tag ${tagId} tidak ditemukan`}
                                   sx={{ mb: 0.5 }}
                                 />
                               );
@@ -397,17 +395,17 @@ export default function OverviewAppView() {
                             </MenuItem>
                           ))
                         ) : (
-                          <MenuItem disabled>No tags available</MenuItem>
+                          <MenuItem disabled>Tidak ada tag yang tersedia</MenuItem>
                         )}
                       </Select>
                     </FormControl>
                   </Stack>
                   <DialogActions>
                     <Button variant="outlined" onClick={handleClosed}>
-                      Cancel
+                      Batal
                     </Button>
                     <Button variant="outlined" type="submit">
-                      {isPending ? 'Creating...' : 'Create'}
+                      {isPending ? 'Membuat...' : 'Buat'}
                     </Button>
                   </DialogActions>
                 </form>
@@ -496,7 +494,7 @@ export default function OverviewAppView() {
               <DialogActions>
                 <Button onClick={handleDeleteConfirmClose}>Batal</Button>
                 <Button onClick={handleDeleteSelected} color="error">
-                  {loadingDelete ? 'Deleting' : 'Delete'}
+                  {loadingDelete ? 'Menghapus...' : 'Hapus'}
                 </Button>
               </DialogActions>
             </Dialog>
@@ -522,7 +520,7 @@ export default function OverviewAppView() {
                               alignItems: 'center',
                             }}
                           >
-                            <Typography variant="body1">{selected.length} selected</Typography>
+                            <Typography variant="body1">{selected.length} dipilih</Typography>
                             <div>
                               <Tooltip
                                 title={

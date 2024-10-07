@@ -43,7 +43,7 @@ export default function Informasi() {
           position: 'absolute',
           bottom: -200,
           width: '180%',
-          height: '500px',
+          height: '494px',
           zIndex: 0,
         }}
       >
@@ -86,13 +86,12 @@ export default function Informasi() {
                       borderRadius: 2,
                       backgroundColor: 'primary.main',
                       color: 'common.white',
-                      cursor: 'pointer',
                       textAlign: 'center',
                       mx: 'auto',
                       zIndex: 1,
                     }}
                   >
-                    <Typography variant="h4">{news.title}</Typography>
+                    <Typography variant="h4"> <div dangerouslySetInnerHTML={{ __html: news.title }} /></Typography>
                     <Typography
                       variant="body1"
                       sx={{
@@ -102,7 +101,7 @@ export default function Informasi() {
                         whiteSpace: 'initial',
                       }}
                     >
-                      {news.content}
+                      <div dangerouslySetInnerHTML={{ __html: news.content }} />
                     </Typography>
                     <Button
                       variant="contained"
@@ -141,7 +140,7 @@ export default function Informasi() {
               >
                 <ArticleIcon fontSize="large" sx={{ mb: 2 }} />
                 <Typography variant="h6" align="center">
-                  Tidak ada data Berita yang tersedia.
+                  Tidak ada Berita yang tersedia.
                 </Typography>
                 <Typography variant="body2" align="center" sx={{ mt: 1 }}>
                   Silakan periksa kembali nanti atau hubungi dukungan untuk bantuan.

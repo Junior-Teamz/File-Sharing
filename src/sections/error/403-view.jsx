@@ -18,15 +18,13 @@ export default function View403() {
       <MotionContainer>
         <m.div variants={varBounce().in}>
           <Typography variant="h3" sx={{ mb: 2 }}>
-            No permission
+            Tidak ada izin
           </Typography>
         </m.div>
 
         <m.div variants={varBounce().in}>
           <Typography sx={{ color: 'text.secondary' }}>
-            The page you&apos;re trying access has restricted access.
-            <br />
-            Please refer to your system administrator
+            Halaman yang Anda coba akses tidak bisa anda akses.
           </Typography>
         </m.div>
 
@@ -35,7 +33,7 @@ export default function View403() {
         </m.div>
 
         <Button component={RouterLink} href="/" size="large" variant="contained">
-          Go to Home
+          Kembali ke Home
         </Button>
       </MotionContainer>
     </CompactLayout>

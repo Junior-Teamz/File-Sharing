@@ -12,18 +12,21 @@ import { Button } from '@mui/material';
 import { useCreateLegal } from './view/fetchLegalBasis';
 import { useRouter } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function LegalCreateForm() {
   const { enqueueSnackbar } = useSnackbar();
+  const queryClient = useQueryClient()
   const router = useRouter();
   const { mutate: createLegal, isPending } = useCreateLegal({
     onSuccess: () => {
-      enqueueSnackbar('Legal document successfully created', { variant: 'success' });
+      enqueueSnackbar('Dasar hukum berhasil dibuat', { variant: 'success' });
       reset();
       router.push(paths.dashboard.legal.list); // Redirect to the legal document list
+      queryClient.invalidateQueries({queryKey : ['legal.admin']})
     },
     onError: (error) => {
-      enqueueSnackbar(`Error: ${error.response?.data?.errors || error.message}`, {
+      enqueueSnackbar(`Gagal membuat dasar hukum : ${error.response?.data?.errors || error.message}`, {
         variant: 'error',
       });
     },

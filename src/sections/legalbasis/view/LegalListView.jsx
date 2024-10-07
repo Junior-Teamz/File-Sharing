@@ -60,11 +60,11 @@ export default function LegalListView() {
   const handleDelete = (id) => {
     deleteLegal.mutate(id, {
       onSuccess: () => {
-        enqueueSnackbar('Legal document successfully deleted', { variant: 'success' });
+        enqueueSnackbar('Dasar hukum berhasil dihapus', { variant: 'success' });
         refetch(); // Refetch documents after deletion
       },
       onError: (error) => {
-        enqueueSnackbar(`Failed to delete document: ${error.message}`, { variant: 'error' });
+        enqueueSnackbar(`Gagal menghapus dasar hukum: ${error.message}`, { variant: 'error' });
       },
     });
   };
@@ -105,18 +105,18 @@ export default function LegalListView() {
   const onSubmit = async () => {
     try {
       // Ensure the file and name are present in editingDocument
-      const updatedDocument = { 
-        ...editingDocument, 
-        file: file ? file : editingDocument.file ,
-        name: name ? name : editingDocument.name 
+      const updatedDocument = {
+        ...editingDocument,
+        file: file ? file : editingDocument.file,
+        name: name ? name : editingDocument.name,
       };
 
       await editLegal(updatedDocument); // Send the updated data
-      enqueueSnackbar('Document updated successfully', { variant: 'success' });
+      enqueueSnackbar('Dasar hukum berhasil di perbarui', { variant: 'success' });
       handleEditDialogClose();
       refetch(); // Refetch documents after update
     } catch (error) {
-      enqueueSnackbar(`Failed to update document: ${error.message}`, { variant: 'error' });
+      enqueueSnackbar(`Gagal memperbarui dasar hukum: ${error.message}`, { variant: 'error' });
     }
   };
 
@@ -232,11 +232,7 @@ export default function LegalListView() {
           <Button onClick={handleEditDialogClose} color="primary">
             Cancel
           </Button>
-          <Button
-            onClick={onSubmit}
-            color="primary"
-            disabled={isUpdating}
-          >
+          <Button onClick={onSubmit} color="primary" disabled={isUpdating}>
             {isUpdating ? <CircularProgress size={24} /> : 'Submit'}
           </Button>
         </DialogActions>
@@ -262,7 +258,7 @@ export default function LegalListView() {
 
       {/* Popover for Actions */}
       <CustomPopover
-        open={popover.open}
+        // open={popover.open}
         onClose={() => setPopover({ ...popover, open: false })}
         anchorEl={popover.anchorEl}
         arrow="right-top"

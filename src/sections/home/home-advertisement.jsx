@@ -28,9 +28,21 @@ export default function HomeAdvertisement() {
           md: 'left',
         },
         flex: 1, // Memberikan ruang lebih kecil untuk deskripsi
-      
       }}
     >
+      <div //shape 1
+        style={{
+          position: 'absolute',
+          top: '0px', // Adjust to align with the second shape
+          left: '-0px', // Ensure horizontal alignment
+          width: '100px',
+          height: '80px',
+          backgroundColor: '#8FAF3E',
+          borderRadius: '0 0 300px 0', // Adjust the radius to blend
+          zIndex: 1,
+        }}
+      />
+
       <Box
         component={m.div}
         variants={varFade().inDown}
@@ -93,7 +105,7 @@ export default function HomeAdvertisement() {
   );
 
   return (
-    <Container sx={{  mt: 10, mb:  5,}} component={MotionViewport}>
+    <Container sx={{ mt: 10, mb: 5 }} component={MotionViewport}>
       <Stack
         alignItems="center"
         direction={{ xs: 'column', md: 'row' }}
