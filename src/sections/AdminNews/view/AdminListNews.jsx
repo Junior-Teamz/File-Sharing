@@ -61,14 +61,14 @@ export default function AdminListNews() {
 
     if (editingNews) {
       try {
-        const { title, content, status, thumbnail } = editingNews;
+        const { title, content, status, thumbnail_url } = editingNews;
 
         // Construct data for the API call
         const updateData = {
           title: title || undefined,
           content: content || undefined,
           status: status || undefined,
-          thumbnail: thumbnail || undefined,
+          thumbnail_url: thumbnail_url || undefined,
           news_tag_ids: editingNews.news_tag_ids || undefined,
         };
 
@@ -148,17 +148,17 @@ export default function AdminListNews() {
               ) : newsData?.data?.data?.length > 0 ? (
                 newsData.data.data
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map(({ id, title, content, status, thumbnail }) => (
+                  .map(({ id, title, content, status, thumbnail_url }) => (
                     <TableRow key={id}>
                       <TableCell>
-                        <div dangerouslySetInnerHTML={{ __html: title }} />
+                        <span dangerouslySetInnerHTML={{ __html: title }} />
                       </TableCell>
                       <TableCell>
-                        <div dangerouslySetInnerHTML={{ __html: content }} />
+                        <span dangerouslySetInnerHTML={{ __html: content }} />
                       </TableCell>
                       <TableCell>{status}</TableCell>
                       <TableCell>
-                        <img src={thumbnail} alt={title} style={{ width: '100px' }} />
+                        <img src={thumbnail_url} alt={title} style={{ width: '100px' }} />
                       </TableCell>
                       <TableCell align="right">
                         <Tooltip title="More Actions" placement="top">
@@ -245,8 +245,8 @@ export default function AdminListNews() {
             type="text"
             fullWidth
             variant="outlined"
-            value={editingNews?.thumbnail || ''}
-            onChange={(e) => setEditingNews({ ...editingNews, thumbnail: e.target.value })}
+            value={editingNews?.thumbnail_url || ''}
+            onChange={(e) => setEditingNews({ ...editingNews, thumbnail_url: e.target.value })}
           />
           <DialogActions>
             <Button variant="outlined" onClick={handleEditDialogClose}>

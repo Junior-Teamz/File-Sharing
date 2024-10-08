@@ -7,21 +7,25 @@ export default function NewsId() {
   const { slug } = useParams();
   const { data: news, isLoading, error } = useFetchNewsSlug(slug);
 
-  const formattedDate = new Date(news.created_at).toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  const formattedDate = news
+    ? new Date(news.created_at).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+    : '';
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
         <CircularProgress />
       </div>
     );
+  }
 
-  if (error || !news)
+  if (error || !news) {
     return <div style={{ textAlign: 'center', padding: '20px' }}>Tidak ada berita!</div>;
+  }
 
   return (
     <Grid container justifyContent="center" sx={{ padding: '20px' }}>
@@ -32,7 +36,7 @@ export default function NewsId() {
           component="img"
           height="auto" // Set height to auto for responsive design
           width="100%" // Maintain width at 100%
-          image={news.thumbnail}
+          image={news.thumbnail_url} // Use thumbnail_url instead of thumbnail
           alt={news.title}
           sx={{
             borderRadius: '20px', // Border radius untuk gambar
@@ -41,13 +45,13 @@ export default function NewsId() {
             maxHeight: '500px', // Optional: Set a maximum height to maintain consistency
           }}
         />
-        
+
         {/* Tags */}
         <div style={{ marginTop: '10px', marginBottom: '10px' }}>
-          {news.news_tags?.map((tag, index) => (
+          {Array.isArray(news.news_tags) && news.news_tags.map((tag, index) => (
             <Chip
               key={index}
-              label={tag.name}
+              label={tag.name} // Ensure tag has a name property
               variant="outlined"
               sx={{
                 marginRight: '8px',
@@ -61,18 +65,18 @@ export default function NewsId() {
 
         {/* Judul Berita */}
         <Typography variant="h4" component="h2" gutterBottom>
-          <div dangerouslySetInnerHTML={{ __html: news.title }} />
+          <span dangerouslySetInnerHTML={{ __html: news.title }} />
         </Typography>
 
         {/* Penulis & Tanggal */}
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
           <Avatar
-            alt={news.creator || 'Unknown'}
-            src={news.creator_avatar} // Jika ada URL avatar penulis, bisa ditambahkan di sini
+            alt={news.creator?.name || 'Unknown'} 
+            src={news.creator_avatar} 
             sx={{ marginRight: '8px' }}
           />
           <Typography variant="body1" color="textSecondary" sx={{ marginRight: '8px' }}>
-            {news.creator || 'Unknown'}
+            {news.creator?.name || 'Unknown'}
           </Typography>
           <Typography variant="body1" color="textSecondary" sx={{ marginRight: '8px' }}>
             -
@@ -84,7 +88,7 @@ export default function NewsId() {
 
         {/* Isi Berita */}
         <Typography variant="body1" color="textPrimary" paragraph>
-          <div dangerouslySetInnerHTML={{ __html: news.content }} />
+          <span dangerouslySetInnerHTML={{ __html: news.content }} />
         </Typography>
       </Grid>
     </Grid>

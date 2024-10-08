@@ -13,90 +13,101 @@ import TextField from '@mui/material/TextField';
 import Pagination from '@mui/material/Pagination';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
+import CardMedia from '@mui/material/CardMedia';
+import { Icon } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import EventIcon from '@mui/icons-material/Event';
 
 // hooks
-import { useResponsive } from 'src/hooks/use-responsive';
 import { useFetchNews } from './view/fetchNews/useFetchNews';
 
 // components
 import { MotionViewport, varFade } from 'src/components/animate';
+import { paths } from 'src/routes/paths';
+import { shadows } from 'src/theme/shadows';
 
 // ----------------------------------------------------------------------
 
 export default function InformationAndAnnouncements() {
   const theme = useTheme();
-  const mdUp = useResponsive('up', 'md');
-  const isLight = theme.palette.mode === 'light';
-  const shadow = `-40px 40px 80px ${alpha(
-    isLight ? theme.palette.grey[500] : theme.palette.common.black,
-    0.24
-  )}`;
-
-  // State for pagination and news data
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [newsData, setNewsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
-  const [expandedNews, setExpandedNews] = useState({}); // State to manage expanded news content
-  const [error, setError] = useState(null); // State for error handling
+  const [error, setError] = useState(null);
 
-  // Fetch news using custom hook
-  const { data, isLoading } = useFetchNews({ page, searchQuery });
+  const { data, isLoading } = useFetchNews({ searchQuery });
 
   useEffect(() => {
     if (data) {
-      console.log('Full Response:', data); // Log the full response
-      // Ensure to access the correct nested data structure
-      setNewsData(data.data?.data || []); // Access nested data safely
-      setTotalPages(data.data?.last_page || 1); // Access total pages safely
+      setNewsData(data.data?.data || []);
+      setTotalPages(data.data?.last_page || 1);
     }
     setLoading(isLoading);
   }, [data, isLoading]);
 
-  // Handle search with debounce
   const handleSearch = useCallback(
     debounce((e) => {
       setSearchQuery(e.target.value);
-      setPage(1); // Reset to first page on new search
+      setPage(1); // Reset page when searching
     }, 1500),
     []
   );
 
   const handlePageChange = useCallback((event, value) => {
+    setLoading(true); // Set loading to true when page changes
     setPage(value);
+    window.scrollTo(0, 0); // Scroll to top on page change
   }, []);
 
-  const toggleExpand = useCallback((id) => {
-    setExpandedNews((prevState) => ({
-      ...prevState,
-      [id]: !prevState[id],
-    }));
-  }, []);
-
-  // Filtered news data based on search query
+  // Calculate filtered news data based on the search query
   const filteredNewsData = newsData.filter((news) =>
     news.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Calculate the number of items to display per page
+  const itemsPerPage = 4;
+  const startIndex = (page - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentNewsData = filteredNewsData.slice(startIndex, endIndex);
 
   return (
     <Container
       component={MotionViewport}
       sx={{
-        py: { xs: 10, md: 15 },
+        py: { xs: 8, md: 15 },
         textAlign: { xs: 'center', md: 'unset' },
       }}
     >
-      {/* Search Field */}
-      <TextField
-        label="Cari berita..."
-        variant="outlined"
-        fullWidth
-        sx={{ mb: 3 }}
-        onChange={handleSearch}
-      />
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          mb: 4,
+        }}
+      >
+        <TextField
+          placeholder="Cari berita berdasarkan judul"
+          variant="outlined"
+          onChange={handleSearch}
+          InputProps={{
+            startAdornment: <SearchIcon sx={{ mr: 1, color: theme.palette.primary.main }} />,
+          }}
+          sx={{
+            width: { xs: '100%', sm: '70%', md: '50%' },
+            borderRadius: '8px',
+            boxShadow: `0px 4px 8px ${alpha(theme.palette.primary.main, 0.2)}`,
+            backgroundColor: theme.palette.background.paper,
+            '& .MuiOutlinedInput-root': {
+              '&:hover fieldset': {
+                borderColor: theme.palette.primary.main,
+              },
+            },
+          }}
+        />
+      </Box>
 
-      {/* Content section */}
       {loading ? (
         <Box
           sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}
@@ -107,64 +118,149 @@ export default function InformationAndAnnouncements() {
         <Typography variant="h6" align="center" color="error">
           Terjadi kesalahan saat mengambil berita: {error.message}
         </Typography>
-      ) : filteredNewsData.length === 0 ? (
+      ) : currentNewsData.length === 0 ? (
         <Typography variant="h6" align="center">
           Tidak ada berita ditemukan.
         </Typography>
       ) : (
-        <Grid container spacing={4}>
-          {filteredNewsData.map((news) => (
-            <Grid xs={12} md={6} key={news.id}>
-              <m.div variants={varFade().inUp}>
-                <Card
-                  sx={{
-                    boxShadow: shadow,
-                    borderRadius: 2,
-                    bgcolor: isLight ? 'background.paper' : 'grey.800',
-                  }}
-                >
-                  <CardContent>
-                    <img
-                      src={news.thumbnail}
+        <Grid container spacing={10} justifyContent="center">
+          {currentNewsData.map((news) => {
+            const formattedDate = new Date(news.created_at).toLocaleDateString('id-ID', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            });
+
+            return (
+              <Grid xs={12} sm={6} md={6} key={news.id}>
+                <m.div variants={varFade().inUp}>
+                  <Card
+                    sx={{
+                      transition: '0.3s',
+                      backgroundColor: theme.palette.background.paper,
+                      boxShadow: shadows,
+                      height: { xs: 'auto', md: '450px' },
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      '&:hover': {
+                        boxShadow: `0px 20px 40px ${alpha(theme.palette.primary.main, 0.2)}`,
+                      },
+                    }}
+                  >
+                    <CardMedia
+                      component="img"
+                      height="200"
+                      src={news.thumbnail_url}
                       alt={news.title}
-                      style={{ width: '100%', height: 'auto', marginBottom: '16px', objectFit: 'cover' }}
+                      sx={{
+                        objectFit: 'cover',
+                        borderTopLeftRadius: '20px',
+                        borderTopRightRadius: '20px',
+                      }}
                     />
-                    <Typography variant="h5" gutterBottom>
-                      {news.title}
-                    </Typography>
+                    <CardContent
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        flexGrow: 1,
+                        py: { xs: 1, md: 2 },
+                      }}
+                    >
+                      <Box sx={{ mb: 0 }}>
+                        {news.news_tags.map((tag, index) => (
+                          <Chip
+                            key={index}
+                            label={tag.name}
+                            variant="outlined"
+                            sx={{
+                              borderRadius: '16px',
+                              backgroundColor: '#e0e0e0',
+                              mr: 0.5,
+                              mb: 0.5,
+                              fontSize: { xs: '0.75rem', md: '0.875rem' },
+                            }}
+                          />
+                        ))}
+                      </Box>
 
-                    {/* Map through news_tags array as Chips */}
-                    <Box sx={{ mb: 2 }}>
-                      {news.news_tags.map((tag, index) => (
-                        <Chip
-                          key={index}
-                          label={tag.name}
-                          variant="outlined"
-                          sx={{ mr: 0.5, mb: 0.5 }} // Margin for spacing
-                        />
-                      ))}
-                    </Box>
+                      <Typography variant="h6" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }}>
+                        <span dangerouslySetInnerHTML={{ __html: news.title }} />
+                      </Typography>
 
-                    {/* Content display with length limitation */}
-                    <Typography sx={{ mb: 2 }}>
-                      {expandedNews[news.id]
-                        ? news.content
-                        : `${news.content.substring(0, 100)}...`}
-                    </Typography>
-                    <Button variant="contained" color="primary" onClick={() => toggleExpand(news.id)}>
-                      {expandedNews[news.id] ? 'Tutup' : 'Selengkapnya'}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </m.div>
-            </Grid>
-          ))}
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{
+                          display: { xs: 'none', md: '-webkit-box' },
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          WebkitLineClamp: 2,
+                        }}
+                      >
+                        <span dangerouslySetInnerHTML={{ __html: news.content }} />
+                      </Typography>
+
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          width: '100%',
+                          alignItems: 'center',
+                          mt: 'auto',
+                        }}
+                      >
+                        <Typography variant="body2" color="textSecondary">
+                          <EventIcon sx={{ fontSize: 17, verticalAlign: 'middle', mr: 0.5 }} />
+                          {formattedDate}
+                        </Typography>
+
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={() =>
+                            (window.location.href = `${paths.news.detail}/${news.slug}`)
+                          }
+                          sx={{
+                            backgroundColor: '#80b918',
+                            fontSize: { xs: '0.75rem', md: '0.875rem' },
+                            '&:hover': {
+                              backgroundColor: '#55a630',
+                            },
+                          }}
+                        >
+                          Baca Selengkapnya
+                        </Button>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </m.div>
+              </Grid>
+            );
+          })}
         </Grid>
       )}
 
-      {/* Pagination */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-        <Pagination count={totalPages} page={page} onChange={handlePageChange} color="primary" />
+        <Pagination
+          count={Math.ceil(filteredNewsData.length / itemsPerPage) || 1} // Ensure count is at least 1
+          page={page}
+          onChange={handlePageChange}
+          color="primary"
+          boundaryCount={1}
+          variant="outlined"
+          sx={{
+            '& .MuiPaginationItem-root': {
+              borderRadius: '8px',
+              '&.Mui-selected': {
+                backgroundColor: theme.palette.primary.main,
+                color: theme.palette.common.white,
+              },
+            },
+          }}
+        />
       </Box>
     </Container>
   );

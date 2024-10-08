@@ -6,7 +6,18 @@ import ArticleIcon from '@mui/icons-material/Article';
 import { useFetchNewsLandingPage } from './view/fetchNews/useFetchNewsLandingPage';
 
 export default function Informasi() {
-  const { data, isLoading, refetch, isFetching } = useFetchNewsLandingPage();
+  const { data, isLoading } = useFetchNewsLandingPage();
+
+  // Get the two most recent news articles
+  const getRecentNews = () => {
+    if (!data || !data.data) return [];
+
+    // Sort news articles by date descending and limit to two articles
+    const sortedNews = data.data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    return sortedNews.slice(0, 2);
+  };
+
+  const recentNews = getRecentNews();
 
   return (
     <Grid
@@ -29,13 +40,11 @@ export default function Informasi() {
           left: '-50px',
           width: '180px',
           height: '150px',
-          backgroundColor: '#e2e8f0', // Hijau Avocado
+          backgroundColor: '#e2e8f0',
           borderRadius: '0 0 300px 0',
           zIndex: 1,
         }}
       />
-
-      {/* New Wave Shape */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 1440 320"
@@ -49,7 +58,6 @@ export default function Informasi() {
       >
         <path
           fill="#6EC207"
-          fillOpacity="1"
           d="M0,224L60,213.3C120,203,240,181,360,160C480,139,600,117,720,122.7C840,128,960,160,1080,165.3C1200,171,1320,149,1380,138.7L1440,128V320H1380H1200H1080H960H840H720H600H480H360H240H120H60H0Z"
         />
       </svg>
@@ -74,8 +82,8 @@ export default function Informasi() {
             <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
               <CircularProgress />
             </Grid>
-          ) : data && data.data && data.data.length > 0 ? ( // Safely check for data and data.data
-            data.data.map((news) => (
+          ) : recentNews.length > 0 ? (
+            recentNews.map((news) => (
               <Grid item xs={12} sm={6} md={5} key={news.id}>
                 <m.div variants={varFade().inUp}>
                   <Stack
@@ -91,7 +99,9 @@ export default function Informasi() {
                       zIndex: 1,
                     }}
                   >
-                    <Typography variant="h4"> <div dangerouslySetInnerHTML={{ __html: news.title }} /></Typography>
+                    <Typography variant="h4">
+                      <span dangerouslySetInnerHTML={{ __html: news.title }} />
+                    </Typography>
                     <Typography
                       variant="body1"
                       sx={{
@@ -101,7 +111,7 @@ export default function Informasi() {
                         whiteSpace: 'initial',
                       }}
                     >
-                      <div dangerouslySetInnerHTML={{ __html: news.content }} />
+                      <span dangerouslySetInnerHTML={{ __html: news.content }} />
                     </Typography>
                     <Button
                       variant="contained"

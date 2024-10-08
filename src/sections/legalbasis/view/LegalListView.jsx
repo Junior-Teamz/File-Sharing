@@ -258,7 +258,7 @@ export default function LegalListView() {
 
       {/* Popover for Actions */}
       <CustomPopover
-        // open={popover.open}
+        open={popover.open}
         onClose={() => setPopover({ ...popover, open: false })}
         anchorEl={popover.anchorEl}
         arrow="right-top"

@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
-export const useCreateNews = ({ onSuccess }) => {
+export const useCreateNews = ({ onSuccess, onError }) => {
   return useMutation({
     mutationKey: ['create.news'],
     mutationFn: async (data) => {
@@ -9,5 +9,6 @@ export const useCreateNews = ({ onSuccess }) => {
       return response;
     },
     onSuccess,
+    onError
   });
 };

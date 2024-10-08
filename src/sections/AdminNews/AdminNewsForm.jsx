@@ -25,15 +25,20 @@ import { useCreateNews } from './view/fetchNews';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { useFetchTagNews } from '../newsTag/view/fetchNewsTag';
 import { TINY_API } from 'src/config-global';
+import { useQueryClient } from '@tanstack/react-query';
+import { paths } from 'src/routes/paths';
 
 export default function AdminNewsForm() {
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
+  const queryClient = useQueryClient();
+
   const { mutate: CreateNews, isPending } = useCreateNews({
     onSuccess: () => {
       enqueueSnackbar('Berita berhasil dibuat', { variant: 'success' });
       reset();
       router.push(paths.dashboard.AdminNews.list); // Redirect to the news list
+      queryClient.invalidateQueries({ queryKey: ['list.news'] });
     },
     onError: (error) => {
       enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
@@ -61,16 +66,12 @@ export default function AdminNewsForm() {
 
   const { reset, handleSubmit, setValue, watch } = methods;
 
-  // Add state for TinyMCE loading spinner
   const [editorLoading, setEditorLoading] = useState(true);
-
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
   const { data: tagsResponse } = useFetchTagNews();
   const tags = tagsResponse?.data || [];
-
-
 
   const onSubmit = async (data) => {
     if (data.news_tag_ids.length === 0) {
@@ -84,23 +85,20 @@ export default function AdminNewsForm() {
       formData.append('content', data.content);
       formData.append('status', data.status);
       formData.append('thumbnail', data.thumbnail);
-      formData.append('news_tag_ids', JSON.stringify(data.news_tag_ids));
+      data.news_tag_ids.forEach((tagId) => {
+        formData.append('news_tag_ids[]', tagId);
+      });
 
       CreateNews(formData);
-      console.log(formData)
     } catch (error) {
-      console.error(error);
+      console.error('Submission Error:', error);
     }
-
   };
 
   const handleTagSelect = (tagId) => {
-    setSelectedTags((prev) => {
-      if (prev.includes(tagId)) {
-        return prev.filter((t) => t !== tagId);
-      }
-      return [...prev, tagId];
-    });    
+    setSelectedTags((prev) =>
+      prev.includes(tagId) ? prev.filter((t) => t !== tagId) : [...prev, tagId]
+    );
   };
 
   useEffect(() => {
@@ -116,9 +114,7 @@ export default function AdminNewsForm() {
     if (file) {
       setValue('thumbnail', file);
       const reader = new FileReader();
-      reader.onload = () => {
-        setThumbnailPreview(reader.result);
-      };
+      reader.onload = () => setThumbnailPreview(reader.result);
       reader.readAsDataURL(file);
     }
   };
@@ -126,28 +122,23 @@ export default function AdminNewsForm() {
   const handleThumbnailRemove = () => {
     setValue('thumbnail', null);
     setThumbnailPreview(null);
-    const fileInput = document.getElementById('thumbnail-upload');
-    if (fileInput) {
-      fileInput.value = null;
-    }
+    document.getElementById('thumbnail-upload').value = null;
   };
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
-        <Grid xs={12}>
+        <Grid item xs={12}>
           <Card sx={{ p: 3, boxShadow: 2 }}>
             <Grid container spacing={3}>
               {/* Title Section */}
-              <Grid xs={12} sm={6}>
+              <Grid item xs={12} sm={6}>
                 <Typography variant="h6">Title:</Typography>
-                {/* TinyMCE loading spinner */}
                 {editorLoading && (
                   <Box sx={{ textAlign: 'center', mt: 2 }}>
                     <CircularProgress />
                   </Box>
                 )}
-                {/* TinyMCE Editor */}
                 <Editor
                   apiKey={TINY_API}
                   value={watch('title')}
@@ -168,13 +159,13 @@ export default function AdminNewsForm() {
                     toolbar:
                       'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent',
                   }}
-                  onInit={() => setEditorLoading(false)} // Hide spinner when TinyMCE is ready
+                  onInit={() => setEditorLoading(false)}
                   onEditorChange={(content) => setValue('title', content)}
                 />
               </Grid>
 
               {/* Content Section */}
-              <Grid xs={12} sm={6}>
+              <Grid item xs={12} sm={6}>
                 <Typography variant="h6">Content:</Typography>
                 {editorLoading && (
                   <Box sx={{ textAlign: 'center', mt: 2 }}>
@@ -211,13 +202,13 @@ export default function AdminNewsForm() {
                     toolbar:
                       'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
                   }}
-                  onInit={() => setEditorLoading(false)} // Hide spinner when TinyMCE is ready
+                  onInit={() => setEditorLoading(false)}
                   onEditorChange={(content) => setValue('content', content)}
                 />
               </Grid>
 
               {/* Thumbnail Upload Section */}
-              <Grid xs={12} sm={6}>
+              <Grid item xs={12} sm={6}>
                 <Box>
                   <Typography variant="h6" sx={{ mb: 1 }}>
                     Thumbnail:
@@ -253,7 +244,12 @@ export default function AdminNewsForm() {
                       />
                       <IconButton
                         onClick={handleThumbnailRemove}
-                        sx={{ position: 'absolute', top: 0, right: 0 }}
+                        sx={{
+                          position: 'absolute',
+                          top: '5px',
+                          right: '5px',
+                          background: 'rgba(255, 255, 255, 0.8)',
+                        }}
                       >
                         <CloseIcon />
                       </IconButton>
@@ -262,15 +258,15 @@ export default function AdminNewsForm() {
                 </Box>
               </Grid>
 
-              {/* Status Selection */}
-              <Grid xs={12} sm={6}>
+              {/* Status Section */}
+              <Grid item xs={12} sm={6}>
                 <RHFSelect name="status" label="Status">
                   <MenuItem value="published">Published</MenuItem>
                   <MenuItem value="archived">Archived</MenuItem>
                 </RHFSelect>
               </Grid>
 
-              {/* Tags Selection */}
+              {/* Tags Section */}
               <Grid xs={12}>
                 <Typography variant="h6" sx={{ mb: 1 }}>
                   Tag berita:
@@ -312,16 +308,16 @@ export default function AdminNewsForm() {
                   ))}
                 </Box>
               </Grid>
-
-              {/* Create News Button */}
-              <Grid xs={12}>
-                <Stack spacing={2} direction="row" justifyContent="flex-end">
-                  <Button variant="contained" color="primary" type="submit" disabled={isPending}>
-                    {isPending ? 'Buat berita...' : 'Buat berita'}
-                  </Button>
-                </Stack>
-              </Grid>
             </Grid>
+
+            <Stack spacing={2} direction="row" sx={{ mt: 2 }}>
+              <Button type="submit" variant="contained" disabled={isPending}>
+                {isPending ? <CircularProgress size={24} /> : 'Create News'}
+              </Button>
+              <Button variant="outlined" onClick={() => reset()} disabled={isPending}>
+                Reset
+              </Button>
+            </Stack>
           </Card>
         </Grid>
       </Grid>
@@ -330,5 +326,6 @@ export default function AdminNewsForm() {
 }
 
 AdminNewsForm.propTypes = {
-  className: PropTypes.string,
+  handleSubmit: PropTypes.func,
+  reset: PropTypes.func,
 };
