@@ -14,7 +14,7 @@ import Pagination from '@mui/material/Pagination';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import CardMedia from '@mui/material/CardMedia';
-import { Icon } from '@mui/material';
+import ArticleIcon from '@mui/icons-material/Article';
 import SearchIcon from '@mui/icons-material/Search';
 import EventIcon from '@mui/icons-material/Event';
 
@@ -119,9 +119,28 @@ export default function InformationAndAnnouncements() {
           Terjadi kesalahan saat mengambil berita: {error.message}
         </Typography>
       ) : currentNewsData.length === 0 ? (
+        <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '200px',
+          backgroundColor: 'primary.main',
+          color: 'common.white',
+          borderRadius: 2,
+          boxShadow: 3,
+          p: 3,
+        }}
+      >
+        <ArticleIcon fontSize="large" sx={{ mb: 2 }} />
         <Typography variant="h6" align="center">
-          Tidak ada berita ditemukan.
+          Tidak ada Berita yang tersedia.
         </Typography>
+        <Typography variant="body2" align="center" sx={{ mt: 1 }}>
+          Silakan periksa kembali nanti atau hubungi dukungan untuk bantuan.
+        </Typography>
+      </Box>
       ) : (
         <Grid container spacing={10} justifyContent="center">
           {currentNewsData.map((news) => {

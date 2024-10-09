@@ -109,7 +109,6 @@ export default function Informasi() {
                         maxHeight: 110,
                         overflowY: 'scroll',
                         overflow:'hidden',
-
                         textOverflow: 'ellipsis',
                         whiteSpace: 'initial',
                       }}

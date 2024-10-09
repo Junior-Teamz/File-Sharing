@@ -117,6 +117,23 @@ export const endpoints = {
     addTag: '/api/folder/addTag',
   },
   //admin
+  ChartFolder: {
+    getChartFolder: '/api/admin/folder/storageSizeUsage',
+  },
+
+  ChartFile: {
+    getChartFile: '/api/admin/',
+  },
+
+  ChartInstansi: {
+    getUserInstansi: '/api/admin/instance/getInstanceUsageStatistic',
+    getChartInstansi: '/api/admin/instance/countAll',
+  },
+
+  ChartTagFolderAndFile: {
+    getChartTag: '/api/admin/tag/getTagUsageStatistic',
+  },
+
   Legal: {
     ListLegal: '/api/legal_basis/getAllLegalBasis',
     SaveLegal: '/api/admin/legal_basis/save',

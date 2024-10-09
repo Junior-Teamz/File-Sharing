@@ -11,6 +11,7 @@ import {
 } from 'src/_mock';
 // components
 import { useSettingsContext } from 'src/components/settings';
+import { Box } from '@mui/material';
 //
 import AnalyticsNews from '../analytics-news';
 import AnalyticsTasks from '../analytics-tasks';
@@ -22,10 +23,70 @@ import AnalyticsTrafficBySite from '../analytics-traffic-by-site';
 import AnalyticsCurrentSubject from '../analytics-current-subject';
 import AnalyticsConversionRates from '../analytics-conversion-rates';
 
+//storage
+import FileStorageOverview from '../../../file-manager/file-storage-overview';
+
+//hooks
+import {
+  useChartFolder,
+  useChartTag,
+  useChartUserInstances,
+  useChartInstances,
+} from './useFetchChart';
+
 // ----------------------------------------------------------------------
+
+const GB = 1000000000 * 24;
 
 export default function OverviewAnalyticsView() {
   const settings = useSettingsContext();
+
+  const { data, isFetching, isLoading, refetch } = useChartFolder();
+  console.log(data);
+
+  const { data: AllInstances } = useChartInstances();
+  console.log(AllInstances);
+
+  const { data: Instances } = useChartUserInstances();
+  console.log(Instances);
+
+  const { data: chartTag } = useChartTag();
+  console.log(chartTag);
+
+  const renderStorageOverview = (
+    <FileStorageOverview
+      total={GB}
+      chart={{
+        series: 76,
+      }}
+      data={[
+        {
+          name: 'Images',
+          usedStorage: GB / 2,
+          filesCount: 223,
+          icon: <Box component="img" src="/assets/icons/files/ic_img.svg" />,
+        },
+        {
+          name: 'Media',
+          usedStorage: GB / 5,
+          filesCount: 223,
+          icon: <Box component="img" src="/assets/icons/files/ic_video.svg" />,
+        },
+        {
+          name: 'Documents',
+          usedStorage: GB / 5,
+          filesCount: 223,
+          icon: <Box component="img" src="/assets/icons/files/ic_document.svg" />,
+        },
+        {
+          name: 'Folder',
+          usedStorage: data.data?.formattedSize || '0kb', // Dynamically set folder storage from useChartFolder response
+          filesCount: 223,
+          icon: <Box component="img" src="/assets/icons/files/ic_folder.svg" />,
+        },
+      ]}
+    />
+  );
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
@@ -39,17 +100,10 @@ export default function OverviewAnalyticsView() {
       </Typography>
 
       <Grid container spacing={3}>
-        <Grid xs={12} sm={6} md={3}>
-          <AnalyticsWidgetSummary
-            title="Weekly Sales"
-            total={714000}
-            icon={<img alt="icon" src="/assets/icons/glass/ic_glass_bag.png" />}
-          />
-        </Grid>
 
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
-            title="New Users"
+            title="All Users"
             total={1352831}
             color="info"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_users.png" />}
@@ -58,60 +112,75 @@ export default function OverviewAnalyticsView() {
 
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
-            title="Item Orders"
-            total={1723315}
+            title="Total Instansi"
+            total={AllInstances?.instance_count}
             color="warning"
-            icon={<img alt="icon" src="/assets/icons/glass/ic_glass_buy.png" />}
+            icon={<img alt="icon" src="/assets/icons/glass/ic_glass_company.png" />}
           />
         </Grid>
 
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
-            title="Bug Reports"
+            title="Admin"
             total={234}
             color="error"
-            icon={<img alt="icon" src="/assets/icons/glass/ic_glass_message.png" />}
+            icon={<img alt="icon" src="/assets/icons/glass/ic_glass_admin.png" />}
           />
         </Grid>
 
-        <Grid xs={12} md={6} lg={8}>
+        <Grid xs={12} sm={6} md={3}>
+          <AnalyticsWidgetSummary
+            title="User"
+            total={234}
+            color="error"
+            icon={<img alt="icon" src="/assets/icons/glass/ic_glass_user.png" />}
+          />
+        </Grid>
+
+        <Grid xs={12} md={12} lg={12}>
           <AnalyticsWebsiteVisits
-            title="Website Visits"
-            subheader="(+43%) than last year"
+            title="Statistik Instansi"
+            subheader="Data Instansi dan Total User, File, Folder"
             chart={{
-              labels: [
-                '01/01/2003',
-                '02/01/2003',
-                '03/01/2003',
-                '04/01/2003',
-                '05/01/2003',
-                '06/01/2003',
-                '07/01/2003',
-                '08/01/2003',
-                '09/01/2003',
-                '10/01/2003',
-                '11/01/2003',
-              ],
+              labels: Instances?.data?.map((item) => item.name) || [], // Mengambil nama instansi
               series: [
                 {
-                  name: 'Team A',
+                  name: 'Total Users',
                   type: 'column',
                   fill: 'solid',
-                  data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30],
+                  data: Instances?.data?.map((item) => item.user_total) || [], // Total user
                 },
                 {
-                  name: 'Team B',
+                  name: 'Total Files',
                   type: 'area',
                   fill: 'gradient',
-                  data: [44, 55, 41, 67, 22, 43, 21, 41, 56, 27, 43],
+                  data: Instances?.data?.map((item) => item.file_total) || [], // Total file
                 },
                 {
-                  name: 'Team C',
+                  name: 'Total Folders',
                   type: 'line',
                   fill: 'solid',
-                  data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39],
+                  data: Instances?.data?.map((item) => item.folder_total) || [], // Total folder
                 },
               ],
+            }}
+          />
+        </Grid>
+
+        <Grid xs={12} md={6} lg={4}>
+          <Box>{renderStorageOverview}</Box>
+        </Grid>
+
+        <Grid xs={12} md={6} lg={8}>
+          <AnalyticsConversionRates
+            title="Tag paling banyak di pakai"
+            subheader="(+43%) than last year"
+            chart={{
+              series:
+                chartTag?.data?.map((tag) => ({
+                  label: tag.name,
+                  value: tag.usage_count,
+                })) || [],
             }}
           />
         </Grid>
@@ -130,28 +199,7 @@ export default function OverviewAnalyticsView() {
           />
         </Grid>
 
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsConversionRates
-            title="Conversion Rates"
-            subheader="(+43%) than last year"
-            chart={{
-              series: [
-                { label: 'Italy', value: 400 },
-                { label: 'Japan', value: 430 },
-                { label: 'China', value: 448 },
-                { label: 'Canada', value: 470 },
-                { label: 'France', value: 540 },
-                { label: 'Germany', value: 580 },
-                { label: 'South Korea', value: 690 },
-                { label: 'Netherlands', value: 1100 },
-                { label: 'United States', value: 1200 },
-                { label: 'United Kingdom', value: 1380 },
-              ],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
+        {/* <Grid xs={12} md={6} lg={4}>
           <AnalyticsCurrentSubject
             title="Current Subject"
             chart={{
@@ -163,23 +211,11 @@ export default function OverviewAnalyticsView() {
               ],
             }}
           />
-        </Grid>
-        {/* 
+        </Grid> */}
+
         <Grid xs={12} md={6} lg={8}>
           <AnalyticsNews title="News" list={_analyticPosts} />
         </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsOrderTimeline title="Order Timeline" list={_analyticOrderTimeline} />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsTrafficBySite title="Traffic by Site" list={_analyticTraffic} />
-        </Grid> */}
-        {/* 
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsTasks title="Tasks" list={_analyticTasks} />
-        </Grid> */}
       </Grid>
     </Container>
   );

@@ -7,6 +7,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 // components
 import { MotionContainer, varFade } from 'src/components/animate';
+import { textAlign } from '@mui/system';
 
 // ----------------------------------------------------------------------
 
@@ -35,17 +36,12 @@ export default function HeroInformation() {
             },
           }}
         >
-          <Stack spacing={2} display="inline-flex" direction="row" sx={{ color: 'common.white' }}>
+          <Stack spacing={2} display="inline-flex" direction="row" sx={{ color: 'common.white', textAlign: 'center'  }}>
             <TextAnimate
-              text="Informasi"
+              text="Berita"
               variants={varFade().inRight}
-              sx={{ color: 'primary.main' }}
-            />
-            <TextAnimate text="&" />
-            <TextAnimate
-              text="Pengumuman"
-              variants={varFade().inRight}
-              sx={{ color: 'primary.main' }}
+              sx={{ color: 'primary.main', textAlign: 'center' }}
+
             />
           </Stack>
 

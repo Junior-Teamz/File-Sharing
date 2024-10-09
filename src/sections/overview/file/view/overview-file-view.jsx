@@ -28,6 +28,7 @@ import FileStorageOverview from '../../../file-manager/file-storage-overview';
 import FileManagerPanel from '../../../file-manager/file-manager-panel';
 import FileManagerFolderItem from '../../../file-manager/file-manager-folder-item';
 import FileManagerNewFolderDialog from '../../../file-manager/file-manager-new-folder-dialog';
+import { useChartFolder } from '../../analytics/view/useFetchChart';
 
 // ----------------------------------------------------------------------
 
@@ -59,6 +60,9 @@ export default function OverviewFileView() {
   const handleChangeFolderName = useCallback((event) => {
     setFolderName(event.target.value);
   }, []);
+
+  const { data, isFetching, isLoading, refetch } = useChartFolder()
+  console.log(data)
 
   const handleCreateNewFolder = useCallback(() => {
     newFolder.onFalse();
@@ -104,15 +108,18 @@ export default function OverviewFileView() {
           filesCount: 223,
           icon: <Box component="img" src="/assets/icons/files/ic_document.svg" />,
         },
-        {
-          name: 'Other',
-          usedStorage: GB / 10,
-          filesCount: 223,
-          icon: <Box component="img" src="/assets/icons/files/ic_file.svg" />,
-        },
+       {
+        name: 'Folder',
+        usedStorage: data.data?.formattedSize || '0kb', // Dynamically set folder storage from useChartFolder response    
+        filesCount: 223,
+        icon: <Box component="img" src="/assets/icons/files/ic_folder.svg" />,
+      },
       ]}
     />
   );
+
+  console.log("Formatted Size: ", data.data?.formattedSize);
+
 
   return (
     <>

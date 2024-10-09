@@ -20,7 +20,10 @@ export default function AnalyticsConversionRates({ title, subheader, chart, ...o
     tooltip: {
       marker: { show: false },
       y: {
-        formatter: (value) => fNumber(value),
+        formatter: (value, { dataPointIndex }) => {
+          const usageCount = series[dataPointIndex].usage_count; // Mengambil 'usage_count' dari series
+          return `${fNumber(value)} pengguna `; // Menampilkan 'usage_count' di tooltip
+        },
         title: {
           formatter: () => '',
         },

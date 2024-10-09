@@ -23,7 +23,8 @@ export default function AnalyticsWebsiteVisits({ title, subheader, chart, ...oth
     },
     labels,
     xaxis: {
-      type: 'datetime',
+      categories: labels, // Menggunakan kategori berbasis string (name)
+      type: 'category', // Mengatur xaxis ke 'category' agar sesuai dengan label yang bukan datetime
     },
     tooltip: {
       shared: true,
@@ -31,7 +32,7 @@ export default function AnalyticsWebsiteVisits({ title, subheader, chart, ...oth
       y: {
         formatter: (value) => {
           if (typeof value !== 'undefined') {
-            return `${value.toFixed(0)} visits`;
+            return `${value.toFixed(0)} `;
           }
           return value;
         },
