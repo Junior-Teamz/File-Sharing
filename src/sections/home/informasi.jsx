@@ -106,7 +106,10 @@ export default function Informasi() {
                       variant="body1"
                       sx={{
                         maxWidth: 400,
-                        overflow: 'hidden',
+                        maxHeight: 110,
+                        overflowY: 'scroll',
+                        overflow:'hidden',
+
                         textOverflow: 'ellipsis',
                         whiteSpace: 'initial',
                       }}

@@ -80,13 +80,13 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
       resetForm({
         name: currentUser.name,
         email: currentUser.email,
-        instance_id: currentUser.instansi?.id || '',
+        instance_id: currentUser.instances?.[0]?.id || '', // Ambil id instansi pertama jika ada
         password: '',
         confirmPassword: '',
-      }); // Reset the form with current user's data
+      });
     }
   }, [currentUser, resetForm]);
-
+  
   // Form submission handler
   const onSubmit = (data) => {
     const userData = {
@@ -141,7 +141,7 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
               <InputLabel id="instansi-label">Instansi</InputLabel>
               <Select
                 labelId="instansi-label"
-                id="instance_id" // Make sure the id matches the field name
+                id="instance_id" // Ensure the id matches the field name
                 name="instance_id" // Use instance_id as the name
                 label="Instansi"
                 value={watch('instance_id')} // Bind the selected value
@@ -158,7 +158,7 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
 
             <RHFTextField
               name="password"
-              label="Password "
+              label="Password"
               type="password"
             />
             <RHFTextField name="confirmPassword" label="Confirm Password" type="password" />
@@ -171,7 +171,7 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
           </Button>
 
           <Button variant="contained" type="submit">
-           {isPending ? "Update User...." : "Update User"}
+            {isPending ? "Update User...." : "Update User"}
           </Button>
         </DialogActions>
       </FormProvider>

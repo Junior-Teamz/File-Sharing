@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 import { useFetchNewsSlug } from './view/fetchNews/useFetchNewsId';
 import { useParams } from 'react-router-dom';
 import { Grid, Typography, CircularProgress, Chip, CardMedia, Avatar } from '@mui/material';
+// routes
+import { paths } from 'src/routes/paths';
+// components
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 export default function NewsId() {
   const { slug } = useParams();
@@ -28,9 +32,36 @@ export default function NewsId() {
   }
 
   return (
-    <Grid container justifyContent="center" sx={{ padding: '20px' }}>
-      {/* Konten Berita */}
-      <Grid item xs={12} md={10}>
+    <Grid container sx={{ padding: '20px' }}>
+      {/* Custom Breadcrumbs on the left */}
+      <Grid item xs={12} md={10} sx={{ display: 'flex', alignItems: 'flex-start' }}>
+        <CustomBreadcrumbs
+          links={[
+            {
+              name: 'Dashboard',
+              href: '/',
+            },
+            {
+              name: 'Daftar Berita',
+              href: paths.news.informasi,
+            },
+            {
+              name: <span dangerouslySetInnerHTML={{ __html: news.title }} />,
+              href: '', // You can set a specific href if needed
+            },
+          ]}
+          sx={{
+            mb: { xs: 3, md: 5 },
+            fontSize: '1rem', // Increased font size
+            '& .MuiTypography-root': {
+              fontSize: '1rem', // Set font size for Typography
+            },
+          }}
+        />
+      </Grid>
+
+      {/* Main content centered */}
+      <Grid item xs={12} md={10} sx={{ mx: 'auto', maxWidth: '800px' }}>
         {/* Gambar Thumbnail */}
         <CardMedia
           component="img"
@@ -48,19 +79,20 @@ export default function NewsId() {
 
         {/* Tags */}
         <div style={{ marginTop: '10px', marginBottom: '10px' }}>
-          {Array.isArray(news.news_tags) && news.news_tags.map((tag, index) => (
-            <Chip
-              key={index}
-              label={tag.name} // Ensure tag has a name property
-              variant="outlined"
-              sx={{
-                marginRight: '8px',
-                marginTop: '4px',
-                borderRadius: '16px', // Membuat Chip menjadi rounded
-                backgroundColor: '#e0e0e0', // Background abu-abu
-              }}
-            />
-          ))}
+          {Array.isArray(news.news_tags) &&
+            news.news_tags.map((tag, index) => (
+              <Chip
+                key={index}
+                label={tag.name} // Ensure tag has a name property
+                variant="outlined"
+                sx={{
+                  marginRight: '8px',
+                  marginTop: '4px',
+                  borderRadius: '16px', // Membuat Chip menjadi rounded
+                  backgroundColor: '#e0e0e0', // Background abu-abu
+                }}
+              />
+            ))}
         </div>
 
         {/* Judul Berita */}
@@ -71,8 +103,8 @@ export default function NewsId() {
         {/* Penulis & Tanggal */}
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
           <Avatar
-            alt={news.creator?.name || 'Unknown'} 
-            src={news.creator_avatar} 
+            alt={news.creator?.name || 'Unknown'}
+            src={news.creator_avatar}
             sx={{ marginRight: '8px' }}
           />
           <Typography variant="body1" color="textSecondary" sx={{ marginRight: '8px' }}>
@@ -87,7 +119,19 @@ export default function NewsId() {
         </div>
 
         {/* Isi Berita */}
-        <Typography variant="body1" color="textPrimary" paragraph>
+        <Typography
+          variant="body1"
+          color="textPrimary"
+          paragraph
+          sx={{
+            textAlign: 'justify',         
+            textAlignLast: 'justify',    
+            lineHeight: 1.6,              
+            marginBottom: 0,              
+            overflowWrap: 'break-word',  
+            wordBreak: 'break-word',      
+          }}
+        >
           <span dangerouslySetInnerHTML={{ __html: news.content }} />
         </Typography>
       </Grid>

@@ -1,19 +1,23 @@
 import { useQuery } from '@tanstack/react-query';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
-export const useFetchNews = (filters) => {
-  const { data, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ['list.news', filters], // Adjusted key to fit 'news'
+export const useFetchNews = ({ searchQuery = '', page = 1, itemsPerPage = 4 }) => {
+  const { data, isLoading, refetch, isFetching, error } = useQuery({
+    queryKey: ['list.news', searchQuery, page, itemsPerPage],
     queryFn: async () => {
       const response = await axiosInstance.get(endpoints.News.getNews, {
         params: {
-          ...filters,
-          perPage: filters.perPage || 5, // Set default perPage to 5
+          search: searchQuery,
+          page,
+          per_page: itemsPerPage,
         },
       });
       return response.data;
     },
-    enabled: !!filters,
+    enabled: !!page && !!itemsPerPage, // Ensure pagination is enabled
+    onError: (err) => {
+      console.error("Error fetching news:", err);
+    },
   });
 
   return {
@@ -21,5 +25,6 @@ export const useFetchNews = (filters) => {
     isLoading,
     refetch,
     isFetching,
+    error, // Keep returning the error for further usage
   };
 };

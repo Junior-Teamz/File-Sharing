@@ -6,7 +6,7 @@ export const useEditUser = ({ onSuccess, onError, refetch ,reset}) => {
     mutationKey: ['edit.user'],
     mutationFn: async ({ userId, data }) => {
       const response = await axiosInstance.put(`${endpoints.users.update}/${userId}`, data);
-      return response.data; // Pastikan hanya data yang dikembalikan
+      return response.data; 
     },
     onSuccess,
     onError,

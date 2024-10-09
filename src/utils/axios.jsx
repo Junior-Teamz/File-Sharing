@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { HOST_API } from 'src/config-global';
 
-
 // ----------------------------------------------------------------------
 
 const axiosInstance = axios.create({ baseURL: HOST_API });
@@ -27,15 +26,17 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor
 axiosInstance.interceptors.response.use(
   (res) => res,
   (error) => {
-    // Check for 403 Forbidden status
+    // Check for response status
     if (error.response) {
       if (error.response.status === 403) {
         // Redirect to the 403 page
-        window.location = "/403"; // Adjust the path as needed
+        window.location = '/403'; // Adjust the path as needed
+      } else if (error.response.status === 500) {
+        // Redirect to the 500 page
+        window.location = '/500'; // Adjust the path as needed
       }
     }
     return Promise.reject((error.response && error.response.data) || 'Something went wrong');
@@ -123,7 +124,7 @@ export const endpoints = {
     DeleteLegal: '/api/admin/legal_basis/delete',
   },
 
-  NewsTag:{
+  NewsTag: {
     list: '/api/admin/news_tag/index',
     create: '/api/admin/news_tag/create',
     update: '/api/admin/news_tag/update',
