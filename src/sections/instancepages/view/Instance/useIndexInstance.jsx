@@ -3,15 +3,11 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 
 export const useIndexInstance = (filters) => {
   const { data, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ['list.instansi', filters],
+    queryKey: ['list.instansi'],
     queryFn: async () => {
-      const response = await axiosInstance.get(endpoints.instance.list, {
-        params: filters, 
-      });
-      return response.data; 
-      
+      const response = await axiosInstance.get(endpoints.instance.list);
+      return response.data;
     },
-    enabled: !!filters, 
   });
 
   return {

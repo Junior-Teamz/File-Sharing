@@ -13,19 +13,30 @@ import { Button } from '@mui/material';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 import { useCreateTagNews } from './view/fetchNewsTag';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function TagNewsCreateForm() {
   const { enqueueSnackbar } = useSnackbar();
+  const useClient = useQueryClient()
   const router = useRouter();
   const { mutate: CreateTag, isPending } = useCreateTagNews({
     onSuccess: () => {
       enqueueSnackbar('Tag berhasil dibuat', { variant: 'success' });
       reset(); // Reset form setelah sukses
       router.push(paths.dashboard.TagNews.list); // Redirect ke halaman list
+      useClient.invalidateQueries({ queryKey: ['list.newstag']})
     },
     onError: (error) => {
-      enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
-      // Tetap di halaman create tanpa redirect
+      // Check if the error has the expected structure
+      if (error.errors && error.errors.name) {
+        // Set form error for the name field
+        methods.setError('name', {
+          type: 'manual',
+          message: error.errors.name[0], // "Instance name already exists."
+        });
+      } else {
+        enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
+      }
     },
   });
 

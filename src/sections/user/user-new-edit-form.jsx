@@ -14,9 +14,11 @@ import { Button, MenuItem } from '@mui/material';
 import { useIndexInstance } from '../instancepages/view/Instance';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
+import { QueryClient, useQueryClient } from '@tanstack/react-query';
 
 export default function UserNewEditForm({ currentUser }) {
   const { enqueueSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
   const router = useRouter();
   const { data: instansiList, isLoading: isLoadingInstansi } = useIndexInstance();
 
@@ -24,25 +26,21 @@ export default function UserNewEditForm({ currentUser }) {
     onSuccess: () => {
       enqueueSnackbar('User created successfully', { variant: 'success' });
       reset();
-      refetch();
       router.push(paths.dashboard.user.list);
+      queryClient.invalidateQueries({ queryKey: ['list.instansi'] });
     },
     onError: (error) => {
-      console.log('API Error Response:', error); // Log the entire error response
-      console.log('Error Response Data:', error?.response?.data); // Log the error data for more context
-    
-      const emailErrors = error?.response?.data?.errors?.email;
-      console.log('Email Errors:', emailErrors); // Log the email errors
-    
-      if (emailErrors && emailErrors.length > 0) {
-        enqueueSnackbar(emailErrors[0], { variant: 'error' });
+      // Check if the error has the expected structure
+      if (error.errors && error.errors.email) {
+        // Set form error for the name field
+        methods.setError('email', {
+          type: 'manual',
+          message: error.errors.email[0], // "Instance name already exists."
+        });
       } else {
-        const message =
-          error.response?.status === 409 ? 'User already exists' : `Error: ${error.message}`;
-        enqueueSnackbar(message, { variant: 'error' });
+        enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
       }
     },
-    
   });
 
   const allowedDomains = [
@@ -111,12 +109,11 @@ export default function UserNewEditForm({ currentUser }) {
     console.log('Payload:', payload); // Add this line to log the payload
     CreateUser(payload);
   };
-  
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
-        <Grid  xs={12}>
+        <Grid xs={12}>
           <Card sx={{ p: 3 }}>
             <Box
               rowGap={3}

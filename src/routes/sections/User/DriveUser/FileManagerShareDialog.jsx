@@ -16,6 +16,7 @@ import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import FileManagerInvitedItem from './FileManagerInvitedItem';
 import { useSearchUser, usePermissionsFile } from './view/FetchDriveUser';
+import { useSnackbar } from 'notistack'; // Import useSnackbar
 
 export default function FileManagerShareDialog({
   shared,
@@ -37,6 +38,8 @@ export default function FileManagerShareDialog({
 
   const { refetch: searchUsers, isLoading } = useSearchUser({ email: debouncedSearchTerm });
   const { mutate: setPermissions } = usePermissionsFile();
+
+  const { enqueueSnackbar } = useSnackbar(); // Initialize useSnackbar
 
   const permissionsOptions = {
     view: 'read',
@@ -80,15 +83,27 @@ export default function FileManagerShareDialog({
   };
 
   const handleSendInvite = () => {
-    if (selectedUser && fileId) {
-      setPermissions({
-        user_id: selectedUser.id,
-        permissions: permissionsOptions[permissions],
-        file_id: fileId,
-      });
+    if (selectedUser && selectedUser.id && fileId) {
+      setPermissions(
+        {
+          user_id: selectedUser.id,
+          permissions: permissionsOptions[permissions],
+          file_id: fileId,
+        },
+        {
+          onSuccess: () => {
+            enqueueSnackbar('Invite sent successfully!', { variant: 'success' }); // Show success notification
+          },
+          onError: (error) => {
+            enqueueSnackbar(`Failed to send invite: ${error.message}`, { variant: 'error' }); // Show error notification
+          },
+        }
+      );
       setInputSearch(''); // Clear search input after invite
       setSearchResults([]); // Clear search results after invite
       setSelectedUser(null); // Clear selected user after invite
+    } else {
+      enqueueSnackbar('User ID or file ID is missing.', { variant: 'warning' }); // Show warning notification
     }
   };
 

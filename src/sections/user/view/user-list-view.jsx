@@ -32,6 +32,7 @@ import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 import { useBoolean } from 'src/hooks/use-boolean';
 import debounce from 'lodash/debounce';
+import { useIndexInstance } from 'src/sections/instancepages/view/Instance';
 
 const TABLE_HEAD = [
   { id: 'name', label: 'Name', width: 180 },
@@ -41,22 +42,34 @@ const TABLE_HEAD = [
   { id: 'action', label: 'Action', width: 120 },
 ];
 
-const DEBOUNCE_DELAY = 1500; // Adjust the delay as needed
+const DEBOUNCE_DELAY = 1500;
+
+const defaultFilters = {
+  name: '',
+  role: [],
+  instances: [],
+};
+
+// Define allowed roles explicitly
+const allowedRoles = ['user', 'admin'];
 
 export default function UserListView() {
   const table = useTable();
   const settings = useSettingsContext();
   const confirm = useBoolean();
-  const [filters, setFilters] = useState({ search: '' });
-  const [searchTerm, setSearchTerm] = useState(filters.search);
+  const [filters, setFilters] = useState(defaultFilters);
+  const [searchTerm, setSearchTerm] = useState(filters.name);
 
+  const { data: Instansi } = useIndexInstance();
   const { data, isLoading, refetch, isFetching } = useIndexUser(filters);
+  const roleOptions = allowedRoles;
+  const instanceOptions = Instansi?.data || [];
 
   const debouncedSearch = useCallback(
     debounce((query) => {
       setFilters((prev) => ({
         ...prev,
-        search: query,
+        name: query,
       }));
     }, DEBOUNCE_DELAY),
     []
@@ -77,6 +90,7 @@ export default function UserListView() {
     }));
   };
 
+  // Apply filters to the user data
   const dataFiltered = applyFilter({
     inputData: tableData,
     comparator: getComparator(table.order, table.orderBy),
@@ -94,17 +108,30 @@ export default function UserListView() {
   const { mutate: deleteUser } = useDeleteUser({
     onSuccess: () => {
       refetch();
-      enqueueSnackbar('User berhasil dihapus', { variant: 'success' });
       confirm.onFalse();
     },
     onError: (error) => console.error(`Failed to delete user: ${error.message}`),
   });
 
   const handleDeleteRow = useCallback((ids) => deleteUser(ids), [deleteUser]);
-  const handleEditRow = useCallback((id) => {
-    // Implement edit functionality here, e.g., redirect to edit page
-    console.log(`Edit user with ID: ${id}`);
-  }, []);
+
+  useEffect(() => {
+    refetch();
+  }, [filters]);
+
+  const handleFilterRole = (selectedRoles) => {
+    setFilters((prev) => ({
+      ...prev,
+      role: selectedRoles,
+    }));
+  };
+
+  const handleFilterInstances = (selectedInstances) => {
+    setFilters((prev) => ({
+      ...prev,
+      instances: selectedInstances,
+    }));
+  };
 
   return (
     <>
@@ -135,6 +162,8 @@ export default function UserListView() {
             onFilters={handleFilters}
             onSearchChange={handleSearchChange}
             searchTerm={searchTerm}
+            roleOptions={roleOptions}
+            instanceOptions={instanceOptions}
           />
 
           <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
@@ -145,10 +174,7 @@ export default function UserListView() {
               numSelected={table.selected.length}
               rowCount={tableData.length}
               onSelectAllRows={(checked) =>
-                table.onSelectAllRows(
-                  checked,
-                  tableData.map((row) => row.id)
-                )
+                table.onSelectAllRows(checked, tableData.map((row) => row.id))
               }
               action={
                 <Tooltip title="Delete">
@@ -169,10 +195,7 @@ export default function UserListView() {
                   numSelected={table.selected.length}
                   onSort={table.onSort}
                   onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(
-                      checked,
-                      tableData.map((row) => row.id)
-                    )
+                    table.onSelectAllRows(checked, tableData.map((row) => row.id))
                   }
                 />
 
@@ -184,8 +207,6 @@ export default function UserListView() {
                       selected={table.selected.includes(row.id)}
                       onSelectRow={() => table.onSelectRow(row.id)}
                       onDeleteRow={() => handleDeleteRow([row.id])}
-                      onEditRow={() => handleEditRow(row.id)}
-                      refetch={refetch} // Pass refetch here
                     />
                   ))}
 
@@ -217,9 +238,9 @@ export default function UserListView() {
         onClose={confirm.onFalse}
         title="Delete"
         content={
-          <>
+          <div>
             Are you sure you want to delete <strong>{table.selected.length}</strong> items?
-          </>
+          </div>
         }
         action={
           <Button
@@ -238,8 +259,8 @@ export default function UserListView() {
   );
 }
 
-function applyFilter({ inputData, comparator, filters = {} }) {
-  const { search } = filters;
+function applyFilter({  inputData, comparator, filters = {} }) {
+  const { search, role, instances } = filters;
 
   if (!Array.isArray(inputData)) {
     console.error('Expected inputData to be an array but received:', inputData);
@@ -249,12 +270,24 @@ function applyFilter({ inputData, comparator, filters = {} }) {
   let filteredData = [...inputData];
   filteredData = filteredData.sort((a, b) => comparator(a, b));
 
+
+  // Filter by name
   if (search) {
     filteredData = filteredData.filter(
       (user) =>
         user?.name?.toLowerCase().includes(search.toLowerCase()) ||
         user?.email?.toLowerCase().includes(search.toLowerCase())
     );
+  }
+
+  // Filter by role if selected
+  if (role.length > 0) {
+    filteredData = filteredData.filter((user) => role.includes(user.role));
+  }
+
+  // Filter by instances if selected
+  if (instances.length > 0) {
+    filteredData = filteredData.filter((user) => instances.includes(user.instance));
   }
 
   return filteredData;

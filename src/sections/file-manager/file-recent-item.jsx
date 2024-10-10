@@ -20,6 +20,8 @@ import TextField from '@mui/material/TextField';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
+import { useDownloadFile, useChangeNameFile, useMutationDeleteFiles } from './view/folderDetail';
+import { useAddFavorite, useRemoveFavorite } from './view/favoritemutation';
 // utils
 import { fData } from 'src/utils/format-number';
 import { fDateTime } from 'src/utils/format-time';
@@ -30,8 +32,9 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import FileThumbnail from 'src/components/file-thumbnail';
 import FileManagerShareDialog from './file-manager-share-dialog';
 import FileManagerFileDetails from './file-manager-file-details';
-import { useDownloadFile, useChangeNameFile, useMutationDeleteFiles } from './view/folderDetail';
+
 import { Button } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
 
 // ----------------------------------------------------------------------
 
@@ -47,7 +50,7 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
   const details = useBoolean();
   const favorite = useBoolean(file.isFavorited);
   const [originalFileType, setOriginalFileType] = useState(file.type);
-
+  const useClient = useQueryClient();
   const { mutateAsync: updateNameFile } = useChangeNameFile();
   const { mutateAsync: downloadFile } = useDownloadFile();
   const { mutateAsync: deleteFile } = useMutationDeleteFiles();
@@ -69,8 +72,8 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
       // Notify user of successful deletion
       enqueueSnackbar('File deleted successfully!', { variant: 'success' });
 
-      // Refetch to update the file list
-      onRefetch();
+      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      useClient.invalidateQueries({ queryKey: ['detail-folder'] });
     } catch (error) {
       enqueueSnackbar('Failed to delete file!', { variant: 'error' });
     }
@@ -87,7 +90,8 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
     try {
       await updateNameFile({ fileId: file.id, data: { name: newFileName } });
       enqueueSnackbar('File name updated successfully!', { variant: 'success' });
-      onRefetch(); // Call to re-fetch the file data
+      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      useClient.invalidateQueries({ queryKey: ['detail-folder'] });
       edit.onFalse(); // Close the edit dialog
     } catch (error) {
       enqueueSnackbar('Failed to update file name!', { variant: 'error' });
@@ -136,6 +140,40 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
     }
   }, [downloadFile, file, enqueueSnackbar]);
 
+  // Inside your FileRecentItem component
+  const { mutateAsync: addFavorite } = useAddFavorite();
+  const { mutateAsync: removeFavorite } = useRemoveFavorite();
+
+  // Function to handle the favorite toggle
+  // Function to handle the favorite toggle
+  const handleFavoriteToggle = useCallback(async () => {
+    if (!file.id) {
+      enqueueSnackbar('File ID is required to toggle favorite status!', { variant: 'error' });
+      return;
+    }
+
+    const payload = { file_id: file.id };
+
+    try {
+      if (favorite.value) {
+        await removeFavorite(payload);
+        enqueueSnackbar('File removed from favorites!', { variant: 'success' });
+      } else {
+        await addFavorite(payload);
+        enqueueSnackbar('File added to favorites!', { variant: 'success' });
+      }
+
+      // Immediately toggle favorite state in the UI
+      favorite.onToggle();
+
+      // Refetch queries to get updated data
+      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      useClient.invalidateQueries({ queryKey: ['detail-folder'] });
+    } catch (error) {
+      enqueueSnackbar('Failed to update favorite status!', { variant: 'error' });
+    }
+  }, [favorite.value, file.id, addFavorite, removeFavorite, enqueueSnackbar, useClient]);
+
   const renderAction = (
     <Box
       sx={{
@@ -152,10 +190,11 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
         color="warning"
         icon={<Iconify icon="eva:star-outline" />}
         checkedIcon={<Iconify icon="eva:star-fill" />}
-        checked={favorite.value}
-        onChange={favorite.onToggle}
+        checked={favorite.value} // This should change based on favorite status
+        onChange={handleFavoriteToggle}
       />
-      <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
+
+      <IconButton color="default">
         <Iconify icon="eva:more-vertical-fill" />
       </IconButton>
     </Box>

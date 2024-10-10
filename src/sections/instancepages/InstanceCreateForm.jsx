@@ -12,19 +12,30 @@ import { useCreateInstance } from './view/Instance'; // Pastikan hook ini sudah 
 import { Button } from '@mui/material';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function InstanceCreateForm() {
   const { enqueueSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
   const router = useRouter();
   const { mutate: CreateInstance, isPending } = useCreateInstance({
     onSuccess: () => {
       enqueueSnackbar('Instansi berhasil dibuat', { variant: 'success' });
       reset();
-      refetch();
-      router.push(returnTo || paths.dashboard.instance.list);
+      router.push(paths.dashboard.instance.list);
+      queryClient.invalidateQueries({ queryKey: ['list.instansi'] });
     },
     onError: (error) => {
-      enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
+      // Check if the error has the expected structure
+      if (error.errors && error.errors.name) {
+        // Set form error for the name field
+        methods.setError('name', {
+          type: 'manual',
+          message: error.errors.name[0], // "Instance name already exists."
+        });
+      } else {
+        enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
+      }
     },
   });
 

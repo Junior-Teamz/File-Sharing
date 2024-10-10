@@ -23,10 +23,16 @@ import Scrollbar from 'src/components/scrollbar';
 import FileThumbnail, { fileFormat } from 'src/components/file-thumbnail';
 import FileManagerShareDialog from './file-manager-share-dialog';
 import FileManagerInvitedItem from './file-manager-invited-item';
-import { useAddFileTag, useRemoveTagFile, useMutationDeleteFiles } from './view/folderDetail/index';
+import {
+  useAddFileTag,
+  useRemoveTagFile,
+  useMutationDeleteFiles,
+  usePreviewImage,
+} from './view/folderDetail/index';
 import { useIndexTag } from '../tag/view/TagMutation';
 import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { useAddFavorite, useRemoveFavorite } from './view/favoritemutation';
 
 // ----------------------------------------------------------------------
 
@@ -54,7 +60,16 @@ export default function FIleManagerFileDetails({
     instance,
     tags: initialTags,
     updated_at,
+    isFavorited,
   } = item;
+
+  // Only fetch preview if fileId is available
+  const { data: preview, isLoading: loadingPreview, isError: errorPreview } = usePreviewImage(id);
+  const isFolder = item.type === 'folder';
+
+  // Inside your FileRecentItem component
+  const { mutateAsync: addFavorite } = useAddFavorite();
+  const { mutateAsync: removeFavorite } = useRemoveFavorite();
 
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
@@ -66,6 +81,7 @@ export default function FIleManagerFileDetails({
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
 
   const [inviteEmail, setInviteEmail] = useState('');
+  const favorite = useBoolean(isFavorited); // Set initial value from props
 
   const { data: tagData, isLoading, isError } = useIndexTag();
   const addTagFile = useAddFileTag();
@@ -79,7 +95,6 @@ export default function FIleManagerFileDetails({
       console.error('Error fetching tag data:', isError);
     }
   }, [tagData, isLoading, isError]);
-  
 
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value);
@@ -184,7 +199,29 @@ export default function FIleManagerFileDetails({
       });
   };
 
-  console.log('Image URL:', image_url);
+  const handleFavoriteToggle = useCallback(async () => {
+    if (!id) {
+      enqueueSnackbar('File ID is required to toggle favorite status!', { variant: 'error' });
+      return;
+    }
+
+    const payload = { file_id: id };
+
+    try {
+      if (favorite.value) {
+        await removeFavorite(payload);
+        enqueueSnackbar('File removed from favorites!', { variant: 'success' });
+      } else {
+        await addFavorite(payload);
+        enqueueSnackbar('File added to favorites!', { variant: 'success' });
+      }
+
+      // Toggle favorite state in the UI
+      favorite.onToggle();
+    } catch (error) {
+      enqueueSnackbar('Failed to update favorite status!', { variant: 'error' });
+    }
+  }, [favorite.value, id, addFavorite, removeFavorite, enqueueSnackbar]);
 
   const renderTags = (
     <Stack spacing={1.5}>
@@ -330,8 +367,8 @@ export default function FIleManagerFileDetails({
             color="warning"
             icon={<Iconify icon="eva:star-outline" />}
             checkedIcon={<Iconify icon="eva:star-fill" />}
-            checked={favorited}
-            onChange={onFavorite}
+            checked={favorite.value}
+            onChange={handleFavoriteToggle} // Toggle favorite state
           />
         </Stack>
 
@@ -343,12 +380,28 @@ export default function FIleManagerFileDetails({
             bgcolor: 'background.neutral',
           }}
         >
-          {/* Uncomment and use for displaying file thumbnail if needed */}
-          <img
-            src={image_url}
-            alt={name}
-            style={{ height: 96, width: 96, borderRadius: '12px', objectFit: 'cover' }} // Adjust style as needed
-          />
+          {isFolder ? (
+            <Box
+              sx={{
+                width: 50,
+                height: 40,
+                flexShrink: 0,
+                objectFit: 'cover',
+              }}
+              component="img"
+              src="/assets/icons/files/ic_folder.svg"
+              alt="Folder Icon"
+            />
+          ) : loadingPreview ? (
+            // Show loading text while the preview is loading
+            <Typography>Loading preview...</Typography>
+          ) : errorPreview ? (
+            // Show error message if there was an error loading the preview
+            <Typography>Error loading preview.</Typography>
+          ) : (
+            // Show image preview if the item is a file
+            <img src={preview} alt={item.name} style={{ maxWidth: '100%', height: 'auto' }} />
+          )}
 
           <Typography variant="subtitle2">{name}</Typography>
           <Typography variant="body2" color="text.secondary">

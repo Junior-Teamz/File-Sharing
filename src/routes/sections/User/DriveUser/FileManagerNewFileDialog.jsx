@@ -22,6 +22,7 @@ import { enqueueSnackbar } from 'notistack';
 import { useForm } from 'react-hook-form';
 import { useMutationUploadFiles } from './view/FetchDriveUser/useMutationUploadFiles';
 import { useIndexTag } from './view/TagUser/useIndexTag';
+import { useQueryClient } from '@tanstack/react-query';
 
 // ----------------------------------------------------------------------
 
@@ -38,6 +39,7 @@ export default function FileManagerNewFileDialog({
   ...other
 }) {
   const [files, setFiles] = useState([]);
+  const useClient = useQueryClient();
   const { register, handleSubmit, reset, setValue } = useForm();
   const { data, isLoading: isLoadingTags } = useIndexTag(); // Use useIndexTag
   const tagsData = data?.data || []; // Ensure data is accessed properly
@@ -65,8 +67,8 @@ export default function FileManagerNewFileDialog({
       enqueueSnackbar('Files Uploaded Successfully');
       handleRemoveAllFiles();
       reset(); // Reset form after successful upload
-      refetch(); // Trigger refetch after successful upload
       onClose(); // Close dialog after successful upload
+      useClient.invalidateQueries({queryKey: ['fetch.folder']})
     },
     onError: (error) => {
       enqueueSnackbar(error.message, { variant: 'error' });
@@ -214,10 +216,12 @@ FileManagerNewFileDialog.propTypes = {
   title: PropTypes.string,
   refetch: PropTypes.func, // Ensure refetch is passed as a function
   onTagChange: PropTypes.func.isRequired,
-  tagsData: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-  })),
+  tagsData: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+    })
+  ),
   selectedTags: PropTypes.arrayOf(PropTypes.string),
   isLoadingTags: PropTypes.bool,
 };

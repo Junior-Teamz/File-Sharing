@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
-export const useCreateTag = ({ onSuccess }) => {
+export const useCreateTag = ({ onSuccess, onError }) => {
   return useMutation({
     mutationKey: ['create.tag'],
     mutationFn: async (data) => {
@@ -9,5 +9,6 @@ export const useCreateTag = ({ onSuccess }) => {
       return response;
     },
     onSuccess,
+    onError
   });
 };

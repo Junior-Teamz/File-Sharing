@@ -57,6 +57,7 @@ export default function FileManagerTable({
     onSort,
     onChangeDense,
     onChangePage,
+    id,
     onChangeRowsPerPage,
   } = table;
 
@@ -165,6 +166,7 @@ export default function FileManagerTable({
                 <FileManagerTableRow
                   key={row.id}
                   row={row}
+                  fileId={id || undefined} // fileId is optional here
                   selected={selected.includes(row.id)}
                   onSelectRow={() => handleSelectRow(row.id)}
                   onDeleteRow={() => handleDeleteRow(row.id)}

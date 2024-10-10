@@ -614,7 +614,7 @@ export default function OverviewAppView() {
           <Stack spacing={2}>
             {files.length === 0 && (
               <>
-                <EmptyContent filled title="Files Kosong" sx={{ py: 10 }} />
+                <EmptyContent filled title="File Kosong" sx={{ py: 10 }} />
               </>
             )}
             {files?.map((file) => (

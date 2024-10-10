@@ -1,6 +1,5 @@
 export * from './useFetchDetail';
 export * from './useMutationAddTag'; //create tag
-export * from './useMutationDeleteTag'; //delete tag
 export * from './useMutationDeleteFiles'; //delete file
 export * from './useRemoveTagFile'; //remove file
 export * from './useAddFileTag'; //add tag

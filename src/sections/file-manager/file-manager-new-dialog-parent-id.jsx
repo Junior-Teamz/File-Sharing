@@ -17,6 +17,7 @@ import { Upload } from 'src/components/upload';
 import { enqueueSnackbar } from 'notistack';
 import { useMutationUploadFilesId } from './view/folderDetail/useMutationUploadFilesId';
 import { useIndexTag } from 'src/sections/tag/view/TagMutation';
+import { QueryClient, useQueryClient } from '@tanstack/react-query';
 
 export default function FileManagerNewDialogParent({
   title,
@@ -34,6 +35,7 @@ export default function FileManagerNewDialogParent({
 }) {
   const [files, setFiles] = useState([]);
   const [tagsData, setTagsData] = useState([]);
+  const useClient = useQueryClient();
 
   // Fetch tags using useIndexTag hook
   const { data: tags = {}, isLoading: isLoadingTags, error: tagsError } = useIndexTag();
@@ -66,7 +68,8 @@ export default function FileManagerNewDialogParent({
       enqueueSnackbar('Files Uploaded Successfully');
       handleRemoveAllFiles();
       onClose();
-      refetch?.();
+      useClient.invalidateQueries({ queryKey: ['detail-folder'] });
+      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
     },
     onError: (error) => {
       enqueueSnackbar(error.message, { variant: 'error' });
@@ -78,22 +81,22 @@ export default function FileManagerNewDialogParent({
       enqueueSnackbar('Please select files to upload', { variant: 'warning' });
       return;
     }
-  
+
     const formData = new FormData();
     formData.append('folder_id', id);
-  
+
     files.forEach((file) => {
       formData.append('file[]', file);
     });
-  
+
     // Append the tag IDs using 'tag_ids' instead of 'tags[]'
     selectedTags.forEach((tagId) => {
       formData.append('tag_ids[]', tagId); // Change 'tags[]' to 'tag_ids[]'
     });
-  
+
     uploadFiles(formData);
   };
-  
+
   const handleRemoveFile = (inputFile) => {
     setFiles((prevFiles) => prevFiles.filter((file) => file !== inputFile));
   };
@@ -105,9 +108,9 @@ export default function FileManagerNewDialogParent({
   const handleTagChange = (event) => {
     // Extract the selected tag IDs from the event
     const value = event.target.value;
-  
+
     console.log('Selected Tags Value:', value);
-  
+
     // Update the parent component or state with selected tag IDs
     if (Array.isArray(value)) {
       onTagChange(value); // Pass the tag IDs to the parent
@@ -115,7 +118,6 @@ export default function FileManagerNewDialogParent({
       console.error('Unexpected value type:', value);
     }
   };
-  
 
   useEffect(() => {
     console.log('Current selectedTags:', selectedTags);

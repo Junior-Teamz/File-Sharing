@@ -5,25 +5,34 @@ export const usePreviewImage = (id) => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['preview-image', id],
     queryFn: async () => {
-      const token = sessionStorage.getItem('accessToken');
+      try {
+        // Set the responseType to 'blob' to handle binary data
+        const response = await axiosInstance.get(`${endpoints.previewImage.preview}${id}`, {
+          responseType: 'blob',
+        });
 
-      // Send GET request with headers
-      const response = await axiosInstance.get(`${endpoints.files.preview}${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`, // Send the token from sessionStorage
-          Accept: 'image/*', // Add an 'Accept' header for images
-        },
-        responseType: 'blob', // Set response type to 'blob' for image data
-      });
+        // Log the full response to check its structure
+        console.log('Preview image response:', response);
 
-      // Convert blob to URL for preview
-      const imageBlob = response.data;
-      return URL.createObjectURL(imageBlob); // Return the image as a URL for preview
+        // Check if we received the blob
+        if (response?.data) {
+          // Convert the blob into an object URL
+          const imageURL = URL.createObjectURL(response.data);
+          return imageURL; // Return the image URL
+        } else {
+          throw new Error('No data found in the response');
+        }
+      } catch (error) {
+        console.error('Error fetching preview image:', error); // Log error for debugging
+        throw error;
+      }
     },
+    enabled: !!id,
+    initialData: null,
   });
 
   return {
-    data,
+    data,  // This will be the image URL
     isLoading,
     refetch,
   };

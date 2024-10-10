@@ -34,6 +34,7 @@ import { useSnackbar } from 'notistack';
 import CustomPopover from 'src/components/custom-popover';
 import { useForm } from 'react-hook-form';
 import { useFetchTagNews, useDeleteTagNews, useUpdateTagNews } from './fetchNewsTag';
+import EmptyContent from 'src/components/empty-content';
 
 export default function TagNewsListView() {
   const settings = useSettingsContext();
@@ -71,8 +72,6 @@ export default function TagNewsListView() {
 
   const tags = Array.isArray(data?.data) ? data?.data : [];
   console.log('Tags array:', tags);
-  
-
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -179,6 +178,14 @@ export default function TagNewsListView() {
         <CircularProgress />
       ) : isError ? (
         <Typography color="error">Gagal memuat data</Typography>
+      ) : tags.length === 0 ? (
+        <EmptyContent
+          filled
+          title="Tidak ada tag berita"
+          sx={{
+            py: 10,
+          }}
+        />
       ) : (
         <>
           <Toolbar>
@@ -248,11 +255,7 @@ export default function TagNewsListView() {
         </>
       )}
 
-      <CustomPopover
-        open={popover.open}
-        anchorEl={popover.anchorEl}
-        onClose={handlePopoverClose}
-      >
+      <CustomPopover open={popover.open} anchorEl={popover.anchorEl} onClose={handlePopoverClose}>
         <MenuItem onClick={() => handleEdit(popover.currentId)}>
           <Iconify icon="eva:edit-fill" />
           Edit
@@ -266,25 +269,22 @@ export default function TagNewsListView() {
       <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
         <DialogTitle>Edit Tag</DialogTitle>
         <DialogContent>
-          <DialogContentText>Edit the tag's name below.</DialogContentText>
-          <form onSubmit={handleSubmit(handleEditSubmit)}>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="name"
-              label="Name"
-              fullWidth
-              variant="outlined"
-              {...register('name')}
-            />
-            <DialogActions>
-              <Button onClick={handleEditDialogClose}>Cancel</Button>
-              <Button type="submit" color="primary">
-                {loadingEdit ? <CircularProgress size={24} /> : 'Save'}
-              </Button>
-            </DialogActions>
-          </form>
+          <DialogContentText>Edit the tag name below:</DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            label="Tag Name"
+            type="text"
+            fullWidth
+            variant="standard"
+            {...register('name')}
+          />
         </DialogContent>
+        <DialogActions>
+          <Button onClick={handleEditDialogClose}>Cancel</Button>
+          <Button onClick={handleSubmit(handleEditSubmit)}>Save</Button>
+        </DialogActions>
       </Dialog>
     </Container>
   );

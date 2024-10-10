@@ -19,5 +19,6 @@ export const useIndexTag = (filters) => {
     isLoading,
     refetch,
     isFetching,
+
   };
 };

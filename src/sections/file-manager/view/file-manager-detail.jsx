@@ -52,6 +52,7 @@ export const FIleManagerDetail = () => {
       enqueueSnackbar('Folder successfully created.', { variant: 'success' });
       refetch();
       handleCloseCreateFolderDialog();
+      
     },
     onError: (error) => {
       console.error('Error creating folder:', error);
@@ -77,6 +78,7 @@ export const FIleManagerDetail = () => {
     };
 
     console.log('Folder Data to be sent:', folderData);
+
 
     createFolder(folderData);
   };
@@ -108,15 +110,6 @@ export const FIleManagerDetail = () => {
     },
     [navigate, id, data]
   );
-
-  // Navigate back to previous folder
-  const handleBackClick = () => {
-    if (folderStack.length > 0) {
-      const previousFolderId = folderStack[folderStack.length - 1];
-      setFolderStack((prev) => prev.slice(0, -1)); // Remove last folder from stack
-      navigate(`/dashboard/file-manager/info/${previousFolderId}`, { replace: true });
-    }
-  };
 
   // Show folder ID when InfoIcon is clicked
   const handleInfoClick = () => {

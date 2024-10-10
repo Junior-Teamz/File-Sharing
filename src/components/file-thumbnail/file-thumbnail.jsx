@@ -9,10 +9,7 @@ import DownloadButton from './download-button';
 // ----------------------------------------------------------------------
 
 export default function FileThumbnail({ file, tooltip, imageView, onDownload, sx, imgSx }) {
-  console.log(file);
   const { name = '', path = '', preview = '' } = fileData(file);
-
-  console.log(preview);
 
   const format = fileFormat(path || preview);
 

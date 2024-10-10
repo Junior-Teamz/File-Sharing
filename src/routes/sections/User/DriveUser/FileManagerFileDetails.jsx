@@ -189,8 +189,6 @@ export default function FIleManagerFileDetails({
       });
   };
 
-  console.log('Image URL:', image_url);
-
   const renderTags = (
     <Stack spacing={1.5}>
       <Stack

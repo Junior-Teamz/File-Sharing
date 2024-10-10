@@ -28,6 +28,7 @@ import {
   Checkbox,
   Toolbar,
   Typography,
+  InputAdornment,
 } from '@mui/material';
 import { useState } from 'react';
 import { useIndexTag, useEditTag, useDeleteTag } from './TagMutation';
@@ -44,9 +45,10 @@ export default function TagListView() {
   const [popover, setPopover] = useState({ open: false, anchorEl: null, currentId: null });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedTags, setSelectedTags] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(''); // State for search input
 
   // Fetch tag data
-  const { data, isLoading, isFetching, refetch } = useIndexTag();
+  const { data, isLoading, isFetching, refetch, isError } = useIndexTag();
 
   const { mutate: deleteTag, isPending: loadingDelete } = useDeleteTag({
     onSuccess: () => {
@@ -70,6 +72,10 @@ export default function TagListView() {
   });
 
   const tags = data?.data || [];
+
+  const filteredTags = tags.filter((tag) =>
+    tag.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -151,10 +157,14 @@ export default function TagListView() {
     setSelectedTags([]);
   };
 
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
-        heading="List Tag"
+        heading="Daftar Tag"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
           { name: 'List Tag', href: paths.dashboard.tag.list },
@@ -172,8 +182,35 @@ export default function TagListView() {
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
+      <Toolbar>
+        <TextField
+          placeholder="Search Tags"
+          variant="outlined"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          sx={{ marginRight: 2 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Iconify icon="eva:search-fill" /> {/* Add search icon here */}
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Toolbar>
+
       {isLoading || isFetching ? (
         <CircularProgress />
+      ) : isError ? (
+        <Typography color="error">Gagal memuat data</Typography>
+      ) : tags.length === 0 ? (
+        <EmptyContent
+          filled
+          title="Tidak ada tag berita"
+          sx={{
+            py: 10,
+          }}
+        />
       ) : (
         <>
           <Toolbar>

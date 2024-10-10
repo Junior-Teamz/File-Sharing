@@ -45,8 +45,6 @@ export default function FileManagerView() {
 
   // console.log(data);
   const {FolderFiles} = handleFolderFiles()
-  
-  
 
   const settings = useSettingsContext();
 

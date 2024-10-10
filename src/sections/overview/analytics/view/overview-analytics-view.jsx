@@ -32,6 +32,8 @@ import {
   useChartTag,
   useChartUserInstances,
   useChartInstances,
+  useChartUsers,
+  useChartFile,
 } from './useFetchChart';
 
 // ----------------------------------------------------------------------
@@ -41,8 +43,14 @@ const GB = 1000000000 * 24;
 export default function OverviewAnalyticsView() {
   const settings = useSettingsContext();
 
+  const { data: Users } = useChartUsers();
+  console.log(Users);
+
   const { data, isFetching, isLoading, refetch } = useChartFolder();
   console.log(data);
+
+  const { data: File } = useChartFile();
+  console.log(File);
 
   const { data: AllInstances } = useChartInstances();
   console.log(AllInstances);
@@ -53,33 +61,69 @@ export default function OverviewAnalyticsView() {
   const { data: chartTag } = useChartTag();
   console.log(chartTag);
 
+  function convertToBytes(sizeString) {
+    if (!sizeString) return 0;
+
+    const size = parseFloat(sizeString);
+    if (sizeString.toLowerCase().includes('kb')) {
+      return size * 1024; // Convert KB to bytes
+    } else if (sizeString.toLowerCase().includes('mb')) {
+      return size * 1024 * 1024; // Convert MB to bytes
+    } else if (sizeString.toLowerCase().includes('gb')) {
+      return size * 1024 * 1024 * 1024; // Convert GB to bytes
+    }
+    return size; // Return size directly if it's already in bytes
+  }
+
+  function formatSize(bytes) {
+    if (bytes >= 1024 * 1024 * 1024) {
+      return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+    } else if (bytes >= 1024 * 1024) {
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    } else if (bytes >= 1024) {
+      return (bytes / 1024).toFixed(2) + ' KB';
+    } else {
+      return bytes + ' B';
+    }
+  }
+
+  // Convert file and folder sizes to bytes
+  const totalFileStorageBytes = convertToBytes(File?.data?.total_size || '0kb'); // Convert file size to bytes
+  const totalFolderStorageBytes = convertToBytes(data?.data?.formattedSize || '0kb'); // Convert folder size to bytes
+
+  // Calculate total storage in bytes
+  const totalStorageBytes = totalFileStorageBytes + totalFolderStorageBytes;
+
+  // Format the total storage size to KB, MB, or GB dynamically
+  const totalStorageFormatted = formatSize(totalStorageBytes);
+
   const renderStorageOverview = (
     <FileStorageOverview
-      total={GB}
+      total={totalStorageBytes} // Pass the total storage as a number
       chart={{
-        series: 76,
+        series: [totalStorageBytes], // Use byte values for accurate chart series
       }}
       data={[
+        // {
+        //   name: 'Images',
+        //   usedStorage: GB / 2,
+        //   filesCount: 223,
+        //   icon: <Box component="img" src="/assets/icons/files/ic_img.svg" />,
+        // },
+        // {
+        //   name: 'Media',
+        //   usedStorage: GB / 5,
+        //   filesCount: 223,
+        //   icon: <Box component="img" src="/assets/icons/files/ic_video.svg" />,
+        // },
         {
-          name: 'Images',
-          usedStorage: GB / 2,
-          filesCount: 223,
-          icon: <Box component="img" src="/assets/icons/files/ic_img.svg" />,
-        },
-        {
-          name: 'Media',
-          usedStorage: GB / 5,
-          filesCount: 223,
-          icon: <Box component="img" src="/assets/icons/files/ic_video.svg" />,
-        },
-        {
-          name: 'Documents',
-          usedStorage: GB / 5,
-          filesCount: 223,
+          name: 'All File',
+          usedStorage: File?.data?.total_size || '0kb',
+          filesCount: File?.data?.total_file,
           icon: <Box component="img" src="/assets/icons/files/ic_document.svg" />,
         },
         {
-          name: 'Folder',
+          name: 'All Folder',
           usedStorage: data.data?.formattedSize || '0kb', // Dynamically set folder storage from useChartFolder response
           filesCount: 223,
           icon: <Box component="img" src="/assets/icons/files/ic_folder.svg" />,
@@ -100,11 +144,14 @@ export default function OverviewAnalyticsView() {
       </Typography>
 
       <Grid container spacing={3}>
-
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
             title="All Users"
-            total={1352831}
+            total={
+              Users?.total_user_count !== undefined && Users?.total_user_count !== null
+                ? Users.total_user_count
+                : 0
+            }
             color="info"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_users.png" />}
           />
@@ -113,7 +160,11 @@ export default function OverviewAnalyticsView() {
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
             title="Total Instansi"
-            total={AllInstances?.instance_count}
+            total={
+              AllInstances?.instance_count !== undefined && AllInstances?.instance_count !== null
+                ? AllInstances.instance_count
+                : 0
+            }
             color="warning"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_company.png" />}
           />
@@ -122,7 +173,11 @@ export default function OverviewAnalyticsView() {
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
             title="Admin"
-            total={234}
+            total={
+              Users?.admin_role_count !== undefined && Users?.admin_role_count !== null
+                ? Users.admin_role_count
+                : 0
+            }
             color="error"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_admin.png" />}
           />
@@ -131,7 +186,11 @@ export default function OverviewAnalyticsView() {
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
             title="User"
-            total={234}
+            total={
+              Users?.user_role_count !== undefined && Users?.user_role_count !== null
+                ? Users.user_role_count
+                : 0
+            }
             color="error"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_user.png" />}
           />
@@ -145,22 +204,34 @@ export default function OverviewAnalyticsView() {
               labels: Instances?.data?.map((item) => item.name) || [], // Mengambil nama instansi
               series: [
                 {
-                  name: 'Total Users',
+                  name: 'Total All User',
                   type: 'column',
-                  fill: 'solid',
-                  data: Instances?.data?.map((item) => item.user_total) || [], // Total user
+                  fill: 'solid', // Fill solid untuk total semua pengguna
+                  data: Instances?.data?.map((item) => item.user_count.user_total) || [],
                 },
                 {
-                  name: 'Total Files',
+                  name: 'Total Role Admin ',
+                  type: 'column',
+                  fill: 'gradient', // Fill gradient untuk total pengguna admin
+                  data: Instances?.data?.map((item) => item.user_count.role_admin_total) || [],
+                },
+                {
+                  name: 'Total Role User',
+                  type: 'column',
+                  fill: 'solid', // Fill solid untuk total pengguna reguler
+                  data: Instances?.data?.map((item) => item.user_count.role_user_total) || [],
+                },
+                {
+                  name: 'Total File',
                   type: 'area',
-                  fill: 'gradient',
-                  data: Instances?.data?.map((item) => item.file_total) || [], // Total file
+                  fill: 'gradient', // Fill gradient untuk total file
+                  data: Instances?.data?.map((item) => item.file_total) || [],
                 },
                 {
-                  name: 'Total Folders',
+                  name: 'Total Folder',
                   type: 'line',
-                  fill: 'solid',
-                  data: Instances?.data?.map((item) => item.folder_total) || [], // Total folder
+                  fill: 'solid', // Fill solid untuk total folder
+                  data: Instances?.data?.map((item) => item.folder_total) || [],
                 },
               ],
             }}
@@ -173,14 +244,24 @@ export default function OverviewAnalyticsView() {
 
         <Grid xs={12} md={6} lg={8}>
           <AnalyticsConversionRates
-            title="Tag paling banyak di pakai"
-            subheader="(+43%) than last year"
+            title="Statistik Tag"
+            subheader="Data Tag paling banyak dipakai dan total file, folder di dalam tag"
             chart={{
-              series:
-                chartTag?.data?.map((tag) => ({
-                  label: tag.name,
-                  value: tag.usage_count,
-                })) || [],
+              series: [
+                {
+                  name: 'Total Pengguna',
+                  data: chartTag?.data?.map((tag) => tag?.total_usage_count) || [],
+                },
+                {
+                  name: 'Total File',
+                  data: chartTag?.data?.map((tag) => tag?.file_usage_count) || [],
+                },
+                {
+                  name: 'Total Folder',
+                  data: chartTag?.data?.map((tag) => tag?.folder_usage_count) || [],
+                },
+              ],
+              labels: chartTag?.data?.map((tag) => tag?.name) || [],
             }}
           />
         </Grid>

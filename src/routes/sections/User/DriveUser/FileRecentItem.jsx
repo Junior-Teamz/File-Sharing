@@ -32,6 +32,7 @@ import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerFileDetails from './FileManagerFileDetails';
 import { useDownloadFile, useChangeNameFile } from './view/folderDetail';
 import { Button } from '@mui/material';
+import { useRemoveFavoriteUser, useAddFavoriteUser } from './view/FetchFolderUser';
 
 // ----------------------------------------------------------------------
 
@@ -56,7 +57,6 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
     setOriginalFileType(file.type);
   }, [file]);
 
-
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value);
   }, []);
@@ -80,7 +80,7 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
   }, [file.id, newFileName, originalFileType, updateNameFile, enqueueSnackbar, edit, onRefetch]);
 
   const handleCopy = useCallback(() => {
-    console.log(file.id)
+    console.log(file.id);
     if (file?.id) {
       enqueueSnackbar('Berhasil di Copied!');
       copy(file.id); // Mengakses file.id langsung, tanpa [0] karena file bukan array
@@ -89,8 +89,57 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
     }
   }, [copy, enqueueSnackbar, file.id]);
 
+  const { mutateAsync: addFavorite } = useAddFavoriteUser();
+  const { mutateAsync: removeFavorite } = useRemoveFavoriteUser();
 
-  
+  // Function to handle the favorite toggle
+  const handleFavoriteToggle = useCallback(async () => {
+    if (!file.id) {
+      enqueueSnackbar('File ID is required to toggle favorite status!', { variant: 'error' });
+      return; // Early return if file.id is not valid
+    }
+
+    const payload = { file_id: file.id }; // Create a payload with the required structure
+    console.log('Payload:', payload); // Log the payload for debugging
+
+    try {
+      if (favorite.value) {
+        // If currently favorited, call removeFavorite
+        console.log('Removing favorite with payload:', payload); // Log the payload for removal
+        await removeFavorite(payload, {
+          // Pass the entire payload object
+          onSuccess: () => {
+            enqueueSnackbar('File removed from favorites!', { variant: 'success' });
+          },
+          onError: () => {
+            enqueueSnackbar('Failed to remove from favorites!', { variant: 'error' });
+          },
+        });
+      } else {
+        // If not favorited, call addFavorite
+        console.log('Adding favorite with payload:', payload); // Log the payload for addition
+        await addFavorite(payload, {
+          // Pass the entire payload object
+          onSuccess: () => {
+            enqueueSnackbar('File added to favorites!', { variant: 'success' });
+          },
+          onError: () => {
+            enqueueSnackbar('Failed to add to favorites!', { variant: 'error' });
+          },
+        });
+      }
+
+      // Toggle the favorite state
+      favorite.onToggle();
+
+      // Optionally refetch any relevant queries
+      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      useClient.invalidateQueries({ queryKey: ['detail-folder'] });
+    } catch (error) {
+      console.error('Error updating favorite status:', error); // Log the error
+      enqueueSnackbar('Failed to update favorite status!', { variant: 'error' });
+    }
+  }, [favorite.value, file.id, removeFavorite, addFavorite, enqueueSnackbar, useClient]);
 
   // const handle = useCallback(() => {
   //   enqueueSnackbar('Link copied!');
@@ -101,10 +150,10 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
     try {
       const idsToDownload = Array.isArray(file.ids) && file.ids.length ? file.ids : [file.id];
       console.log('IDs to Download:', idsToDownload);
-  
+
       // Send the correct payload to the API
       const response = await downloadFile(idsToDownload);
-  
+
       if (response.data) {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
@@ -123,7 +172,6 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
       enqueueSnackbar(errorMessage, { variant: 'error' });
     }
   }, [downloadFile, file, enqueueSnackbar]);
-  
 
   const renderAction = (
     <Box
@@ -142,7 +190,7 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
         icon={<Iconify icon="eva:star-outline" />}
         checkedIcon={<Iconify icon="eva:star-fill" />}
         checked={favorite.value}
-        onChange={favorite.onToggle}
+        onChange={handleFavoriteToggle} // Update here to call handleFavoriteToggle
       />
       <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
         <Iconify icon="eva:more-vertical-fill" />

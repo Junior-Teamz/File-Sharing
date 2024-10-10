@@ -19,6 +19,7 @@ import AvatarGroup, { avatarGroupClasses } from '@mui/material/AvatarGroup';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useDoubleClick } from 'src/hooks/use-double-click';
 import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
+import { useRemoveFavoriteUser, useAddFavoriteUser } from './view/FetchFolderUser';
 // utils
 import { fData } from 'src/utils/format-number';
 // components
@@ -30,11 +31,21 @@ import FileThumbnail from 'src/components/file-thumbnail';
 //
 import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerFileDetails from './FileManagerFileDetails';
+import { useQueryClient } from '@tanstack/react-query';
 
 // ----------------------------------------------------------------------
 
-export default function FileManagerTableRow({ row, selected, onSelectRow, onDeleteRow }) {
+export default function FileManagerTableRow({
+  file = {},
+  row,
+  selected,
+  fileId,
+  onSelectRow,
+  onDeleteRow,
+}) {
   const theme = useTheme();
+
+  const useClient = useQueryClient();
 
   const { name, size, type, updated_at, shared_with, isFavorited } = row;
 
@@ -84,6 +95,58 @@ export default function FileManagerTableRow({ row, selected, onSelectRow, onDele
       borderRight: `solid 1px ${alpha(theme.palette.grey[500], 0.16)}`,
     },
   };
+
+  const { mutateAsync: addFavorite } = useAddFavoriteUser();
+  const { mutateAsync: removeFavorite } = useRemoveFavoriteUser();
+
+  // Function to handle the favorite toggle
+  const handleFavoriteToggle = useCallback(async () => {
+    if (!file.id) {
+      enqueueSnackbar('File ID is required to toggle favorite status!', { variant: 'error' });
+      return; // Early return if file.id is not valid
+    }
+
+    const payload = { file_id: file.id }; // Create a payload with the required structure
+    console.log('Payload:', payload); // Log the payload for debugging
+
+    try {
+      if (favorite.value) {
+        // If currently favorited, call removeFavorite
+        console.log('Removing favorite with payload:', payload); // Log the payload for removal
+        await removeFavorite(payload, {
+          // Pass the entire payload object
+          onSuccess: () => {
+            enqueueSnackbar('File removed from favorites!', { variant: 'success' });
+          },
+          onError: () => {
+            enqueueSnackbar('Failed to remove from favorites!', { variant: 'error' });
+          },
+        });
+      } else {
+        // If not favorited, call addFavorite
+        console.log('Adding favorite with payload:', payload); // Log the payload for addition
+        await addFavorite(payload, {
+          // Pass the entire payload object
+          onSuccess: () => {
+            enqueueSnackbar('File added to favorites!', { variant: 'success' });
+          },
+          onError: () => {
+            enqueueSnackbar('Failed to add to favorites!', { variant: 'error' });
+          },
+        });
+      }
+
+      // Toggle the favorite state
+      favorite.onToggle();
+
+      // Optionally refetch any relevant queries
+      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      useClient.invalidateQueries({ queryKey: ['detail-folder'] });
+    } catch (error) {
+      console.error('Error updating favorite status:', error); // Log the error
+      enqueueSnackbar('Failed to update favorite status!', { variant: 'error' });
+    }
+  }, [favorite.value, file.id, removeFavorite, addFavorite, enqueueSnackbar, useClient]);
 
   return (
     <>
@@ -192,10 +255,8 @@ export default function FileManagerTableRow({ row, selected, onSelectRow, onDele
             icon={<Iconify icon="eva:star-outline" />}
             checkedIcon={<Iconify icon="eva:star-fill" />}
             checked={favorite.value}
-            onChange={favorite.onToggle}
-            sx={{ p: 0.75 }}
+            onChange={handleFavoriteToggle} // Update here to call handleFavoriteToggle
           />
-
           <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
@@ -282,6 +343,7 @@ export default function FileManagerTableRow({ row, selected, onSelectRow, onDele
 FileManagerTableRow.propTypes = {
   onDeleteRow: PropTypes.func,
   onSelectRow: PropTypes.func,
+  fileId: PropTypes.string, // fileId is now optional
   row: PropTypes.object,
   selected: PropTypes.bool,
 };

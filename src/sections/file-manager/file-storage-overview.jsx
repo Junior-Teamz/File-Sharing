@@ -48,7 +48,7 @@ export default function FileStorageOverview({ data, total, chart, ...other }) {
             offsetY: -40,
           },
           total: {
-            label: `Used of ${fData(total)} / 50GB`,
+            label: `Used of ${fData(total)} / ∞`,
             color: theme.palette.text.disabled,
             fontSize: theme.typography.body2.fontSize,
             fontWeight: theme.typography.body2.fontWeight,
@@ -99,5 +99,5 @@ export default function FileStorageOverview({ data, total, chart, ...other }) {
 FileStorageOverview.propTypes = {
   chart: PropTypes.object,
   data: PropTypes.array,
-  total: PropTypes.number,
+  total: PropTypes.number, // total should be a number (in bytes)
 };

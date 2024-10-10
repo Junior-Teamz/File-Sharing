@@ -22,7 +22,7 @@ export default function TagCreateView() {
             href: paths.dashboard.root,
           },
           {
-            name: 'Tag List',
+            name: 'Daftar Tag',
             href: paths.dashboard.tag.list,
           },
           { name: 'Tag Create' },

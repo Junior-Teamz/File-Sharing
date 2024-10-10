@@ -3,7 +3,7 @@ import { HOST_API } from 'src/config-global';
 
 // ----------------------------------------------------------------------
 
-const axiosInstance = axios.create({ baseURL: HOST_API });
+const axiosInstance = axios.create({ baseURL: HOST_API, withCredentials: true,});
 
 // Function to set the token
 export const setToken = (token) => {
@@ -100,6 +100,9 @@ export const endpoints = {
   file: {
     upload: '/api/file/upload',
     delete: '/api/file/delete',
+    getFavoritUser: '/api/file/favorite',
+    addFavoritUser: '/api/file/addToFavorite',
+    deleteFavoritUser: '/api/file/deleteFavorite',
     addTag: '/api/file/addTag',
     removeTag: '/api/file/removeTag',
     download: '/api/file/download',
@@ -122,7 +125,11 @@ export const endpoints = {
   },
 
   ChartFile: {
-    getChartFile: '/api/admin/',
+    getChartFile: '/api/admin/file/all',
+  },
+
+  ChartUser: {
+    getChartUser: '/api/admin/users/countTotalUser',
   },
 
   ChartInstansi: {
@@ -155,6 +162,9 @@ export const endpoints = {
     removeTag: '/api/admin/file/removeTag',
     download: '/api/admin/file/download',
     change: '/api/admin/file/change_name',
+    getFavoritUser: '/api/admin/file/favorite',
+    addFavoritUser: '/api/admin/file/addToFavorite',
+    deleteFavoritUser: '/api/admin/file/deleteFavorite',
   },
   permission: {
     getPermissionFolder: '/api/admin/permission/folder/grantPermission',
@@ -173,12 +183,16 @@ export const endpoints = {
     delete: '/api/admin/folder/delete', // delete folder
     edit: '/api/admin/folder/update', // edit folder
     addTag: '/api/admin/folder/addTag',
+    getFavoritUser: '/api/admin/folder/favorite',
+    addFavoritUser: '/api/admin/folder/addToFavorite',
+    deleteFavoritUser: '/api/admin/folder/deleteFavorite',
   },
   users: {
     list: '/api/admin/users/list',
     create: '/api/admin/users/create_user',
     update: '/api/admin/users/update_user',
     delete: '/api/admin/users/delete_user',
+    getTotalUser: '/api/admin/users/countTotalUser',
   },
   instance: {
     list: '/api/admin/instance/index',

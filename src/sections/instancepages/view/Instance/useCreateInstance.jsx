@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
 
-export const useCreateInstance = ({ onSuccess }) => {
+export const useCreateInstance = ({ onSuccess, onError }) => {
     return useMutation({
       mutationKey: ['create.instansi'],
       mutationFn: async (data) => {
@@ -10,5 +10,6 @@ export const useCreateInstance = ({ onSuccess }) => {
         return response;
       },
       onSuccess,
+      onError
     });
   };

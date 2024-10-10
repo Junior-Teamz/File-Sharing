@@ -13,19 +13,30 @@ import { useCreateTag } from './view/TagMutation'; // Pastikan hook ini sudah be
 import { Button } from '@mui/material';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function TagCreateForm() {
   const { enqueueSnackbar } = useSnackbar();
+  const queryClient = useQueryClient()
   const router = useRouter();
   const { mutate: CreateTag, isPending } = useCreateTag({
     onSuccess: () => {
       enqueueSnackbar('Tag berhasil dibuat', { variant: 'success' });
       reset();
-      refetch();
       router.push(paths.dashboard.tag.list);
+      queryClient.invalidateQueries({ queryKey:['list.tag']})
     },
     onError: (error) => {
-      enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
+      // Check if the error has the expected structure
+      if (error.errors && error.errors.name) {
+        // Set form error for the name field
+        methods.setError('name', {
+          type: 'manual',
+          message: error.errors.name[0], // "Instance name already exists."
+        });
+      } else {
+        enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
+      }
     },
   });
 

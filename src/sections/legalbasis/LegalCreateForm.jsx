@@ -26,9 +26,16 @@ export default function LegalCreateForm() {
       queryClient.invalidateQueries({queryKey : ['legal.admin']})
     },
     onError: (error) => {
-      enqueueSnackbar(`Gagal membuat dasar hukum : ${error.response?.data?.errors || error.message}`, {
-        variant: 'error',
-      });
+      // Check if the error has the expected structure
+      if (error.errors && error.errors.name) {
+        // Set form error for the name field
+        methods.setError('name', {
+          type: 'manual',
+          message: error.errors.name[0], // "Instance name already exists."
+        });
+      } else {
+        enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
+      }
     },
   });
 

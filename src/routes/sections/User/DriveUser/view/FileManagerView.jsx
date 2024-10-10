@@ -26,6 +26,7 @@ import { useDeleteFolder, useEditFolder, useMutationFolder } from './FetchFolder
 import FileManagerNewFileDialog from '../FileManagerNewFileDialog';
 import { handleFolderFiles } from 'src/_mock/map/FilesFolderUser';
 import { FILE_TYPE_OPTIONS } from 'src/_mock';
+import { Typography } from '@mui/material';
 
 const defaultFilters = {
   name: '',
@@ -43,6 +44,11 @@ export default function FileManagerView() {
   const [tableData, setTableData] = useState(FolderFiles);
   const [filters, setFilters] = useState(defaultFilters);
   const [selectedTags, setSelectedTags] = useState([]);
+
+  const dateError =
+    filters.startDate && filters.endDate
+      ? filters.startDate.getTime() > filters.endDate.getTime()
+      : false;
 
   const openDateRange = useBoolean();
   const confirm = useBoolean();
@@ -84,16 +90,6 @@ export default function FileManagerView() {
     );
   };
 
-  // Folder deletion handler
-  const handleDeleteItems = useCallback(() => {
-    deleteFolder(table.selected, {
-      onSuccess: () => {
-        confirm.onFalse();
-        refetch(); // Only refetch after deletion is confirmed
-      },
-    });
-  }, [table.selected, deleteFolder, refetch, confirm]);
-
   const canReset =
     !!filters.name || !!filters.type.length || (!!filters.startDate && !!filters.endDate);
 
@@ -103,6 +99,11 @@ export default function FileManagerView() {
     comparator: getComparator(table.order, table.orderBy),
     filters,
   });
+
+  const dataInPage = dataFiltered.slice(
+    table.page * table.rowsPerPage,
+    table.page * table.rowsPerPage + table.rowsPerPage
+  );
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
@@ -120,10 +121,36 @@ export default function FileManagerView() {
     [table]
   );
 
-  // Reset filters handler
-  const handleResetFilters = useCallback(() => setFilters(defaultFilters), []);
+  const handleTagChange = (tags) => {
+    setSelectedTags(tags); // Update the selected tags state
+    console.log('Selected Tags:', tags);
+  };
 
-  // Render filters
+  const handleDeleteItem = useCallback(
+    (id) => {
+      const deleteRow = tableData.filter((row) => row.id !== id);
+      setTableData(deleteRow);
+
+      table.onUpdatePageDeleteRow(dataInPage.length);
+    },
+    [dataInPage.length, table, tableData]
+  );
+
+  const handleDeleteItems = useCallback(() => {
+    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
+    setTableData(deleteRows);
+
+    table.onUpdatePageDeleteRows({
+      totalRows: tableData.length,
+      totalRowsInPage: dataInPage.length,
+      totalRowsFiltered: dataFiltered.length,
+    });
+  }, [dataFiltered.length, dataInPage.length, table, tableData]);
+
+  const handleResetFilters = useCallback(() => {
+    setFilters(defaultFilters);
+  }, []);
+
   const renderFilters = (
     <Stack
       spacing={2}
@@ -132,16 +159,21 @@ export default function FileManagerView() {
     >
       <FileManagerFilters
         openDateRange={openDateRange.value}
-        onOpenDateRange={openDateRange.onTrue}
         onCloseDateRange={openDateRange.onFalse}
+        onOpenDateRange={openDateRange.onTrue}
+        //
         filters={filters}
         onFilters={handleFilters}
+        //
+        dateError={dateError}
         typeOptions={FILE_TYPE_OPTIONS}
       />
+
       <ToggleButtonGroup size="small" value={view} exclusive onChange={handleChangeView}>
         <ToggleButton value="list">
           <Iconify icon="solar:list-bold" />
         </ToggleButton>
+
         <ToggleButton value="grid">
           <Iconify icon="mingcute:dot-grid-fill" />
         </ToggleButton>
@@ -153,76 +185,95 @@ export default function FileManagerView() {
     <FileManagerFiltersResult
       filters={filters}
       onResetFilters={handleResetFilters}
+      //
       canReset={canReset}
       onFilters={handleFilters}
+      //
       results={dataFiltered.length}
     />
   );
 
   return (
     <>
-      <Container sx={{ mt: 10 }} maxWidth={settings.themeStretch ? false : 'lg'}>
-        <Button
-          variant="contained"
-          startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-          onClick={upload.onTrue}
-        >
-          Upload
-        </Button>
-
-        <FileManagerPanel title="Folder" onOpen={folderDialog.onTrue} sx={{ mt: 5 }} />
-
-        {/* Folder Creation Dialog */}
-        <FileManagerNewFolderDialog
-          open={folderDialog.value}
-          onClose={folderDialog.onFalse}
-          onSubmit={handleCreateFolder}
-        />
-
-        {/* Folder Editing Dialog */}
-        <FileManagerNewFolderDialog
-          open={editDialog.value}
-          onClose={editDialog.onFalse}
-          onSubmit={handleEditFolder}
-          isEditMode
-        />
-
-        <Stack spacing={2.5} sx={{ my: { xs: 3, md: 5 } }}>
-          {renderFilters}
-          {renderResults}
+      <Container maxWidth={settings.themeStretch ? false : 'lg'} sx={{ mt: '10px' }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Typography variant="h4">File Manager</Typography>
+          <Button
+            variant="contained"
+            startIcon={<Iconify icon="eva:cloud-upload-fill" />}
+            onClick={upload.onTrue}
+          >
+            Upload
+          </Button>
         </Stack>
 
-        {/* Conditional rendering for table or grid view */}
+        <Stack
+          spacing={2.5}
+          sx={{
+            my: { xs: 3, md: 5 },
+          }}
+        >
+          {renderFilters}
+
+          {canReset && renderResults}
+        </Stack>
+
         {notFound ? (
-          <EmptyContent filled title="No Data" sx={{ py: 10 }} />
-        ) : view === 'list' ? (
-          <FileManagerTable
-            table={table}
-            tableData={dataFiltered}
-            onDeleteRow={handleDeleteItems}
-            onRefetch={refetch}
+          <EmptyContent
+            filled
+            title="No Data"
+            sx={{
+              py: 10,
+            }}
           />
         ) : (
-          <FileManagerGridView
-            table={table}
-            data={dataFiltered}
-            onDeleteItem={handleDeleteItems}
-            onRefetch={refetch}
-          />
+          <>
+            {view === 'list' ? (
+              <FileManagerTable
+                table={table}
+                tableData={tableData}
+                dataFiltered={dataFiltered}
+                onDeleteRow={handleDeleteItem}
+                notFound={notFound}
+                onOpenConfirm={confirm.onTrue}
+              />
+            ) : (
+              <FileManagerGridView
+                table={table}
+                data={tableData}
+                dataFiltered={dataFiltered}
+                onDeleteItem={handleDeleteItem}
+                onOpenConfirm={confirm.onTrue}
+              />
+            )}
+          </>
         )}
       </Container>
 
-      {/* Upload File Dialog */}
-      <FileManagerNewFileDialog open={upload.value} onClose={upload.onFalse} onRefetch={refetch} />
+      <FileManagerNewFileDialog
+        onTagChange={handleTagChange}
+        open={upload.value}
+        onClose={upload.onFalse}
+      />
 
-      {/* Confirm Dialog for Deletion */}
       <ConfirmDialog
         open={confirm.value}
         onClose={confirm.onFalse}
         title="Delete"
-        content={`Are you sure you want to delete ${table.selected.length} items?`}
+        content={
+          <>
+            Are you sure want to delete <strong> {table.selected.length} </strong> items?
+          </>
+        }
         action={
-          <Button variant="contained" color="error" onClick={handleDeleteItems}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              handleDeleteItems();
+              confirm.onFalse();
+            }}
+          >
             Delete
           </Button>
         }
@@ -231,7 +282,9 @@ export default function FileManagerView() {
   );
 }
 
-function applyFilter({ inputData, comparator, filters }) {
+// ----------------------------------------------------------------------
+
+function applyFilter({ inputData, comparator, filters, dateError }) {
   const { name, type, startDate, endDate } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
@@ -254,12 +307,14 @@ function applyFilter({ inputData, comparator, filters }) {
     inputData = inputData.filter((file) => type.includes(fileFormat(file.type)));
   }
 
-  if (startDate && endDate) {
-    inputData = inputData.filter(
-      (file) =>
-        fTimestamp(file.createdAt) >= fTimestamp(startDate) &&
-        fTimestamp(file.createdAt) <= fTimestamp(endDate)
-    );
+  if (!dateError) {
+    if (startDate && endDate) {
+      inputData = inputData.filter(
+        (file) =>
+          fTimestamp(file.createdAt) >= fTimestamp(startDate) &&
+          fTimestamp(file.createdAt) <= fTimestamp(endDate)
+      );
+    }
   }
 
   return inputData;
