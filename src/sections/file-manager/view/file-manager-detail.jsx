@@ -52,7 +52,7 @@ export const FIleManagerDetail = () => {
       enqueueSnackbar('Folder successfully created.', { variant: 'success' });
       refetch();
       handleCloseCreateFolderDialog();
-      
+
     },
     onError: (error) => {
       console.error('Error creating folder:', error);

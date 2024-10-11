@@ -5,6 +5,8 @@ import { Outlet } from 'react-router-dom';
 import { LoadingScreen } from 'src/components/loading-screen';
 import UsersPage from './UsersPage';
 import DashboardUserLayout from '../dashboarduser/Layout';
+import { element } from 'prop-types';
+import FileManagerDetailUsers from './FIleDetail/FileManagerDetailUsers';
 
 export const DashboardUser = [
   {
@@ -19,7 +21,8 @@ export const DashboardUser = [
       </AuthGuard>
     ),
     children: [
-      { element: <UsersPage />, index: true }
+      { element: <UsersPage />, index: true },
+      { path: 'folder/:id', element: <FileManagerDetailUsers /> },
     ],
   },
 ];

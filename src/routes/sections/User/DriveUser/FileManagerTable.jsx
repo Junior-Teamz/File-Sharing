@@ -69,13 +69,19 @@ export default function FileManagerTable({
   }, [dataFiltered, page, rowsPerPage]);
 
   // Memoize row select and delete handlers
-  const handleSelectRow = useCallback((rowId) => {
-    onSelectRow(rowId);
-  }, [onSelectRow]);
+  const handleSelectRow = useCallback(
+    (rowId) => {
+      onSelectRow(rowId);
+    },
+    [onSelectRow]
+  );
 
-  const handleDeleteRow = useCallback((rowId) => {
-    onDeleteRow(rowId);
-  }, [onDeleteRow]);
+  const handleDeleteRow = useCallback(
+    (rowId) => {
+      onDeleteRow(rowId);
+    },
+    [onDeleteRow]
+  );
 
   return (
     <>

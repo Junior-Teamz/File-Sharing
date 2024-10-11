@@ -22,6 +22,7 @@ import { enqueueSnackbar } from 'notistack';
 import { useForm } from 'react-hook-form';
 import { useIndexTag } from './view/TagUser/useIndexTag';
 import { useMutationFolder } from './view/FetchFolderUser';
+import { useQueryClient } from '@tanstack/react-query';
 
 // ----------------------------------------------------------------------
 
@@ -42,7 +43,7 @@ export default function FileManagerNewFolderDialog({
   const { data, isLoading: isLoadingTags } = useIndexTag();
   const tagsData = data?.data || [];
   const [selectedTags, setSelectedTags] = useState([]);
-
+  const queryClient = useQueryClient();
   useEffect(() => {
     if (open) {
       reset(); // Reset form when dialog is opened
@@ -52,29 +53,32 @@ export default function FileManagerNewFolderDialog({
     }
   }, [open, reset, setValue]);
 
-  const handleDrop = useCallback((acceptedFiles) => {
-    const newFiles = acceptedFiles.map((file) =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file),
-      })
-    );
+  const handleDrop = useCallback(
+    (acceptedFiles) => {
+      const newFiles = acceptedFiles.map((file) =>
+        Object.assign(file, {
+          preview: URL.createObjectURL(file),
+        })
+      );
 
-    if (acceptedFiles.length && !getValues('name')) {
-      const folderName = acceptedFiles[0].webkitRelativePath
-        ? acceptedFiles[0].webkitRelativePath.split('/')[0]
-        : acceptedFiles[0].name;
-      setValue('name', folderName); // Set the folder name
-    }
+      if (acceptedFiles.length && !getValues('name')) {
+        const folderName = acceptedFiles[0].webkitRelativePath
+          ? acceptedFiles[0].webkitRelativePath.split('/')[0]
+          : acceptedFiles[0].name;
+        setValue('name', folderName); // Set the folder name
+      }
 
-    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-  }, [getValues, setValue]);
+      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+    },
+    [getValues, setValue]
+  );
 
   const { mutate: CreateFolder, isPending: loadingUpload } = useMutationFolder({
     onSuccess: () => {
       enqueueSnackbar('Folder Created Successfully');
       handleRemoveAllFiles();
       reset(); // Reset form after successful upload
-      refetch(); // Trigger refetch after successful upload
+      queryClient.invalidateQueries({ queryKey: ['fetch.folder'] });
       onClose(); // Close dialog after successful upload
     },
     onError: (error) => {
@@ -170,10 +174,6 @@ export default function FileManagerNewFolderDialog({
             )}
           </Select>
         </FormControl>
-        <Box sx={{ mt: 2, mb: 1 }}>
-          <strong>Optional: Drag folder here to upload</strong>
-        </Box>
-        <Upload multiple files={files} onDrop={handleDrop} onRemove={handleRemoveFile} />
       </DialogContent>
 
       <DialogActions>
@@ -191,14 +191,13 @@ export default function FileManagerNewFolderDialog({
             Remove all
           </Button>
         )}
-
-        {(onCreate || onUpdate) && (
+        {/* {(onCreate || onUpdate) && (
           <Stack direction="row" justifyContent="flex-end" flexGrow={1}>
             <Button variant="soft" onClick={onCreate || onUpdate}>
               {onUpdate ? 'Save' : 'Create'}
             </Button>
           </Stack>
-        )}
+        )} */}
       </DialogActions>
     </Dialog>
   );

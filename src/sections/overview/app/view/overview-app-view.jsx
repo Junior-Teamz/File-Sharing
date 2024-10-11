@@ -78,7 +78,7 @@ export default function OverviewAppView() {
     },
   });
 
-  useEffect(() => { 
+  useEffect(() => {
     if (tags.data && Array.isArray(tags.data)) {
       setTagsData(tags.data);
     } else if (tagsError) {
@@ -113,7 +113,7 @@ export default function OverviewAppView() {
   const { data, isLoading, refetch, isFetching } = useFetchFolder(); // Fetch Folder
   const files = data?.files || []; // Use optional chaining to safely access files
   console.log(files);
-  
+
 
   if (isLoading || isFetching) {
     return (
@@ -158,7 +158,6 @@ export default function OverviewAppView() {
     });
     setSelected([]);
   };
-
   const handleEditSubmit = (data) => {
     // Ensure the folder name is valid
     if (!data.name || data.name.trim() === '') {

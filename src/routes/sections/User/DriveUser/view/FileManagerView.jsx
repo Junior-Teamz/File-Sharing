@@ -27,6 +27,7 @@ import FileManagerNewFileDialog from '../FileManagerNewFileDialog';
 import { handleFolderFiles } from 'src/_mock/map/FilesFolderUser';
 import { FILE_TYPE_OPTIONS } from 'src/_mock';
 import { Typography } from '@mui/material';
+import { enqueueSnackbar } from 'notistack';
 
 const defaultFilters = {
   name: '',
@@ -44,7 +45,7 @@ export default function FileManagerView() {
   const [tableData, setTableData] = useState(FolderFiles);
   const [filters, setFilters] = useState(defaultFilters);
   const [selectedTags, setSelectedTags] = useState([]);
-
+  console.log(tableData);
   const dateError =
     filters.startDate && filters.endDate
       ? filters.startDate.getTime() > filters.endDate.getTime()
@@ -72,6 +73,7 @@ export default function FileManagerView() {
     createFolder(folderData, {
       onSuccess: () => {
         folderDialog.onFalse();
+        enqueueSnackbar('Login Berhasil!', { variant: 'success' });
         refetch(); // Only refetch after closing the dialog to avoid loop
       },
     });
