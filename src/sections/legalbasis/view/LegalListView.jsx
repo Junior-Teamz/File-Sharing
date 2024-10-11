@@ -123,10 +123,10 @@ export default function LegalListView() {
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
-        heading="Legal Documents"
+        heading="Daftar dasar hukum"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'Legal Documents', href: paths.dashboard.legal.list },
+          { name: 'Daftar dasar hukumm', href: paths.dashboard.legal.list },
         ]}
         action={
           <Button

@@ -10,4 +10,8 @@ export const useFetchDetailFolderUsers = (id) => {
       return res.data.data;
     },
   });
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> eae0407082a00742c5b25e7538271b6e0b960768

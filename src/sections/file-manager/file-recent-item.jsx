@@ -20,7 +20,12 @@ import TextField from '@mui/material/TextField';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
-import { useDownloadFile, useChangeNameFile, useMutationDeleteFiles } from './view/folderDetail';
+import {
+  useDownloadFile,
+  useChangeNameFile,
+  useMutationDeleteFiles,
+  usePreviewImage,
+} from './view/folderDetail';
 import { useAddFavorite, useRemoveFavorite } from './view/favoritemutation';
 // utils
 import { fData } from 'src/utils/format-number';
@@ -38,7 +43,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 // ----------------------------------------------------------------------
 
-export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other }) {
+export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...other }) {
   const { enqueueSnackbar } = useSnackbar();
   const { copy } = useCopyToClipboard();
   const smUp = useResponsive('up', 'sm');
@@ -54,6 +59,7 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
   const { mutateAsync: updateNameFile } = useChangeNameFile();
   const { mutateAsync: downloadFile } = useDownloadFile();
   const { mutateAsync: deleteFile } = useMutationDeleteFiles();
+  const { data: preview, isLoading: loadingPreview, isError: errorPreview } = usePreviewImage(id);
 
   useEffect(() => {
     setNewFileName(file.name);

@@ -30,9 +30,10 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import FileThumbnail from 'src/components/file-thumbnail';
 import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerFileDetails from './FileManagerFileDetails';
-import { useDownloadFile, useChangeNameFile } from './view/folderDetail';
 import { Button } from '@mui/material';
 import { useRemoveFavoriteUser, useAddFavoriteUser } from './view/FetchFolderUser';
+import { useDownloadFile, useChangeNameFile } from './view/FetchDriveUser';
+import { useQueryClient } from '@tanstack/react-query';
 
 // ----------------------------------------------------------------------
 
@@ -48,6 +49,7 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
   const details = useBoolean();
   const favorite = useBoolean(file.isFavorited);
   const [originalFileType, setOriginalFileType] = useState(file.type);
+  const useClient = useQueryClient();
 
   const { mutateAsync: updateNameFile } = useChangeNameFile();
   const { mutateAsync: downloadFile } = useDownloadFile();

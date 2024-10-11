@@ -47,6 +47,8 @@ const AdminListNews = lazy(() => import('src/sections/AdminNews/view/AdminListNe
 const NewsCreateView = lazy(() => import('src/sections/AdminNews/view/NewsCreateView'));
 const TagNewsCreateView = lazy(() => import('src/sections/newsTag/view/TagNewsCreateView'));
 const TagNewsListView = lazy(() => import('src/sections/newsTag/view/TagNewsListView'));
+const ListHelmetFavorite = lazy(() => import('src/sections/favorite/ListHelmetFavorite'));
+
 
 // ----------------------------------------------------------------------
 
@@ -68,6 +70,7 @@ export const dashboardRoutes = [
       { path: 'analytics', element: <OverviewAnalyticsPage /> },
       // { path: 'banking', element: <OverviewBankingPage /> },
       // { path: 'booking', element: <OverviewBookingPage /> },
+      { path: 'favorite', element: <ListHelmetFavorite /> },
       { path: 'file', element: <OverviewFilePage /> },
       {
         path: 'user',

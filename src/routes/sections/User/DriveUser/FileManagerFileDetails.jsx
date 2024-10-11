@@ -302,12 +302,18 @@ export default function FIleManagerFileDetails({
         </IconButton>
       </Stack>
 
-      {shared_with && shared_with.length > 0 && (
-        <Box sx={{ pl: 2.5, pr: 1 }}>
-          {shared_with.map((user) => (
-            <FileManagerInvitedItem key={user.id} user={user} />
-          ))}
-        </Box>
+       {shared_with.length > 0 ? (
+        shared_with.map((share) => (
+          <FileManagerInvitedItem
+            key={share.user.id}
+            user={share.user}
+            permissions={share.permissions}
+          />
+        ))
+      ) : (
+        <Typography variant="body2" color="text.secondary">
+          Not shared with anyone.
+        </Typography>
       )}
     </>
   );

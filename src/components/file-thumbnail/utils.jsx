@@ -140,7 +140,7 @@ export function fileData(file) {
     size: file.size,
     path: file.path,
     type: file.type,
-    preview: file.preview,
+    preview: file?.preview,
     lastModified: file.lastModified,
     lastModifiedDate: file.lastModifiedDate,
   };

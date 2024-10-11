@@ -22,7 +22,7 @@ export const paths = {
   maintenance: '/maintenance',
   news: {
     informasi: '/berita',
-    detail:'/berita'
+    detail: '/berita',
   },
   about: '/about-us',
   contact: '/contact-us',
@@ -69,6 +69,7 @@ export const paths = {
 
     fileManager: `${ROOTS.DASHBOARD}/file-manager`,
     permission: `${ROOTS.DASHBOARD}/permission`,
+    favorite: `${ROOTS.DASHBOARD}/favorite`,
     general: {
       app: `${ROOTS.DASHBOARD}/app`,
       ecommerce: `${ROOTS.DASHBOARD}/ecommerce`,

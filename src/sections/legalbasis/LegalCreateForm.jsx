@@ -16,14 +16,14 @@ import { useQueryClient } from '@tanstack/react-query';
 
 export default function LegalCreateForm() {
   const { enqueueSnackbar } = useSnackbar();
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
   const router = useRouter();
   const { mutate: createLegal, isPending } = useCreateLegal({
     onSuccess: () => {
       enqueueSnackbar('Dasar hukum berhasil dibuat', { variant: 'success' });
       reset();
       router.push(paths.dashboard.legal.list); // Redirect to the legal document list
-      queryClient.invalidateQueries({queryKey : ['legal.admin']})
+      queryClient.invalidateQueries({ queryKey: ['legal.admin'] });
     },
     onError: (error) => {
       // Check if the error has the expected structure
@@ -63,7 +63,7 @@ export default function LegalCreateForm() {
 
     const fileSize = data.file.size;
     const fileType = data.file.type;
-    if (fileSize > 2000000) {
+    if (fileSize > 5000000) {
       // 2MB
       enqueueSnackbar('File size exceeds 2MB', { variant: 'error' });
       return;
@@ -96,10 +96,10 @@ export default function LegalCreateForm() {
         <Grid item xs={12} md={8}>
           <Card sx={{ p: 4, boxShadow: 3, borderRadius: 2 }}>
             <Typography variant="h4" align="center" gutterBottom>
-              Create Legal Document
+              buat dasar hukum baru
             </Typography>
             <Typography variant="body1" align="center" color="textSecondary" sx={{ mb: 3 }}>
-              Please provide a name and upload a valid legal document (PDF, DOC, DOCX).
+              Harap berikan nama dan unggah dokumen yang valid(PDF, DOC, DOCX).
             </Typography>
 
             <Box
@@ -132,7 +132,7 @@ export default function LegalCreateForm() {
                 loading={isPending}
                 sx={{ minWidth: '150px' }}
               >
-                {isPending ? 'Creating...' : 'Create Document'}
+                {isPending ? 'Creating...' : 'Create Dasar Hukum'}
               </LoadingButton>
               <Button
                 variant="outlined"
