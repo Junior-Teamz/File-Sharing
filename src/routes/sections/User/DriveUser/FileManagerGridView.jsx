@@ -17,6 +17,7 @@ import FileManagerActionSelected from './FileManagerActionSelected';
 import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerNewFolderDialog from './FileManagerNewFolderDialog';
 import FileManagerNewFileDialog from './FileManagerNewFileDialog';
+import { Link } from 'react-router-dom';
 
 // ----------------------------------------------------------------------
 
@@ -81,14 +82,16 @@ export default function FileManagerGridView({
             {dataFiltered
               .filter((i) => i.type === 'folder')
               .map((folder) => (
-                <FileManagerFolderItem
-                  key={folder.id}
-                  folder={folder}
-                  selected={selected.includes(folder.id)}
-                  onSelect={() => onSelectItem(folder.id)}
-                  onDelete={() => onDeleteItem(folder.id)}
-                  sx={{ maxWidth: 'auto' }}
-                />
+                <Link to={`folder/${folder.folder_id}`}>
+                  <FileManagerFolderItem
+                    key={folder.id}
+                    folder={folder}
+                    selected={selected.includes(folder.id)}
+                    onSelect={() => onSelectItem(folder.id)}
+                    onDelete={() => onDeleteItem(folder.id)}
+                    sx={{ maxWidth: 'auto' }}
+                  />
+                </Link>
               ))}
           </Box>
         </Collapse>

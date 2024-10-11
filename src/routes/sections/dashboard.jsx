@@ -38,16 +38,18 @@ const InstanceCreate = lazy(() => import('src/pages/dashboard/instance/create'))
 // FILE MANAGER
 const FileManagerPage = lazy(() => import('src/pages/dashboard/file-manager'));
 
-
 //Legal
-const  LegalListView   = lazy(() => import ('src/sections/legalbasis/view/LegalListView'))
-const  LegalCreateView   = lazy(() => import ('src/sections/legalbasis/view/LegalCreateView'))
+const LegalListView = lazy(() => import('src/sections/legalbasis/view/LegalListView'));
+const LegalCreateView = lazy(() => import('src/sections/legalbasis/view/LegalCreateView'));
 
 //news admin
-const  AdminListNews   = lazy(() => import ('src/sections/AdminNews/view/AdminListNews'))
-const  NewsCreateView   = lazy(() => import ('src/sections/AdminNews/view/NewsCreateView'))
-const  TagNewsCreateView   = lazy(() => import ('src/sections/newsTag/view/TagNewsCreateView'))
-const  TagNewsListView   = lazy(() => import ('src/sections/newsTag/view/TagNewsListView'))
+const AdminListNews = lazy(() => import('src/sections/AdminNews/view/AdminListNews'));
+const NewsCreateView = lazy(() => import('src/sections/AdminNews/view/NewsCreateView'));
+const TagNewsCreateView = lazy(() => import('src/sections/newsTag/view/TagNewsCreateView'));
+const TagNewsListView = lazy(() => import('src/sections/newsTag/view/TagNewsListView'));
+
+//favorite
+const ListHelmetFavorite = lazy(() => import('src/sections/favorite/ListHelmetFavorite'));
 
 // ----------------------------------------------------------------------
 
@@ -69,6 +71,7 @@ export const dashboardRoutes = [
       { path: 'analytics', element: <OverviewAnalyticsPage /> },
       // { path: 'banking', element: <OverviewBankingPage /> },
       // { path: 'booking', element: <OverviewBookingPage /> },
+      { path: 'favorite', element: <ListHelmetFavorite /> },
       { path: 'file', element: <OverviewFilePage /> },
       {
         path: 'user',

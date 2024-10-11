@@ -15,14 +15,14 @@ export default function LegalCreateView() {
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
-        heading="Create a new legal"
+        heading="Buat dasar hukum baru"
         links={[
           {
             name: 'Dashboard',
             href: paths.dashboard.root,
           },
           {
-            name: 'Tag List',
+            name: 'Daftar dasar hukum',
             href: paths.dashboard.legal.list,
           },
           { name: 'Legal Create' },

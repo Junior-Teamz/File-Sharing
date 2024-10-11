@@ -258,7 +258,7 @@ export default function FileManagerFolderItem({
         </MenuItem>
       </CustomPopover>
 
-      <FileManagerFileDetails
+      {/* <FileManagerFileDetails
         item={folder}
         favorited={favorite.value}
         onFavorite={favorite.onToggle}
@@ -281,7 +281,7 @@ export default function FileManagerFolderItem({
           share.onFalse();
           setInviteEmail('');
         }}
-      />
+      /> */}
 
       <FileManagerNewFolderDialog
         open={editFolder.value}

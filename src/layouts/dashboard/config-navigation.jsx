@@ -12,6 +12,7 @@ import ApartmentIcon from '@mui/icons-material/Apartment';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import StyleIcon from '@mui/icons-material/Style';
 import GavelIcon from '@mui/icons-material/Gavel';
+import StarIcon from '@mui/icons-material/Star';
 
 // ----------------------------------------------------------------------
 
@@ -52,7 +53,8 @@ const ICONS = {
   instance: <ApartmentIcon />,
   tags: <LocalOfferIcon />,
   tagsnews: <StyleIcon />,
-  legalbasis: <GavelIcon/>,
+  legalbasis: <GavelIcon />,
+  Favorite: <StarIcon />,
 };
 
 // ----------------------------------------------------------------------
@@ -87,6 +89,12 @@ export function useNavData() {
             title: t('analytics'),
             path: paths.dashboard.general.analytics,
             icon: ICONS.analytics,
+          },
+
+          {
+            title: t('favorite'),
+            path: paths.dashboard.favorite,
+            icon: ICONS.Favorite,
           },
           // {
           //   title: t('banking'),

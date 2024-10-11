@@ -22,6 +22,7 @@ import { useMutationUploadFiles } from './view/folderDetail/useMutationUploadFil
 import { useIndexTag } from 'src/sections/tag/view/TagMutation';
 import { enqueueSnackbar } from 'notistack';
 import { useForm } from 'react-hook-form';
+import { useQueryClient } from '@tanstack/react-query';
 
 // ----------------------------------------------------------------------
 
@@ -41,7 +42,7 @@ export default function FileManagerNewFolderDialog({
   const { register, handleSubmit, reset, setValue } = useForm();
   const { data, isLoading: isLoadingTags } = useIndexTag(); // Use useIndexTag
   const tagsData = data?.data || []; // Ensure data is accessed properly
-
+  const useClient = useQueryClient();
   const [selectedTags, setSelectedTags] = useState([]);
 
   useEffect(() => {
@@ -67,6 +68,8 @@ export default function FileManagerNewFolderDialog({
       reset(); // Reset form after successful upload
       refetch(); // Trigger refetch after successful upload
       onClose(); // Close dialog after successful upload
+      useClient.invalidateQueries({ queryKey: ['preview.image'] });
+      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
     },
     onError: (error) => {
       enqueueSnackbar(`${error.errors.tag_ids}`, { variant: 'error' });
@@ -103,7 +106,6 @@ export default function FileManagerNewFolderDialog({
     const value = event.target.value;
     if (Array.isArray(value)) {
       setSelectedTags(value); // Update local state with selected tag IDs
-     
     } else {
       console.error('Unexpected value type:', value);
     }

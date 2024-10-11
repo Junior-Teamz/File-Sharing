@@ -18,7 +18,7 @@ export default function AnalyticsConversionRates({ title, subheader, chart, ...o
     tooltip: {
       marker: { show: false },
       y: {
-        formatter: (value) => `${fNumber(value)} pengguna`, 
+        formatter: (value) => `${fNumber(value)} `, 
       },
       title: {
         formatter: () => '',

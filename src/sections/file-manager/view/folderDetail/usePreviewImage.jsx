@@ -3,12 +3,16 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 
 export const usePreviewImage = (id) => {
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ['preview-image', id],
+    queryKey: ['preview.image', id],
     queryFn: async () => {
       try {
         // Set the responseType to 'blob' to handle binary data
         const response = await axiosInstance.get(`${endpoints.previewImage.preview}${id}`, {
           responseType: 'blob',
+          headers: {
+            'Content-Type': 'application/json' // or other required types
+          },
+          
         });
 
         // Log the full response to check its structure
@@ -32,7 +36,7 @@ export const usePreviewImage = (id) => {
   });
 
   return {
-    data,  // This will be the image URL
+    data, // This will be the image URL
     isLoading,
     refetch,
   };

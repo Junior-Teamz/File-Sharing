@@ -17,6 +17,7 @@ import Scrollbar from 'src/components/scrollbar';
 import FileManagerInvitedItem from './FileManagerInvitedItem';
 import { useSearchUser, usePermissionsFile } from './view/FetchDriveUser';
 import { useSnackbar } from 'notistack'; // Import useSnackbar
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function FileManagerShareDialog({
   shared,
@@ -35,6 +36,7 @@ export default function FileManagerShareDialog({
   const [inputSearch, setInputSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]); // Local state for search results
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(inputSearch);
+  const useClient = useQueryClient();
 
   const { refetch: searchUsers, isLoading } = useSearchUser({ email: debouncedSearchTerm });
   const { mutate: setPermissions } = usePermissionsFile();
@@ -102,6 +104,7 @@ export default function FileManagerShareDialog({
       setInputSearch(''); // Clear search input after invite
       setSearchResults([]); // Clear search results after invite
       setSelectedUser(null); // Clear selected user after invite
+      useClient.invalidateQueries({queryKey:['fetch.folder']})
     } else {
       enqueueSnackbar('User ID or file ID is missing.', { variant: 'warning' }); // Show warning notification
     }
@@ -159,12 +162,7 @@ export default function FileManagerShareDialog({
         {/* Permission Selection */}
         {selectedUser && (
           <div>
-            <Select
-              fullWidth
-              value={permissions}
-              onChange={handlePermissionChange}
-              displayEmpty
-            >
+            <Select fullWidth value={permissions} onChange={handlePermissionChange} displayEmpty>
               <MenuItem value="view">View (Read)</MenuItem>
               <MenuItem value="edit">Edit (Write)</MenuItem>
             </Select>
