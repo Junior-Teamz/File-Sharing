@@ -54,6 +54,7 @@ export default function FIleManagerFileDetails({
     id,
     type,
     shared,
+    shared_with,
     modifiedAt,
     email,
     user,
@@ -336,16 +337,22 @@ export default function FIleManagerFileDetails({
         </IconButton>
       </Stack>
 
-      {shared && shared.length > 0 && (
-        <Box sx={{ pl: 2.5, pr: 1 }}>
-          {shared.map((person) => (
-            <FileManagerInvitedItem key={person.id} person={person} />
-          ))}
-        </Box>
+       {shared_with.length > 0 ? (
+        shared_with.map((share) => (
+          <FileManagerInvitedItem
+            key={share.user.id}
+            user={share.user}
+            permissions={share.permissions}
+          />
+        ))
+      ) : (
+        <Typography variant="body2" color="text.secondary">
+          Not shared with anyone.
+        </Typography>
       )}
     </>
   );
-
+  
   return (
     <Drawer
       open={open}
@@ -433,13 +440,7 @@ export default function FIleManagerFileDetails({
               </Box>
               {user?.email}
             </Stack>
-            {/* <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
-                <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-                  Email
-                </Box>
-                {user?.email}
-              </Stack> */}
-
+          
             <Stack direction="row" alignItems="center" sx={{ typography: 'subtitle2' }}>
               Instansi
             </Stack>
@@ -462,7 +463,8 @@ export default function FIleManagerFileDetails({
 
           <FileManagerShareDialog
             open={share.value}
-            shared={shared}
+            fileId={id}
+            shared={shared_with}
             inviteEmail={inviteEmail}
             onChangeInvite={handleChangeInvite}
             onCopyLink={handleCopyLink}
@@ -471,7 +473,7 @@ export default function FIleManagerFileDetails({
               setInviteEmail('');
             }}
           />
-
+          
           {renderShared}
 
           <Button fullWidth size="small" color="inherit" variant="outlined" onClick={onClose}>

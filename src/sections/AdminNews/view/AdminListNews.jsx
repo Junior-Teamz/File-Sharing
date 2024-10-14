@@ -29,6 +29,7 @@ import { RouterLink } from 'src/routes/components';
 import { paths } from 'src/routes/paths';
 import { useDeleteLegal, useFetchNews, useUpdateNews } from './fetchNews';
 import { useSnackbar } from 'notistack';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function AdminListNews() {
   const settings = useSettingsContext();
@@ -36,7 +37,7 @@ export default function AdminListNews() {
   const deleteNews = useDeleteLegal();
   const { mutateAsync: updateNews, isLoading: isUpdating } = useUpdateNews();
   const { enqueueSnackbar } = useSnackbar();
-
+  const useClient = useQueryClient();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -47,6 +48,7 @@ export default function AdminListNews() {
     try {
       await deleteNews.mutateAsync(id);
       enqueueSnackbar('Berita berhasil di hapus', { variant: 'success' });
+      useClient.invalidateQueries({queryKey:['list.news']})
     } catch {
       enqueueSnackbar('Gagal menghapus berita', { variant: 'error' });
     }
@@ -61,6 +63,8 @@ export default function AdminListNews() {
 
     if (editingNews) {
       try {
+    
+
         const { title, content, status, thumbnail_url } = editingNews;
 
         // Construct data for the API call
@@ -74,6 +78,7 @@ export default function AdminListNews() {
 
         await updateNews({ newsId: id, data: updateData });
         enqueueSnackbar('Berita berhasil di perbarui', { variant: 'success' });
+        useClient.invalidateQueries({queryKey:['list.news']})
         handleEditDialogClose();
       } catch (error) {
         console.error('Error perbarui berita:', error);
@@ -131,10 +136,11 @@ export default function AdminListNews() {
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell>Thumbnail</TableCell>
                 <TableCell>Judul</TableCell>
                 <TableCell>Content</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell>Thumbnail</TableCell>
+
                 <TableCell align="right">Aksi</TableCell>
               </TableRow>
             </TableHead>
@@ -151,15 +157,16 @@ export default function AdminListNews() {
                   .map(({ id, title, content, status, thumbnail_url }) => (
                     <TableRow key={id}>
                       <TableCell>
+                        <img src={thumbnail_url} alt={title} style={{ width: '100px' }} />
+                      </TableCell>
+                      <TableCell>
                         <span dangerouslySetInnerHTML={{ __html: title }} />
                       </TableCell>
                       <TableCell>
                         <span dangerouslySetInnerHTML={{ __html: content }} />
                       </TableCell>
                       <TableCell>{status}</TableCell>
-                      <TableCell>
-                        <img src={thumbnail_url} alt={title} style={{ width: '100px' }} />
-                      </TableCell>
+
                       <TableCell align="right">
                         <Tooltip title="More Actions" placement="top">
                           <IconButton onClick={(event) => handlePopoverOpen(event, id)}>

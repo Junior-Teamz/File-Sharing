@@ -81,17 +81,10 @@ export default function FileManagerGridView({
           >
             {dataFiltered
               .filter((i) => i.type === 'folder')
-<<<<<<< HEAD
               .map((folder, idx) => (
                 <Link to={`folder/${folder.folder_id}`}>
                   <FileManagerFolderItem
                     key={idx}
-=======
-              .map((folder) => (
-                <Link to={`folder/${folder.folder_id}`}>
-                  <FileManagerFolderItem
-                    key={folder.id}
->>>>>>> eae0407082a00742c5b25e7538271b6e0b960768
                     folder={folder}
                     selected={selected.includes(folder.id)}
                     onSelect={() => onSelectItem(folder.id)}

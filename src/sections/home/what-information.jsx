@@ -120,29 +120,29 @@ export default function InformationAndAnnouncements() {
         </Typography>
       ) : currentNewsData.length === 0 ? (
         <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '200px',
-          backgroundColor: 'primary.main',
-          color: 'common.white',
-          borderRadius: 2,
-          boxShadow: 3,
-          p: 3,
-        }}
-      >
-        <ArticleIcon fontSize="large" sx={{ mb: 2 }} />
-        <Typography variant="h6" align="center">
-          Tidak ada Berita yang tersedia.
-        </Typography>
-        <Typography variant="body2" align="center" sx={{ mt: 1 }}>
-          Silakan periksa kembali nanti atau hubungi dukungan untuk bantuan.
-        </Typography>
-      </Box>
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '200px',
+            backgroundColor: 'primary.main',
+            color: 'common.white',
+            borderRadius: 2,
+            boxShadow: 3,
+            p: 3,
+          }}
+        >
+          <ArticleIcon fontSize="large" sx={{ mb: 2 }} />
+          <Typography variant="h6" align="center">
+            Tidak ada Berita yang tersedia.
+          </Typography>
+          <Typography variant="body2" align="center" sx={{ mt: 1 }}>
+            Silakan periksa kembali nanti atau hubungi dukungan untuk bantuan.
+          </Typography>
+        </Box>
       ) : (
-        <Grid container spacing={10} justifyContent="center">
+        <Grid container spacing={3} justifyContent="center">
           {currentNewsData.map((news) => {
             const formattedDate = new Date(news.created_at).toLocaleDateString('id-ID', {
               day: 'numeric',

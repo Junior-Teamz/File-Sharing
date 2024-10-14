@@ -263,7 +263,7 @@ export default function FIleManagerFileDetails({
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Modified
+              Updated
             </Box>
             {fDateTime(updated_at)}
           </Stack>

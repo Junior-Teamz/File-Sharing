@@ -7,6 +7,7 @@ import Iconify from 'src/components/iconify';
 import LoginIcon from '@mui/icons-material/Login';
 import PeopleIcon from '@mui/icons-material/People';
 import QuizIcon from '@mui/icons-material/Quiz';
+import NewspaperIcon from '@mui/icons-material/Newspaper';
 import { useResponsive } from 'src/hooks/use-responsive';
 
 // ----------------------------------------------------------------------
@@ -23,7 +24,12 @@ export const navConfig = [
     path: '/auth/jwt/login',
   },
   {
-    title: 'About us',
+    title: 'Berita',
+    icon: <NewspaperIcon fontSize="small" />,
+    path: paths.news.informasi,
+  },
+  {
+    title: 'About Us',
     icon: <PeopleIcon fontSize="small" />,
     path: paths.about,
   },

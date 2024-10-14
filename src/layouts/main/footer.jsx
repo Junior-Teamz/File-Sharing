@@ -17,15 +17,16 @@ import Iconify from 'src/components/iconify';
 import Kemen from '../../../public/logo/kemen3.png';
 import Grid from '@mui/system/Unstable_Grid/Grid';
 
-import Overlay from '../../../public/assets/background/kemenkopoverlay.jpg' ;
+import Overlay from '../../../public/assets/background/kemenkopoverlay.jpg';
 
 const LINKS = [
   {
     headline: 'FILE SHARING',
     children: [
-      { name: 'About us', href: paths.about },
-      { name: 'Contact us', href: paths.contact },
-      { name: 'FAQs', href: paths.faqs },
+      { name: 'Home', href: '/' },
+      { name: 'About Us', href: paths.about },
+      { name: 'Berita', href: paths.news.informasi },
+      { name: 'FAQ', href: paths.faqs },
     ],
   },
   {
@@ -116,13 +117,17 @@ export default function Footer() {
               {_socials.map((social) => (
                 <IconButton
                   key={social.name}
+                  component="a" // Makes the IconButton behave like an anchor tag
+                  href={social.path}
+                  target="_blank" // Opens the link in a new tab
+                  rel="noopener noreferrer" // Security best practices
                   sx={{
                     '&:hover': {
                       bgcolor: alpha(social.color, 0.08),
                     },
                   }}
                 >
-                  <Iconify color={social.color} icon={social.icon} />
+                  {social.icon}
                 </IconButton>
               ))}
             </Stack>
@@ -171,4 +176,3 @@ export default function Footer() {
 
   return mainFooter;
 }
-

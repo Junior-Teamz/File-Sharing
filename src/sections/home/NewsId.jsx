@@ -38,7 +38,7 @@ export default function NewsId() {
         <CustomBreadcrumbs
           links={[
             {
-              name: 'Dashboard',
+              name: 'Home',
               href: '/',
             },
             {
@@ -47,7 +47,7 @@ export default function NewsId() {
             },
             {
               name: <span dangerouslySetInnerHTML={{ __html: news.title }} />,
-              href: '', // You can set a specific href if needed
+              href: '', 
             },
           ]}
           sx={{

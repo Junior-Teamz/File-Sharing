@@ -13,21 +13,64 @@ import FaqsList from '../faqs-list';
 export default function FaqsView() {
   return (
     <>
-      {/* Background wrapper */}
+      {/* Background Wrapper */}
       <Box
         sx={{
           overflow: 'hidden',
           position: 'relative',
-          background: 'linear-gradient(120deg, #d4fc79 0%, #43e97b 100%)',
+          backgroundColor: 'primary.main',
+          color: 'common.white',
+          minHeight: '100vh',
         }}
       >
         <FaqsHero />
+
+        {/* Shape Wrapper */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'none', // Prevent interaction blocking
+          }}
+        >
+          {/* Shape 1 */}
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: '70px',
+              left: '-80px',
+              width: '110px',
+              height: '100px',
+              backgroundColor: '#8FAF3E',
+              borderRadius: '300px',
+              zIndex: 0,
+            }}
+          />
+
+          {/* Shape 2 */}
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: '200px',
+              right: '-80px',
+              width: '180px',
+              height: '180px',
+              backgroundColor: '#8FAF3E',
+              borderRadius: '300px',
+              zIndex: 0,
+            }}
+          />
+        </Box>
 
         <Container
           sx={{
             pb: 10,
             pt: { xs: 10, md: 15 },
             position: 'relative',
+            zIndex: 1, // Keep content above shapes
           }}
         >
           <Typography
@@ -39,32 +82,6 @@ export default function FaqsView() {
           >
             Frequently asked questions
           </Typography>
-
-          <div // shape 1
-        style={{
-          position: 'absolute',
-          bottom: '70px',
-          left: '-80px',
-          width: '110px',
-          height: '100px',
-          backgroundColor: '#8FAF3E',
-          borderRadius: '300px 300px 300px 300px',
-          zIndex: 0, // Behind text
-        }}
-      />
-
-      <div // shape 2
-        style={{
-          position: 'absolute',
-          bottom: '550px',
-          right: '-80px',
-          width: '180px',
-          height: '180px',
-          backgroundColor: '#8FAF3E',
-          borderRadius: '300px 300px 300px 300px',
-          zIndex: 0, // Behind text
-        }}
-      />
 
           <Box
             sx={{

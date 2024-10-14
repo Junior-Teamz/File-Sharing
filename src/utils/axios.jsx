@@ -124,6 +124,10 @@ export const endpoints = {
     getChartFolder: '/api/admin/folder/storageSizeUsage',
   },
 
+  SearchUserAdmin: {
+    User: '/api/admin/searchUser',
+  },
+
   ChartFile: {
     getChartFile: '/api/admin/file/all',
   },

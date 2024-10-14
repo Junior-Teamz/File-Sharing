@@ -10,7 +10,8 @@ export default function AboutView() {
       sx={{
         overflow: 'hidden',
         position: 'relative',
-        background: 'linear-gradient(120deg, #43e97b  0%, #96e6a1 100%,  #d4fc79 0%)',
+        backgroundColor: 'primary.main',
+        color: 'common.white',
       }}
     >
       <AboutHero />
