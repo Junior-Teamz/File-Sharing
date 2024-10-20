@@ -22,6 +22,8 @@ import AnalyticsWidgetSummary from '../analytics-widget-summary';
 import AnalyticsTrafficBySite from '../analytics-traffic-by-site';
 import AnalyticsCurrentSubject from '../analytics-current-subject';
 import AnalyticsConversionRates from '../analytics-conversion-rates';
+import React, { useState } from 'react';
+import { MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 
 //storage
 import FileStorageOverview from '../../../file-manager/file-storage-overview';
@@ -35,31 +37,44 @@ import {
   useChartUsers,
   useChartFile,
 } from './useFetchChart';
+import { fData } from 'src/utils/format-number';
 
 // ----------------------------------------------------------------------
-
-const GB = 1000000000 * 24;
 
 export default function OverviewAnalyticsView() {
   const settings = useSettingsContext();
 
   const { data: Users } = useChartUsers();
-  console.log(Users);
 
   const { data, isFetching, isLoading, refetch } = useChartFolder();
-  console.log(data);
 
   const { data: File } = useChartFile();
-  console.log(File);
 
   const { data: AllInstances } = useChartInstances();
-  console.log(AllInstances);
 
   const { data: Instances } = useChartUserInstances();
-  console.log(Instances);
 
   const { data: chartTag } = useChartTag();
-  console.log(chartTag);
+
+  const [selectedInstance, setSelectedInstance] = useState('all');
+
+  // Sort and filter to get top 5 instances by total user, file, or folder
+  const getTop5Instances = () => {
+    if (!Instances?.data) return [];
+    return [...Instances.data]
+      .sort((a, b) => {
+        const totalA = a.user_count.user_total + a.file_total + a.folder_total;
+        const totalB = b.user_count.user_total + b.file_total + b.folder_total;
+        return totalB - totalA; // Sort descending by the combined total
+      })
+      .slice(0, 5); // Get top 5
+  };
+
+  // Filter data based on the selected instance
+  const filteredData =
+    selectedInstance === 'all'
+      ? getTop5Instances() // Show top 5 when 'all' is selected
+      : Instances?.data?.filter((instance) => instance.name === selectedInstance);
 
   function convertToBytes(sizeString) {
     if (!sizeString) return 0;
@@ -70,38 +85,24 @@ export default function OverviewAnalyticsView() {
     } else if (sizeString.toLowerCase().includes('mb')) {
       return size * 1024 * 1024; // Convert MB to bytes
     } else if (sizeString.toLowerCase().includes('gb')) {
-      return size * 1024 * 1024 * 1024; // Convert GB to bytes
+      return size * 1024 * 1024 * 1024;
     }
-    return size; // Return size directly if it's already in bytes
+    return size;
   }
 
-  function formatSize(bytes) {
-    if (bytes >= 1024 * 1024 * 1024) {
-      return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
-    } else if (bytes >= 1024 * 1024) {
-      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-    } else if (bytes >= 1024) {
-      return (bytes / 1024).toFixed(2) + ' KB';
-    } else {
-      return bytes + ' B';
-    }
-  }
-
-  // Convert file and folder sizes to bytes
   const totalFileStorageBytes = convertToBytes(File?.data?.total_size || '0kb'); // Convert file size to bytes
   const totalFolderStorageBytes = convertToBytes(data?.data?.formattedSize || '0kb'); // Convert folder size to bytes
 
-  // Calculate total storage in bytes
   const totalStorageBytes = totalFileStorageBytes + totalFolderStorageBytes;
 
-  // Format the total storage size to KB, MB, or GB dynamically
-  const totalStorageFormatted = formatSize(totalStorageBytes);
+  // Use fData to format the total storage
+  const totalStorageFormatted = fData(totalStorageBytes);
 
   const renderStorageOverview = (
     <FileStorageOverview
-      total={totalStorageBytes} // Pass the total storage as a number
+      total={totalStorageBytes} 
       chart={{
-        series: [totalStorageBytes], // Use byte values for accurate chart series
+        series: [totalStorageBytes], 
       }}
       data={[
         // {
@@ -124,7 +125,7 @@ export default function OverviewAnalyticsView() {
         },
         {
           name: 'All Folder',
-          usedStorage: data.data?.formattedSize || '0kb', // Dynamically set folder storage from useChartFolder response
+          usedStorage: data.data?.formattedSize || '0kb',
           filesCount: 223,
           icon: <Box component="img" src="/assets/icons/files/ic_folder.svg" />,
         },
@@ -139,9 +140,7 @@ export default function OverviewAnalyticsView() {
         sx={{
           mb: { xs: 3, md: 5 },
         }}
-      >
-      
-      </Typography>
+      ></Typography>
 
       <Grid container spacing={3}>
         <Grid xs={12} sm={6} md={3}>
@@ -197,45 +196,72 @@ export default function OverviewAnalyticsView() {
         </Grid>
 
         <Grid xs={12} md={12} lg={12}>
-          <AnalyticsWebsiteVisits
-            title="Statistik Instansi"
-            subheader="Data Instansi dan Total User, File, Folder"
-            chart={{
-              labels: Instances?.data?.map((item) => item.name) || [], // Mengambil nama instansi
-              series: [
-                {
-                  name: 'Total All User',
-                  type: 'column',
-                  fill: 'solid', // Fill solid untuk total semua pengguna
-                  data: Instances?.data?.map((item) => item.user_count.user_total) || [],
-                },
-                {
-                  name: 'Total Role Admin ',
-                  type: 'column',
-                  fill: 'gradient', // Fill gradient untuk total pengguna admin
-                  data: Instances?.data?.map((item) => item.user_count.role_admin_total) || [],
-                },
-                {
-                  name: 'Total Role User',
-                  type: 'column',
-                  fill: 'solid', // Fill solid untuk total pengguna reguler
-                  data: Instances?.data?.map((item) => item.user_count.role_user_total) || [],
-                },
-                {
-                  name: 'Total File',
-                  type: 'area',
-                  fill: 'gradient', // Fill gradient untuk total file
-                  data: Instances?.data?.map((item) => item.file_total) || [],
-                },
-                {
-                  name: 'Total Folder',
-                  type: 'line',
-                  fill: 'solid', // Fill solid untuk total folder
-                  data: Instances?.data?.map((item) => item.folder_total) || [],
-                },
-              ],
-            }}
-          />
+          <Grid xs={12}>
+            <FormControl fullWidth>
+              <InputLabel>Filter Instansi</InputLabel>
+              <Select
+                value={selectedInstance}
+                onChange={(e) => setSelectedInstance(e.target.value)}
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 200, // Maksimal tinggi dropdown
+                      overflowY: 'auto', // Tambahkan scroll jika melebihi maksimal tinggi
+                    },
+                  },
+                }}
+              >
+                <MenuItem value="all">5 Teratas</MenuItem>
+                {Instances?.data?.map((instance) => (
+                  <MenuItem key={instance.id} value={instance.name}>
+                    {instance.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid xs={12} md={12} lg={12}>
+            <AnalyticsWebsiteVisits
+              title="Statistik Instansi"
+              subheader="Data Instansi dan Total User, File, Folder"
+              chart={{
+                labels: filteredData?.map((item) => item.name) || [],
+                series: [
+                  {
+                    name: 'Total All User',
+                    type: 'column',
+                    fill: 'solid',
+                    data: filteredData?.map((item) => item.user_count.user_total) || [],
+                  },
+                  {
+                    name: 'Total Role Admin',
+                    type: 'column',
+                    fill: 'gradient',
+                    data: filteredData?.map((item) => item.user_count.role_admin_total) || [],
+                  },
+                  {
+                    name: 'Total Role User',
+                    type: 'column',
+                    fill: 'solid',
+                    data: filteredData?.map((item) => item.user_count.role_user_total) || [],
+                  },
+                  {
+                    name: 'Total File',
+                    type: 'area',
+                    fill: 'gradient',
+                    data: filteredData?.map((item) => item.file_total) || [],
+                  },
+                  {
+                    name: 'Total Folder',
+                    type: 'line',
+                    fill: 'solid',
+                    data: filteredData?.map((item) => item.folder_total) || [],
+                  },
+                ],
+              }}
+            />
+          </Grid>
         </Grid>
 
         <Grid xs={12} md={6} lg={4}>
@@ -266,7 +292,7 @@ export default function OverviewAnalyticsView() {
           />
         </Grid>
 
-        <Grid xs={12} md={6} lg={4}>
+        {/* <Grid xs={12} md={6} lg={4}>
           <AnalyticsCurrentVisits
             title="Current Visits"
             chart={{
@@ -275,20 +301,6 @@ export default function OverviewAnalyticsView() {
                 { label: 'Asia', value: 5435 },
                 { label: 'Europe', value: 1443 },
                 { label: 'Africa', value: 4443 },
-              ],
-            }}
-          />
-        </Grid>
-
-        {/* <Grid xs={12} md={6} lg={4}>
-          <AnalyticsCurrentSubject
-            title="Current Subject"
-            chart={{
-              categories: ['English', 'History', 'Physics', 'Geography', 'Chinese', 'Math'],
-              series: [
-                { name: 'Series 1', data: [80, 50, 30, 40, 100, 20] },
-                { name: 'Series 2', data: [20, 30, 40, 80, 20, 80] },
-                { name: 'Series 3', data: [44, 76, 78, 13, 43, 10] },
               ],
             }}
           />

@@ -3,7 +3,7 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 
 export const useFetchFolder = () => {
   const { data, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ['fetch.folder'],
+    queryKey: ['fetch.folder.admin'],
     queryFn: async () => {
       const response = await axiosInstance.get(endpoints.folder.list);
       const { data: result } = response.data;

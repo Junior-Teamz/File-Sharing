@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
@@ -27,11 +27,15 @@ import { useFetchTagNews } from '../newsTag/view/fetchNewsTag';
 import { TINY_API } from 'src/config-global';
 import { useQueryClient } from '@tanstack/react-query';
 import { paths } from 'src/routes/paths';
+import SlimSelect from 'slim-select';
+import '../../theme/Css/slimselect.css'
+import { useIndexTag } from '../tag/view/TagMutation';
 
 export default function AdminNewsForm() {
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const newsTagSelectRef = useRef();
 
   const { mutate: CreateNews, isPending } = useCreateNews({
     onSuccess: () => {
@@ -64,18 +68,45 @@ export default function AdminNewsForm() {
     },
   });
 
-  const { reset, handleSubmit, setValue, watch } = methods;
+  const {
+    reset,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = methods;
 
   const [editorLoading, setEditorLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
-  const { data: tagsResponse } = useFetchTagNews();
+  const { data: tagsResponse } = useIndexTag();
   const tags = tagsResponse?.data || [];
 
-  const onSubmit = async (data) => {
+  const slimSelect = new SlimSelect({
+    select: newsTagSelectRef.current,
+    placeholder: 'Pilih tag berita...',
+    closeOnSelect: false,
+    onChange: (selected) => {
+      const tagIds = selected.map((option) => option.value);
+      console.log('Selected Tag IDs:', tagIds); // Debug log
+      setSelectedTags(tagIds); // Store selected tags in state if needed
+      setValue('news_tag_ids', tagIds, { shouldValidate: true }); // Update form state
+    },
+  });
+
+  useEffect(() => {
+    methods.register('news_tag_ids', {
+      required: true,
+      validate: (value) => value.length > 0 || 'Minimal di isi satu tag berita',
+    });
+  }, [methods]);
+
+  const onSubmit = (data) => {
+    console.log('Data pada Submit:', data);
+
     if (data.news_tag_ids.length === 0) {
-      enqueueSnackbar('Please select at least one tag.', { variant: 'error' });
+      enqueueSnackbar('Pilih minimal satu tag.', { variant: 'warning' });
       return;
     }
 
@@ -85,29 +116,15 @@ export default function AdminNewsForm() {
       formData.append('content', data.content);
       formData.append('status', data.status);
       formData.append('thumbnail', data.thumbnail);
-      data.news_tag_ids.forEach((tagId) => {
-        formData.append('news_tag_ids[]', tagId);
-      });
 
-      CreateNews(formData);
+      // Tambahkan setiap ID tag ke FormData
+      data.news_tag_ids.forEach((tagId) => formData.append('news_tag_ids[]', tagId));
+
+      CreateNews(formData); // Panggil fungsi CreateNews
     } catch (error) {
-      console.error('Submission Error:', error);
+      console.error('Error Submit:', error);
     }
   };
-
-  const handleTagSelect = (tagId) => {
-    setSelectedTags((prev) =>
-      prev.includes(tagId) ? prev.filter((t) => t !== tagId) : [...prev, tagId]
-    );
-  };
-
-  useEffect(() => {
-    setValue('news_tag_ids', selectedTags);
-  }, [selectedTags, setValue]);
-
-  const filteredTags = tags.filter((tag) =>
-    tag.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleThumbnailChange = (event) => {
     const file = event.target.files[0];
@@ -119,6 +136,9 @@ export default function AdminNewsForm() {
     }
   };
 
+  const hasErrors = Object.keys(methods.formState.errors).length > 0;
+  console.log('Form Errors:', methods.formState.errors);
+
   const handleThumbnailRemove = () => {
     setValue('thumbnail', null);
     setThumbnailPreview(null);
@@ -128,44 +148,23 @@ export default function AdminNewsForm() {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3}>
-        <Grid item xs={12}>
+        <Grid xs={12}>
           <Card sx={{ p: 3, boxShadow: 2 }}>
             <Grid container spacing={3}>
               {/* Title Section */}
-              <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <Typography variant="h6">Title:</Typography>
-                {editorLoading && (
-                  <Box sx={{ textAlign: 'center', mt: 2 }}>
-                    <CircularProgress />
-                  </Box>
-                )}
-                <Editor
-                  apiKey={TINY_API}
-                  value={watch('title')}
-                  init={{
-                    height: 200,
-                    menubar: false,
-                    plugins: [
-                      'advlist',
-                      'autolink',
-                      'lists',
-                      'link',
-                      'image',
-                      'charmap',
-                      'print',
-                      'preview',
-                      'anchor',
-                    ],
-                    toolbar:
-                      'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent',
-                  }}
-                  onInit={() => setEditorLoading(false)}
-                  onEditorChange={(content) => setValue('title', content)}
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  {...methods.register('title')}
+                  error={!!errors.title}
+                  helperText={errors.title?.message}
                 />
               </Grid>
 
               {/* Content Section */}
-              <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <Typography variant="h6">Content:</Typography>
                 {editorLoading && (
                   <Box sx={{ textAlign: 'center', mt: 2 }}>
@@ -203,21 +202,31 @@ export default function AdminNewsForm() {
                       'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
                   }}
                   onInit={() => setEditorLoading(false)}
-                  onEditorChange={(content) => setValue('content', content)}
+                  onEditorChange={(content) =>
+                    setValue('content', content, { shouldValidate: true })
+                  }
                 />
+                {errors.content && (
+                  <Typography color="error" variant="caption">
+                    {errors.content.message}
+                  </Typography>
+                )}
               </Grid>
 
               {/* Thumbnail Upload Section */}
-              <Grid item xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <Box>
                   <Typography variant="h6" sx={{ mb: 1 }}>
                     Thumbnail:
                   </Typography>
+
                   <input
                     type="file"
                     accept="image/*"
                     onChange={handleThumbnailChange}
                     style={{ display: 'none' }}
+                    error={!!errors.thumbnail}
+                    helperText={errors.thumbnail?.message}
                     id="thumbnail-upload"
                   />
                   <label htmlFor="thumbnail-upload">
@@ -225,6 +234,11 @@ export default function AdminNewsForm() {
                       Upload Thumbnail
                     </Button>
                   </label>
+                  {errors.thumbnail && (
+                    <Typography color="error" variant="caption">
+                      {errors.thumbnail.message}
+                    </Typography>
+                  )}
                   {thumbnailPreview && (
                     <Box
                       sx={{
@@ -259,60 +273,39 @@ export default function AdminNewsForm() {
               </Grid>
 
               {/* Status Section */}
-              <Grid item xs={12} sm={6}>
-                <RHFSelect name="status" label="Status">
-                  <MenuItem value="published">Published</MenuItem>
-                  <MenuItem value="archived">Archived</MenuItem>
+              <Grid xs={12} sm={6}>
+                <RHFSelect
+                  name="status"
+                  label="Status"
+                  error={!!errors.status}
+                  helperText={errors.status?.message}
+                >
+                  <MenuItem value="published">Publik</MenuItem>
+                  <MenuItem value="archived">Arsip</MenuItem>
                 </RHFSelect>
               </Grid>
 
               {/* Tags Section */}
               <Grid xs={12}>
-                <Typography variant="h6" sx={{ mb: 1 }}>
-                  Tag berita:
-                </Typography>
-                <TextField
-                  placeholder="Cari tag berita..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">🔍</InputAdornment>,
-                  }}
-                  fullWidth
-                />
-                <Box
-                  mt={1}
-                  sx={{
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
-                    padding: '4px', // Reduced padding for a smaller look
-                    maxHeight: '100px', // Set a maximum height for the scroll area
-                    overflowY: 'auto', // Enable vertical scrolling
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '4px',
-                  }}
-                >
-                  {filteredTags.map((tag) => (
-                    <Chip
-                      key={tag.id}
-                      label={tag.name}
-                      color={selectedTags.includes(tag.id) ? 'primary' : 'default'}
-                      onClick={() => handleTagSelect(tag.id)}
-                      variant="outlined"
-                      sx={{
-                        padding: '2px 4px', // Adjust padding for smaller size
-                        fontSize: '0.8rem', // Smaller font size
-                      }}
-                    />
+                <Typography variant="h6">Tags:</Typography>
+                <select ref={newsTagSelectRef} id="news-tag-select" multiple>
+                  {tags.map((tag) => (
+                    <option key={tag.id} value={tag.id}>
+                      {tag.name}
+                    </option>
                   ))}
-                </Box>
+                </select>
+                {errors.news_tag_ids && (
+                  <Typography color="error" variant="caption">
+                    {errors.news_tag_ids.message}
+                  </Typography>
+                )}
               </Grid>
             </Grid>
 
             <Stack spacing={2} direction="row" sx={{ mt: 2 }}>
               <Button type="submit" variant="contained" disabled={isPending}>
-                {isPending ? <CircularProgress size={24} /> : 'Create News'}
+                {isPending ? <CircularProgress size={24} /> : 'Buat berita'}
               </Button>
               <Button variant="outlined" onClick={() => reset()} disabled={isPending}>
                 Reset

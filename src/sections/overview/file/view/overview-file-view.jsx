@@ -61,8 +61,8 @@ export default function OverviewFileView() {
     setFolderName(event.target.value);
   }, []);
 
-  const { data, isFetching, isLoading, refetch } = useChartFolder()
-  console.log(data)
+  const { data, isFetching, isLoading, refetch } = useChartFolder();
+  console.log(data);
 
   const handleCreateNewFolder = useCallback(() => {
     newFolder.onFalse();
@@ -108,18 +108,17 @@ export default function OverviewFileView() {
           filesCount: 223,
           icon: <Box component="img" src="/assets/icons/files/ic_document.svg" />,
         },
-       {
-        name: 'Folder',
-        usedStorage: data.data?.formattedSize || '0kb', // Dynamically set folder storage from useChartFolder response    
-        filesCount: 223,
-        icon: <Box component="img" src="/assets/icons/files/ic_folder.svg" />,
-      },
+        {
+          name: 'Folder',
+          usedStorage: data.data?.formattedSize || '0kb', // Dynamically set folder storage from useChartFolder response
+          filesCount: 223,
+          icon: <Box component="img" src="/assets/icons/files/ic_folder.svg" />,
+        },
       ]}
     />
   );
 
-  console.log("Formatted Size: ", data.data?.formattedSize);
-
+  console.log('Formatted Size: ', data.data?.formattedSize);
 
   return (
     <>
@@ -208,86 +207,9 @@ export default function OverviewFileView() {
                 ],
               }}
             />
-
-            <div>
-              <FileManagerPanel
-                title="Folders"
-                link={paths.dashboard.fileManager}
-                onOpen={newFolder.onTrue}
-                sx={{ mt: 5 }}
-              />
-
-              <Scrollbar>
-                <Stack direction="row" spacing={3} sx={{ pb: 3 }}>
-                  {_folders.map((folder) => (
-                    <FileManagerFolderItem
-                      key={folder.id}
-                      folder={folder}
-                      onDelete={() => console.info('DELETE', folder.id)}
-                      sx={{
-                        ...(_folders.length > 3 && {
-                          minWidth: 222,
-                        }),
-                      }}
-                    />
-                  ))}
-                </Stack>
-              </Scrollbar>
-
-              <FileManagerPanel
-                title="Recent Files"
-                link={paths.dashboard.fileManager}
-                onOpen={upload.onTrue}
-                sx={{ mt: 2 }}
-              />
-
-              <Stack spacing={2}>
-                {_files.slice(0, 5).map((file) => (
-                  <FileRecentItem
-                    key={file.id}
-                    file={file}
-                    onDelete={() => console.info('DELETE', file.id)}
-                  />
-                ))}
-              </Stack>
-            </div>
-          </Grid>
-
-          <Grid xs={12} md={6} lg={4}>
-            <UploadBox
-              onDrop={handleDrop}
-              placeholder={
-                <Stack spacing={0.5} alignItems="center" sx={{ color: 'text.disabled' }}>
-                  <Iconify icon="eva:cloud-upload-fill" width={40} />
-                  <Typography variant="body2">Upload file</Typography>
-                </Stack>
-              }
-              sx={{
-                mb: 3,
-                py: 2.5,
-                width: 'auto',
-                height: 'auto',
-                borderRadius: 1.5,
-              }}
-            />
-
-            <Box sx={{ display: { xs: 'none', sm: 'block' } }}>{renderStorageOverview}</Box>
-
-            {/* <FileUpgrade sx={{ mt: 3 }} /> */}
           </Grid>
         </Grid>
       </Container>
-
-      <FileManagerNewFolderDialog open={upload.value} onClose={upload.onFalse} />
-
-      <FileManagerNewFolderDialog
-        open={newFolder.value}
-        onClose={newFolder.onFalse}
-        title="New Folder"
-        folderName={folderName}
-        onChangeFolderName={handleChangeFolderName}
-        onCreate={handleCreateNewFolder}
-      />
     </>
   );
 }

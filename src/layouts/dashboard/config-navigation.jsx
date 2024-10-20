@@ -13,6 +13,7 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import StyleIcon from '@mui/icons-material/Style';
 import GavelIcon from '@mui/icons-material/Gavel';
 import StarIcon from '@mui/icons-material/Star';
+import Groups2Icon from '@mui/icons-material/Groups2';
 
 // ----------------------------------------------------------------------
 
@@ -55,6 +56,7 @@ const ICONS = {
   tagsnews: <StyleIcon />,
   legalbasis: <GavelIcon />,
   Favorite: <StarIcon />,
+  share: <Groups2Icon/>
 };
 
 // ----------------------------------------------------------------------
@@ -79,33 +81,21 @@ export function useNavData() {
             path: paths.dashboard.fileManager,
             icon: ICONS.folder,
           },
-
-          // {
-          //   title: t('ecommerce'),
-          //   path: paths.dashboard.general.ecommerce,
-          //   icon: ICONS.ecommerce,
-          // },
           {
             title: t('analytics'),
             path: paths.dashboard.general.analytics,
             icon: ICONS.analytics,
           },
-
+          {
+            title: t('shared with me'),
+            path: paths.dashboard.shareFilFolder,
+            icon: ICONS.share,
+          },
           {
             title: t('favorite'),
             path: paths.dashboard.favorite,
             icon: ICONS.Favorite,
           },
-          // {
-          //   title: t('banking'),
-          //   path: paths.dashboard.general.banking,
-          //   icon: ICONS.banking,
-          // },
-          // {
-          //   title: t('booking'),
-          //   path: paths.dashboard.general.booking,
-          //   icon: ICONS.booking,
-          // },
           {
             title: t('file'),
             path: paths.dashboard.general.file,

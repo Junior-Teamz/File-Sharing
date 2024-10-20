@@ -4,8 +4,6 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 // utils
 import { fTimestamp } from 'src/utils/format-time';
 // _mock
@@ -41,10 +39,10 @@ const defaultFilters = {
 export default function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
 
-  const {data, isLoading} = useFetchFolder()
+  const { data, isLoading } = useFetchFolder();
 
   // console.log(data);
-  const {FolderFiles} = handleFolderFiles()
+  const { FolderFiles } = handleFolderFiles();
 
   const settings = useSettingsContext();
 
@@ -84,12 +82,6 @@ export default function FileManagerView() {
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
-  const handleChangeView = useCallback((event, newView) => {
-    if (newView !== null) {
-      setView(newView);
-    }
-  }, []);
-
   const handleFilters = useCallback(
     (name, value) => {
       table.onResetPage();
@@ -127,10 +119,9 @@ export default function FileManagerView() {
   }, []);
 
   const handleTagChange = (tags) => {
-    setSelectedTags(tags); // Update the selected tags state
+    setSelectedTags(tags);
     console.log('Selected Tags:', tags);
   };
-
 
   const renderFilters = (
     <Stack
@@ -149,16 +140,6 @@ export default function FileManagerView() {
         dateError={dateError}
         typeOptions={FILE_TYPE_OPTIONS}
       />
-
-      <ToggleButtonGroup size="small" value={view} exclusive onChange={handleChangeView}>
-        <ToggleButton value="list">
-          <Iconify icon="solar:list-bold" />
-        </ToggleButton>
-
-        <ToggleButton value="grid">
-          <Iconify icon="mingcute:dot-grid-fill" />
-        </ToggleButton>
-      </ToggleButtonGroup>
     </Stack>
   );
 
@@ -200,38 +181,24 @@ export default function FileManagerView() {
         </Stack>
 
         {notFound ? (
-          <EmptyContent
-            filled
-            title="No Data"
-            sx={{
-              py: 10,
-            }}
-          />
+          <EmptyContent filled title="No Data" sx={{ py: 10 }} />
         ) : (
-          <>
-            {view === 'list' ? (
-              <FileManagerTable
-                table={table}
-                tableData={tableData}
-                dataFiltered={dataFiltered}
-                onDeleteRow={handleDeleteItem}
-                notFound={notFound}
-                onOpenConfirm={confirm.onTrue}
-              />
-            ) : (
-              <FileManagerGridView
-                table={table}
-                data={tableData}
-                dataFiltered={dataFiltered}
-                onDeleteItem={handleDeleteItem}
-                onOpenConfirm={confirm.onTrue}
-              />
-            )}
-          </>
+          <FileManagerGridView
+            table={table}
+            data={tableData}
+            dataFiltered={dataFiltered}
+            onDeleteItem={handleDeleteItem}
+            onOpenConfirm={confirm.onTrue}
+          />
         )}
       </Container>
 
-      <FileManagerNewFolderDialog onTagChange={handleTagChange} open={upload.value} onClose={upload.onFalse} />
+      <FileManagerNewFolderDialog
+        title="Buat Folder Baru "
+        onTagChange={handleTagChange}
+        open={upload.value}
+        onClose={upload.onFalse}
+      />
 
       <ConfirmDialog
         open={confirm.value}
@@ -263,12 +230,10 @@ export default function FileManagerView() {
 
 function applyFilter({ inputData, comparator, filters, dateError }) {
   const { name, type, startDate, endDate } = filters;
-  console.log(inputData); 
-  console.log(comparator); 
-  console.log(filters); 
-  console.log(dateError); 
-
-  
+  console.log(inputData);
+  console.log(comparator);
+  console.log(filters);
+  console.log(dateError);
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 

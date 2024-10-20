@@ -35,6 +35,7 @@ import { useIndexTag, useEditTag, useDeleteTag } from './TagMutation';
 import { useSnackbar } from 'notistack';
 import CustomPopover from 'src/components/custom-popover';
 import { useForm } from 'react-hook-form';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function TagListView() {
   const settings = useSettingsContext();
@@ -46,6 +47,7 @@ export default function TagListView() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedTags, setSelectedTags] = useState([]);
   const [searchQuery, setSearchQuery] = useState(''); // State for search input
+  const queryClient = useQueryClient();
 
   // Fetch tag data
   const { data, isLoading, isFetching, refetch, isError } = useIndexTag();
@@ -54,6 +56,7 @@ export default function TagListView() {
     onSuccess: () => {
       enqueueSnackbar('Tag Berhasil Dihapus', { variant: 'success' });
       refetch();
+      queryClient.invalidateQueries({ queryKey: ['tag.admin'] });
     },
     onError: (error) => {
       enqueueSnackbar(`Gagal menghapus tag: ${error.message}`, { variant: 'error' });
@@ -65,6 +68,7 @@ export default function TagListView() {
       enqueueSnackbar('Tag Berhasil Diperbarui', { variant: 'success' });
       refetch();
       handleEditDialogClose();
+      queryClient.invalidateQueries({ queryKey: ['tag.admin'] });
     },
     onError: (error) => {
       enqueueSnackbar(`Gagal memperbarui tag: ${error.message}`, { variant: 'error' });

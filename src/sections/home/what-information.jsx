@@ -26,51 +26,63 @@ import { MotionViewport, varFade } from 'src/components/animate';
 import { paths } from 'src/routes/paths';
 import { shadows } from 'src/theme/shadows';
 
-// ----------------------------------------------------------------------
-
 export default function InformationAndAnnouncements() {
   const theme = useTheme();
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [newsData, setNewsData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [totalPages, setTotalPages] = useState(1);
-  const [error, setError] = useState(null);
+  const [filteredNews, setFilteredNews] = useState([]);
 
-  const { data, isLoading } = useFetchNews({ searchQuery });
+  const { data, isLoading, error } = useFetchNews({ searchQuery });
 
+  // Mengurutkan berita berdasarkan tanggal terbaru
+  const sortedNews = data?.data?.data?.sort(
+    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+  );
+
+  // Update filtered news ketika data atau halaman berubah
   useEffect(() => {
-    if (data) {
-      setNewsData(data.data?.data || []);
-      setTotalPages(data.data?.last_page || 1);
+    if (sortedNews) {
+      const itemsPerPage = 4;
+      const startIndex = (page - 1) * itemsPerPage;
+      const paginatedData = sortedNews.slice(startIndex, startIndex + itemsPerPage);
+      console.log('Paginated Data:', paginatedData); // Debug log
+      setFilteredNews(paginatedData);
     }
-    setLoading(isLoading);
-  }, [data, isLoading]);
+  }, [sortedNews, page]);
 
+  // Debounced search handler
   const handleSearch = useCallback(
     debounce((e) => {
-      setSearchQuery(e.target.value);
-      setPage(1); // Reset page when searching
+      const value = e.target.value;
+      console.log('Search Query:', value); // Debug log
+      setSearchQuery(value);
+      setPage(1); // Reset page ketika mencari
     }, 1500),
     []
   );
 
-  const handlePageChange = useCallback((event, value) => {
-    setLoading(true); // Set loading to true when page changes
+  const handlePageChange = (event, value) => {
     setPage(value);
-    window.scrollTo(0, 0); // Scroll to top on page change
-  }, []);
+    window.scrollTo(0, 0); // Scroll ke atas saat mengganti halaman
+  };
 
-  // Calculate filtered news data based on the search query
-  const filteredNewsData = newsData.filter((news) =>
-    news.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter the news based on search query
+  useEffect(() => {
+    if (sortedNews) {
+      const filteredData = sortedNews.filter(news =>
+        news.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
 
-  // Calculate the number of items to display per page
-  const itemsPerPage = 4;
-  const startIndex = (page - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentNewsData = filteredNewsData.slice(startIndex, endIndex);
+      const itemsPerPage = 4;
+      const startIndex = (page - 1) * itemsPerPage;
+      const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+      console.log('Filtered Data:', filteredData); // Debug log
+      setFilteredNews(paginatedData);
+    }
+  }, [sortedNews, searchQuery, page]);
+
+  const totalPages = Math.ceil((data?.data?.data?.length || 0) / 4);
+
 
   return (
     <Container
@@ -108,7 +120,7 @@ export default function InformationAndAnnouncements() {
         />
       </Box>
 
-      {loading ? (
+      {isLoading ? (
         <Box
           sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}
         >
@@ -118,7 +130,7 @@ export default function InformationAndAnnouncements() {
         <Typography variant="h6" align="center" color="error">
           Terjadi kesalahan saat mengambil berita: {error.message}
         </Typography>
-      ) : currentNewsData.length === 0 ? (
+      ) : filteredNews.length === 0 ? (
         <Box
           sx={{
             display: 'flex',
@@ -143,7 +155,7 @@ export default function InformationAndAnnouncements() {
         </Box>
       ) : (
         <Grid container spacing={3} justifyContent="center">
-          {currentNewsData.map((news) => {
+          {filteredNews.map((news) => {
             const formattedDate = new Date(news.created_at).toLocaleDateString('id-ID', {
               day: 'numeric',
               month: 'long',
@@ -158,7 +170,7 @@ export default function InformationAndAnnouncements() {
                       transition: '0.3s',
                       backgroundColor: theme.palette.background.paper,
                       boxShadow: shadows,
-                      height: { xs: 'auto', md: '450px' },
+                      minHeight: { xs: 'auto', md: '450px' }, // Use minHeight instead of height
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-between',
@@ -235,21 +247,7 @@ export default function InformationAndAnnouncements() {
                           <EventIcon sx={{ fontSize: 17, verticalAlign: 'middle', mr: 0.5 }} />
                           {formattedDate}
                         </Typography>
-
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          onClick={() =>
-                            (window.location.href = `${paths.news.detail}/${news.slug}`)
-                          }
-                          sx={{
-                            backgroundColor: '#80b918',
-                            fontSize: { xs: '0.75rem', md: '0.875rem' },
-                            '&:hover': {
-                              backgroundColor: '#55a630',
-                            },
-                          }}
-                        >
+                        <Button variant="outlined" size="small" sx={{ color: 'primary.main' }}>
                           Baca Selengkapnya
                         </Button>
                       </Box>
@@ -262,23 +260,14 @@ export default function InformationAndAnnouncements() {
         </Grid>
       )}
 
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
+      <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
         <Pagination
-          count={Math.ceil(filteredNewsData.length / itemsPerPage) || 1} // Ensure count is at least 1
+          count={totalPages}
           page={page}
           onChange={handlePageChange}
           color="primary"
-          boundaryCount={1}
           variant="outlined"
-          sx={{
-            '& .MuiPaginationItem-root': {
-              borderRadius: '8px',
-              '&.Mui-selected': {
-                backgroundColor: theme.palette.primary.main,
-                color: theme.palette.common.white,
-              },
-            },
-          }}
+          shape="rounded"
         />
       </Box>
     </Container>

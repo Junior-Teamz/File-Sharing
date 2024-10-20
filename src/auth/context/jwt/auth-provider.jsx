@@ -71,18 +71,16 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password) => {
     const data = { email, password };
-  
+
     try {
       const response = await axiosInstance.post(endpoints.auth.login, data);
       console.log('Login Response in AuthProvider:', response.data);
-  
-      const { accessToken, roles, is_superadmin, user } = response.data;
-  
-      setSession(accessToken); // Set session and add token to axios headers
-  
-      // // Set access token to localStorage
-      // localStorage.setItem('accessToken', accessToken);
-  
+
+      const {refreshToken, accessToken, roles, is_superadmin, user } = response.data;
+
+      setSession(accessToken);
+      setSession(refreshToken);
+
       dispatch({
         type: 'LOGIN',
         payload: {
@@ -91,7 +89,7 @@ export function AuthProvider({ children }) {
           is_superadmin,
         },
       });
-  
+
       // Return data to the caller
       return {
         accessToken,
@@ -104,28 +102,24 @@ export function AuthProvider({ children }) {
       throw error; // Rethrow error to be caught in the caller
     }
   }, []);
-  
+
   // REGISTER
   const register = useCallback(async (email, password, firstName, lastName) => {
     const data = { email, password, firstName, lastName };
-  
+
     const response = await axiosInstance.post(endpoints.auth.register, data);
     const { user } = response.data;
-  
+
     dispatch({ type: 'REGISTER', payload: { user } });
   }, []);
-  
+
   // LOGOUT
   const logout = useCallback(async () => {
     await axiosInstance.post(endpoints.auth.logout); // Panggil endpoint logout di server
-    
-    // Remove access token from sessionStorage and localStorage
-    // localStorage.removeItem('accessToken'); 
-    sessionStorage.removeItem('accessToken'); // or any token you have in session storage if applicable
-  
+    sessionStorage.removeItem(STORAGE_KEY); // Hapus access token
+    sessionStorage.removeItem('refreshToken'); // Hapus refresh token
     dispatch({ type: 'LOGOUT' });
   }, []);
-  
 
   // Status management
   const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';

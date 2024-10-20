@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -17,97 +17,82 @@ import Box from '@mui/material/Box';
 import MenuItem from '@mui/material/MenuItem';
 // components
 import Iconify from 'src/components/iconify';
-import { Upload } from 'src/components/upload';
-import { useMutationUploadFiles } from './view/folderDetail/useMutationUploadFiles';
-import { useIndexTag } from 'src/sections/tag/view/TagMutation';
 import { enqueueSnackbar } from 'notistack';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
-
-// ----------------------------------------------------------------------
+import { useMutationFolder } from '../overview/app/view/folders';
+import { useIndexTag } from '../tag/view/TagMutation';
 
 export default function FileManagerNewFolderDialog({
   title,
   open,
   onClose,
-  onCreate,
-  onUpdate,
-  folderName,
-  onChangeFolderName,
   onTagChange,
-  refetch,
   ...other
 }) {
   const [files, setFiles] = useState([]);
-  const { register, handleSubmit, reset, setValue } = useForm();
-  const { data, isLoading: isLoadingTags } = useIndexTag(); // Use useIndexTag
-  const tagsData = data?.data || []; // Ensure data is accessed properly
-  const useClient = useQueryClient();
+  const { register, handleSubmit, reset, setValue, getValues, formState: { errors }, setError } = useForm();
+  const { data, isLoading: isLoadingTags } = useIndexTag();
+  const tagsData = data?.data || [];
   const [selectedTags, setSelectedTags] = useState([]);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!open) {
-      setFiles([]);
-      reset(); // Reset form when dialog is closed
+    if (open) {
+      reset(); // Reset form when dialog is opened
+      setFiles([]); // Clear files on dialog open
+      setSelectedTags([]); // Reset selected tags on dialog open
+      setValue('name', ''); // Ensure the folder name is also reset
     }
-  }, [open, reset]);
+  }, [open, reset, setValue]);
 
-  const handleDrop = useCallback((acceptedFiles) => {
-    const newFiles = acceptedFiles.map((file) =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file),
-      })
-    );
-    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-  }, []);
-
-  const { mutate: UploadFiles, isPending: loadingUpload } = useMutationUploadFiles({
-    onSuccess: async () => {
-      enqueueSnackbar('Files Uploaded Successfully');
-      handleRemoveAllFiles();
-      reset(); // Reset form after successful upload
-      refetch(); // Trigger refetch after successful upload
-      onClose(); // Close dialog after successful upload
-      useClient.invalidateQueries({ queryKey: ['preview.image'] });
-      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
-    },
-    onError: (error) => {
-      enqueueSnackbar(`${error.errors.tag_ids}`, { variant: 'error' });
-    },
-  });
-
-  const handleUpload = () => {
-    if (!files.length) {
-      enqueueSnackbar('Please select files to upload', { variant: 'warning' });
+  const handleCreate = () => {
+    const nameValue = getValues('name');
+    if (!nameValue || !selectedTags.length) {
+      enqueueSnackbar('Please fill in the required fields: name and tags', { variant: 'warning' });
       return;
     }
 
     const formData = new FormData();
     files.forEach((file) => {
-      formData.append('file[]', file); // Adjust according to server-side expectations
+      formData.append('file[]', file);
     });
 
     selectedTags.forEach((tagId) => {
-      formData.append('tag_ids[]', tagId); // Change 'tags[]' to 'tag_ids[]'
+      formData.append('tag_ids[]', tagId);
     });
 
-    UploadFiles(formData);
+    formData.append('name', nameValue);
+
+    createFolder(formData);
   };
 
-  const handleRemoveFile = (inputFile) => {
-    setFiles((prevFiles) => prevFiles.filter((file) => file !== inputFile));
-  };
-
-  const handleRemoveAllFiles = () => {
-    setFiles([]);
-  };
+  const { mutate: createFolder, isPending: loadingUpload } = useMutationFolder({
+    onSuccess: () => {
+      enqueueSnackbar('Berhasil Membuat Folder', { variant: 'success' });
+      queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      reset();
+      setFiles([]);
+      setSelectedTags([]);
+      onClose();
+    },
+    onError: (error) => {
+      if (error.errors && error.errors.name) {
+        setError('name', {
+          type: 'manual',
+          message: error.errors.name[0],
+        });
+      } else {
+        enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
+      }
+    },
+  });
 
   const handleTagChange = (event) => {
     const value = event.target.value;
-    if (Array.isArray(value)) {
-      setSelectedTags(value); // Update local state with selected tag IDs
-    } else {
-      console.error('Unexpected value type:', value);
+    setSelectedTags(value);
+    if (typeof onTagChange === 'function') {
+      onTagChange(value);
     }
   };
 
@@ -116,15 +101,15 @@ export default function FileManagerNewFolderDialog({
       <DialogTitle sx={{ p: (theme) => theme.spacing(3, 3, 2, 3) }}>{title}</DialogTitle>
 
       <DialogContent dividers sx={{ pt: 1, pb: 0, border: 'none' }}>
-        {(onCreate || onUpdate) && (
-          <TextField
-            fullWidth
-            label="Folder name"
-            value={folderName}
-            onChange={onChangeFolderName}
-            sx={{ mb: 3 }}
-          />
-        )}
+        <TextField
+          fullWidth
+          label="Name"
+          {...register('name', { required: 'Nama Folder Harus Di Isi' })}
+          error={!!errors.name}
+          helperText={errors.name ? errors.name.message : ''}
+          sx={{ mb: 3 }}
+        />
+
         <FormControl fullWidth margin="dense">
           <InputLabel id="tags-label">Tags</InputLabel>
           <Select
@@ -170,8 +155,6 @@ export default function FileManagerNewFolderDialog({
             )}
           </Select>
         </FormControl>
-
-        <Upload multiple files={files} onDrop={handleDrop} onRemove={handleRemoveFile} />
       </DialogContent>
 
       <DialogActions>
@@ -179,45 +162,18 @@ export default function FileManagerNewFolderDialog({
           type="submit"
           variant="contained"
           startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-          onClick={handleUpload}
+          onClick={handleSubmit(handleCreate)}
         >
-          {loadingUpload ? 'Loading...' : 'Upload Files'}
+          {loadingUpload ? 'Loading...' : 'Create Folder'}
         </Button>
-
-        {!!files.length && (
-          <Button variant="outlined" color="inherit" onClick={handleRemoveAllFiles}>
-            Remove all
-          </Button>
-        )}
-
-        {(onCreate || onUpdate) && (
-          <Stack direction="row" justifyContent="flex-end" flexGrow={1}>
-            <Button variant="soft" onClick={onCreate || onUpdate}>
-              {onUpdate ? 'Save' : 'Create'}
-            </Button>
-          </Stack>
-        )}
       </DialogActions>
     </Dialog>
   );
 }
 
 FileManagerNewFolderDialog.propTypes = {
-  folderName: PropTypes.string,
-  onChangeFolderName: PropTypes.func,
-  onClose: PropTypes.func,
-  onCreate: PropTypes.func,
-  onUpdate: PropTypes.func,
-  open: PropTypes.bool,
   title: PropTypes.string,
-  refetch: PropTypes.func,
-  onTagChange: PropTypes.func,
-  tagsData: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-    })
-  ),
-  selectedTags: PropTypes.arrayOf(PropTypes.string),
-  isLoadingTags: PropTypes.bool,
+  open: PropTypes.bool,
+  onClose: PropTypes.func,
+  onTagChange: PropTypes.func.isRequired,
 };

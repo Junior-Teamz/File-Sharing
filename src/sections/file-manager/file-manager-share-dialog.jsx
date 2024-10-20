@@ -105,7 +105,7 @@ export default function FileManagerShareDialog({
       setInputSearch(''); // Clear search input after invite
       setSearchResults([]); // Clear search results after invite
       setSelectedUser(null); // Clear selected user after invite
-      useClient.invalidateQueries({queryKey:['fetch.folder']})
+      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
     } else {
       enqueueSnackbar('User ID or file ID is missing.', { variant: 'warning' }); // Show warning notification
     }
@@ -148,8 +148,8 @@ export default function FileManagerShareDialog({
               {searchResults.length > 0 ? (
                 searchResults.map((user) => (
                   <FileManagerInvitedItem
-                    key={user.id}
-                    person={user}
+                    key={user.id}  
+                    user={user}
                     onClick={() => handleUserSelect(user)} // Ensure onClick works
                   />
                 ))

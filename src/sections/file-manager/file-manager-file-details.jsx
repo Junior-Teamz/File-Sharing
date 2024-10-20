@@ -28,11 +28,13 @@ import {
   useRemoveTagFile,
   useMutationDeleteFiles,
   usePreviewImage,
+  usePreviewVideo,
 } from './view/folderDetail/index';
 import { useIndexTag } from '../tag/view/TagMutation';
 import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import { useAddFavorite, useRemoveFavorite } from './view/favoritemutation';
+import { useQueryClient } from '@tanstack/react-query';
 
 // ----------------------------------------------------------------------
 
@@ -46,7 +48,7 @@ export default function FIleManagerFileDetails({
   onDelete,
   ...other
 }) {
-  const { enqueueSnackbar } = useSnackbar(); // Initialize enqueueSnackbar
+  const { enqueueSnackbar } = useSnackbar();
   const {
     name,
     size,
@@ -57,16 +59,23 @@ export default function FIleManagerFileDetails({
     shared_with,
     modifiedAt,
     email,
+    video_url,
     user,
     instance,
     tags: initialTags,
     updated_at,
-    isFavorited,
+    is_favorite,
+    file_url,
   } = item;
 
   // Only fetch preview if fileId is available
-  const { data: preview, isLoading: loadingPreview, isError: errorPreview } = usePreviewImage(id);
+  // const { data: preview, isLoading: loadingPreview, isError: errorPreview } = usePreviewImage(id);
+  // const { data: previewVideo, isLoading: LoadingVideo } = usePreviewVideo(id);
+  // console.log(previewVideo);
   const isFolder = item.type === 'folder';
+  const isImage = item.type === 'image';
+  const isVideo = item.type === 'video';
+  const isAudio = item.type === 'audio';
 
   // Inside your FileRecentItem component
   const { mutateAsync: addFavorite } = useAddFavorite();
@@ -74,6 +83,7 @@ export default function FIleManagerFileDetails({
 
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
+  const useClient = useQueryClient();
 
   const toggleTags = useBoolean(true);
   const share = useBoolean();
@@ -82,7 +92,8 @@ export default function FIleManagerFileDetails({
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
 
   const [inviteEmail, setInviteEmail] = useState('');
-  const favorite = useBoolean(isFavorited); // Set initial value from props
+  const favorite = useBoolean(is_favorite); // Set initial value from props
+  const [issLoading, setIsLoading] = useState(false);
 
   const { data: tagData, isLoading, isError } = useIndexTag();
   const addTagFile = useAddFileTag();
@@ -158,6 +169,7 @@ export default function FIleManagerFileDetails({
       enqueueSnackbar('File deleted successfully!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
+      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
       // Optionally, call a prop function to refresh the file list
     } catch (error) {
       console.error('Error deleting file:', error);
@@ -200,27 +212,36 @@ export default function FIleManagerFileDetails({
       });
   };
 
+  useEffect(() => {
+    favorite.setValue(is_favorite); // Set the state from props or backend response
+  }, [is_favorite]);
+
   const handleFavoriteToggle = useCallback(async () => {
     if (!id) {
       enqueueSnackbar('File ID is required to toggle favorite status!', { variant: 'error' });
       return;
     }
 
-    const payload = { file_id: id };
+    setIsLoading(true);
 
     try {
       if (favorite.value) {
-        await removeFavorite(payload);
+        // If already favorited, remove it
+        await removeFavorite(id);
         enqueueSnackbar('File removed from favorites!', { variant: 'success' });
       } else {
-        await addFavorite(payload);
+        // Otherwise, add it
+        await addFavorite(id);
         enqueueSnackbar('File added to favorites!', { variant: 'success' });
       }
 
-      // Toggle favorite state in the UI
+      // Toggle the UI state
       favorite.onToggle();
     } catch (error) {
+      console.error('Error updating favorite status:', error);
       enqueueSnackbar('Failed to update favorite status!', { variant: 'error' });
+    } finally {
+      setIsLoading(false);
     }
   }, [favorite.value, id, addFavorite, removeFavorite, enqueueSnackbar]);
 
@@ -233,9 +254,10 @@ export default function FIleManagerFileDetails({
         sx={{ typography: 'subtitle2' }}
       >
         Tags
-        <IconButton size="small" onClick={toggleTags.onToggle}>
+        <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
           <Iconify
-            icon={toggleTags.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
+            icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
+            sx={{ color: favorite.value ? 'yellow' : 'gray' }}
           />
         </IconButton>
       </Stack>
@@ -243,8 +265,8 @@ export default function FIleManagerFileDetails({
       {toggleTags.value && (
         <Autocomplete
           multiple
-          options={availableTags} // Array of tag objects
-          getOptionLabel={(option) => option.name} // Display name
+          options={availableTags}
+          getOptionLabel={(option) => option.name}
           value={availableTags.filter((tag) => tags.includes(tag.id))} // Display selected tags
           onChange={handleChangeTags} // Update tags state
           renderOption={(props, option) => (
@@ -337,7 +359,7 @@ export default function FIleManagerFileDetails({
         </IconButton>
       </Stack>
 
-       {shared_with.length > 0 ? (
+      {shared_with.length > 0 ? (
         shared_with.map((share) => (
           <FileManagerInvitedItem
             key={share.user.id}
@@ -352,7 +374,7 @@ export default function FIleManagerFileDetails({
       )}
     </>
   );
-  
+
   return (
     <Drawer
       open={open}
@@ -375,7 +397,7 @@ export default function FIleManagerFileDetails({
             icon={<Iconify icon="eva:star-outline" />}
             checkedIcon={<Iconify icon="eva:star-fill" />}
             checked={favorite.value}
-            onChange={handleFavoriteToggle} // Toggle favorite state
+            onChange={handleFavoriteToggle} 
           />
         </Stack>
 
@@ -399,15 +421,46 @@ export default function FIleManagerFileDetails({
               src="/assets/icons/files/ic_folder.svg"
               alt="Folder Icon"
             />
-          ) : loadingPreview ? (
-            // Show loading text while the preview is loading
-            <Typography>Loading preview...</Typography>
-          ) : errorPreview ? (
-            // Show error message if there was an error loading the preview
-            <Typography>Error loading preview.</Typography>
+          ) : ['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(item.type) ? (
+            <Box
+              component="img"
+              src={file_url}
+              alt={item.name}
+              style={{ maxWidth: '100%', height: 'auto' }}
+            />
+          ) : [
+              'mp4',
+              'mkv',
+              'webm',
+              '.mov',
+              'mpeg1',
+              'mpeg2',
+              'mpeg4',
+              'mpg',
+              'avi',
+              'wmv',
+              'mpegps',
+              'flv',
+              '3gpp',
+              'webm',
+              'dnxhr',
+              'prores',
+              'cineform',
+              'hevc',
+            ].includes(item.type) ? (
+            <video controls style={{ maxWidth: '100%', height: 'auto' }}>
+              <source src={video_url} type={`video/${item.type}`} />
+              Your browser does not support the video tag.
+            </video>
+          ) : ['mp3', 'wav', 'ogg', 'm4p', 'mxp4', 'msv'].includes(item.type) ? (
+            <Box component="div">
+              <audio controls>
+                <source src={file_url} type={`audio/${item.type}`} />
+                Your browser does not support the audio element.
+              </audio>
+            </Box>
           ) : (
-            // Show image preview if the item is a file
-            <img src={preview} alt={item.name} style={{ maxWidth: '100%', height: 'auto' }} />
+            <span>Unsupported file type</span> // Optional fallback for unsupported types
           )}
 
           <Typography variant="subtitle2">{name}</Typography>
@@ -440,7 +493,7 @@ export default function FIleManagerFileDetails({
               </Box>
               {user?.email}
             </Stack>
-          
+
             <Stack direction="row" alignItems="center" sx={{ typography: 'subtitle2' }}>
               Instansi
             </Stack>
@@ -473,7 +526,7 @@ export default function FIleManagerFileDetails({
               setInviteEmail('');
             }}
           />
-          
+
           {renderShared}
 
           <Button fullWidth size="small" color="inherit" variant="outlined" onClick={onClose}>

@@ -43,6 +43,9 @@ export const paths = {
     jwt: {
       login: `${ROOTS.AUTH}/jwt/login`,
       register: `${ROOTS.AUTH}/jwt/register`,
+      forgotPassword: `${ROOTS.AUTH_DEMO}/classic/forgot-password`,
+      newPassword: `${ROOTS.AUTH_DEMO}/classic/new-password`,
+      verify: `${ROOTS.AUTH_DEMO}/classic/verify`,
     },
   },
   authDemo: {
@@ -57,6 +60,7 @@ export const paths = {
   dashboarduser: {
     root: ROOTS.DashboardUser,
     shared: `${ROOTS.DashboardUser}/shared-with-me`,
+    favorite: `${ROOTS.DashboardUser}/favorite`,
   },
   // DASHBOARD
   dashboard: {
@@ -68,6 +72,7 @@ export const paths = {
     // calendar: `${ROOTS.DASHBOARD}/calendar`,
 
     fileManager: `${ROOTS.DASHBOARD}/file-manager`,
+    shareFilFolder: `${ROOTS.DASHBOARD}/shared-with-me`,
     permission: `${ROOTS.DASHBOARD}/permission`,
     favorite: `${ROOTS.DASHBOARD}/favorite`,
     general: {

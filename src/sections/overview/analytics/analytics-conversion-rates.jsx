@@ -18,7 +18,7 @@ export default function AnalyticsConversionRates({ title, subheader, chart, ...o
     tooltip: {
       marker: { show: false },
       y: {
-        formatter: (value) => `${fNumber(value)} `, 
+        formatter: (value) => `${fNumber(value)} `,
       },
       title: {
         formatter: () => '',
@@ -26,14 +26,19 @@ export default function AnalyticsConversionRates({ title, subheader, chart, ...o
     },
     plotOptions: {
       bar: {
-        horizontal: true,
-        barHeight: '28%',
+        horizontal: false,  // Ubah ke false untuk arah vertikal (Y)
         borderRadius: 2,
+        distributed: false,
+        columnWidth: '28%', // Atur lebar kolom
       },
     },
     xaxis: {
-      // Menggunakan "Tag {tag.name}" sebagai label di sumbu X
-      categories: labels.map((label) => `Tag ${label}`), 
+      categories: labels, // Menggunakan label di sumbu X
+    },
+    yaxis: {
+      labels: {
+        formatter: (value) => fNumber(value),
+      },
     },
     ...options,
   });

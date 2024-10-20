@@ -14,7 +14,7 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 // ----------------------------------------------------------------------
 
-export default function FileManagerInvitedItem({ user, onClick, permissions }) {
+export default function FileManagerInvitedItem({person, user, onClick, permissions }) {
   const [currentPermission, setPermission] = useState(permissions || 'view');
 
   const popover = usePopover();
@@ -111,7 +111,11 @@ export default function FileManagerInvitedItem({ user, onClick, permissions }) {
 }
 
 FileManagerInvitedItem.propTypes = {
-  user: PropTypes.object.isRequired,
+  person: PropTypes.object.isRequired,
+  user: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    email: PropTypes.string.isRequired,
+  }).isRequired,
   permissions: PropTypes.string.isRequired,
   onClick: PropTypes.func, // Add onClick prop type
 };

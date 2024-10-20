@@ -159,7 +159,7 @@ export default function FileManagerFolderItem({
         },
       }}
     >
-      {folder.shared?.map((person) => (
+      {folder.shared_with?.map((person) => (
         <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
       ))}
     </AvatarGroup>

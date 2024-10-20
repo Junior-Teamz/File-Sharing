@@ -1,7 +1,7 @@
 import { useFetchFolder } from "src/sections/overview/app/view/folders"
 
 export const handleFolderFiles = () => {
-    const {data} = useFetchFolder()
+    const {data,  refetch} = useFetchFolder()
     
     const folderss = data.folders.map((folder, id) => {
         return folder
@@ -14,7 +14,8 @@ export const handleFolderFiles = () => {
     const FolderFiles = [...folderss, ...filess];
 
     return {
-       FolderFiles
+       FolderFiles,
+       refetch,
     }
   
 }

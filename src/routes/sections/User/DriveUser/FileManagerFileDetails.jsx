@@ -58,6 +58,8 @@ export default function FIleManagerFileDetails({
     instance,
     tags: initialTags,
     updated_at,
+    video_url,
+    file_url,
     email,
   } = item;
 
@@ -65,6 +67,7 @@ export default function FIleManagerFileDetails({
 
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
+  const isFolder = item.type === 'folder';
 
   const toggleTags = useBoolean(true);
   const share = useBoolean();
@@ -352,11 +355,59 @@ export default function FIleManagerFileDetails({
             bgcolor: 'background.neutral',
           }}
         >
-          <img
-            src={image_url}
-            alt={name}
-            style={{ height: 96, width: 96, borderRadius: '12px', objectFit: 'cover' }} // Adjust style as needed
-          />
+          {isFolder ? (
+            <Box
+              sx={{
+                width: 50,
+                height: 40,
+                flexShrink: 0,
+                objectFit: 'cover',
+              }}
+              component="img"
+              src="/assets/icons/files/ic_folder.svg"
+              alt="Folder Icon"
+            />
+          ) : ['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(item.type) ? (
+            <Box
+              component="img"
+              src={file_url}
+              alt={item.name}
+              style={{ maxWidth: '100%', height: 'auto' }}
+            />
+          ) : [
+              'mp4',
+              'mkv',
+              'webm',
+              '.mov',
+              'mpeg1',
+              'mpeg2',
+              'mpeg4',
+              'mpg',
+              'avi',
+              'wmv',
+              'mpegps',
+              'flv',
+              '3gpp',
+              'webm',
+              'dnxhr',
+              'prores',
+              'cineform',
+              'hevc',
+            ].includes(item.type) ? (
+            <video controls style={{ maxWidth: '100%', height: 'auto' }}>
+              <source src={video_url} type={`video/${item.type}`} />
+              Your browser does not support the video tag.
+            </video>
+          ) : ['mp3', 'wav', 'ogg', 'm4p', 'mxp4', 'msv'].includes(item.type) ? (
+            <Box component="div">
+              <audio controls>
+                <source src={file_url} type={`audio/${item.type}`} />
+                Your browser does not support the audio element.
+              </audio>
+            </Box>
+          ) : (
+            <span>Unsupported file type</span> // Optional fallback for unsupported types
+          )}
 
           <Typography variant="subtitle2">{name}</Typography>
           <Typography variant="body2" color="text.secondary">
