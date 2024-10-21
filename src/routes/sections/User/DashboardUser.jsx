@@ -6,10 +6,10 @@ import { LoadingScreen } from 'src/components/loading-screen';
 import UsersPage from './UsersPage';
 import DashboardUserLayout from '../dashboarduser/Layout';
 import { element } from 'prop-types';
-import { FileManagerDetailUsers } from './FIleDetail/FileManagerDetailUsers';
 import AccountView from './DriveUser/user-account-view';
 import ShareUserPage from './ShareUserPage';
 import FavoritePage from './FavoritePage';
+import { FilemanagerDetailUsers } from './FIleDetail';
 
 export const DashboardUser = [
   {
@@ -25,7 +25,7 @@ export const DashboardUser = [
     ),
     children: [
       { element: <UsersPage />, index: true },
-      { path: 'folder/:id', element: <FileManagerDetailUsers /> },
+      { path: 'folder/:id', element: <FilemanagerDetailUsers /> },
       { path: 'akun', element: <AccountView /> },
       { path: 'shared-with-me', element: <ShareUserPage /> },
       { path: 'favorite', element: <FavoritePage /> },
