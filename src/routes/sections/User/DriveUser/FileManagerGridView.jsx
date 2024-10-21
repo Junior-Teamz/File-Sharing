@@ -90,12 +90,12 @@ export default function FileManagerGridView({
   const endIndex = startIndex + rowsPerPage;
   const currentData = dataFiltered
     .filter((i) => i.type !== 'folder')
-    .sort((a, b) => new Date(b.modifiedAt) - new Date(a.modifiedAt)) 
+    .sort((a, b) => new Date(b.modifiedAt) - new Date(a.modifiedAt))
     .slice(startIndex, endIndex);
 
   const handleTagChange = useCallback((tags) => {
-    setSelectedTags(tags); 
-  }, []); 
+    setSelectedTags(tags);
+  }, []);
 
   return (
     <>
