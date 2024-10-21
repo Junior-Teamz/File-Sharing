@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState, useCallback } from 'react';
-// @mui
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -9,23 +8,19 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import Dialog from '@mui/material/Dialog';
 import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
-import MenuItem from '@mui/material/MenuItem';
-// components
 import Iconify from 'src/components/iconify';
 import { Upload } from 'src/components/upload';
 import { enqueueSnackbar } from 'notistack';
-import { useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMutationUploadFiles } from './view/folderDetail/useMutationUploadFiles';
 import { useIndexTag } from '../tag/view/TagMutation';
+import { RHFAutocomplete } from 'src/components/hook-form';
 import { fData } from 'src/utils/format-number';
 
-export default function FileManagerFileDialog({
+export default function FileManageFileDialog({
   title,
   open,
   onClose,
@@ -37,23 +32,23 @@ export default function FileManagerFileDialog({
   refetch = () => {},
   ...other
 }) {
+  const methods = useForm();
+  const queryClient = useQueryClient();
   const [files, setFiles] = useState([]);
-  const [progress, setProgress] = useState(0); // Tambahkan state progress
-  const useClient = useQueryClient();
-  const { register, handleSubmit, reset, setValue } = useForm();
+  const [progress, setProgress] = useState(0);
   const { data, isLoading: isLoadingTags } = useIndexTag();
   const tagsData = data?.data || [];
-
   const [selectedTags, setSelectedTags] = useState([]);
 
   useEffect(() => {
     if (!open) {
       setFiles([]);
-      reset(); // Reset form fields
-      setSelectedTags([]); // Reset selected tags
-      setProgress(0); // Reset upload progress
+      methods.reset();
+      setSelectedTags([]);
+      setProgress(0);
     }
-  }, [open, reset]);
+  }, [open, methods]);
+
   const handleDrop = useCallback((acceptedFiles) => {
     const newFiles = acceptedFiles.map((file) =>
       Object.assign(file, {
@@ -65,17 +60,23 @@ export default function FileManagerFileDialog({
 
   const { mutate: uploadFiles, isPending: loadingUpload } = useMutationUploadFiles({
     onSuccess: () => {
-      enqueueSnackbar('Files Uploaded Successfully');
+      enqueueSnackbar('Files Uploaded Successfully', { variant: 'success' });
       handleRemoveAllFiles();
-      reset();
+      methods.reset();
       onClose();
-      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
     },
     onError: (error) => {
-      enqueueSnackbar(error.message, { variant: 'error' });
+      const errorMessage =
+        error.response?.data?.errors
+          ? Object.entries(error.response.data.errors)
+              .flatMap(([key, messages]) => messages.map((message) => `${key}: ${message}`))
+              .join(', ')
+          : 'Upload failed. Please try again.';
+      enqueueSnackbar(errorMessage, { variant: 'error' });
     },
     onUploadProgress: (percentCompleted) => {
-      setProgress(percentCompleted); // Update progress state
+      setProgress(percentCompleted);
     },
   });
 
@@ -85,167 +86,134 @@ export default function FileManagerFileDialog({
       return;
     }
 
+    if (!selectedTags.length) {
+      enqueueSnackbar('Please select at least one tag', { variant: 'warning' });
+      return;
+    }
+
     const formData = new FormData();
-     // Reset progress before upload
-     setProgress(0);
+    setProgress(0);
 
     files.forEach((file) => {
-      formData.append('file[]', file); // Sesuaikan dengan server-side
+      formData.append('file[]', file); // Adjust according to server-side expectations
     });
 
     selectedTags.forEach((tagId) => {
-      formData.append('tag_ids[]', tagId);
+      formData.append('tag_ids[]', tagId); // Send tag ids
     });
 
-    uploadFiles(formData); // Mulai upload file
+    uploadFiles(formData);
   };
 
   const handleRemoveFile = (inputFile) => {
     setFiles((prevFiles) => prevFiles.filter((file) => file !== inputFile));
-    const { [inputFile.name]: removed, ...rest } = uploadProgress; // Remove progress of the removed file
-    setUploadProgress(rest);
+    URL.revokeObjectURL(inputFile.preview);
   };
 
   const handleRemoveAllFiles = () => {
+    files.forEach((file) => URL.revokeObjectURL(file.preview));
     setFiles([]);
-    setProgress(0); // Reset upload progress when removing all files
-  }
-  const handleTagChange = (event) => {
-    const value = event.target.value;
-    if (Array.isArray(value)) {
-      setSelectedTags(value);
-      if (typeof onTagChange === 'function') {
-        onTagChange(value);
-      } else {
-        console.warn('onTagChange is not a function');
-      }
-    } else {
-      console.error('Unexpected value type:', value);
-    }
+    setProgress(0);
   };
 
   return (
     <Dialog fullWidth maxWidth="sm" open={open} onClose={onClose} {...other}>
       <DialogTitle>{title}</DialogTitle>
 
-      <DialogContent dividers sx={{ pt: 1, pb: 0 }}>
-        {(onCreate || onUpdate) && (
-          <TextField
-            fullWidth
-            label="Folder name"
-            value={folderName}
-            onChange={onChangeFolderName}
-            sx={{ mb: 3 }}
-          />
-        )}
-        <FormControl fullWidth margin="dense">
-          <InputLabel id="tags-label">Tags</InputLabel>
-          <Select
-            labelId="tags-label"
-            id="tags"
-            multiple
-            value={selectedTags}
-            onChange={handleTagChange}
-            input={<OutlinedInput id="select-multiple-chip" label="Tags" />}
-            renderValue={(selected) => (
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: 0.5,
-                  maxHeight: 100,
-                  overflowY: 'auto',
+      <FormProvider {...methods}>
+        <form onSubmit={methods.handleSubmit((data) => console.log(data))}>
+          <DialogContent dividers>
+            {(onCreate || onUpdate) && (
+              <TextField
+                fullWidth
+                label="Folder name"
+                value={folderName}
+                onChange={onChangeFolderName}
+                sx={{ mb: 3 }}
+              />
+            )}
+            <FormControl fullWidth margin="dense">
+              <RHFAutocomplete
+                name="tags"
+                label="Tags"
+                multiple
+                options={tagsData}
+                getOptionLabel={(option) => option.name}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                onChange={(_, newValue) => {
+                  setSelectedTags(newValue.map((tag) => tag.id));
+                  methods.setValue('tags', newValue);
                 }}
-              >
-                {selected.map((tagId) => {
-                  const tag = tagsData.find((t) => t.id === tagId);
-                  return (
-                    <Chip
-                      key={tagId}
-                      label={tag ? tag.name : `Tag ${tagId} not found`}
-                      sx={{ mb: 0.5 }}
-                    />
-                  );
-                })}
+                renderTags={(value, getTagProps) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {value.map((tag, index) => (
+                      <Chip key={tag.id} label={tag.name} {...getTagProps({ index })} />
+                    ))}
+                  </Box>
+                )}
+                loading={isLoadingTags}
+              />
+            </FormControl>
+
+            <Upload multiple files={files} onDrop={handleDrop} onRemove={handleRemoveFile} />
+
+            {(loadingUpload || progress > 0) && (
+              <Box sx={{ width: '100%', mt: 2 }}>
+                {files.map((file) => (
+                  <Box key={file.name} sx={{ mb: 1 }}>
+                    <Box
+                      sx={{
+                        height: 10,
+                        backgroundColor: '#f0f0f0',
+                        borderRadius: '5px',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <Box
+                        sx={{ width: `${progress}%`, backgroundColor: '#4caf50', height: '100%' }}
+                      />
+                    </Box>
+                    <Box sx={{ textAlign: 'center', mt: 1 }}>
+                      {file.name} - {fData(file.size)} {progress}%
+                    </Box>
+                  </Box>
+                ))}
               </Box>
             )}
-          >
-            {isLoadingTags ? (
-              <MenuItem disabled>Loading...</MenuItem>
-            ) : tagsData.length > 0 ? (
-              tagsData.map((tag) => (
-                <MenuItem key={tag.id} value={tag.id}>
-                  {tag.name}
-                </MenuItem>
-              ))
-            ) : (
-              <MenuItem disabled>No tags available</MenuItem>
-            )}
-          </Select>
-        </FormControl>
+          </DialogContent>
 
-        <Upload multiple files={files} onDrop={handleDrop} onRemove={handleRemoveFile} />
-
-        {/* Progress Bar and File Sizes */}
-        {(loadingUpload || progress > 0) && (
-          <Box sx={{ width: '100%', mt: 2 }}>
-            {files.map((file) => (
-              <Box key={file.name} sx={{ mb: 1 }}>
-                <Box
-                  sx={{
-                    height: 10,
-                    backgroundColor: '#f0f0f0',
-                    borderRadius: '5px',
-                    overflow: 'hidden',
-                  }}
-                >
-                  <Box sx={{ width: `${progress}%`, backgroundColor: '#4caf50', height: '100%' }} />
-                </Box>
-                <Box sx={{ textAlign: 'center', mt: 1 }}>
-                  {file.name} -  {fData(file.size)} {progress}%
-                </Box>
-              </Box>
-            ))}
-          </Box>
-        )}
-      </DialogContent>
-
-      <DialogActions>
-        <Button
-          type="submit"
-          variant="contained"
-          startIcon={
-            loadingUpload ? (
-              <Iconify icon="eva:loader-outline" spin />
-            ) : (
-              <Iconify icon="eva:cloud-upload-fill" />
-            )
-          }
-          onClick={handleUpload}
-          disabled={loadingUpload} // Disable tombol saat sedang upload
-        >
-          {loadingUpload ? 'Uploading...' : 'Upload Files'}
-        </Button>
-
-        {!!files.length && (
-          <Button variant="outlined" color="inherit" onClick={handleRemoveAllFiles}>
-            Remove all
-          </Button>
-        )}
-
-        {(onCreate || onUpdate) && (
-          <Stack direction="row" justifyContent="flex-end" flexGrow={1}>
-            <Button variant="soft" onClick={onUpdate || onCreate}>
-              {onUpdate ? 'Save' : 'Create'}
+          <DialogActions>
+            <Button
+              type="submit"
+              variant="contained"
+              startIcon={<Iconify icon="eva:cloud-upload-fill" />}
+              onClick={handleUpload}
+              disabled={loadingUpload}
+            >
+              {loadingUpload ? 'Loading...' : 'Upload Files'}
             </Button>
-          </Stack>
-        )}
-      </DialogActions>
+
+            {!!files.length && (
+              <Button variant="outlined" color="inherit" onClick={handleRemoveAllFiles}>
+                Remove all
+              </Button>
+            )}
+
+            {(onCreate || onUpdate) && (
+              <Stack direction="row" justifyContent="flex-end" flexGrow={1}>
+                <Button variant="soft" onClick={onUpdate || onCreate}>
+                  {onUpdate ? 'Save' : 'Create'}
+                </Button>
+              </Stack>
+            )}
+          </DialogActions>
+        </form>
+      </FormProvider>
     </Dialog>
   );
 }
 
-FileManagerFileDialog.propTypes = {
+FileManageFileDialog.propTypes = {
   folderName: PropTypes.string,
   onChangeFolderName: PropTypes.func,
   onClose: PropTypes.func,
@@ -255,12 +223,4 @@ FileManagerFileDialog.propTypes = {
   title: PropTypes.string,
   refetch: PropTypes.func,
   onTagChange: PropTypes.func.isRequired,
-  tagsData: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-    })
-  ),
-  selectedTags: PropTypes.arrayOf(PropTypes.string),
-  isLoadingTags: PropTypes.bool,
 };

@@ -1,3 +1,4 @@
+// Import necessary components and hooks
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import * as Yup from 'yup';
@@ -19,7 +20,7 @@ import {
   IconButton,
 } from '@mui/material';
 import { Editor } from '@tinymce/tinymce-react';
-import FormProvider, { RHFTextField, RHFSelect } from 'src/components/hook-form';
+import FormProvider, { RHFTextField, RHFSelect, RHFAutocomplete } from 'src/components/hook-form';
 import { useRouter } from 'src/routes/hooks';
 import { useCreateNews } from './view/fetchNews';
 import { Close as CloseIcon } from '@mui/icons-material';
@@ -27,21 +28,18 @@ import { useFetchTagNews } from '../newsTag/view/fetchNewsTag';
 import { TINY_API } from 'src/config-global';
 import { useQueryClient } from '@tanstack/react-query';
 import { paths } from 'src/routes/paths';
-import SlimSelect from 'slim-select';
-import '../../theme/Css/slimselect.css'
 import { useIndexTag } from '../tag/view/TagMutation';
 
 export default function AdminNewsForm() {
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const newsTagSelectRef = useRef();
 
   const { mutate: CreateNews, isPending } = useCreateNews({
     onSuccess: () => {
       enqueueSnackbar('Berita berhasil dibuat', { variant: 'success' });
       reset();
-      router.push(paths.dashboard.AdminNews.list); // Redirect to the news list
+      router.push(paths.dashboard.AdminNews.list);
       queryClient.invalidateQueries({ queryKey: ['list.news'] });
     },
     onError: (error) => {
@@ -77,23 +75,9 @@ export default function AdminNewsForm() {
   } = methods;
 
   const [editorLoading, setEditorLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTags, setSelectedTags] = useState([]);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
   const { data: tagsResponse } = useIndexTag();
-  const tags = tagsResponse?.data || [];
-
-  const slimSelect = new SlimSelect({
-    select: newsTagSelectRef.current,
-    placeholder: 'Pilih tag berita...',
-    closeOnSelect: false,
-    onChange: (selected) => {
-      const tagIds = selected.map((option) => option.value);
-      console.log('Selected Tag IDs:', tagIds); // Debug log
-      setSelectedTags(tagIds); // Store selected tags in state if needed
-      setValue('news_tag_ids', tagIds, { shouldValidate: true }); // Update form state
-    },
-  });
+  const tags = Array.isArray(tagsResponse?.data) ? tagsResponse.data : [];
 
   useEffect(() => {
     methods.register('news_tag_ids', {
@@ -103,8 +87,6 @@ export default function AdminNewsForm() {
   }, [methods]);
 
   const onSubmit = (data) => {
-    console.log('Data pada Submit:', data);
-
     if (data.news_tag_ids.length === 0) {
       enqueueSnackbar('Pilih minimal satu tag.', { variant: 'warning' });
       return;
@@ -117,13 +99,11 @@ export default function AdminNewsForm() {
       formData.append('status', data.status);
       formData.append('thumbnail', data.thumbnail);
 
-      // Tambahkan setiap ID tag ke FormData
+      // Add each selected tag ID to FormData
       data.news_tag_ids.forEach((tagId) => formData.append('news_tag_ids[]', tagId));
 
       CreateNews(formData); // Panggil fungsi CreateNews
-    } catch (error) {
-      console.error('Error Submit:', error);
-    }
+    } catch (error) {}
   };
 
   const handleThumbnailChange = (event) => {
@@ -135,9 +115,6 @@ export default function AdminNewsForm() {
       reader.readAsDataURL(file);
     }
   };
-
-  const hasErrors = Object.keys(methods.formState.errors).length > 0;
-  console.log('Form Errors:', methods.formState.errors);
 
   const handleThumbnailRemove = () => {
     setValue('thumbnail', null);
@@ -288,13 +265,34 @@ export default function AdminNewsForm() {
               {/* Tags Section */}
               <Grid xs={12}>
                 <Typography variant="h6">Tags:</Typography>
-                <select ref={newsTagSelectRef} id="news-tag-select" multiple>
-                  {tags.map((tag) => (
-                    <option key={tag.id} value={tag.id}>
-                      {tag.name}
-                    </option>
-                  ))}
-                </select>
+                <RHFAutocomplete
+                  name="news_tag_ids"
+                  label="Tags"
+                  multiple
+                  options={tags}
+                  getOptionLabel={(option) => option.name}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  onChange={(event, value) => {
+                    const selectedIds = (Array.isArray(value) ? value : []).map((tag) => tag.id);
+                    setValue('news_tag_ids', selectedIds);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      error={!!errors.news_tag_ids}
+                      helperText={errors.news_tag_ids?.message}
+                      variant="outlined"
+                      placeholder="Pilih Tag Berita"
+                    />
+                  )}
+                  renderTags={(value, getTagProps) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {value.map((tag, index) => (
+                        <Chip key={tag.id} label={tag.name} {...getTagProps({ index })} />
+                      ))}
+                    </Box>
+                  )}
+                />
                 {errors.news_tag_ids && (
                   <Typography color="error" variant="caption">
                     {errors.news_tag_ids.message}
@@ -303,12 +301,10 @@ export default function AdminNewsForm() {
               </Grid>
             </Grid>
 
-            <Stack spacing={2} direction="row" sx={{ mt: 2 }}>
-              <Button type="submit" variant="contained" disabled={isPending}>
+            {/* Submit Button */}
+            <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
+              <Button variant="contained" type="submit" disabled={isPending}>
                 {isPending ? <CircularProgress size={24} /> : 'Buat berita'}
-              </Button>
-              <Button variant="outlined" onClick={() => reset()} disabled={isPending}>
-                Reset
               </Button>
             </Stack>
           </Card>

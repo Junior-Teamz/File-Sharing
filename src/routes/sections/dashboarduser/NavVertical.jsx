@@ -19,6 +19,9 @@ import { useNavData } from './UserNavigation';
 import { NavToggleButton } from '../../../layouts/_common';
 
 import Kemen from '../../../../public/logo/Kemen3.png';
+import NavUpgrade from 'src/layouts/_common/nav-upgrade';
+
+
 // ----------------------------------------------------------------------
 
 export default function NavVertical({ openNav, onCloseNav }) {
@@ -71,7 +74,7 @@ export default function NavVertical({ openNav, onCloseNav }) {
 
       <Box sx={{ flexGrow: 1 }} />
 
-      {/* <NavUpgrade /> */}
+      <NavUpgrade />
     </Scrollbar>
   );
 

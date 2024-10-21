@@ -43,6 +43,7 @@ import FolderDetail from 'src/sections/file-manager/FolderDetail';
 import ShareWithMe from 'src/pages/dashboard/sharewithme';
 import FolderDetailShare from 'src/sections/sharewithme/FolderDetail';
 import { FIleManagerDetaill } from 'src/sections/sharewithme/view/file-manager-detail';
+import AdminEditView from 'src/sections/AdminNews/view/AdminEditView';
 
 //Legal
 const LegalListView = lazy(() => import('src/sections/legalbasis/view/LegalListView'));
@@ -133,6 +134,7 @@ export const dashboardRoutes = [
           { element: <AdminListNews />, index: true, path: 'list' },
           { path: 'create', element: <NewsCreateView /> },
           // { path: 'edit', element: <InstanceEdit /> },
+          { path: 'edit/:id', element: <AdminEditView /> },
         ],
       },
 
@@ -142,6 +144,7 @@ export const dashboardRoutes = [
           { element: <FileManagerPage />, index: true },
           { path: 'info/:id', element: <FIleManagerDetail /> },
           { path: 'folder', element: <FolderDetail /> },
+        
         ],
       },
     ],

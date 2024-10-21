@@ -32,9 +32,12 @@ import {
 } from './view/folderDetail/index';
 import { useIndexTag } from '../tag/view/TagMutation';
 import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
-import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Modal } from '@mui/material';
 import { useAddFavorite, useRemoveFavorite } from './view/favoritemutation';
 import { useQueryClient } from '@tanstack/react-query';
+import CloseIcon from '@mui/icons-material/Close';
+import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
+import Lightbox from 'yet-another-react-lightbox';
 
 // ----------------------------------------------------------------------
 
@@ -68,14 +71,32 @@ export default function FIleManagerFileDetails({
     file_url,
   } = item;
 
-  // Only fetch preview if fileId is available
-  // const { data: preview, isLoading: loadingPreview, isError: errorPreview } = usePreviewImage(id);
-  // const { data: previewVideo, isLoading: LoadingVideo } = usePreviewVideo(id);
-  // console.log(previewVideo);
   const isFolder = item.type === 'folder';
   const isImage = item.type === 'image';
   const isVideo = item.type === 'video';
   const isAudio = item.type === 'audio';
+
+  // Inside your component...
+  const [openLightbox, setOpenLightbox] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState([]);
+  const [lightboxVideos, setLightboxVideos] = useState([]);
+  const [lightboxAudio, setLightboxAudio] = useState([]);
+
+  const handleOpenLightbox = () => {
+    if (isImage) {
+      setLightboxImages([file_url]); // Add your image URL
+    } else if (isVideo) {
+      setLightboxVideos([video_url]); // Add your video URL
+    } else if (isAudio) {
+      setLightboxAudio([file_url]); // Assuming file_url is audio
+    }
+    setOpenLightbox(true);
+  };
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpen = () => setIsOpen(true);
+  const handleClose = () => setIsOpen(false);
 
   // Inside your FileRecentItem component
   const { mutateAsync: addFavorite } = useAddFavorite();
@@ -153,10 +174,8 @@ export default function FIleManagerFileDetails({
     } catch (error) {
       console.error('Error adding tags:', error);
       if (error.response && error.response.data.errors) {
-        // Log specific errors from the server
-        console.error('Server errors:', error.response.data.errors);
         if (error.response.data.errors.tag_id) {
-          enqueueSnackbar('Tag already exists in folder.', { variant: 'warning' });
+          enqueueSnackbar('Tag sudah ada di file.', { variant: 'warning' });
         }
       }
       enqueueSnackbar('Error adding tags.', { variant: 'error' });
@@ -166,14 +185,13 @@ export default function FIleManagerFileDetails({
   const handleDeleteFile = async () => {
     try {
       await deleteFile({ file_id: fileIdToDelete });
-      enqueueSnackbar('File deleted successfully!', { variant: 'success' });
+      enqueueSnackbar('File berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
       useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
-      // Optionally, call a prop function to refresh the file list
     } catch (error) {
       console.error('Error deleting file:', error);
-      enqueueSnackbar('Error deleting file.', { variant: 'error' });
+      enqueueSnackbar('Gagal menghapus file', { variant: 'error' });
     }
   };
 
@@ -194,9 +212,7 @@ export default function FIleManagerFileDetails({
   };
 
   const handleCopyLink = () => {
-    const fileUrl = item.id; // Ensure this is the correct property for URL
-
-    console.log('File URL:', fileUrl); // Debugging line
+    const fileUrl = item.id;
 
     if (!fileUrl) {
       enqueueSnackbar('No URL to copy.', { variant: 'warning' });
@@ -213,7 +229,7 @@ export default function FIleManagerFileDetails({
   };
 
   useEffect(() => {
-    favorite.setValue(is_favorite); // Set the state from props or backend response
+    favorite.setValue(is_favorite);
   }, [is_favorite]);
 
   const handleFavoriteToggle = useCallback(async () => {
@@ -254,12 +270,12 @@ export default function FIleManagerFileDetails({
         sx={{ typography: 'subtitle2' }}
       >
         Tags
-        <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
+        {/* <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
           <Iconify
             icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
             sx={{ color: favorite.value ? 'yellow' : 'gray' }}
           />
-        </IconButton>
+        </IconButton> */}
       </Stack>
 
       {toggleTags.value && (
@@ -397,10 +413,9 @@ export default function FIleManagerFileDetails({
             icon={<Iconify icon="eva:star-outline" />}
             checkedIcon={<Iconify icon="eva:star-fill" />}
             checked={favorite.value}
-            onChange={handleFavoriteToggle} 
+            onChange={handleFavoriteToggle}
           />
         </Stack>
-
         <Stack
           spacing={2.5}
           justifyContent="center"
@@ -421,13 +436,86 @@ export default function FIleManagerFileDetails({
               src="/assets/icons/files/ic_folder.svg"
               alt="Folder Icon"
             />
-          ) : ['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(item.type) ? (
-            <Box
-              component="img"
-              src={file_url}
-              alt={item.name}
-              style={{ maxWidth: '100%', height: 'auto' }}
-            />
+          ) : ['jpg', 'jpeg', 'gif', 'bmp', 'png', 'svg'].includes(item.type) ? (
+            <>
+              <Box
+                sx={{
+                  position: 'relative',
+                  cursor: 'zoom-in',
+                  '&:hover .zoom-icon': {
+                    opacity: 1,
+                  },
+                }}
+              >
+                <Box
+                  component="img"
+                  src={file_url}
+                  alt={item.name}
+                  onClick={handleOpen} // Open modal for zoomed view
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                    cursor: 'zoom-in',
+                  }}
+                />
+                <IconButton
+                  className="zoom-icon"
+                  sx={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    color: 'white',
+                    opacity: 0,
+                    transition: 'opacity 0.3s',
+                  }}
+                  onClick={handleOpen} // Open modal for zoom
+                >
+                  <ZoomInMapIcon />
+                </IconButton>
+              </Box>
+
+              <Modal
+                open={isOpen}
+                onClose={handleClose}
+                aria-labelledby="zoomed-image-modal"
+                aria-describedby="modal-with-zoomed-image"
+              >
+                <Box
+                  position="relative"
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  height="100vh"
+                  bgcolor="rgba(0, 0, 0, 0.8)"
+                  onClick={handleClose}
+                >
+                  <Box
+                    component="img"
+                    src={file_url}
+                    alt={item.name}
+                    style={{
+                      maxWidth: '50%',
+                      maxHeight: '50%',
+                      transform: 'scale(1.5)',
+                      transition: 'transform 0.3s ease-in-out',
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+
+                  <IconButton
+                    onClick={handleClose}
+                    style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      color: '#fff',
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+              </Modal>
+            </>
           ) : [
               'mp4',
               'mkv',
@@ -450,17 +538,17 @@ export default function FIleManagerFileDetails({
             ].includes(item.type) ? (
             <video controls style={{ maxWidth: '100%', height: 'auto' }}>
               <source src={video_url} type={`video/${item.type}`} />
-              Your browser does not support the video tag.
+              Browser Anda tidak mendukung tag video.
             </video>
-          ) : ['mp3', 'wav', 'ogg', 'm4p', 'mxp4', 'msv'].includes(item.type) ? (
+          ) : ['aif', 'mp3', 'wav', 'ogg', 'm4p', 'mxp4', 'msv', 'aac'].includes(item.type) ? (
             <Box component="div">
               <audio controls>
                 <source src={file_url} type={`audio/${item.type}`} />
-                Your browser does not support the audio element.
+                browser Anda tidak mendukung tag audio.
               </audio>
             </Box>
           ) : (
-            <span>Unsupported file type</span> // Optional fallback for unsupported types
+            <span>Tidak ada preview</span>
           )}
 
           <Typography variant="subtitle2">{name}</Typography>

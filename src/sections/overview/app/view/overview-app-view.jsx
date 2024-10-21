@@ -112,7 +112,6 @@ export default function OverviewAppView() {
 
   const { data, isLoading, refetch, isFetching } = useFetchFolder(); // Fetch Folder
   const files = data?.files || []; // Use optional chaining to safely access files
-  console.log(files);
 
 
   if (isLoading || isFetching) {

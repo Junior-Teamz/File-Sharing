@@ -45,8 +45,10 @@ export default function TagListView() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [popover, setPopover] = useState({ open: false, anchorEl: null, currentId: null });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [selectedTagId, setSelectedTagId] = useState(null);
   const [selectedTags, setSelectedTags] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(''); // State for search input
+  const [searchQuery, setSearchQuery] = useState('');
   const queryClient = useQueryClient();
 
   // Fetch tag data
@@ -75,9 +77,12 @@ export default function TagListView() {
     },
   });
 
+  // Sort tags by creation date
   const tags = data?.data || [];
+  const sortedTags = tags.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-  const filteredTags = tags.filter((tag) =>
+  // Filter tags based on search query
+  const filteredTags = sortedTags.filter((tag) =>
     tag.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -102,8 +107,15 @@ export default function TagListView() {
   };
 
   const handleDelete = (id) => {
-    deleteTag(id);
-    setPopover((prev) => ({ ...prev, open: false }));
+    setSelectedTagId(id);
+    setDeleteConfirmOpen(true);
+    handlePopoverClose();
+  };
+
+  const confirmDelete = () => {
+    deleteTag(selectedTagId);
+    setDeleteConfirmOpen(false);
+    setSelectedTagId(null);
   };
 
   const handlePopoverOpen = (event, id) => {
@@ -157,7 +169,10 @@ export default function TagListView() {
   };
 
   const handleDeleteSelected = () => {
-    selectedTags.forEach((id) => deleteTag(id));
+    selectedTags.forEach((id) => {
+      setSelectedTagId(id);
+      setDeleteConfirmOpen(true);
+    });
     setSelectedTags([]);
   };
 
@@ -188,7 +203,7 @@ export default function TagListView() {
 
       <Toolbar>
         <TextField
-          placeholder="Search Tags"
+          placeholder="Cari Tag"
           variant="outlined"
           value={searchQuery}
           onChange={handleSearchChange}
@@ -196,7 +211,7 @@ export default function TagListView() {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Iconify icon="eva:search-fill" /> {/* Add search icon here */}
+                <Iconify icon="eva:search-fill" />
               </InputAdornment>
             ),
           }}
@@ -253,25 +268,27 @@ export default function TagListView() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {tags.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((tag) => (
-                    <TableRow key={tag.id}>
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          color="primary"
-                          checked={selectedTags.indexOf(tag.id) !== -1}
-                          onChange={() => handleSelectOne(tag.id)}
-                        />
-                      </TableCell>
-                      <TableCell>{tag.name}</TableCell>
-                      <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                        <Tooltip title="More Actions" placement="top">
-                          <IconButton onClick={(event) => handlePopoverOpen(event, tag.id)}>
-                            <Iconify icon="eva:more-vertical-fill" />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {filteredTags
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((tag) => (
+                      <TableRow key={tag.id}>
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            color="primary"
+                            checked={selectedTags.indexOf(tag.id) !== -1}
+                            onChange={() => handleSelectOne(tag.id)}
+                          />
+                        </TableCell>
+                        <TableCell>{tag.name}</TableCell>
+                        <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                          <Tooltip title="More Actions" placement="top">
+                            <IconButton onClick={(event) => handlePopoverOpen(event, tag.id)}>
+                              <Iconify icon="eva:more-vertical-fill" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -340,6 +357,20 @@ export default function TagListView() {
           Delete
         </MenuItem>
       </CustomPopover>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
+        <DialogTitle>Konfirmasi Hapus</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Apakah Anda yakin ingin menghapus tag ini?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteConfirmOpen(false)}>Batal</Button>
+          <Button onClick={confirmDelete} color="error" disabled={loadingDelete}>
+            {loadingDelete ? <CircularProgress size={24} /> : 'Hapus'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

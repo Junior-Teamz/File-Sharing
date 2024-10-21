@@ -247,19 +247,6 @@ export default function FileManagerFolderItem({
         </MenuItem>
       </CustomPopover>
 
-      <FileManagerFileDetails
-        item={folder}
-        favorited={favorite.value}
-        onFavorite={favorite.onToggle}
-        onCopyLink={handleCopy}
-        open={details.value}
-        onClose={details.onFalse}
-        onDelete={() => {
-          details.onFalse();
-          onDelete();
-        }}
-      />
-
       <FileManagerShareDialogFolder
         open={share.value}
         folderId={folder.id} // Use folder.id instead of id

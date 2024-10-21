@@ -9,6 +9,7 @@ import Iconify from 'src/components/iconify';
 import SvgColor from 'src/components/svg-color';
 import AddToDriveIcon from '@mui/icons-material/AddToDrive';
 import Groups2Icon from '@mui/icons-material/Groups2';
+import StarIcon from '@mui/icons-material/Star';
 
 // ----------------------------------------------------------------------
 
@@ -28,7 +29,8 @@ const ICONS = {
   analytics: icon('ic_analytics'),
   dashboard: icon('ic_dashboard'),
   drive: <AddToDriveIcon />,
-  share: <Groups2Icon/>
+  share: <Groups2Icon/>,
+  Favorite: <StarIcon />,
 };
 
 // ----------------------------------------------------------------------
@@ -48,45 +50,40 @@ export function useNavData() {
             path: paths.dashboarduser.root,
             icon: ICONS.drive,
           },
-        //   {
-        //     title: t('file_manager'),
-        //     path: paths.dashboard.fileManager,
-        //     icon: ICONS.folder,
-        //   },
-        //   {
-        //     title: t('analytics'),
-        //     path: paths.dashboard.general.analytics,
-        //     icon: ICONS.analytics,
-        //   },
-        //   {
-        //     title: t('file'),
-        //     path: paths.dashboard.general.file,
-        //     icon: ICONS.file,
-        //   },
-        ],
-      },
-
-      // MANAGEMENT
-      // ----------------------------------------------------------------------
-      {
-        subheader: t('management'),
-        items: [
-          // USER
           {
-            title: t('shared with me'),
-            path: paths.dashboard.user.root,
+            title: t('Dibagikan'),
+            path: paths.dashboarduser.shared,
             icon: ICONS.share,
-            children: [
-            //   { title: t('profile'), path: paths.dashboard.user.root },
-            //   { title: t('cards'), path: paths.dashboard.user.cards },
-            //   { title: t('list user'), path: paths.dashboard.user.list },
-            //   { title: t('create user'), path: paths.dashboard.user.new },
-            //   { title: t('edit'), path: paths.dashboard.user.demo.edit },
-            //   { title: t('account'), path: paths.dashboard.user.account },
-            ],
+          },
+          {
+            title: t('Favorite'),
+            path: paths.dashboarduser.favorite,
+            icon: ICONS.Favorite,
           },
         ],
       },
+
+      // // MANAGEMENT
+      // // ----------------------------------------------------------------------
+      // {
+      //   subheader: t('management'),
+      //   items: [
+      //     // USER
+      //     {
+      //       title: t('shared with me'),
+      //       path: paths.dashboard.user.root,
+      //       icon: ICONS.share,
+      //       children: [
+      //       //   { title: t('profile'), path: paths.dashboard.user.root },
+      //       //   { title: t('cards'), path: paths.dashboard.user.cards },
+      //       //   { title: t('list user'), path: paths.dashboard.user.list },
+      //       //   { title: t('create user'), path: paths.dashboard.user.new },
+      //       //   { title: t('edit'), path: paths.dashboard.user.demo.edit },
+      //       //   { title: t('account'), path: paths.dashboard.user.account },
+      //       ],
+      //     },
+      //   ],
+      // },
     ],
     [t]
   );

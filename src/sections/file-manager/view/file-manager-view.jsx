@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -25,6 +25,7 @@ import FileManagerFiltersResult from '../file-manager-filters-result';
 import FileManagerNewFolderDialog from '../file-manager-new-folder-dialog';
 import { useFetchFolder } from 'src/sections/overview/app/view/folders';
 import { handleFolderFiles } from 'src/_mock/map/filesFolderApi';
+import Overlay from '../../../../public/assets/background/overlay_2.jpg';
 // ----------------------------------------------------------------------
 
 const defaultFilters = {
@@ -59,6 +60,13 @@ export default function FileManagerView() {
   const [filters, setFilters] = useState(defaultFilters);
 
   const [selectedTags, setSelectedTags] = useState([]);
+
+  // Refetch Folder Files only when FolderFiles has meaningful changes
+  useEffect(() => {
+    if (FolderFiles && FolderFiles !== tableData) {
+      setTableData(FolderFiles);
+    }
+  }, [FolderFiles, tableData]);
 
   const dateError =
     filters.startDate && filters.endDate
@@ -157,7 +165,28 @@ export default function FileManagerView() {
 
   return (
     <>
-      <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+      <Container
+        maxWidth={settings.themeStretch ? false : 'lg'}
+        sx={{
+          position: 'relative', // Required for positioning child elements
+          minHeight: '100vh',
+          // Overlay background
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundImage: `url(${Overlay})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            filter: 'blur(10px)', // Apply blur
+            zIndex: -1, // Send background behind the content
+          },
+        }}
+      >
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h4">File Manager</Typography>
           <Button
@@ -181,7 +210,7 @@ export default function FileManagerView() {
         </Stack>
 
         {notFound ? (
-          <EmptyContent filled title="No Data" sx={{ py: 10 }} />
+          <EmptyContent filled title="Tidak ada data" sx={{ py: 10 }} />
         ) : (
           <FileManagerGridView
             table={table}
@@ -206,7 +235,7 @@ export default function FileManagerView() {
         title="Delete"
         content={
           <>
-            Are you sure want to delete <strong> {table.selected.length} </strong> items?
+            Apakah Anda yakin ingin menghapus? <strong> {table.selected.length} </strong> items?
           </>
         }
         action={
@@ -230,10 +259,6 @@ export default function FileManagerView() {
 
 function applyFilter({ inputData, comparator, filters, dateError }) {
   const { name, type, startDate, endDate } = filters;
-  console.log(inputData);
-  console.log(comparator);
-  console.log(filters);
-  console.log(dateError);
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 
@@ -259,8 +284,8 @@ function applyFilter({ inputData, comparator, filters, dateError }) {
     if (startDate && endDate) {
       inputData = inputData.filter(
         (file) =>
-          fTimestamp(file.createdAt) >= fTimestamp(startDate) &&
-          fTimestamp(file.createdAt) <= fTimestamp(endDate)
+          fTimestamp(file.created_at) >= fTimestamp(startDate) &&
+          fTimestamp(file.created_at) <= fTimestamp(endDate)
       );
     }
   }

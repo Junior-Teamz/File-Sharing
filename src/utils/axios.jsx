@@ -115,6 +115,10 @@ export const endpoints = {
     preview: '/api/file/preview/',
   },
 
+  previewStorage:{
+    storage:'/api/storageSizeUsage'
+  },
+
   //get data di landing page
   Legalbasis: {
     getLegal: '/api/legal_basis/getAllLegalBasis',
@@ -132,7 +136,6 @@ export const endpoints = {
 
   GetFileFolderShare: {
     UserShare: '/api/getSharedFolderAndFile',
-    GetShareFolderFile: '/api/getSharedFolderAndFile',
   },
   SearchUser: {
     User: '/api/searchUser',

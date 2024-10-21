@@ -30,11 +30,11 @@ const OPTIONS = [
   },
   {
     label: 'Profile',
-    linkTo: paths.dashboard.user.profile,
+    linkTo: paths.dashboarduser.profil,
   },
   {
     label: 'Settings',
-    linkTo: paths.dashboard.user.account,
+    linkTo: paths.dashboarduser.akun,
   },
 ];
 

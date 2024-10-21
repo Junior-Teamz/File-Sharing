@@ -3,26 +3,25 @@ import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
 import LinearProgress from '@mui/material/LinearProgress';
+import AllInclusiveIcon from '@mui/icons-material/AllInclusive';
 // utils
 import { fData } from 'src/utils/format-number';
 
 // ----------------------------------------------------------------------
 
-export default function FileWidget({ title, value, total, icon, sx, ...other }) {
-  return (
-    <Card sx={{ p: 3, ...sx }} {...other}>
-      <Box component="img" src={icon} sx={{ width: 48, height: 48 }} />
+export default function FileWidget({ title, value, icon, sx, ...other }) {
+  const progressValue = value ? Math.min((value / 1000000000) * 100, 100) : 0;
 
+  return (
+    <Box sx={{ p: 3, ...sx }} {...other}>
       <Typography variant="h6" sx={{ mt: 3 }}>
         {title}
       </Typography>
 
       <LinearProgress
-        value={24}
         variant="determinate"
-        color="inherit"
+        value={progressValue}
         sx={{
           my: 2,
           height: 6,
@@ -48,10 +47,9 @@ export default function FileWidget({ title, value, total, icon, sx, ...other }) 
         >
           {fData(value)}
         </Box>
-
-        {` / ${fData(total)}`}
+        / <AllInclusiveIcon />
       </Stack>
-    </Card>
+    </Box>
   );
 }
 
@@ -59,6 +57,5 @@ FileWidget.propTypes = {
   icon: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
   sx: PropTypes.object,
   title: PropTypes.string,
-  total: PropTypes.number,
-  value: PropTypes.number,
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
 };

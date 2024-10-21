@@ -17,7 +17,6 @@ import { useTheme } from '@mui/material/styles';
 import { useBoolean } from 'src/hooks/use-boolean';
 // components
 import Iconify from 'src/components/iconify';
-import { Link } from 'react-router-dom';
 import FileManagerPanel from './file-manager-panel';
 import FileManagerFileItem from './file-manager-file-item';
 import FileManagerFolderItem from './file-manager-folder-item';
@@ -54,12 +53,20 @@ export default function FileManagerGridView({
   onOpenConfirm,
 }) {
   const {
-    page,
-    rowsPerPage,
     dense,
+    page,
+    order,
+    orderBy,
+    rowsPerPage,
+    //
     selected,
-    onSelectRow: onSelectItem,
-    onSelectAllRows: onSelectAllItems,
+    onSelectRow,
+    onSelectAllRows,
+    //
+    onSort,
+    onChangeDense,
+    onChangePage,
+    onChangeRowsPerPage,
   } = table;
   const theme = useTheme();
 
@@ -81,7 +88,14 @@ export default function FileManagerGridView({
 
   const denseHeight = dense ? 58 : 78;
 
-  // Render
+  const startIndex = page * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const currentData = dataFiltered
+    .filter((i) => i.type !== 'folder')
+    .sort((a, b) => new Date(b.modifiedAt) - new Date(a.modifiedAt)) 
+    .slice(startIndex, endIndex);
+
+
   return (
     <>
       <Box ref={containerRef}>
@@ -107,12 +121,12 @@ export default function FileManagerGridView({
           >
             {dataFiltered
               .filter((i) => i.type === 'folder')
-              .map((folder, idx) => (
+              .map((folder) => (
                 <FileManagerFolderItem
                   key={folder.id}
                   folder={folder}
                   selected={selected.includes(folder.id)}
-                  onSelect={() => onSelectItem(folder.id)}
+                  onSelect={() => onSelectRow(folder.id)}
                   onDelete={() => onDeleteItem(folder.id)}
                   sx={{ maxWidth: 'auto' }}
                 />
@@ -136,18 +150,18 @@ export default function FileManagerGridView({
             numSelected={selected.length}
             rowCount={dataFiltered.length}
             onSelectAllRows={(checked) =>
-              onSelectAllItems(
+              onSelectAllRows(
                 checked,
                 dataFiltered.map((row) => row.id)
               )
             }
             action={
               <>
-                <Tooltip title="Share">
+                {/* <Tooltip title="Share">
                   <IconButton color="primary">
                     <Iconify icon="solar:share-bold" />
                   </IconButton>
-                </Tooltip>
+                </Tooltip> */}
                 <Tooltip title="Delete">
                   <IconButton color="primary" onClick={onOpenConfirm}>
                     <Iconify icon="solar:trash-bin-trash-bold" />
@@ -181,11 +195,14 @@ export default function FileManagerGridView({
               }}
             >
               <TableHeadCustom
+                order={order}
+                orderBy={orderBy}
                 headLabel={TABLE_HEAD}
                 rowCount={dataFiltered.length}
                 numSelected={selected.length}
+                onSort={onSort}
                 onSelectAllRows={(checked) =>
-                  onSelectAllItems(
+                  onSelectAllRows(
                     checked,
                     dataFiltered.map((row) => row.id)
                   )
@@ -205,17 +222,15 @@ export default function FileManagerGridView({
               />
 
               <TableBody>
-                {dataFiltered
-                  .filter((i) => i.type !== 'folder')
-                  .map((file) => (
-                    <FileManagerFileItem
-                      key={file.id}
-                      file={file}
-                      selected={selected.includes(file.id)}
-                      onSelect={() => onSelectItem(file.id)}
-                      onDelete={() => onDeleteItem(file.id)}
-                    />
-                  ))}
+                {currentData.map((file) => (
+                  <FileManagerFileItem
+                    key={file.id}
+                    file={file}
+                    selected={selected.includes(file.id)}
+                    onSelect={() => onSelectRow(file.id)}
+                    onDelete={() => onDeleteItem(file.id)}
+                  />
+                ))}
                 <TableEmptyRows
                   height={denseHeight}
                   emptyRows={emptyRows(page, rowsPerPage, dataFiltered.length)}
@@ -235,12 +250,19 @@ export default function FileManagerGridView({
 
         {/* Pagination */}
         <TablePaginationCustom
-          count={dataFiltered.length}
-          page={0}
-          rowsPerPage={10}
-          onPageChange={() => {}}
-          onRowsPerPageChange={() => {}}
-          sx={{ [`& .${tablePaginationClasses.toolbar}`]: { borderTopColor: 'transparent' } }}
+          count={dataFiltered.filter((i) => i.type !== 'folder').length} // Total count for files only
+          page={page}
+          rowsPerPage={rowsPerPage}
+          onPageChange={onChangePage}
+          onRowsPerPageChange={onChangeRowsPerPage}
+          //
+          dense={dense}
+          onChangeDense={onChangeDense}
+          sx={{
+            [`& .${tablePaginationClasses.toolbar}`]: {
+              borderTopColor: 'transparent',
+            },
+          }}
         />
       </Box>
 
@@ -278,9 +300,32 @@ export default function FileManagerGridView({
 }
 
 FileManagerGridView.propTypes = {
-  table: PropTypes.object.isRequired,
-  data: PropTypes.array.isRequired,
+  table: PropTypes.shape({
+    dense: PropTypes.bool,
+    order: PropTypes.string,
+    orderBy: PropTypes.string,
+    page: PropTypes.number,
+    rowsPerPage: PropTypes.number,
+    selected: PropTypes.array,
+    onSelectRow: PropTypes.func,
+    onSelectAllRows: PropTypes.func,
+    onSort: PropTypes.func,
+    onChangeDense: PropTypes.func,
+    onChangePage: PropTypes.func,
+    onChangeRowsPerPage: PropTypes.func,
+  }),
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      size: PropTypes.number,
+      type: PropTypes.string.isRequired,
+      modifiedAt: PropTypes.string.isRequired,
+      shared: PropTypes.bool,
+    })
+  ).isRequired,
   dataFiltered: PropTypes.array.isRequired,
-  onDeleteItem: PropTypes.func.isRequired,
-  onOpenConfirm: PropTypes.func.isRequired,
+  notFound: PropTypes.bool,
+  onDeleteItem: PropTypes.func,
+  onOpenConfirm: PropTypes.func,
 };

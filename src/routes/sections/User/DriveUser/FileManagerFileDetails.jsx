@@ -21,17 +21,21 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import FileThumbnail, { fileFormat } from 'src/components/file-thumbnail';
-import FileManagerShareDialog from './FileManagerShareDialog';
-import FileManagerInvitedItem from './FileManagerInvitedItem';
+import { useIndexTag } from './view/TagUser/useIndexTag';
+import { useAddFavoriteUser, useRemoveFavoriteUser } from './view/FetchFolderUser';
 import {
   useAddFileTag,
   useRemoveTagFile,
-  usePreviewImage,
   useMutationDeleteFiles,
 } from './view/FetchDriveUser/index';
+
+import FileManagerShareDialog from './FileManagerShareDialog';
+import FileManagerInvitedItem from './FileManagerInvitedItem';
 import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
-import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
-import { useIndexTag } from './view/TagUser/useIndexTag';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Modal } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
+import CloseIcon from '@mui/icons-material/Close';
+import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
 
 // ----------------------------------------------------------------------
 
@@ -45,29 +49,40 @@ export default function FIleManagerFileDetails({
   onDelete,
   ...other
 }) {
-  const { enqueueSnackbar } = useSnackbar(); // Initialize enqueueSnackbar
+  const { enqueueSnackbar } = useSnackbar();
   const {
     name,
     size,
     image_url,
     id,
     type,
+    shared,
     shared_with,
     modifiedAt,
+    email,
+    video_url,
     user,
     instance,
     tags: initialTags,
     updated_at,
-    video_url,
+    is_favorite,
     file_url,
-    email,
   } = item;
 
-  // const { previewImage } = usePreviewImage(image_url);
+  const isFolder = item.type === 'folder';
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpen = () => setIsOpen(true);
+  const handleClose = () => setIsOpen(false);
+
+  // Inside your FileRecentItem component
+  const { mutateAsync: addFavorite } = useAddFavoriteUser();
+  const { mutateAsync: removeFavorite } = useRemoveFavoriteUser();
 
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
-  const isFolder = item.type === 'folder';
+  const useClient = useQueryClient();
 
   const toggleTags = useBoolean(true);
   const share = useBoolean();
@@ -76,19 +91,21 @@ export default function FIleManagerFileDetails({
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
 
   const [inviteEmail, setInviteEmail] = useState('');
+  const favorite = useBoolean(is_favorite); // Set initial value from props
+  const [issLoading, setIsLoading] = useState(false);
 
-  const { data: tagData } = useIndexTag(); // Assuming this returns tag data
+  const { data: tagData, isLoading, isError } = useIndexTag();
   const addTagFile = useAddFileTag();
   const { mutateAsync: removeTagFile } = useRemoveTagFile();
   const { mutateAsync: deleteFile } = useMutationDeleteFiles();
 
   useEffect(() => {
-    if (tagData && Array.isArray(tagData.data)) {
-      setAvailableTags(tagData.data); // Extract and set the tags array
-    } else {
-      console.error('Expected tagData.data to be an array, but got:', tagData);
+    if (!isLoading && !isError && tagData && Array.isArray(tagData.data)) {
+      setAvailableTags(tagData.data);
+    } else if (isError) {
+      console.error('Error fetching tag data:', isError);
     }
-  }, [tagData]);
+  }, [tagData, isLoading, isError]);
 
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value);
@@ -96,12 +113,12 @@ export default function FIleManagerFileDetails({
 
   const handleChangeTags = useCallback((event, newValue) => {
     if (Array.isArray(newValue)) {
-      setTags(newValue.map((tag) => tag.id)); // Assuming newValue is an array of tag objects
+      setTags(newValue.map((tag) => tag.id));
     }
   }, []);
 
-  const handleOpenConfirmDialog = (fileId) => {
-    setFileIdToDelete(fileId);
+  const handleOpenConfirmDialog = (id) => {
+    setFileIdToDelete(id);
     setOpenConfirmDialog(true);
   };
 
@@ -112,12 +129,10 @@ export default function FIleManagerFileDetails({
 
   const handleSaveTags = async () => {
     if (!addTagFile.mutateAsync) {
-      console.error('addTagFile.mutateAsync is not a function');
       return;
     }
 
     try {
-      // Determine which tags are new
       const existingTagIds = new Set(initialTags.map((tag) => tag.id));
       const newTagIds = tags.filter((tagId) => !existingTagIds.has(tagId));
 
@@ -135,10 +150,8 @@ export default function FIleManagerFileDetails({
     } catch (error) {
       console.error('Error adding tags:', error);
       if (error.response && error.response.data.errors) {
-        // Log specific errors from the server
-        console.error('Server errors:', error.response.data.errors);
         if (error.response.data.errors.tag_id) {
-          enqueueSnackbar('Tag already exists in folder.', { variant: 'warning' });
+          enqueueSnackbar('Tag sudah ada di file.', { variant: 'warning' });
         }
       }
       enqueueSnackbar('Error adding tags.', { variant: 'error' });
@@ -147,13 +160,13 @@ export default function FIleManagerFileDetails({
 
   const handleDeleteFile = async () => {
     try {
-      await deleteFile({ file_id: fileIdToDelete });
-      enqueueSnackbar('File deleted successfully!', { variant: 'success' });
+      await deleteFile(fileIdToDelete);
+      enqueueSnackbar('File berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
-      // Optionally, call a prop function to refresh the file list
+      onDelete();
+      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
     } catch (error) {
-      console.error('Error deleting file:', error);
-      enqueueSnackbar('Error deleting file.', { variant: 'error' });
+      enqueueSnackbar('Gagal menghapus file', { variant: 'error' });
     }
   };
 
@@ -168,15 +181,12 @@ export default function FIleManagerFileDetails({
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
       enqueueSnackbar('Tag removed successfully!', { variant: 'success' });
     } catch (error) {
-      console.error('Error removing tag:', error);
       enqueueSnackbar('Error removing tag.', { variant: 'error' });
     }
   };
 
   const handleCopyLink = () => {
-    const fileUrl = item.id; // Ensure this is the correct property for URL
-
-    console.log('File URL:', fileUrl); // Debugging line
+    const fileUrl = item.id;
 
     if (!fileUrl) {
       enqueueSnackbar('No URL to copy.', { variant: 'warning' });
@@ -192,6 +202,43 @@ export default function FIleManagerFileDetails({
       });
   };
 
+  useEffect(() => {
+    favorite.setValue(is_favorite);
+  }, [is_favorite]);
+
+  const handleFavoriteToggle = useCallback(async () => {
+    if (!id) {
+      enqueueSnackbar('File ID is required to toggle favorite status!', { variant: 'error' });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      if (favorite.value) {
+        // Jika sudah difavoritkan, hapus dari favorit
+        await removeFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
+        enqueueSnackbar('File removed from favorites!', { variant: 'success' });
+      } else {
+        // Tambahkan ke favorit
+        await addFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
+        enqueueSnackbar('File added to favorites!', { variant: 'success' });
+      }
+
+      // Toggle status favorit di UI
+      favorite.onToggle();
+    } catch (error) {
+      console.error('Error updating favorite status:', error);
+      if (error.response && error.response.data.errors && error.response.data.errors.file_id) {
+        enqueueSnackbar('The file id field is required.', { variant: 'error' });
+      } else {
+        enqueueSnackbar('Failed to update favorite status!', { variant: 'error' });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [favorite.value, id, addFavorite, removeFavorite, enqueueSnackbar]);
+
   const renderTags = (
     <Stack spacing={1.5}>
       <Stack
@@ -201,18 +248,19 @@ export default function FIleManagerFileDetails({
         sx={{ typography: 'subtitle2' }}
       >
         Tags
-        <IconButton size="small" onClick={toggleTags.onToggle}>
+        {/* <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
           <Iconify
-            icon={toggleTags.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
+            icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
+            sx={{ color: favorite.value ? 'yellow' : 'gray' }}
           />
-        </IconButton>
+        </IconButton> */}
       </Stack>
 
       {toggleTags.value && (
         <Autocomplete
           multiple
-          options={availableTags} // Array of tag objects
-          getOptionLabel={(option) => option.name} // Display name
+          options={availableTags}
+          getOptionLabel={(option) => option.name}
           value={availableTags.filter((tag) => tags.includes(tag.id))} // Display selected tags
           onChange={handleChangeTags} // Update tags state
           renderOption={(props, option) => (
@@ -305,7 +353,7 @@ export default function FIleManagerFileDetails({
         </IconButton>
       </Stack>
 
-       {shared_with.length > 0 ? (
+      {shared_with.length > 0 ? (
         shared_with.map((share) => (
           <FileManagerInvitedItem
             key={share.user.id}
@@ -342,11 +390,10 @@ export default function FIleManagerFileDetails({
             color="warning"
             icon={<Iconify icon="eva:star-outline" />}
             checkedIcon={<Iconify icon="eva:star-fill" />}
-            checked={favorited}
-            onChange={onFavorite}
+            checked={favorite.value}
+            onChange={handleFavoriteToggle}
           />
         </Stack>
-
         <Stack
           spacing={2.5}
           justifyContent="center"
@@ -368,12 +415,85 @@ export default function FIleManagerFileDetails({
               alt="Folder Icon"
             />
           ) : ['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(item.type) ? (
-            <Box
-              component="img"
-              src={file_url}
-              alt={item.name}
-              style={{ maxWidth: '100%', height: 'auto' }}
-            />
+            <>
+              <Box
+                sx={{
+                  position: 'relative',
+                  cursor: 'zoom-in',
+                  '&:hover .zoom-icon': {
+                    opacity: 1,
+                  },
+                }}
+              >
+                <Box
+                  component="img"
+                  src={file_url}
+                  alt={item.name}
+                  onClick={handleOpen} // Open modal for zoomed view
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                    cursor: 'zoom-in',
+                  }}
+                />
+                <IconButton
+                  className="zoom-icon"
+                  sx={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    color: 'white',
+                    opacity: 0,
+                    transition: 'opacity 0.3s',
+                  }}
+                  onClick={handleOpen} // Open modal for zoom
+                >
+                  <ZoomInMapIcon />
+                </IconButton>
+              </Box>
+
+              <Modal
+                open={isOpen}
+                onClose={handleClose}
+                aria-labelledby="zoomed-image-modal"
+                aria-describedby="modal-with-zoomed-image"
+              >
+                <Box
+                  position="relative"
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  height="100vh"
+                  bgcolor="rgba(0, 0, 0, 0.8)"
+                  onClick={handleClose}
+                >
+                  <Box
+                    component="img"
+                    src={file_url}
+                    alt={item.name}
+                    style={{
+                      maxWidth: '50%',
+                      maxHeight: '50%',
+                      transform: 'scale(1.5)',
+                      transition: 'transform 0.3s ease-in-out',
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+
+                  <IconButton
+                    onClick={handleClose}
+                    style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      color: '#fff',
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+              </Modal>
+            </>
           ) : [
               'mp4',
               'mkv',
@@ -396,17 +516,17 @@ export default function FIleManagerFileDetails({
             ].includes(item.type) ? (
             <video controls style={{ maxWidth: '100%', height: 'auto' }}>
               <source src={video_url} type={`video/${item.type}`} />
-              Your browser does not support the video tag.
+              Browser Anda tidak mendukung tag video.
             </video>
           ) : ['mp3', 'wav', 'ogg', 'm4p', 'mxp4', 'msv'].includes(item.type) ? (
             <Box component="div">
               <audio controls>
                 <source src={file_url} type={`audio/${item.type}`} />
-                Your browser does not support the audio element.
+                browser Anda tidak mendukung tag audio.
               </audio>
             </Box>
           ) : (
-            <span>Unsupported file type</span> // Optional fallback for unsupported types
+            <span>Tidak ada preview</span>
           )}
 
           <Typography variant="subtitle2">{name}</Typography>
