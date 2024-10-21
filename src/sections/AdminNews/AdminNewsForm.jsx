@@ -266,14 +266,14 @@ export default function AdminNewsForm() {
               <Grid xs={12}>
                 <Typography variant="h6">Tags:</Typography>
                 <RHFAutocomplete
-                  name="news_tag_ids"
-                  label="Tags"
+                  name="tag"
+                  label="Tag"
                   multiple
                   options={tags}
-                  getOptionLabel={(option) => option.name}
-                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  getOptionLabel={(option) => option?.name || ''} // Handle undefined options gracefully
                   onChange={(event, value) => {
-                    const selectedIds = (Array.isArray(value) ? value : []).map((tag) => tag.id);
+                    // Map selected options to their IDs
+                    const selectedIds = value?.map((tag) => tag?.id) ?? []; // Handle case where value is null
                     setValue('news_tag_ids', selectedIds);
                   }}
                   renderInput={(params) => (
@@ -287,12 +287,15 @@ export default function AdminNewsForm() {
                   )}
                   renderTags={(value, getTagProps) => (
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {value.map((tag, index) => (
-                        <Chip key={tag.id} label={tag.name} {...getTagProps({ index })} />
-                      ))}
+                      {value?.map((tag, index) =>
+                        tag?.id && tag?.name ? (
+                          <Chip key={tag.id} label={tag.name} {...getTagProps({ index })} />
+                        ) : null
+                      )}
                     </Box>
                   )}
                 />
+
                 {errors.news_tag_ids && (
                   <Typography color="error" variant="caption">
                     {errors.news_tag_ids.message}

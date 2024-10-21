@@ -134,11 +134,6 @@ export default function FIleManagerFileDetails({
   };
 
   const handleSaveTags = async () => {
-    if (!canAddTag) {
-      enqueueSnackbar('Anda tidak memiliki izin untuk menambahkan tag!', { variant: 'warning' });
-      return;
-    }
-
     if (!addTagFile.mutateAsync) {
       return;
     }
@@ -228,39 +223,28 @@ export default function FIleManagerFileDetails({
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      if (favorite) {
-        if (canRemoveFavorite) {
-          await removeFavorite({ file_id: id });
-          enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
-        } else {
-          enqueueSnackbar('Anda tidak memiliki izin untuk menghapus dari favorite!', {
-            variant: 'warning',
-          });
-        }
+      if (favorite.value) {
+        await removeFavorite({ file_id: id });
+        enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
       } else {
-        if (canAddFavorite) {
-          await addFavorite({ file_id: id });
-          enqueueSnackbar('File berhasil ditambahkan ke favorite!', { variant: 'success' });
-        } else {
-          enqueueSnackbar('Anda tidak memiliki izin untuk menambahkan ke favorite!', {
-            variant: 'warning',
-          });
-        }
+        await addFavorite({ file_id: id });
+        enqueueSnackbar('File berhasil di tambahkan ke favorite!', { variant: 'success' });
       }
-      setFavorite(!favorite);
+
+      favorite.onToggle();
     } catch (error) {
-      enqueueSnackbar('Error saat mengubah favorite!', { variant: 'error' });
+      if (error.response && error.response.data.errors && error.response.data.errors.file_id) {
+        enqueueSnackbar('Kolom id file wajib diisi.', { variant: 'error' });
+      } else {
+        enqueueSnackbar('Error saat menambahkan favorite!', { variant: 'error' });
+      }
+    } finally {
+      setIsLoading(false);
     }
-  }, [
-    favorite,
-    id,
-    addFavorite,
-    removeFavorite,
-    canAddFavorite,
-    canRemoveFavorite,
-    enqueueSnackbar,
-  ]);
+  }, [favorite.value, id, addFavorite, removeFavorite, enqueueSnackbar]);
 
   const renderTags = (
     <Stack spacing={1.5}>
@@ -376,7 +360,7 @@ export default function FIleManagerFileDetails({
         </IconButton>
       </Stack>
 
-      {shared_with.length > 0 ? (
+      {shared_with && shared_with.length > 0 ? (
         shared_with.map((share) => (
           <FileManagerInvitedItem
             key={share.user.id}

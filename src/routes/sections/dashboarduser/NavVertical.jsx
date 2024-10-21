@@ -17,7 +17,7 @@ import { NAV } from '../../../layouts/config-layout';
 import { useNavData } from './UserNavigation';
 import { NavToggleButton } from '../../../layouts/_common';
 
-import Kemen from '../../../../public/logo/Kemen3.png';
+import Kemen from '../../../../public/logo/kemen3.png'
 import NavUpgrade from 'src/layouts/_common/nav-upgrade';
 
 

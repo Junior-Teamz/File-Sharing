@@ -13,6 +13,7 @@ import {
   IconButton,
   Tooltip,
   TextField,
+  MenuItem,
 } from '@mui/material';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import CustomPopover from 'src/components/custom-popover';
@@ -36,14 +37,15 @@ export default function AdminListNews() {
   const [searchQuery, setSearchQuery] = useState('');
   const [popover, setPopover] = useState({ open: false, anchorEl: null, currentId: null });
 
-  const filteredNews = newsData?.data?.data.filter((news) =>
+  // Fallback to an empty array if newsData is undefined
+  const filteredNews = (newsData?.data?.data || []).filter((news) =>
     news.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleDelete = async (id) => {
     try {
       await deleteNews.mutateAsync(id);
-      enqueueSnackbar('Berita berhasil di hapus', { variant: 'success' });
+      enqueueSnackbar('Berita berhasil dihapus', { variant: 'success' });
       useClient.invalidateQueries({ queryKey: ['list.news'] });
     } catch {
       enqueueSnackbar('Gagal menghapus berita', { variant: 'error' });
@@ -79,7 +81,7 @@ export default function AdminListNews() {
             variant="contained"
             startIcon={<Iconify icon="mingcute:add-line" />}
           >
-            Buat Berita baru
+            Buat Berita Baru
           </Button>
         }
         sx={{ mb: { xs: 3, md: 5 } }}
@@ -127,7 +129,6 @@ export default function AdminListNews() {
                         <span dangerouslySetInnerHTML={{ __html: content }} />
                       </TableCell>
                       <TableCell>{status}</TableCell>
-
                       <TableCell align="right">
                         <Tooltip title="More Actions" placement="top">
                           <IconButton onClick={(event) => handlePopoverOpen(event, id)}>
@@ -166,7 +167,7 @@ export default function AdminListNews() {
         sx={{ width: 140 }}
       >
         <MenuItem onClick={() => handleDelete(popover.currentId)} sx={{ color: 'error.main' }}>
-          <Iconify icon="solar:trash-bin-trash-bold" /> Delete
+          <Iconify icon="solar:trash-bin-trash-bold" /> Hapus
         </MenuItem>
         <MenuItem onClick={() => RouterLink.push(`/edit/${popover.currentId}`)}>
           <Iconify icon="solar:pen-bold" /> Edit

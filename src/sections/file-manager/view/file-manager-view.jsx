@@ -165,28 +165,7 @@ export default function FileManagerView() {
 
   return (
     <>
-      <Container
-        maxWidth={settings.themeStretch ? false : 'lg'}
-        sx={{
-          position: 'relative', // Required for positioning child elements
-          minHeight: '100vh',
-          // Overlay background
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundImage: `url(${Overlay})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            filter: 'blur(10px)', // Apply blur
-            zIndex: -1, // Send background behind the content
-          },
-        }}
-      >
+      <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h4">File Manager</Typography>
           <Button

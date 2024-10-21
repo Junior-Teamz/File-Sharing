@@ -69,7 +69,7 @@ export default function InstanceListView() {
   const instances = data?.data || [];
 
   // Sort instances by creation date (most recent first)
-  const sortedInstances = instances.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const sortedInstances = instances.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
 
   // Filter instances based on search term
