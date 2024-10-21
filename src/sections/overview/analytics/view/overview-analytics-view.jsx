@@ -306,9 +306,9 @@ export default function OverviewAnalyticsView() {
           />
         </Grid> */}
 
-        <Grid xs={12} md={6} lg={8}>
+        {/* <Grid xs={12} md={6} lg={8}>
           <AnalyticsNews title="News" list={_analyticPosts} />
-        </Grid>
+        </Grid> */}
       </Grid>
     </Container>
   );

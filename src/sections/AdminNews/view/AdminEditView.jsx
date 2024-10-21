@@ -6,11 +6,15 @@ import { paths } from 'src/routes/paths';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import AdminNewsEdit from '../AdminNewsEdit';
+// react-router
+import { useParams } from 'react-router-dom';
 
 // ----------------------------------------------------------------------
 
 export default function AdminEditView() {
   const settings = useSettingsContext();
+  // Mengambil ID dari URL
+  const { id } = useParams();
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -32,7 +36,8 @@ export default function AdminEditView() {
         }}
       />
 
-      <AdminNewsEdit />
+      {/* Mengoper ID ke komponen AdminNewsEdit jika perlu */}
+      <AdminNewsEdit newsId={id} />
     </Container>
   );
 }

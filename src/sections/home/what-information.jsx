@@ -69,7 +69,7 @@ export default function InformationAndAnnouncements() {
   // Filter the news based on search query
   useEffect(() => {
     if (sortedNews) {
-      const filteredData = sortedNews.filter(news =>
+      const filteredData = sortedNews.filter((news) =>
         news.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
@@ -82,7 +82,6 @@ export default function InformationAndAnnouncements() {
   }, [sortedNews, searchQuery, page]);
 
   const totalPages = Math.ceil((data?.data?.data?.length || 0) / 4);
-
 
   return (
     <Container
@@ -200,7 +199,7 @@ export default function InformationAndAnnouncements() {
                       }}
                     >
                       <Box sx={{ mb: 0 }}>
-                        {news.news_tags.map((tag, index) => (
+                        {news.news_tags?.map((tag, index) => (
                           <Chip
                             key={index}
                             label={tag.name}
@@ -247,7 +246,14 @@ export default function InformationAndAnnouncements() {
                           <EventIcon sx={{ fontSize: 17, verticalAlign: 'middle', mr: 0.5 }} />
                           {formattedDate}
                         </Typography>
-                        <Button variant="outlined" size="small" sx={{ color: 'primary.main' }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{ color: 'primary.main' }}
+                          onClick={() =>
+                            (window.location.href = `${paths.news.detail}/${news.slug}`)
+                          }
+                        >
                           Baca Selengkapnya
                         </Button>
                       </Box>

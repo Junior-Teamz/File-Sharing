@@ -14,6 +14,8 @@ import {
   Tooltip,
   TextField,
   MenuItem,
+  Modal,
+  Box,
 } from '@mui/material';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import CustomPopover from 'src/components/custom-popover';
@@ -25,6 +27,9 @@ import { paths } from 'src/routes/paths';
 import { useDeleteLegal, useFetchNews } from './fetchNews';
 import { useSnackbar } from 'notistack';
 import { useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
+import CloseIcon from '@mui/icons-material/Close';
+import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
 
 export default function AdminListNews() {
   const settings = useSettingsContext();
@@ -36,11 +41,15 @@ export default function AdminListNews() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
   const [popover, setPopover] = useState({ open: false, anchorEl: null, currentId: null });
+  const [isOpen, setIsOpen] = useState(false);
 
   // Fallback to an empty array if newsData is undefined
   const filteredNews = (newsData?.data?.data || []).filter((news) =>
     news.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Urutkan berita berdasarkan waktu terbaru (misal, berdasarkan `createdAt` atau field lain)
+  const sortedNews = filteredNews.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
   const handleDelete = async (id) => {
     try {
@@ -102,7 +111,7 @@ export default function AdminListNews() {
               <TableRow>
                 <TableCell>Thumbnail</TableCell>
                 <TableCell>Judul</TableCell>
-                <TableCell>Content</TableCell>
+                <TableCell>Isi</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell align="right">Aksi</TableCell>
               </TableRow>
@@ -114,19 +123,98 @@ export default function AdminListNews() {
                     Loading...
                   </TableCell>
                 </TableRow>
-              ) : filteredNews.length > 0 ? (
-                filteredNews
+              ) : sortedNews.length > 0 ? (
+                sortedNews
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map(({ id, title, content, status, thumbnail_url }) => (
                     <TableRow key={id}>
                       <TableCell>
-                        <img src={thumbnail_url} alt={title} style={{ width: '100px' }} />
+                        <Box
+                          sx={{
+                            position: 'relative',
+                            cursor: 'zoom-in',
+                            '&:hover .zoom-icon': {
+                              opacity: 1,
+                            },
+                          }}
+                        >
+                          <Box
+                            component="img"
+                            src={thumbnail_url}
+                            alt={title}
+                            onClick={() => setIsOpen(true)}
+                            style={{
+                              maxWidth: '50%',
+                              height: '50%',
+                              cursor: 'zoom-in',
+                            }}
+                          />
+                          <IconButton
+                            className="zoom-icon"
+                            sx={{
+                              position: 'absolute',
+                              top: '10px',
+                              right: '10px',
+                              color: 'white',
+                              opacity: 0,
+                              transition: 'opacity 0.3s',
+                            }}
+                            onClick={() => setIsOpen(true)}
+                          >
+                            <ZoomInMapIcon />
+                          </IconButton>
+                        </Box>
+
+                        <Modal
+                          open={isOpen}
+                          onClose={() => setIsOpen(false)}
+                          aria-labelledby="zoomed-image-modal"
+                          aria-describedby="modal-with-zoomed-image"
+                        >
+                          <Box
+                            position="relative"
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
+                            height="100vh"
+                            bgcolor="rgba(0, 0, 0, 0.8)"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            <Box
+                              component="img"
+                              src={thumbnail_url}
+                              alt={title}
+                              style={{
+                                maxWidth: '50%',
+                                maxHeight: '50%',
+                                transform: 'scale(1.5)',
+                                transition: 'transform 0.3s ease-in-out',
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+
+                            <IconButton
+                              onClick={() => setIsOpen(false)}
+                              style={{
+                                position: 'absolute',
+                                top: '10px',
+                                right: '10px',
+                                color: '#fff',
+                              }}
+                            >
+                              <CloseIcon />
+                            </IconButton>
+                          </Box>
+                        </Modal>
                       </TableCell>
                       <TableCell>
                         <span dangerouslySetInnerHTML={{ __html: title }} />
                       </TableCell>
                       <TableCell>
-                        <span dangerouslySetInnerHTML={{ __html: content }} />
+                        <span
+                          dangerouslySetInnerHTML={{ __html: content }}
+                          style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical', overflow: 'hidden', WebkitLineClamp: 3 }}
+                        />
                       </TableCell>
                       <TableCell>{status}</TableCell>
                       <TableCell align="right">
@@ -151,7 +239,7 @@ export default function AdminListNews() {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={filteredNews.length}
+          count={sortedNews.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
@@ -169,9 +257,11 @@ export default function AdminListNews() {
         <MenuItem onClick={() => handleDelete(popover.currentId)} sx={{ color: 'error.main' }}>
           <Iconify icon="solar:trash-bin-trash-bold" /> Hapus
         </MenuItem>
-        <MenuItem onClick={() => RouterLink.push(`/edit/${popover.currentId}`)}>
-          <Iconify icon="solar:pen-bold" /> Edit
-        </MenuItem>
+        <Link to={`edit/${popover.currentId}`}>
+          <MenuItem>
+            <Iconify icon="solar:pen-bold" /> Edit
+          </MenuItem>
+        </Link>
       </CustomPopover>
     </Container>
   );

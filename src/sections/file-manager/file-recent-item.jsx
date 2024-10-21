@@ -96,7 +96,7 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
     try {
       await updateNameFile({ fileId: file.id, data: { name: newFileName } });
       enqueueSnackbar('File name updated successfully!', { variant: 'success' });
-      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
       useClient.invalidateQueries({ queryKey: ['detail-folder'] });
       edit.onFalse(); // Close the edit dialog
     } catch (error) {
@@ -253,7 +253,7 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
         },
       }}
     >
-      {file.shared?.map((person) => (
+      {file.shared_with?.map((person) => (
         <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
       ))}
     </AvatarGroup>

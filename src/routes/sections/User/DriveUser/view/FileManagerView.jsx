@@ -54,6 +54,7 @@ export default function FileManagerView() {
   const openDateRange = useBoolean();
   const confirm = useBoolean();
   const upload = useBoolean();
+  const create = useBoolean();
   const folderDialog = useBoolean();
   const editDialog = useBoolean();
 
@@ -67,7 +68,6 @@ export default function FileManagerView() {
       setTableData(FolderFiles);
     }
   }, [FolderFiles, tableData]);
-
 
   const canReset =
     !!filters.name || !!filters.type.length || (!!filters.startDate && !!filters.endDate);
@@ -164,15 +164,22 @@ export default function FileManagerView() {
 
   return (
     <>
-      <Container maxWidth={settings.themeStretch ? false : 'lg'} sx={{ mt: '10px' }}>
+      <Container maxWidth={settings.themeStretch ? false : 'lg'} sx={{ mt: '20px' }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Typography variant="h4">File Manager</Typography>
+          <Typography variant="h4">Drive Saya</Typography>
           <Button
             variant="contained"
             startIcon={<Iconify icon="eva:cloud-upload-fill" />}
             onClick={upload.onTrue}
           >
-            Upload
+            Upload File
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<Iconify icon="eva:cloud-upload-fill" />}
+            onClick={create.onTrue}
+          >
+            Create Folder
           </Button>
         </Stack>
 
@@ -204,6 +211,13 @@ export default function FileManagerView() {
         onTagChange={handleTagChange}
         open={upload.value}
         onClose={upload.onFalse}
+      />
+
+      <FileManagerNewFolderDialog
+        title="Buat Folder Baru "
+        onTagChange={handleTagChange}
+        open={create.value}
+        onClose={create.onFalse}
       />
 
       <ConfirmDialog

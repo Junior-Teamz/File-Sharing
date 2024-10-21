@@ -74,7 +74,7 @@ export const dashboardRoutes = [
       { element: <IndexPage />, index: true },
       { path: 'analytics', element: <OverviewAnalyticsPage /> },
       { path: 'favorite', element: <ListHelmetFavorite /> },
-      { path: 'file', element: <OverviewFilePage /> },
+      // { path: 'file', element: <OverviewFilePage /> },
       {
         path: 'shared-with-me',
         children: [

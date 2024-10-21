@@ -96,11 +96,11 @@ export function useNavData() {
             path: paths.dashboard.favorite,
             icon: ICONS.Favorite,
           },
-          {
-            title: t('file'),
-            path: paths.dashboard.general.file,
-            icon: ICONS.file,
-          },
+          // {
+          //   title: t('file'),
+          //   path: paths.dashboard.general.file,
+          //   icon: ICONS.file,
+          // },
         ],
       },
 
@@ -150,18 +150,18 @@ export function useNavData() {
             ],
           },
 
-          {
-            title: t('manajemen tag berita'),
-            path: paths.dashboard.TagNews.root,
-            icon: ICONS.tagsnews,
-            children: [
-              // { title: t('profile'), path: paths.dashboard.user.root },
-              // { title: t('cards'), path: paths.dashboard.user.cards },
-              { title: t('daftar tag berita'), path: paths.dashboard.TagNews.list },
-              { title: t('membuat tag berita'), path: paths.dashboard.TagNews.create },
-              // { title: t('instance edit'), path: paths.dashboard.instance.edit },
-            ],
-          },
+          // {
+          //   title: t('manajemen tag berita'),
+          //   path: paths.dashboard.TagNews.root,
+          //   icon: ICONS.tagsnews,
+          //   children: [
+          //     // { title: t('profile'), path: paths.dashboard.user.root },
+          //     // { title: t('cards'), path: paths.dashboard.user.cards },
+          //     { title: t('daftar tag berita'), path: paths.dashboard.TagNews.list },
+          //     { title: t('membuat tag berita'), path: paths.dashboard.TagNews.create },
+          //     // { title: t('instance edit'), path: paths.dashboard.instance.edit },
+          //   ],
+          // },
 
           {
             title: t('manajemen dasar hukum'),
@@ -185,6 +185,7 @@ export function useNavData() {
               // { title: t('cards'), path: paths.dashboard.user.cards },
               { title: t('daftar berita'), path: paths.dashboard.AdminNews.list },
               { title: t('membuat berita'), path: paths.dashboard.AdminNews.create },
+              // { title: t('membuat berita'), path: paths.dashboard.AdminNews.edit },
               // { title: t('Create News'), path: paths.dashboard.legal.create },
               // { title: t('Update News'), path: paths.dashboard.legal.create },
               // { title: t('instance edit'), path: paths.dashboard.instance.edit },

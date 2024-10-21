@@ -15,6 +15,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  IconButton,
 } from '@mui/material';
 import { Box, Container, Stack } from '@mui/system';
 import InfoIcon from '@mui/icons-material/Info';
@@ -27,10 +28,16 @@ import { useMutationFolder } from '../DriveUser/view/FetchFolderUser';
 import FileManagerNewDialogParent from '../DriveUser/FileManagerNewDialogParentId';
 import FileRecentItem from '../DriveUser/FileRecentItem';
 import FileManagerPanel from '../DriveUser/FileManagerPanel';
+import { useBoolean } from 'src/hooks/use-boolean';
+import FolderDetail from '../DriveUser/FolderDetail';
 
 export const FileManagerDetailUsers = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const Folder = useBoolean();
+
+  const details = useBoolean();
 
   // Fetch folder details and tags
   const { data, isLoading, refetch, error } = useFetchDetailFolderUsers(id);
@@ -41,6 +48,7 @@ export const FileManagerDetailUsers = () => {
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   // Folder navigation state
   const [folderStack, setFolderStack] = useState([]);
+
 
   const [openCreateFolderDialog, setOpenCreateFolderDialog] = useState(false);
   const [folderName, setFolderName] = useState('');
@@ -177,12 +185,9 @@ export const FileManagerDetailUsers = () => {
             {/* Current folder name */}
             <span style={{ color: 'black' }}>{data.folder_info.name}</span>
 
-            {/* InfoIcon displays folder.id */}
-            <InfoIcon
-              fontSize="medium"
-              sx={{ mt: 3, cursor: 'pointer' }}
-              onClick={handleInfoClick}
-            />
+            <IconButton onClick={details.onTrue} sx={{ mt: 3, cursor: 'pointer' }}>
+              <InfoIcon fontSize="medium" />
+            </IconButton>
           </Typography>
         </Box>
 
@@ -325,6 +330,8 @@ export const FileManagerDetailUsers = () => {
         selectedTags={selectedTagIds} // Ensure 'selectedTagIds' is used here
         onTagChange={handleTagChange} // Ensure 'handleTagChange' is used here
       />
+
+      <FolderDetail open={details.value} onClose={details.onFalse} />
     </>
   );
 };

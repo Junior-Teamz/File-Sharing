@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useUpdateNews } from './view/fetchNews';
+import { useParams } from 'react-router-dom';
 import {
   Dialog,
   DialogTitle,
@@ -21,26 +22,26 @@ import CloseIcon from '@mui/icons-material/Close'; // Import Close icon
 import { RHFAutocomplete } from 'src/components/hook-form';
 import { TINY_API } from 'src/config-global';
 
-export default function AdminNewsEdit({ newsId, open, onClose }) {
+export default function AdminNewsEdit({ id, open, onClose }) {
   const { mutateAsync: updateNews, isLoading: isUpdating } = useUpdateNews();
   const { enqueueSnackbar } = useSnackbar();
   const useClient = useQueryClient();
   const [editingNews, setEditingNews] = useState(null);
   const [thumbnailPreview, setThumbnailPreview] = useState('');
 
-  // Fetch news data when the component mounts or newsId changes
+  // Fetch news data when the component mounts or id changes
   useEffect(() => {
     const fetchNewsData = async () => {
-      if (newsId) {
+      if (id) {
         // Assume there's a function to get news data by ID
-        const newsToEdit = await getNewsById(newsId); // Replace with your fetching logic
+        const newsToEdit = await getNewsById(id); // Replace with your fetching logic
         setEditingNews(newsToEdit);
         setThumbnailPreview(newsToEdit?.thumbnail_url || ''); // Set initial thumbnail preview
       }
     };
 
     fetchNewsData();
-  }, [newsId]);
+  }, [id]);
 
   const handleThumbnailChange = (event) => {
     const file = event.target.files[0];
@@ -78,7 +79,7 @@ export default function AdminNewsEdit({ newsId, open, onClose }) {
         news_tag_ids: news_tag_ids || undefined,
       };
 
-      await updateNews({ newsId, data: updateData });
+      await updateNews({ id, data: updateData });
       enqueueSnackbar('Berita berhasil diperbarui', { variant: 'success' });
       useClient.invalidateQueries({ queryKey: ['list.news'] });
       onClose(); // Close the dialog

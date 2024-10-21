@@ -34,7 +34,7 @@ export default function NewsId() {
   return (
     <Grid container sx={{ padding: '20px' }}>
       {/* Custom Breadcrumbs on the left */}
-      <Grid item xs={12} md={10} sx={{ display: 'flex', alignItems: 'flex-start' }}>
+      <Grid item xs={12} md={12} sx={{ display: 'flex', alignItems: 'flex-start' }}>
         <CustomBreadcrumbs
           links={[
             {
@@ -43,18 +43,17 @@ export default function NewsId() {
             },
             {
               name: 'Daftar Berita',
-              href: paths.news.informasi,
+              href: '/berita',
             },
             {
               name: <span dangerouslySetInnerHTML={{ __html: news.title }} />,
-              href: '', 
             },
           ]}
           sx={{
             mb: { xs: 3, md: 5 },
-            fontSize: '1rem', // Increased font size
+            fontSize: '1rem',
             '& .MuiTypography-root': {
-              fontSize: '1rem', // Set font size for Typography
+              fontSize: '1rem',
             },
           }}
         />
@@ -124,12 +123,10 @@ export default function NewsId() {
           color="textPrimary"
           paragraph
           sx={{
-            textAlign: 'justify',         
-            textAlignLast: 'justify',    
-            lineHeight: 1.6,              
-            marginBottom: 0,              
-            overflowWrap: 'break-word',  
-            wordBreak: 'break-word',      
+            lineHeight: 1.6, // Tetap ada pengaturan line-height
+            marginBottom: 0,
+            overflowWrap: 'break-word',
+            wordBreak: 'break-word',
           }}
         >
           <span dangerouslySetInnerHTML={{ __html: news.content }} />
