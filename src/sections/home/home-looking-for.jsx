@@ -32,7 +32,7 @@ export default function HomeLookingFor() {
           height: '80px',
           backgroundColor: '#8FAF3E',
           borderRadius: '0 300px 0 0', // Keep the radius complementary to the first shape
-          zIndex: 1,
+          zIndex: 0,
         }}
       />
 
@@ -43,9 +43,9 @@ export default function HomeLookingFor() {
           position: 'absolute',
           top: -200,
           width: '180%',
-          height: '500px',
+          height: '494px',
           zIndex: 0,
-          transform: 'scaleY(-1)', // Flips the wave to face downward
+          transform: 'scaleY(-1)', 
         }}
       >
         <path
@@ -66,7 +66,7 @@ export default function HomeLookingFor() {
         </Grid>
 
         {/* PDF Cards */}
-        <Grid container item xs={12} spacing={2}>
+        <Grid container item xs={12} spacing={2} sx={{ zIndex: 1,}}>
           {isLoading && <Typography>Loading...</Typography>}
           {error && <Typography>Error loading data!</Typography>}
           {Array.isArray(legalBasisData) && legalBasisData.length > 0 ? (
@@ -85,6 +85,7 @@ export default function HomeLookingFor() {
                       color: 'common.white',
                       textAlign: 'center',
                       cursor: 'pointer',
+                     
                       transition: 'transform 0.3s ease-in-out, backgroundColor 0.3s ease-in-out',
                       '&:hover': {
                         transform: 'scale(1.05)',

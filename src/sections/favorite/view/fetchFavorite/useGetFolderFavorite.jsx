@@ -5,7 +5,7 @@ export const useGetFolderFavorite = () => {
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['list.favorite'],
     queryFn: async () => {
-      const response = await axiosInstance.get(endpoints.folder.getFavoritUser);
+      const response = await axiosInstance.get(endpoints.folder.getFavorit);
       return response.data;
     },
   });

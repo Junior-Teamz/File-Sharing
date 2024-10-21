@@ -73,7 +73,7 @@ export default function HomeView() {
         sx={{
           overflow: 'hidden',
           position: 'relative',
-          background: 'linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%)',
+          background: 'linear-gradient(120deg, #d4fc79 30%, #96e6a1 100%)',
         }}
       >
         <HomeLookingFor />

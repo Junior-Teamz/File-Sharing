@@ -24,7 +24,7 @@ export default function TagCreateForm() {
       enqueueSnackbar('Tag berhasil dibuat', { variant: 'success' });
       reset();
       router.push(paths.dashboard.tag.list);
-      queryClient.invalidateQueries({ queryKey:['list.tag']})
+      queryClient.invalidateQueries({ queryKey:['tag.admin']})
     },
     onError: (error) => {
       // Check if the error has the expected structure

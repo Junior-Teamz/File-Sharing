@@ -19,13 +19,13 @@ export default function Page500() {
       <MotionContainer>
         <m.div variants={varBounce().in}>
           <Typography variant="h3" sx={{ mb: 2 }}>
-            500 Internal Server Error
+            Kesalahan Server Internal 500
           </Typography>
         </m.div>
 
         <m.div variants={varBounce().in}>
           <Typography sx={{ color: 'text.secondary' }}>
-            There was an error, please try again later.
+            Terjadi kesalahan, coba lagi nanti.
           </Typography>
         </m.div>
 
@@ -34,7 +34,7 @@ export default function Page500() {
         </m.div>
 
         <Button component={RouterLink} href="/" size="large" variant="contained">
-          Go to Home
+          Kembali Ke Home
         </Button>
       </MotionContainer>
     </CompactLayout>

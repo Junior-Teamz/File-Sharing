@@ -4,6 +4,7 @@ import { m } from 'framer-motion';
 import { varFade } from 'src/components/animate';
 import ArticleIcon from '@mui/icons-material/Article';
 import { useFetchNewsLandingPage } from './view/fetchNews/useFetchNewsLandingPage';
+import EventIcon from '@mui/icons-material/Event';
 
 export default function Informasi() {
   const { data, isLoading } = useFetchNewsLandingPage();
@@ -11,7 +12,6 @@ export default function Informasi() {
   // Get the two most recent news articles
   const getRecentNews = () => {
     if (!data || !data.data) return [];
-
     // Sort news articles by date descending and limit to two articles
     const sortedNews = data.data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     return sortedNews.slice(0, 2);
@@ -77,62 +77,85 @@ export default function Informasi() {
 
       {/* News Cards */}
       <Grid item xs={12}>
-        <Grid item container spacing={2} justifyContent="center">
+        <Grid container spacing={2} justifyContent="center">
           {isLoading ? (
             <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
               <CircularProgress />
             </Grid>
           ) : recentNews.length > 0 ? (
-            recentNews.map((news) => (
-              <Grid item xs={12} sm={6} md={5} key={news.id}>
-                <m.div variants={varFade().inUp}>
-                  <Stack
-                    alignItems="flex-start"
-                    spacing={2}
-                    sx={{
-                      p: 4,
-                      borderRadius: 2,
-                      backgroundColor: 'primary.main',
-                      color: 'common.white',
-                      textAlign: 'center',
-                      mx: 'auto',
-                      zIndex: 1,
-                    }}
-                  >
-                    <Typography variant="h4">
-                      <span dangerouslySetInnerHTML={{ __html: news.title }} />
-                    </Typography>
-                    <Typography
-                      variant="body1"
+            recentNews.map((news) => {
+              const formattedDate = new Date(news.created_at).toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              });
+
+              return (
+                <Grid item xs={12} sm={6} md={5} key={news.id}>
+                  <m.div variants={varFade().inUp}>
+                    <Stack
+                      alignItems="flex-start"
+                      spacing={2}
                       sx={{
-                        maxWidth: 400,
-                        maxHeight: 110,
-                        overflowY: 'scroll',
-                        overflow:'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'initial',
+                        p: 4,
+                        borderRadius: 2,
+                        backgroundColor: 'primary.main',
+                        color: 'common.white',
+                        textAlign: 'center',
+                        mx: 'auto',
+                        zIndex: 1,
                       }}
                     >
-                      <span dangerouslySetInnerHTML={{ __html: news.content }} />
-                    </Typography>
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      onClick={() => (window.location.href = `${paths.news.detail}/${news.slug}`)}
-                      sx={{
-                        mt: 2,
-                        backgroundColor: '#80b918',
-                        '&:hover': {
-                          backgroundColor: '#55a630',
-                        },
-                      }}
-                    >
-                      Baca Selengkapnya
-                    </Button>
-                  </Stack>
-                </m.div>
-              </Grid>
-            ))
+                      <Typography variant="h4">
+                        <span dangerouslySetInnerHTML={{ __html: news.title }} />
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          maxWidth: 400,
+                          maxHeight: 110,
+                          overflowY: 'auto',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'initial',
+                        }}
+                      >
+                        <span dangerouslySetInnerHTML={{ __html: news.content }} />
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          width: '100%',
+                          alignItems: 'center',
+                          mt: 'auto',
+                        }}
+                      >
+                        <Typography variant="body2" color="">
+                          <EventIcon sx={{ fontSize: 17, verticalAlign: 'middle', mr: 0.5 }} />
+                          {formattedDate}
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={() =>
+                            (window.location.href = `${paths.news.detail}/${news.slug}`)
+                          }
+                          sx={{
+                            mt: 2,
+                            backgroundColor: '#80b918',
+                            '&:hover': {
+                              backgroundColor: '#55a630',
+                            },
+                          }}
+                        >
+                          Baca Selengkapnya
+                        </Button>
+                      </Box>
+                    </Stack>
+                  </m.div>
+                </Grid>
+              );
+            })
           ) : (
             // No news available
             <Grid item xs={12}>

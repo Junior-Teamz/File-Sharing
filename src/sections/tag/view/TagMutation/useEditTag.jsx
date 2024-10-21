@@ -3,7 +3,7 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 
 export const useEditTag = ({ onSuccess, onError }) => {
   return useMutation({
-    mutationKey: ['edit.tag'],
+    mutationKey: ['edite.tag'],
     mutationFn: async ({ tagId, data }) => {
       if (!tagId) {
         throw new Error('Tag ID is required');

@@ -103,17 +103,17 @@ export default function AboutWhat() {
             <TextAnimate
               text="Apa"
               variants={varFade().inUp}
-              sx={{ color: 'primary.main', zIndex: 2 }}
+              sx={{ color: 'common.white', zIndex: 2 }}
             />
             <TextAnimate
               text="Itu"
               variants={varFade().inUp}
-              sx={{ color: 'primary.main', zIndex: 2 }}
+              sx={{ color: 'common.white', zIndex: 2 }}
             />
             <TextAnimate
               text="File Sharing?"
               variants={varFade().inUp}
-              sx={{ color: 'primary.main', zIndex: 2 }}
+              sx={{ color: 'common.white', zIndex: 2 }}
             />
           </Stack>
           <m.div variants={varFade().inUp}>

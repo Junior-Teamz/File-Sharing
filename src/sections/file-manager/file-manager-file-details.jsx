@@ -28,11 +28,16 @@ import {
   useRemoveTagFile,
   useMutationDeleteFiles,
   usePreviewImage,
+  usePreviewVideo,
 } from './view/folderDetail/index';
 import { useIndexTag } from '../tag/view/TagMutation';
 import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
-import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Modal } from '@mui/material';
 import { useAddFavorite, useRemoveFavorite } from './view/favoritemutation';
+import { useQueryClient } from '@tanstack/react-query';
+import CloseIcon from '@mui/icons-material/Close';
+import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
+import Lightbox from 'yet-another-react-lightbox';
 
 // ----------------------------------------------------------------------
 
@@ -46,7 +51,7 @@ export default function FIleManagerFileDetails({
   onDelete,
   ...other
 }) {
-  const { enqueueSnackbar } = useSnackbar(); // Initialize enqueueSnackbar
+  const { enqueueSnackbar } = useSnackbar();
   const {
     name,
     size,
@@ -54,18 +59,44 @@ export default function FIleManagerFileDetails({
     id,
     type,
     shared,
+    shared_with,
     modifiedAt,
     email,
+    video_url,
     user,
     instance,
     tags: initialTags,
     updated_at,
-    isFavorited,
+    is_favorite,
+    file_url,
   } = item;
 
-  // Only fetch preview if fileId is available
-  const { data: preview, isLoading: loadingPreview, isError: errorPreview } = usePreviewImage(id);
   const isFolder = item.type === 'folder';
+  const isImage = item.type === 'image';
+  const isVideo = item.type === 'video';
+  const isAudio = item.type === 'audio';
+
+  // Inside your component...
+  const [openLightbox, setOpenLightbox] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState([]);
+  const [lightboxVideos, setLightboxVideos] = useState([]);
+  const [lightboxAudio, setLightboxAudio] = useState([]);
+
+  const handleOpenLightbox = () => {
+    if (isImage) {
+      setLightboxImages([file_url]); // Add your image URL
+    } else if (isVideo) {
+      setLightboxVideos([video_url]); // Add your video URL
+    } else if (isAudio) {
+      setLightboxAudio([file_url]); // Assuming file_url is audio
+    }
+    setOpenLightbox(true);
+  };
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpen = () => setIsOpen(true);
+  const handleClose = () => setIsOpen(false);
 
   // Inside your FileRecentItem component
   const { mutateAsync: addFavorite } = useAddFavorite();
@@ -73,6 +104,7 @@ export default function FIleManagerFileDetails({
 
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
+  const useClient = useQueryClient();
 
   const toggleTags = useBoolean(true);
   const share = useBoolean();
@@ -81,7 +113,8 @@ export default function FIleManagerFileDetails({
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
 
   const [inviteEmail, setInviteEmail] = useState('');
-  const favorite = useBoolean(isFavorited); // Set initial value from props
+  const favorite = useBoolean(is_favorite); // Set initial value from props
+  const [issLoading, setIsLoading] = useState(false);
 
   const { data: tagData, isLoading, isError } = useIndexTag();
   const addTagFile = useAddFileTag();
@@ -141,10 +174,8 @@ export default function FIleManagerFileDetails({
     } catch (error) {
       console.error('Error adding tags:', error);
       if (error.response && error.response.data.errors) {
-        // Log specific errors from the server
-        console.error('Server errors:', error.response.data.errors);
         if (error.response.data.errors.tag_id) {
-          enqueueSnackbar('Tag already exists in folder.', { variant: 'warning' });
+          enqueueSnackbar('Tag sudah ada di file.', { variant: 'warning' });
         }
       }
       enqueueSnackbar('Error adding tags.', { variant: 'error' });
@@ -154,13 +185,13 @@ export default function FIleManagerFileDetails({
   const handleDeleteFile = async () => {
     try {
       await deleteFile({ file_id: fileIdToDelete });
-      enqueueSnackbar('File deleted successfully!', { variant: 'success' });
+      enqueueSnackbar('File berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
-      // Optionally, call a prop function to refresh the file list
+      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
     } catch (error) {
       console.error('Error deleting file:', error);
-      enqueueSnackbar('Error deleting file.', { variant: 'error' });
+      enqueueSnackbar('Gagal menghapus file', { variant: 'error' });
     }
   };
 
@@ -181,9 +212,7 @@ export default function FIleManagerFileDetails({
   };
 
   const handleCopyLink = () => {
-    const fileUrl = item.id; // Ensure this is the correct property for URL
-
-    console.log('File URL:', fileUrl); // Debugging line
+    const fileUrl = item.id;
 
     if (!fileUrl) {
       enqueueSnackbar('No URL to copy.', { variant: 'warning' });
@@ -199,27 +228,36 @@ export default function FIleManagerFileDetails({
       });
   };
 
+  useEffect(() => {
+    favorite.setValue(is_favorite);
+  }, [is_favorite]);
+
   const handleFavoriteToggle = useCallback(async () => {
     if (!id) {
       enqueueSnackbar('File ID is required to toggle favorite status!', { variant: 'error' });
       return;
     }
 
-    const payload = { file_id: id };
+    setIsLoading(true);
 
     try {
       if (favorite.value) {
-        await removeFavorite(payload);
+        // If already favorited, remove it
+        await removeFavorite(id);
         enqueueSnackbar('File removed from favorites!', { variant: 'success' });
       } else {
-        await addFavorite(payload);
+        // Otherwise, add it
+        await addFavorite(id);
         enqueueSnackbar('File added to favorites!', { variant: 'success' });
       }
 
-      // Toggle favorite state in the UI
+      // Toggle the UI state
       favorite.onToggle();
     } catch (error) {
+      console.error('Error updating favorite status:', error);
       enqueueSnackbar('Failed to update favorite status!', { variant: 'error' });
+    } finally {
+      setIsLoading(false);
     }
   }, [favorite.value, id, addFavorite, removeFavorite, enqueueSnackbar]);
 
@@ -232,18 +270,19 @@ export default function FIleManagerFileDetails({
         sx={{ typography: 'subtitle2' }}
       >
         Tags
-        <IconButton size="small" onClick={toggleTags.onToggle}>
+        {/* <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
           <Iconify
-            icon={toggleTags.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
+            icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
+            sx={{ color: favorite.value ? 'yellow' : 'gray' }}
           />
-        </IconButton>
+        </IconButton> */}
       </Stack>
 
       {toggleTags.value && (
         <Autocomplete
           multiple
-          options={availableTags} // Array of tag objects
-          getOptionLabel={(option) => option.name} // Display name
+          options={availableTags}
+          getOptionLabel={(option) => option.name}
           value={availableTags.filter((tag) => tags.includes(tag.id))} // Display selected tags
           onChange={handleChangeTags} // Update tags state
           renderOption={(props, option) => (
@@ -336,12 +375,18 @@ export default function FIleManagerFileDetails({
         </IconButton>
       </Stack>
 
-      {shared && shared.length > 0 && (
-        <Box sx={{ pl: 2.5, pr: 1 }}>
-          {shared.map((person) => (
-            <FileManagerInvitedItem key={person.id} person={person} />
-          ))}
-        </Box>
+      {shared_with.length > 0 ? (
+        shared_with.map((share) => (
+          <FileManagerInvitedItem
+            key={share.user.id}
+            user={share.user}
+            permissions={share.permissions}
+          />
+        ))
+      ) : (
+        <Typography variant="body2" color="text.secondary">
+          Not shared with anyone.
+        </Typography>
       )}
     </>
   );
@@ -368,10 +413,9 @@ export default function FIleManagerFileDetails({
             icon={<Iconify icon="eva:star-outline" />}
             checkedIcon={<Iconify icon="eva:star-fill" />}
             checked={favorite.value}
-            onChange={handleFavoriteToggle} // Toggle favorite state
+            onChange={handleFavoriteToggle}
           />
         </Stack>
-
         <Stack
           spacing={2.5}
           justifyContent="center"
@@ -392,15 +436,119 @@ export default function FIleManagerFileDetails({
               src="/assets/icons/files/ic_folder.svg"
               alt="Folder Icon"
             />
-          ) : loadingPreview ? (
-            // Show loading text while the preview is loading
-            <Typography>Loading preview...</Typography>
-          ) : errorPreview ? (
-            // Show error message if there was an error loading the preview
-            <Typography>Error loading preview.</Typography>
+          ) : ['jpg', 'jpeg', 'gif', 'bmp', 'png', 'svg'].includes(item.type) ? (
+            <>
+              <Box
+                sx={{
+                  position: 'relative',
+                  cursor: 'zoom-in',
+                  '&:hover .zoom-icon': {
+                    opacity: 1,
+                  },
+                }}
+              >
+                <Box
+                  component="img"
+                  src={file_url}
+                  alt={item.name}
+                  onClick={handleOpen} // Open modal for zoomed view
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                    cursor: 'zoom-in',
+                  }}
+                />
+                <IconButton
+                  className="zoom-icon"
+                  sx={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    color: 'white',
+                    opacity: 0,
+                    transition: 'opacity 0.3s',
+                  }}
+                  onClick={handleOpen} // Open modal for zoom
+                >
+                  <ZoomInMapIcon />
+                </IconButton>
+              </Box>
+
+              <Modal
+                open={isOpen}
+                onClose={handleClose}
+                aria-labelledby="zoomed-image-modal"
+                aria-describedby="modal-with-zoomed-image"
+              >
+                <Box
+                  position="relative"
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  height="100vh"
+                  bgcolor="rgba(0, 0, 0, 0.8)"
+                  onClick={handleClose}
+                >
+                  <Box
+                    component="img"
+                    src={file_url}
+                    alt={item.name}
+                    style={{
+                      maxWidth: '50%',
+                      maxHeight: '50%',
+                      transform: 'scale(1.5)',
+                      transition: 'transform 0.3s ease-in-out',
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+
+                  <IconButton
+                    onClick={handleClose}
+                    style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      color: '#fff',
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+              </Modal>
+            </>
+          ) : [
+              'mp4',
+              'mkv',
+              'webm',
+              '.mov',
+              'mpeg1',
+              'mpeg2',
+              'mpeg4',
+              'mpg',
+              'avi',
+              'wmv',
+              'mpegps',
+              'flv',
+              '3gpp',
+              'webm',
+              'dnxhr',
+              'prores',
+              'cineform',
+              'hevc',
+            ].includes(item.type) ? (
+            <video controls style={{ maxWidth: '100%', height: 'auto' }}>
+              <source src={video_url} type={`video/${item.type}`} />
+              Browser Anda tidak mendukung tag video.
+            </video>
+          ) : ['aif', 'mp3', 'wav', 'ogg', 'm4p', 'mxp4', 'msv', 'aac'].includes(item.type) ? (
+            <Box component="div">
+              <audio controls>
+                <source src={file_url} type={`audio/${item.type}`} />
+                browser Anda tidak mendukung tag audio.
+              </audio>
+            </Box>
           ) : (
-            // Show image preview if the item is a file
-            <img src={preview} alt={item.name} style={{ maxWidth: '100%', height: 'auto' }} />
+            <span>Tidak ada preview</span>
           )}
 
           <Typography variant="subtitle2">{name}</Typography>
@@ -433,12 +581,6 @@ export default function FIleManagerFileDetails({
               </Box>
               {user?.email}
             </Stack>
-            {/* <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
-                <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-                  Email
-                </Box>
-                {user?.email}
-              </Stack> */}
 
             <Stack direction="row" alignItems="center" sx={{ typography: 'subtitle2' }}>
               Instansi
@@ -462,7 +604,8 @@ export default function FIleManagerFileDetails({
 
           <FileManagerShareDialog
             open={share.value}
-            shared={shared}
+            fileId={id}
+            shared={shared_with}
             inviteEmail={inviteEmail}
             onChangeInvite={handleChangeInvite}
             onCopyLink={handleCopyLink}

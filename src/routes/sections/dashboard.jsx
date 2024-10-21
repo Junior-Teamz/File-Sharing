@@ -16,15 +16,15 @@ import TagCreateView from 'src/sections/tag/view/TagCreateView';
 
 // OVERVIEW
 const IndexPage = lazy(() => import('src/pages/dashboard/app'));
-const OverviewEcommercePage = lazy(() => import('src/pages/dashboard/ecommerce'));
+// const OverviewEcommercePage = lazy(() => import('src/pages/dashboard/ecommerce'));
 const OverviewAnalyticsPage = lazy(() => import('src/pages/dashboard/analytics'));
-const OverviewBankingPage = lazy(() => import('src/pages/dashboard/banking'));
-const OverviewBookingPage = lazy(() => import('src/pages/dashboard/booking'));
+// const OverviewBankingPage = lazy(() => import('src/pages/dashboard/banking'));
+// const OverviewBookingPage = lazy(() => import('src/pages/dashboard/booking'));
 const OverviewFilePage = lazy(() => import('src/pages/dashboard/file'));
 
 // USER
 const UserProfilePage = lazy(() => import('src/pages/dashboard/user/profile'));
-const UserCardsPage = lazy(() => import('src/pages/dashboard/user/cards'));
+// const UserCardsPage = lazy(() => import('src/pages/dashboard/user/cards'));
 const UserListPage = lazy(() => import('src/pages/dashboard/user/list'));
 const UserAccountPage = lazy(() => import('src/pages/dashboard/user/account'));
 const UserCreatePage = lazy(() => import('src/pages/dashboard/user/new'));
@@ -37,6 +37,13 @@ const InstanceCreate = lazy(() => import('src/pages/dashboard/instance/create'))
 
 // FILE MANAGER
 const FileManagerPage = lazy(() => import('src/pages/dashboard/file-manager'));
+import FolderDetail from 'src/sections/file-manager/FolderDetail';
+
+//share with me
+import ShareWithMe from 'src/pages/dashboard/sharewithme';
+import FolderDetailShare from 'src/sections/sharewithme/FolderDetail';
+import { FIleManagerDetaill } from 'src/sections/sharewithme/view/file-manager-detail';
+import AdminEditView from 'src/sections/AdminNews/view/AdminEditView';
 
 //Legal
 const LegalListView = lazy(() => import('src/sections/legalbasis/view/LegalListView'));
@@ -48,7 +55,6 @@ const NewsCreateView = lazy(() => import('src/sections/AdminNews/view/NewsCreate
 const TagNewsCreateView = lazy(() => import('src/sections/newsTag/view/TagNewsCreateView'));
 const TagNewsListView = lazy(() => import('src/sections/newsTag/view/TagNewsListView'));
 const ListHelmetFavorite = lazy(() => import('src/sections/favorite/ListHelmetFavorite'));
-
 
 // ----------------------------------------------------------------------
 
@@ -66,12 +72,17 @@ export const dashboardRoutes = [
     ),
     children: [
       { element: <IndexPage />, index: true },
-      // { path: 'ecommerce', element: <OverviewEcommercePage /> },
       { path: 'analytics', element: <OverviewAnalyticsPage /> },
-      // { path: 'banking', element: <OverviewBankingPage /> },
-      // { path: 'booking', element: <OverviewBookingPage /> },
       { path: 'favorite', element: <ListHelmetFavorite /> },
       { path: 'file', element: <OverviewFilePage /> },
+      {
+        path: 'shared-with-me',
+        children: [
+          { element: <ShareWithMe />, index: true },
+          { path: 'info/:id', element: <FIleManagerDetaill /> },
+          { path: 'folder', element: <FolderDetailShare /> },
+        ],
+      },
       {
         path: 'user',
         children: [
@@ -97,7 +108,6 @@ export const dashboardRoutes = [
         children: [
           { element: <TagListView />, index: true, path: 'list' },
           { path: 'create', element: <TagCreateView /> },
-          // { path: 'edit', element: <InstanceEdit /> },
         ],
       },
 
@@ -106,7 +116,6 @@ export const dashboardRoutes = [
         children: [
           { element: <TagNewsListView />, index: true, path: 'list' },
           { path: 'create', element: <TagNewsCreateView /> },
-          // { path: 'edit', element: <InstanceEdit /> },
         ],
       },
 
@@ -125,80 +134,19 @@ export const dashboardRoutes = [
           { element: <AdminListNews />, index: true, path: 'list' },
           { path: 'create', element: <NewsCreateView /> },
           // { path: 'edit', element: <InstanceEdit /> },
+          { path: 'edit/:id', element: <AdminEditView /> },
         ],
       },
-      // {
-      //   path: 'product',
-      //   children: [
-      //     { element: <ProductListPage />, index: true },
-      //     { path: 'list', element: <ProductListPage /> },
-      //     { path: ':id', element: <ProductDetailsPage /> },
-      //     { path: 'new', element: <ProductCreatePage /> },
-      //     { path: ':id/edit', element: <ProductEditPage /> },
-      //   ],
-      // },
-      // {
-      //   path: 'order',
-      //   children: [
-      //     { element: <OrderListPage />, index: true },
-      //     { path: 'list', element: <OrderListPage /> },
-      //     { path: ':id', element: <OrderDetailsPage /> },
-      //   ],
-      // },
-      // {
-      //   path: 'invoice',
-      //   children: [
-      //     { element: <InvoiceListPage />, index: true },
-      //     { path: 'list', element: <InvoiceListPage /> },
-      //     { path: ':id', element: <InvoiceDetailsPage /> },
-      //     { path: ':id/edit', element: <InvoiceEditPage /> },
-      //     { path: 'new', element: <InvoiceCreatePage /> },
-      //   ],
-      // },
-      // {
-      //   path: 'post',
-      //   children: [
-      //     { element: <BlogPostsPage />, index: true },
-      //     { path: 'list', element: <BlogPostsPage /> },
-      //     { path: ':title', element: <BlogPostPage /> },
-      //     { path: ':title/edit', element: <BlogEditPostPage /> },
-      //     { path: 'new', element: <BlogNewPostPage /> },
-      //   ],
-      // },
-      // {
-      //   path: 'job',
-      //   children: [
-      //     { element: <JobListPage />, index: true },
-      //     { path: 'list', element: <JobListPage /> },
-      //     { path: ':id', element: <JobDetailsPage /> },
-      //     { path: 'new', element: <JobCreatePage /> },
-      //     { path: ':id/edit', element: <JobEditPage /> },
-      //   ],
-      // },
-      // {
-      //   path: 'tour',
-      //   children: [
-      //
-      //     { path: 'list', element: <TourListPage /> },
-      //     { path: ':id', element: <TourDetailsPage /> },
-      //     { path: 'new', element: <TourCreatePage /> },
-      //     { path: ':id/edit', element: <TourEditPage /> },
-      //   ],
-      // },
+
       {
         path: 'file-manager',
         children: [
           { element: <FileManagerPage />, index: true },
           { path: 'info/:id', element: <FIleManagerDetail /> },
-          // { path: 'infosubfolder/:id', element: <FIleManagerDetail /> },
+          { path: 'folder', element: <FolderDetail /> },
+        
         ],
       },
-      // { path: 'mail', element: <MailPage /> },
-      // { path: 'chat', element: <ChatPage /> },
-      // { path: 'calendar', element: <CalendarPage /> },
-      // { path: 'kanban', element: <KanbanPage /> },
-      // { path: 'permission', element: <PermissionDeniedPage /> },
-      // { path: 'blank', element: <BlankPage /> },
     ],
   },
 ];

@@ -9,9 +9,29 @@ const FORMAT_EXCEL = ['xls', 'xlsx'];
 const FORMAT_ZIP = ['zip', 'rar', 'iso'];
 const FORMAT_ILLUSTRATOR = ['ai', 'esp'];
 const FORMAT_POWERPOINT = ['ppt', 'pptx'];
-const FORMAT_AUDIO = ['wav', 'aif', 'mp3', 'aac'];
+const FORMAT_AUDIO = ['aif', 'mp3', 'wav', 'ogg', 'm4p', 'mxp4', 'msv', 'aac'];
 const FORMAT_IMG = ['jpg', 'jpeg', 'gif', 'bmp', 'png', 'svg'];
-const FORMAT_VIDEO = ['m4v', 'avi', 'mpg', 'mp4', 'webm'];
+const FORMAT_VIDEO = [
+  'm4v',
+  'mp4',
+  'mkv',
+  'webm',
+  '.mov',
+  'mpeg1',
+  'mpeg2',
+  'mpeg4',
+  'mpg',
+  'avi',
+  'wmv',
+  'mpegps',
+  'flv',
+  '3gpp',
+  'webm',
+  'dnxhr',
+  'prores',
+  'cineform',
+  'hevc',
+];
 
 const iconUrl = (icon) => `/assets/icons/files/${icon}.svg`;
 

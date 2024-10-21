@@ -7,6 +7,7 @@ export * from './usePermissionsFile'; //permission
 export * from './usePermissionsFolder'; //permission
 export * from './useDownloadFile'; //download
 export * from './useChangeNameFile'; //change name
-export * from './usePreviewImage'; //permission
+export * from './usePreviewImage';
+export * from './usePreviewVideo';
 
 

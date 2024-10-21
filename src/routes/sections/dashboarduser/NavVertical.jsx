@@ -9,7 +9,6 @@ import { useResponsive } from 'src/hooks/use-responsive';
 // hooks
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 // components
-import Logo from 'src/components/logo';
 import Scrollbar from 'src/components/scrollbar';
 import { usePathname } from 'src/routes/hooks';
 import { NavSectionVertical } from 'src/components/nav-section';
@@ -19,6 +18,9 @@ import { useNavData } from './UserNavigation';
 import { NavToggleButton } from '../../../layouts/_common';
 
 import Kemen from '../../../../public/logo/Kemen3.png';
+import NavUpgrade from 'src/layouts/_common/nav-upgrade';
+
+
 // ----------------------------------------------------------------------
 
 export default function NavVertical({ openNav, onCloseNav }) {
@@ -71,7 +73,7 @@ export default function NavVertical({ openNav, onCloseNav }) {
 
       <Box sx={{ flexGrow: 1 }} />
 
-      {/* <NavUpgrade /> */}
+      <NavUpgrade />
     </Scrollbar>
   );
 

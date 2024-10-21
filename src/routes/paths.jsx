@@ -57,6 +57,9 @@ export const paths = {
   dashboarduser: {
     root: ROOTS.DashboardUser,
     shared: `${ROOTS.DashboardUser}/shared-with-me`,
+    favorite: `${ROOTS.DashboardUser}/favorite`,
+    profil: `${ROOTS.DashboardUser}/profil`,
+    akun: `${ROOTS.DashboardUser}/akun`,
   },
   // DASHBOARD
   dashboard: {
@@ -68,6 +71,7 @@ export const paths = {
     // calendar: `${ROOTS.DASHBOARD}/calendar`,
 
     fileManager: `${ROOTS.DASHBOARD}/file-manager`,
+    shareFilFolder: `${ROOTS.DASHBOARD}/shared-with-me`,
     permission: `${ROOTS.DASHBOARD}/permission`,
     favorite: `${ROOTS.DASHBOARD}/favorite`,
     general: {
@@ -115,6 +119,7 @@ export const paths = {
       root: `${ROOTS.DASHBOARD}/News`,
       list: `${ROOTS.DASHBOARD}/News/list`,
       create: `${ROOTS.DASHBOARD}/News/create`,
+      edit: `${ROOTS.DASHBOARD}/News/edit`,
     },
   },
 };

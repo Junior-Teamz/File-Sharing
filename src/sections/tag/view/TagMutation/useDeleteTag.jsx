@@ -3,7 +3,7 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 
 export const useDeleteTag = ({ onSuccess, onError }) => {
   return useMutation({
-    mutationKey: ['delete.tag'],
+    mutationKey: ['deletee.tag'],
     mutationFn: async (tagIdOrIds) => {
       const isArray = Array.isArray(tagIdOrIds);
 

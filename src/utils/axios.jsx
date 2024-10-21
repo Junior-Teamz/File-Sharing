@@ -6,37 +6,75 @@ import { HOST_API } from 'src/config-global';
 const axiosInstance = axios.create({ baseURL: HOST_API, withCredentials: true,});
 
 // Function to set the token
-export const setToken = (token) => {
-  if (token) {
-    sessionStorage.setItem('accessToken', token);
+export const setToken = (accessToken, refreshToken) => {
+  if (accessToken) {
+    sessionStorage.setItem('accessToken', accessToken);
   } else {
     sessionStorage.removeItem('accessToken');
   }
+
+  if (refreshToken) {
+    sessionStorage.setItem('refreshToken', refreshToken);
+  } else {
+    sessionStorage.removeItem('refreshToken');
+  }
 };
 
-// Request interceptor to attach the token
+// Function to get refresh token
+const getRefreshToken = () => {
+  return sessionStorage.getItem('refreshToken'); // Ambil refresh_token dari sessionStorage
+};
+
+// Function untuk refresh access_token
+const refreshAccessToken = async () => {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    throw new Error('No refresh token available');
+  }
+
+  const response = await axiosInstance.post('/api/refreshToken', { token: refreshToken });
+  const newAccessToken = response.data.accessToken; // Ambil access_token baru
+  setToken(newAccessToken, refreshToken); // Simpan access_token baru
+  return newAccessToken;
+};
+
+// Request interceptor untuk menyisipkan token
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = sessionStorage.getItem('accessToken'); // Get token from sessionStorage
+    const token = sessionStorage.getItem('accessToken'); // Ambil token dari sessionStorage
     if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`; // Attach Bearer token
+      config.headers['Authorization'] = `Bearer ${token}`; // Tambahkan Bearer token
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
+// Response interceptor untuk menangani refresh token
 axiosInstance.interceptors.response.use(
   (res) => res,
-  (error) => {
-    // Check for response status
+  async (error) => {
+    // Cek status respons
     if (error.response) {
-      if (error.response.status === 403) {
-        // Redirect to the 403 page
-        window.location = '/403'; // Adjust the path as needed
+      const originalRequest = error.config; // Simpan request yang gagal
+      if (error.response.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true; // Tandai request yang sudah dicoba
+
+        try {
+          const newAccessToken = await refreshAccessToken(); // Dapatkan access_token baru
+          originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`; // Tambahkan token baru ke header
+          return axiosInstance(originalRequest); // Ulangi request dengan token baru
+        } catch (refreshError) {
+          // Tangani kesalahan saat refresh token
+          handleLogout(); // Misalnya, logout pengguna
+          return Promise.reject(refreshError);
+        }
+      } else if (error.response.status === 403) {
+        // Redirect ke halaman 403
+        window.location = '/403'; // Sesuaikan path sesuai kebutuhan
       } else if (error.response.status === 500) {
-        // Redirect to the 500 page
-        window.location = '/500'; // Adjust the path as needed
+        // Redirect ke halaman 500
+        window.location = '/500'; // Sesuaikan path sesuai kebutuhan
       }
     }
     return Promise.reject((error.response && error.response.data) || 'Something went wrong');
@@ -63,12 +101,23 @@ export const endpoints = {
     me: '/api/index', // for info
     login: '/api/login', // for login
     logout: '/api/logout', // for log out
+    refreshToken: '/api/refreshToken',
     // register: '/api/auth/register/',
   },
 
   // previewImage: {
   //   preview: (hashedId) => `/api/file/preview/${hashedId}`,
   // },
+  previewVideo: {
+    getVideo: '/api/file/videoStream/',
+  },
+  previewImage: {
+    preview: '/api/file/preview/',
+  },
+
+  previewStorage:{
+    storage:'/api/storageSizeUsage'
+  },
 
   //get data di landing page
   Legalbasis: {
@@ -84,12 +133,9 @@ export const endpoints = {
   Tags: {
     ListTag: '/api/tag/index',
   },
-  previewImage: {
-    preview: '/api/file/preview/',
-  },
+
   GetFileFolderShare: {
     UserShare: '/api/getSharedFolderAndFile',
-    GetShareFolderFile: '/api/getSharedFolderAndFile',
   },
   SearchUser: {
     User: '/api/searchUser',
@@ -118,10 +164,19 @@ export const endpoints = {
     delete: '/api/folder/delete', // delete folder
     edit: '/api/folder/update', // edit folder
     addTag: '/api/folder/addTag',
+    removeTag: '/api/folder/removeTag',
   },
   //admin
   ChartFolder: {
     getChartFolder: '/api/admin/folder/storageSizeUsage',
+  },
+
+  FolderFileShare: {
+    getShareFolderFile: '/api/admin/getSharedFolderAndFile',
+  },
+
+  SearchUserAdmin: {
+    User: '/api/admin/searchUser',
   },
 
   ChartFile: {
@@ -162,9 +217,9 @@ export const endpoints = {
     removeTag: '/api/admin/file/removeTag',
     download: '/api/admin/file/download',
     change: '/api/admin/file/change_name',
-    getFavoritUser: '/api/admin/file/favorite',
-    addFavoritUser: '/api/admin/file/addToFavorite',
-    deleteFavoritUser: '/api/admin/file/deleteFavorite',
+    getFavorit: '/api/admin/file/favorite',
+    addFavorit: '/api/admin/file/addToFavorite',
+    deleteFavorit: '/api/admin/file/deleteFavorite',
   },
   permission: {
     getPermissionFolder: '/api/admin/permission/folder/grantPermission',
@@ -183,9 +238,10 @@ export const endpoints = {
     delete: '/api/admin/folder/delete', // delete folder
     edit: '/api/admin/folder/update', // edit folder
     addTag: '/api/admin/folder/addTag',
-    getFavoritUser: '/api/admin/folder/favorite',
-    addFavoritUser: '/api/admin/folder/addToFavorite',
-    deleteFavoritUser: '/api/admin/folder/deleteFavorite',
+    removeTag: '/api/admin/folder/removeTag',
+    getFavorit: '/api/admin/folder/favorite',
+    addFavorit: '/api/admin/folder/addToFavorite',
+    deleteFavorit: '/api/admin/folder/deleteFavorite',
   },
   users: {
     list: '/api/admin/users/list',

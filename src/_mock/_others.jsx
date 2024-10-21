@@ -1,4 +1,6 @@
 import { _mock } from './_mock';
+import XIcon from '@mui/icons-material/X';
+import Iconify from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -120,30 +122,23 @@ export const _socials = [
   {
     value: 'facebook',
     name: 'FaceBook',
-    icon: 'eva:facebook-fill',
+    icon: <Iconify icon="eva:facebook-fill" color='#1877F2'/>,
     color: '#1877F2',
-    path: 'https://www.facebook.com/caitlyn.kerluke',
+    path: 'https://web.facebook.com/kemenkopukm',
   },
   {
     value: 'instagram',
     name: 'Instagram',
-    icon: 'ant-design:instagram-filled',
+    icon: <Iconify icon="ant-design:instagram-filled" color='#E02D69' />,
     color: '#E02D69',
-    path: 'https://www.instagram.com/caitlyn.kerluke',
-  },
-  {
-    value: 'linkedin',
-    name: 'Linkedin',
-    icon: 'eva:linkedin-fill',
-    color: '#007EBB',
-    path: 'https://www.linkedin.com/caitlyn.kerluke',
+    path: 'https://www.instagram.com/kemenkopukm',
   },
   {
     value: 'twitter',
     name: 'Twitter',
-    icon: 'eva:twitter-fill',
-    color: '#00AAEC',
-    path: 'https://www.twitter.com/caitlyn.kerluke',
+    icon: <XIcon fontSize='small'/>,
+    color: '#000000',
+    path: 'https://x.com/kemenkopukm',
   },
 ];
 
