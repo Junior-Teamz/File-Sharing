@@ -6,7 +6,7 @@ import { LoadingScreen } from 'src/components/loading-screen';
 import UsersPage from './UsersPage';
 import DashboardUserLayout from '../dashboarduser/Layout';
 import { element } from 'prop-types';
-import { FileManagerDetailUsers } from './FileDetail/FileManagerDetailUsers';
+import { FileManagerDetailUsers } from './FIleDetail/FileManagerDetailUsers';
 import AccountView from './DriveUser/user-account-view';
 import ShareUserPage from './ShareUserPage';
 import FavoritePage from './FavoritePage';
