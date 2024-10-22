@@ -40,7 +40,7 @@ const defaultFilters = {
 export default function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
 
-  // console.log(data);
+ 
   const { FolderFiles } = FolderFileShare();
 
   const settings = useSettingsContext();
@@ -119,7 +119,7 @@ export default function FileManagerView() {
 
   const handleTagChange = (tags) => {
     setSelectedTags(tags); // Update the selected tags state
-    console.log('Selected Tags:', tags);
+   
   };
 
   const renderFilters = (

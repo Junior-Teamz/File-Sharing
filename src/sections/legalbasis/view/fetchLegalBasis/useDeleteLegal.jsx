@@ -8,7 +8,6 @@ export const useDeleteLegal = () => {
      
       const response = await axiosInstance.delete(`${endpoints.Legal.DeleteLegal}/${legalId}`);
 
-      console.log(response);
       return response;
     },
  

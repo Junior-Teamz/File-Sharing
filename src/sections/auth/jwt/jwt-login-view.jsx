@@ -16,7 +16,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { useAuthContext } from 'src/auth/hooks';
 // routes
 import { RouterLink } from 'src/routes/components';
-import { useSearchParams, useRouter } from 'src/routes/hooks';
+import { useRouter } from 'src/routes/hooks';
 // components
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
@@ -33,8 +33,8 @@ export default function JwtLoginView() {
   const password = useBoolean();
 
   const LoginSchema = Yup.object().shape({
-    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: Yup.string().required('Password is required'),
+    email: Yup.string().required('Email harus di isi').email('Email harus email yang valid'),
+    password: Yup.string().required('Password harus di isi'),
   });
 
   const methods = useForm({
@@ -54,11 +54,10 @@ export default function JwtLoginView() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       const response = await login?.(data.email, data.password);
-      // console.log('Login Response:', response);
+  
       const userRoles = response?.roles;
       const isSuperadmin = response?.is_superadmin ?? false;
-      // console.log('User Roles:', userRoles);
-
+  
       if (userRoles?.includes('admin') || isSuperadmin) {
         router.push('/dashboard');
       } else if (userRoles?.includes('user')) {
@@ -66,15 +65,30 @@ export default function JwtLoginView() {
       } else {
         enqueueSnackbar('Role tidak dikenal!', { variant: 'error' });
       }
-
+  
       enqueueSnackbar('Login Berhasil!', { variant: 'success' });
     } catch (error) {
       console.error('Login Error:', error);
-      enqueueSnackbar('Tidak bisa login!', { variant: 'error' });
       reset();
-      setErrorMsg(typeof error === 'string' ? error : error.message);
+  
+      // Menangani pesan kesalahan spesifik
+      if (error.response && error.response.data.errors) {
+        // Cek apakah errors adalah string atau objek
+        if (typeof error.response.data.errors === 'string') {
+          setErrorMsg(error.response.data.errors);
+        } else if (typeof error.response.data.errors === 'object') {
+          // Ambil pesan kesalahan dari objek
+          setErrorMsg(Object.values(error.response.data.errors).join(', '));
+        }
+      } else {
+        setErrorMsg('Tidak bisa login! Silakan coba lagi.');
+      }
+  
+      // Pastikan menampilkan snackbar setelah setErrorMsg
+      enqueueSnackbar(errorMsg, { variant: 'error' });
     }
   });
+  
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5 }}>

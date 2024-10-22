@@ -24,7 +24,7 @@ import Scrollbar from 'src/components/scrollbar';
 import { useSettingsContext } from 'src/components/settings';
 import { RouterLink } from 'src/routes/components';
 import { paths } from 'src/routes/paths';
-import { useDeleteLegal, useFetchNews } from './fetchNews';
+import { useDeleteNews, useFetchNews } from './fetchNews';
 import { useSnackbar } from 'notistack';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -34,7 +34,7 @@ import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
 export default function AdminListNews() {
   const settings = useSettingsContext();
   const { data: newsData, isLoading } = useFetchNews();
-  const deleteNews = useDeleteLegal();
+  const deleteNews = useDeleteNews();
   const { enqueueSnackbar } = useSnackbar();
   const useClient = useQueryClient();
   const [page, setPage] = useState(0);
@@ -52,14 +52,19 @@ export default function AdminListNews() {
   const sortedNews = filteredNews.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
   const handleDelete = async (id) => {
+    if (!id) return; // Pastikan id tidak null atau undefined
     try {
-      await deleteNews.mutateAsync(id);
+  
+      const response = await deleteNews.mutateAsync(id);
+      
       enqueueSnackbar('Berita berhasil dihapus', { variant: 'success' });
       useClient.invalidateQueries({ queryKey: ['list.news'] });
-    } catch {
+    } catch (error) {
+     
       enqueueSnackbar('Gagal menghapus berita', { variant: 'error' });
     }
   };
+  
 
   const handlePopoverOpen = (event, id) => {
     setPopover({ open: true, anchorEl: event.currentTarget, currentId: id });

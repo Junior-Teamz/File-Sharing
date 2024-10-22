@@ -123,7 +123,7 @@ export default function FileManagerNewFolderDialog({
   return (
     <Dialog fullWidth maxWidth="sm" open={open} onClose={onClose} {...other}>
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit((data) => console.log(data))}>
+        <form onSubmit={methods.handleSubmit}>
           <DialogTitle>{title}</DialogTitle>
 
           <DialogContent dividers sx={{ pt: 1, pb: 0, border: 'none' }}>

@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
-export const useFetchDetail = (id) => {
+export const useGenerateLinkFile = (id) => {
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ['detail-folder'],
+    queryKey: ['generate.link'],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${endpoints.folder.detail}${id}`);
+      const response = await axiosInstance.get(`${endpoints.files.generateLink}/${id}`);
       const { data: result } = response.data;
+    
       return result;
     },
   });

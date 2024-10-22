@@ -60,7 +60,7 @@ export default function FileManagerNewFolderDialog({
         onChange: (info) => {
           const values = info.map((tag) => tag.value);
           setSelectedTags(values);
-          console.log('Selected Tags:', values); // Debug log
+        
           if (typeof onTagChange === 'function') {
             onTagChange(values);
           }
@@ -96,8 +96,7 @@ export default function FileManagerNewFolderDialog({
 
   const onSubmit = (formData) => {
     const { name } = formData;
-    console.log('Form Data:', formData); // Debug log
-    console.log('Selected Tags:', selectedTags); // Debug log
+  
     if (!name || selectedTags.length === 0) {
       enqueueSnackbar('Please fill in the required fields: name and tags', {
         variant: 'warning',

@@ -18,7 +18,7 @@ export const useDeleteFolder = () => {
         payload // Kirim payload langsung, bukan dalam objek data
       );
 
-      console.log(response);
+
       return response;
     },
   });

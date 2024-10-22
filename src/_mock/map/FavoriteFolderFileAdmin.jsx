@@ -15,9 +15,7 @@ export const FavoriteFolderFileAdmin = () => {
     refetch: refetchFolders,
   } = useGetFolderFavorite();
 
-  // Log the responses
-  console.log('Favorite Data:', favoriteData);
-  console.log('Folder Data:', folderData);
+ 
 
   // Handle loading and error states
   if (isLoadingFavorites || isLoadingFolders) {

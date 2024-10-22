@@ -190,7 +190,6 @@ export default function FIleManagerFileDetails({
   const handleCopyLink = () => {
     const fileUrl = item.id; // Ensure this is the correct property for URL
 
-    console.log('File URL:', fileUrl); // Debugging line
 
     if (!fileUrl) {
       enqueueSnackbar('No URL to copy.', { variant: 'warning' });
@@ -542,7 +541,7 @@ export default function FIleManagerFileDetails({
 }
 
 FIleManagerFileDetails.propTypes = {
-  item: PropTypes.object.isRequired,
+  item: PropTypes.object,
   open: PropTypes.bool,
   favorited: PropTypes.bool,
   onFavorite: PropTypes.func,

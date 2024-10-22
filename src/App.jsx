@@ -70,9 +70,6 @@ export default function App() {
           refetchOnWindowFocus: false,
           refetchOnReconnect: true,
           suspense: true,
-          onError: (error, variables) => {
-            console.error('Error during query:', error, variables);
-          },
         },
       },
     });

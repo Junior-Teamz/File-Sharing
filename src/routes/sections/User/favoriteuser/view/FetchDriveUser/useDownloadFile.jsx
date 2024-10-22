@@ -14,7 +14,7 @@ export const useDownloadFile = () => {
       const response = await axiosInstance.post(`${endpoints.file.download}`, payload, {
         responseType: 'blob',
       });
-      console.log(response);
+    
       return response;
     },
   });

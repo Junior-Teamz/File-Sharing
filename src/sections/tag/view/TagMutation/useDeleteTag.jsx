@@ -13,7 +13,7 @@ export const useDeleteTag = ({ onSuccess, onError }) => {
 
       const response = await axiosInstance.post(`${endpoints.tag.delete}`, payload);
 
-      console.log(response);
+     
       return response;
     },
     onSuccess,

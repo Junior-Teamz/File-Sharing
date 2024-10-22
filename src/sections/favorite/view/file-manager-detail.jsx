@@ -77,7 +77,7 @@ export const FIleManagerDetail = () => {
       parent_id: id,
     };
 
-    console.log('Folder Data to be sent:', folderData);
+   
 
 
     createFolder(folderData);

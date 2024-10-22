@@ -10,8 +10,8 @@ const initialState = {
   roles: [],
   is_superadmin: false,
   loading: true,
-  accessToken: null, // Tambahkan accessToken ke state
-  refreshToken: null, // Tambahkan refreshToken ke state
+  accessToken: null,
+  refreshToken: null,
 };
 
 const reducer = (state, action) => {
@@ -31,11 +31,18 @@ const reducer = (state, action) => {
         user: action.payload.user,
         roles: action.payload.roles,
         is_superadmin: action.payload.is_superadmin,
-        accessToken: action.payload.accessToken, // Simpan accessToken
-        refreshToken: action.payload.refreshToken, // Simpan refreshToken
+        accessToken: action.payload.accessToken,
+        refreshToken: action.payload.refreshToken,
       };
     case 'LOGOUT':
-      return { ...state, user: null, roles: [], is_superadmin: false, accessToken: null, refreshToken: null }; // Reset state
+      return {
+        ...state,
+        user: null,
+        roles: [],
+        is_superadmin: false,
+        accessToken: null,
+        refreshToken: null,
+      };
     default:
       return state;
   }
@@ -53,20 +60,20 @@ export function AuthProvider({ children }) {
       const accessToken = sessionStorage.getItem(STORAGE_KEY);
 
       if (accessToken && isValidToken(accessToken)) {
-        setSession(accessToken); // Set token in session and axios headers
+        setSession(accessToken);
 
         const response = await axiosInstance.get(endpoints.auth.me);
         const { data: user } = response.data;
 
         dispatch({
           type: 'INITIAL',
-          payload: { user },
+          payload: { user, roles: user.roles || [], is_superadmin: user.is_superadmin || false },
         });
       } else {
         dispatch({ type: 'INITIAL', payload: { user: null } });
       }
     } catch (error) {
-      console.error(error);
+      console.error('Initialization Error:', error);
       dispatch({ type: 'INITIAL', payload: { user: null } });
     }
   }, []);
@@ -75,16 +82,39 @@ export function AuthProvider({ children }) {
     initialize();
   }, [initialize]);
 
+  const refreshAccessToken = async () => {
+    const { refreshToken } = state;
+    if (!refreshToken) return;
+
+    try {
+      const response = await axiosInstance.post(endpoints.auth.refreshToken, { refreshToken });
+      const { accessToken } = response.data;
+
+      setSession(accessToken);
+      dispatch({
+        type: 'LOGIN',
+        payload: {
+          accessToken,
+          refreshToken,
+          user: state.user,
+          roles: state.roles,
+          is_superadmin: state.is_superadmin,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      logout(); // Logout jika refresh token gagal
+    }
+  };
+
   const login = useCallback(async (email, password) => {
     const data = { email, password };
 
     try {
       const response = await axiosInstance.post(endpoints.auth.login, data);
-  
-      const { refreshToken, accessToken, roles, is_superadmin, user } = response.data;
+      const { accessToken, roles, is_superadmin, user, refreshToken } = response.data;
 
-      setSession(accessToken); // Set accessToken in session storage
-      setSession(refreshToken); // Set refreshToken in session storage
+      setSession(accessToken);
 
       dispatch({
         type: 'LOGIN',
@@ -92,17 +122,12 @@ export function AuthProvider({ children }) {
           user,
           roles,
           is_superadmin,
-          accessToken, // Simpan accessToken
-          refreshToken, // Simpan refreshToken
+          accessToken,
+          refreshToken,
         },
       });
 
-      return {
-        accessToken,
-        roles,
-        is_superadmin,
-        user,
-      };
+      return { accessToken, roles, is_superadmin, user };
     } catch (error) {
       console.error('Login Error:', error);
       throw error;
@@ -112,27 +137,32 @@ export function AuthProvider({ children }) {
   const register = useCallback(async (email, password, firstName, lastName) => {
     const data = { email, password, firstName, lastName };
 
-    const response = await axiosInstance.post(endpoints.auth.register, data);
-    const { user } = response.data;
+    try {
+      const response = await axiosInstance.post(endpoints.auth.register, data);
+      const { user } = response.data;
 
-    dispatch({ type: 'REGISTER', payload: { user } });
+      dispatch({ type: 'REGISTER', payload: { user, roles: user.roles || [], is_superadmin: user.is_superadmin || false } });
+    } catch (error) {
+      console.error('Registration Error:', error);
+      throw error;
+    }
   }, []);
 
-  // LOGOUT
   const logout = useCallback(async () => {
-    const { refreshToken, accessToken } = state; // Ambil refreshToken dan accessToken dari state
-  
-    await axiosInstance.post(endpoints.auth.logout, {
-      accessToken, // Sertakan accessToken dalam body permintaan
-      refreshToken, // Sertakan refreshToken dalam body permintaan
-    });
+    const { refreshToken } = state;
 
-    sessionStorage.removeItem(STORAGE_KEY); // Hapus access token dari session storage
-    sessionStorage.removeItem('REFRESH_TOKEN_KEY'); // Hapus refresh token dari session storage
-
-    dispatch({ type: 'LOGOUT' }); // Reset state
+    try {
+      await axiosInstance.post(endpoints.auth.logout, {
+        refreshToken: refreshToken || '',
+      });
+    } catch (error) {
+      console.error('Logout Error:', error);
+    } finally {
+      sessionStorage.removeItem(STORAGE_KEY);
+      dispatch({ type: 'LOGOUT' });
+    }
   }, [state]);
-  
+
   // Status management
   const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';
   const status = state.loading ? 'loading' : checkAuthenticated;
@@ -147,6 +177,7 @@ export function AuthProvider({ children }) {
       login,
       register,
       logout,
+      refreshAccessToken, // Menambahkan refreshAccessToken ke value
     }),
     [login, logout, register, state.user, status]
   );

@@ -42,7 +42,7 @@ export default function FileManagerView() {
 
   const { data, isLoading } = useFetchFolder();
 
-  // console.log(data);
+
   const { FolderFiles } = handleFolderFiles();
 
   const settings = useSettingsContext();
@@ -128,7 +128,7 @@ export default function FileManagerView() {
 
   const handleTagChange = (tags) => {
     setSelectedTags(tags);
-    console.log('Selected Tags:', tags);
+   
   };
 
   const renderFilters = (

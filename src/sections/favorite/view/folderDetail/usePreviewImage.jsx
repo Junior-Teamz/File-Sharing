@@ -10,7 +10,7 @@ export const usePreviewImage = (id) => {
           responseType: 'blob',
         });
 
-        console.log('Preview image response:', response);
+       
 
         if (response?.data) {
           const reader = new FileReader();
@@ -25,7 +25,7 @@ export const usePreviewImage = (id) => {
           throw new Error('No data found in the response');
         }
       } catch (error) {
-        console.error('Error fetching preview image:', error);
+       
         throw error;
       }
     },

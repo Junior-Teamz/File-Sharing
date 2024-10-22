@@ -102,7 +102,7 @@ export default function FileManagerView() {
 
   const handleTagChange = (tags) => {
     setSelectedTags(tags); // Update the selected tags state
-    console.log('Selected Tags:', tags);
+  
   };
 
   const handleDeleteItem = useCallback(

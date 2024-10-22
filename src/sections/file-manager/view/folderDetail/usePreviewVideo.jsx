@@ -9,7 +9,7 @@ export const usePreviewVideo = (id) => {
         const response = await axiosInstance.get(`${endpoints.previewVideo.getVideo}${id}`, {
           responseType: 'blob', // Requesting Blob data
         });
-        console.log('File ID:', id);
+        ('File ID:', id);
 
 
         if (response?.data) {

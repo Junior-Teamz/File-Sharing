@@ -13,7 +13,7 @@ export const useDeleteTagNews = ({ onSuccess, onError }) => {
 
       const response = await axiosInstance.post(`${endpoints.NewsTag.delete}`, payload);
 
-      console.log(response);
+    
       return response;
     },
     onSuccess,

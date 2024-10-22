@@ -73,7 +73,7 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
   });
 
   const handleCopy = useCallback(() => {
-    console.log('File URL:', file.url); // Log the file URL to check if it's correct
+  
     if (file.url) {
       enqueueSnackbar('Berhasil di Copied!');
       copy(file.url);

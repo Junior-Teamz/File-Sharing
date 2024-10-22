@@ -14,15 +14,13 @@ export const useMutationDeleteFiles = () => {
           ? fileIdOrIds.map(file => file.file_id) // Extract file_id from each object
           : [fileIdOrIds.file_id], // If single, extract file_id
       };
-
-      console.log("Payload being sent:", payload);
-
+  
       try {
         const response = await axiosInstance.post(`${endpoints.files.delete}`, payload);
-        console.log(response);
+      
         return response;
       } catch (error) {
-        console.error("Error deleting files:", error.response.data);
+       
         throw error; // Re-throw the error for further handling
       }
     },

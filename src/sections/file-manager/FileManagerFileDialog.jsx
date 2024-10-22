@@ -121,7 +121,7 @@ export default function FileManageFileDialog({
       <DialogTitle>{title}</DialogTitle>
 
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit((data) => console.log(data))}>
+        <form onSubmit={methods.handleSubmit}>
           <DialogContent dividers>
             {(onCreate || onUpdate) && (
               <TextField

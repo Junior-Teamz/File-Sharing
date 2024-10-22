@@ -6,7 +6,7 @@ export const usePreviewImage = (id) => {
     queryKey: ['preview-image', id],
     queryFn: async () => {
       const token = sessionStorage.getItem('accessToken');
-      console.log(token);
+    
 
       // Send GET request with Authorization header
       const response = await axiosInstance.get(`${endpoints.previewImage.preview}${id}`, {

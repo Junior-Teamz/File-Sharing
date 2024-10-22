@@ -183,8 +183,7 @@ export default function FolderDetail({
   const handleCopyLink = () => {
     const folderUrl = folder_id; // Ensure this is the correct property for URL
 
-    console.log('Folder URL:', folderUrl); // Debugging line
-
+ 
     if (!folderUrl) {
       enqueueSnackbar('No URL to copy.', { variant: 'warning' });
       return;
@@ -213,16 +212,16 @@ export default function FolderDetail({
 
     try {
       // Log folder_id before making the API call
-      console.log('Toggling favorite for folder:', folder_id);
+    
 
       if (favorite.value) {
         // If already favorited, remove it
-        console.log('Removing from favorites:', { folder_id });
+      
         await removeFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
         enqueueSnackbar('Folder removed from favorites!', { variant: 'success' });
       } else {
         // Otherwise, add it
-        console.log('Adding to favorites:', { folder_id });
+      
         await addFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
         enqueueSnackbar('Folder added to favorites!', { variant: 'success' });
       }
@@ -516,7 +515,7 @@ export default function FolderDetail({
 }
 
 FolderDetail.propTypes = {
-  item: PropTypes.object.isRequired,
+  item: PropTypes.object,
   open: PropTypes.bool,
   favorited: PropTypes.bool,
   onFavorite: PropTypes.func,

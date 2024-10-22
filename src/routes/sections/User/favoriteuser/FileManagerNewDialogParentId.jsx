@@ -107,8 +107,7 @@ export default function FileManagerNewDialogParent({
     // Extract the selected tag IDs from the event
     const value = event.target.value;
 
-    console.log('Selected Tags Value:', value);
-
+    
     // Update the parent component or state with selected tag IDs
     if (Array.isArray(value)) {
       onTagChange(value); // Pass the tag IDs to the parent
@@ -118,8 +117,7 @@ export default function FileManagerNewDialogParent({
   };
 
   useEffect(() => {
-    console.log('Current selectedTags:', selectedTags);
-    console.log('Current tagsData:', tagsData);
+
   }, [selectedTags, tagsData]);
 
   return (

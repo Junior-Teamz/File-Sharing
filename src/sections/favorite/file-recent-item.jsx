@@ -105,7 +105,7 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
   }, [file.id, newFileName, originalFileType, updateNameFile, enqueueSnackbar, edit, onRefetch]);
 
   const handleCopy = useCallback(() => {
-    console.log(file.id);
+  
     if (file?.id) {
       enqueueSnackbar('Berhasil di Copied!');
       copy(file.id); // Mengakses file.id langsung, tanpa [0] karena file bukan array
@@ -122,8 +122,7 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
   const handleDownload = useCallback(async () => {
     try {
       const idsToDownload = Array.isArray(file.ids) && file.ids.length ? file.ids : [file.id];
-      console.log('IDs to Download:', idsToDownload);
-
+     
       // Send the correct payload to the API
       const response = await downloadFile(idsToDownload);
 

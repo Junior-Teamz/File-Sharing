@@ -62,7 +62,7 @@ export default function OverviewFileView() {
   }, []);
 
   const { data, isFetching, isLoading, refetch } = useChartFolder();
-  console.log(data);
+ 
 
   const handleCreateNewFolder = useCallback(() => {
     newFolder.onFalse();
@@ -118,8 +118,7 @@ export default function OverviewFileView() {
     />
   );
 
-  console.log('Formatted Size: ', data.data?.formattedSize);
-
+ 
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'xl'}>

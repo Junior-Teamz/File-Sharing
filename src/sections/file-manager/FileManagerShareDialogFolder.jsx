@@ -14,71 +14,71 @@ import Select from '@mui/material/Select';
 // components
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
-import { useSnackbar } from 'notistack'; // Import useSnackbar
+import { useSnackbar } from 'notistack';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePermissionsFolder } from './view/folderDetail';
 import { useFetchUser } from './view/searchUserShare';
 import FileManagerInvitedItem from './file-manager-invited-item';
+import { useGenerateLinkFolder } from './view/ShareLink';
+import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
 
 export default function FileManagerShareDialogFolder({
   shared,
   inviteEmail,
   onCopyLink,
   onChangeInvite,
-  folderId, // Changed from fileId to folderId
+  folderId,
   open,
   onClose,
   ...other
 }) {
   const hasShared = shared && !!shared.length;
-
   const [selectedUser, setSelectedUser] = useState(null);
   const [permissions, setPermission] = useState('view');
   const [inputSearch, setInputSearch] = useState('');
-  const [searchResults, setSearchResults] = useState([]); // Local state for search results
+  const [searchResults, setSearchResults] = useState([]);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(inputSearch);
-  const useClient = useQueryClient();
-
+  const queryClient = useQueryClient();
   const { refetch: searchUsers, isLoading } = useFetchUser({ email: debouncedSearchTerm });
   const { mutate: setPermissions } = usePermissionsFolder();
+  const { enqueueSnackbar } = useSnackbar();
+  const { copy } = useCopyToClipboard();
 
-  const { enqueueSnackbar } = useSnackbar(); // Initialize useSnackbar
+  const { data: shareableLink, isLoading: isLinkLoading } = useGenerateLinkFolder(folderId);
 
   const permissionsOptions = {
     view: 'read',
     edit: 'write',
   };
 
-  // Effect to debounce input search
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(inputSearch);
-    }, 300); // Delay of 300ms for the API call
+    }, 1000);
 
     return () => {
       clearTimeout(handler);
     };
   }, [inputSearch]);
 
-  // Effect to fetch search results when debounced search term changes
   useEffect(() => {
     if (debouncedSearchTerm) {
       searchUsers({ email: debouncedSearchTerm }).then((results) => {
-        setSearchResults(results.data); // Assuming your API returns the data directly
+        setSearchResults(results.data);
       });
     } else {
-      setSearchResults([]); // Clear results if input is empty
+      setSearchResults([]);
     }
-  }, [debouncedSearchTerm, searchUsers]); // Trigger search on debounced input change
+  }, [debouncedSearchTerm, searchUsers]);
 
   const handleInviteChange = (e) => {
-    setInputSearch(e.target.value); // Update input search immediately
+    setInputSearch(e.target.value);
   };
 
   const handleUserSelect = (user) => {
     setSelectedUser(user);
-    setInputSearch(user.email); // Populate input with selected user's email
-    setPermission('view'); // Reset permission to default
+    setInputSearch(user.email);
+    setPermission('view');
   };
 
   const handlePermissionChange = (event) => {
@@ -86,40 +86,50 @@ export default function FileManagerShareDialogFolder({
   };
 
   const handleSendInvite = () => {
-    if (selectedUser && selectedUser.id && folderId) { // Changed from fileId to folderId
+    if (selectedUser && selectedUser.id && folderId) {
       setPermissions(
         {
           user_id: selectedUser.id,
           permissions: permissionsOptions[permissions],
-          folder_id: folderId, // Changed from fileId to folderId
+          folder_id: folderId,
         },
         {
           onSuccess: () => {
-            enqueueSnackbar('Invite sent successfully!', { variant: 'success' }); // Show success notification
+            enqueueSnackbar('Folder Berhasil dikirim!', { variant: 'success' });
+
+            setInputSearch('');
+            setSearchResults([]);
+            setSelectedUser(null);
+            queryClient.invalidateQueries({ queryKey: ['fetch.folder'] });
           },
           onError: (error) => {
-            enqueueSnackbar(`Failed to send invite: ${error.message}`, { variant: 'error' }); // Show error notification
+            enqueueSnackbar(`Gagal mengirim folder: ${error.message}`, { variant: 'error' });
           },
         }
       );
-      setInputSearch(''); // Clear search input after invite
-      setSearchResults([]); // Clear search results after invite
-      setSelectedUser(null); // Clear selected user after invite
-      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
     } else {
-      enqueueSnackbar('User ID or folder ID is missing.', { variant: 'warning' }); // Show warning notification
+      enqueueSnackbar('User id atau folder id menghilang', { variant: 'warning' });
+    }
+  };
+
+  const handleCopyLink = () => {
+    if (!isLinkLoading && shareableLink) {
+      copy(shareableLink);
+      enqueueSnackbar('Tautan disalin ke papan klip!', { variant: 'success' });
+    } else {
+      enqueueSnackbar('Gagal salin link.', { variant: 'error' });
     }
   };
 
   return (
     <Dialog fullWidth maxWidth="xs" open={open} onClose={onClose} {...other}>
-      <DialogTitle> Invite </DialogTitle>
+      <DialogTitle> Undang </DialogTitle>
 
       <DialogContent sx={{ overflow: 'unset' }}>
         <TextField
           fullWidth
           value={inputSearch}
-          placeholder="Search user by email"
+          placeholder="Cari pengguna berdasarkan email"
           onChange={handleInviteChange}
           InputProps={{
             endAdornment: (
@@ -131,7 +141,7 @@ export default function FileManagerShareDialogFolder({
                   sx={{ mr: -0.75 }}
                   onClick={handleSendInvite}
                 >
-                  Send Invite
+                  Kirim Undangan
                 </Button>
               </InputAdornment>
             ),
@@ -139,9 +149,8 @@ export default function FileManagerShareDialogFolder({
           sx={{ mb: 2 }}
         />
 
-        {/* Display search results dynamically */}
         {isLoading ? (
-          <p>Loading...</p> // Show loading state
+          <p>Memuat...</p>
         ) : (
           <Scrollbar sx={{ maxHeight: 60 * 6 }}>
             <List disablePadding>
@@ -149,23 +158,24 @@ export default function FileManagerShareDialogFolder({
                 searchResults.map((user) => (
                   <FileManagerInvitedItem
                     key={user.id}
+                    permissions={permissions}
                     person={user}
-                    onClick={() => handleUserSelect(user)} // Ensure onClick works
+                    user={user}
+                    onClick={() => handleUserSelect(user)}
                   />
                 ))
               ) : (
-                <p>No users found</p> // Message when no users are found
+                <p>Pengguna tidak ditemukan</p>
               )}
             </List>
           </Scrollbar>
         )}
 
-        {/* Permission Selection */}
         {selectedUser && (
           <div>
             <Select fullWidth value={permissions} onChange={handlePermissionChange} displayEmpty>
-              <MenuItem value="view">View (Read)</MenuItem>
-              <MenuItem value="edit">Edit (Write)</MenuItem>
+              <MenuItem value="view">View (View)</MenuItem>
+              <MenuItem value="edit">Edit (Edit)</MenuItem>
             </Select>
           </div>
         )}
@@ -173,14 +183,14 @@ export default function FileManagerShareDialogFolder({
 
       <DialogActions sx={{ justifyContent: 'space-between' }}>
         {onCopyLink && (
-          <Button startIcon={<Iconify icon="eva:link-2-fill" />} onClick={onCopyLink}>
-            Copy link
+          <Button startIcon={<Iconify icon="eva:link-2-fill" />} onClick={handleCopyLink}>
+            Salin tautan
           </Button>
         )}
 
         {onClose && (
           <Button variant="outlined" color="inherit" onClick={onClose}>
-            Close
+            Tutup
           </Button>
         )}
       </DialogActions>
@@ -195,5 +205,5 @@ FileManagerShareDialogFolder.propTypes = {
   onCopyLink: PropTypes.func,
   open: PropTypes.bool,
   shared: PropTypes.array,
-  folderId: PropTypes.string.isRequired, // Mark as required
+  folderId: PropTypes.string.isRequired,
 };

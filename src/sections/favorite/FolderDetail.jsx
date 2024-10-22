@@ -183,7 +183,7 @@ export default function FolderDetail({
   const handleCopyLink = () => {
     const folderUrl = folder_id; // Ensure this is the correct property for URL
 
-    console.log('Folder URL:', folderUrl); // Debugging line
+   
 
     if (!folderUrl) {
       enqueueSnackbar('No URL to copy.', { variant: 'warning' });
@@ -512,7 +512,7 @@ export default function FolderDetail({
 }
 
 FolderDetail.propTypes = {
-  item: PropTypes.object.isRequired,
+  item: PropTypes.object,
   open: PropTypes.bool,
   favorited: PropTypes.bool,
   onFavorite: PropTypes.func,

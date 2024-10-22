@@ -45,7 +45,7 @@ export default function InformationAndAnnouncements() {
       const itemsPerPage = 4;
       const startIndex = (page - 1) * itemsPerPage;
       const paginatedData = sortedNews.slice(startIndex, startIndex + itemsPerPage);
-      console.log('Paginated Data:', paginatedData); // Debug log
+    
       setFilteredNews(paginatedData);
     }
   }, [sortedNews, page]);
@@ -54,7 +54,7 @@ export default function InformationAndAnnouncements() {
   const handleSearch = useCallback(
     debounce((e) => {
       const value = e.target.value;
-      console.log('Search Query:', value); // Debug log
+    
       setSearchQuery(value);
       setPage(1); // Reset page ketika mencari
     }, 1500),
@@ -76,7 +76,7 @@ export default function InformationAndAnnouncements() {
       const itemsPerPage = 4;
       const startIndex = (page - 1) * itemsPerPage;
       const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
-      console.log('Filtered Data:', filteredData); // Debug log
+     
       setFilteredNews(paginatedData);
     }
   }, [sortedNews, searchQuery, page]);

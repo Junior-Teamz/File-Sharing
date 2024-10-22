@@ -107,12 +107,11 @@ export default function FileManagerTableRow({
     }
 
     const payload = { file_id: file.id }; // Create a payload with the required structure
-    console.log('Payload:', payload); // Log the payload for debugging
-
+  
     try {
       if (favorite.value) {
         // If currently favorited, call removeFavorite
-        console.log('Removing favorite with payload:', payload); // Log the payload for removal
+       
         await removeFavorite(payload, {
           // Pass the entire payload object
           onSuccess: () => {
@@ -124,7 +123,7 @@ export default function FileManagerTableRow({
         });
       } else {
         // If not favorited, call addFavorite
-        console.log('Adding favorite with payload:', payload); // Log the payload for addition
+      
         await addFavorite(payload, {
           // Pass the entire payload object
           onSuccess: () => {

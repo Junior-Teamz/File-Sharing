@@ -654,7 +654,7 @@ export default function FIleManagerFileDetails({
 }
 
 FIleManagerFileDetails.propTypes = {
-  item: PropTypes.object.isRequired,
+  item: PropTypes.object,
   open: PropTypes.bool,
   favorited: PropTypes.bool,
   onFavorite: PropTypes.func,
