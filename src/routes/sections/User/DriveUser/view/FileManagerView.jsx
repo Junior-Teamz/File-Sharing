@@ -102,7 +102,6 @@ export default function FileManagerView() {
 
   const handleTagChange = (tags) => {
     setSelectedTags(tags); // Update the selected tags state
-  
   };
 
   const handleDeleteItem = useCallback(
@@ -167,13 +166,7 @@ export default function FileManagerView() {
       <Container maxWidth={settings.themeStretch ? false : 'lg'} sx={{ mt: '20px' }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h4">Drive Saya</Typography>
-          <Button
-            variant="contained"
-            startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-            onClick={upload.onTrue}
-          >
-            Upload File
-          </Button>
+
           <Button
             variant="contained"
             startIcon={<Iconify icon="eva:cloud-upload-fill" />}
@@ -206,12 +199,6 @@ export default function FileManagerView() {
           />
         )}
       </Container>
-
-      <FileManagerNewFileDialog
-        onTagChange={handleTagChange}
-        open={upload.value}
-        onClose={upload.onFalse}
-      />
 
       <FileManagerNewFolderDialog
         title="Buat Folder Baru "

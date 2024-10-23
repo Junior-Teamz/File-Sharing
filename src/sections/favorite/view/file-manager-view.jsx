@@ -24,8 +24,7 @@ import FileManagerGridView from '../file-manager-grid-view';
 import FileManagerFiltersResult from '../file-manager-filters-result';
 import FileManagerNewFolderDialog from '../file-manager-new-folder-dialog';
 import { FavoriteFolderFileAdmin } from 'src/_mock/map/FavoriteFolderFileAdmin';
-import { useGetFolderFavorite, useGetFavorite } from './fetchFavorite';
-import { useEffect } from 'react';
+import { useGetFolderFavorite } from './fetchFavorite';
 
 // ----------------------------------------------------------------------
 
@@ -42,10 +41,6 @@ export default function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
 
   const { FolderFiles } = FavoriteFolderFileAdmin();
-
-  useEffect(() => {
-    setTableData(FolderFiles);
-  }, [FolderFiles]);
 
   const settings = useSettingsContext();
 
@@ -123,6 +118,7 @@ export default function FileManagerView() {
 
   const handleTagChange = (tags) => {
     setSelectedTags(tags); // Update the selected tags state
+ 
   };
 
   const renderFilters = (

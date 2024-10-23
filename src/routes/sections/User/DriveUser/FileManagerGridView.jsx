@@ -101,7 +101,7 @@ export default function FileManagerGridView({
     <>
       <Box ref={containerRef}>
         <FileManagerPanel
-          title="Folders"
+          title="Folder"
           subTitle={`${data.filter((item) => item.type === 'folder').length} folders`}
           onOpen={newFolder.onTrue}
           collapse={folders.value}
@@ -136,7 +136,7 @@ export default function FileManagerGridView({
 
         <Divider sx={{ my: 5, borderStyle: 'dashed' }} />
 
-        <FileManagerPanel title="Files" onOpen={upload.onTrue} />
+        <FileManagerPanel title="Upload File" onOpen={upload.onTrue} />
 
         <Box
           sx={{

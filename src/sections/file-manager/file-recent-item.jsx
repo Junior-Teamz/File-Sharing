@@ -105,7 +105,6 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
   }, [file.id, newFileName, originalFileType, updateNameFile, enqueueSnackbar, edit, onRefetch]);
 
   const handleCopy = useCallback(() => {
-  
     if (file?.id) {
       enqueueSnackbar('Berhasil di Copied!');
       copy(file.id); // Mengakses file.id langsung, tanpa [0] karena file bukan array
@@ -122,7 +121,6 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
   const handleDownload = useCallback(async () => {
     try {
       const idsToDownload = Array.isArray(file.ids) && file.ids.length ? file.ids : [file.id];
-    
 
       // Send the correct payload to the API
       const response = await downloadFile(idsToDownload);
@@ -135,9 +133,9 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
         document.body.appendChild(link);
         link.click();
         link.remove();
-        enqueueSnackbar('Download started!', { variant: 'success' });
+        enqueueSnackbar('Download berhasil!', { variant: 'success' });
       } else {
-        enqueueSnackbar('No data received for download!', { variant: 'error' });
+        enqueueSnackbar('Tidak ada data untuk di download!', { variant: 'error' });
       }
     } catch (error) {
       console.error('Download error:', error);
@@ -150,8 +148,6 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
   const { mutateAsync: addFavorite } = useAddFavorite();
   const { mutateAsync: removeFavorite } = useRemoveFavorite();
 
-  // Function to handle the favorite toggle
-  // Function to handle the favorite toggle
   const handleFavoriteToggle = useCallback(async () => {
     if (!file.id) {
       enqueueSnackbar('File ID is required to toggle favorite status!', { variant: 'error' });
@@ -169,7 +165,6 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
         enqueueSnackbar('File added to favorites!', { variant: 'success' });
       }
 
-      // Immediately toggle favorite state in the UI
       favorite.onToggle();
 
       // Refetch queries to get updated data
@@ -200,7 +195,10 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
         onChange={handleFavoriteToggle}
       />
 
-      <IconButton color="default">
+      <IconButton
+        color="default"
+        onClick={popover.onOpen} // Open popover on IconButton click
+      >
         <Iconify icon="eva:more-vertical-fill" />
       </IconButton>
     </Box>
@@ -342,7 +340,7 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
           Delete
         </MenuItem>
       </CustomPopover>
-
+      
       <FileManagerFileDetails
         item={file}
         favorited={favorite.value}

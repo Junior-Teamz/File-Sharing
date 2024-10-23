@@ -20,7 +20,7 @@ import { useIndexTag } from '../tag/view/TagMutation';
 import { RHFAutocomplete } from 'src/components/hook-form';
 import { fData } from 'src/utils/format-number';
 
-export default function FileManageFileDialog({
+export default function FileManagerFileDialog({
   title,
   open,
   onClose,
@@ -213,7 +213,7 @@ export default function FileManageFileDialog({
   );
 }
 
-FileManageFileDialog.propTypes = {
+FileManagerFileDialog.propTypes = {
   folderName: PropTypes.string,
   onChangeFolderName: PropTypes.func,
   onClose: PropTypes.func,

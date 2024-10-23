@@ -47,6 +47,8 @@ import FileRecentItem from 'src/sections/file-manager/file-recent-item';
 import { Link } from 'react-router-dom';
 import { AuthContext } from 'src/auth/context/jwt/auth-context';
 import { useIndexTag } from 'src/sections/tag/view/TagMutation';
+import FileManagerFileDialog from 'src/sections/favorite/FileManagerFileDialog';
+
 
 export default function OverviewAppView() {
   const { user } = useContext(AuthContext);
@@ -602,8 +604,8 @@ export default function OverviewAppView() {
             onOpen={handleClickOpen}
             sx={{ mt: 5 }}
           />
-          <FileManagerNewFolderDialog
-            title="Upload Files"
+          <FileManagerFileDialog
+            title="Upload File"
             open={open} // Use the same state
             onClose={handleClose} // Ensure the dialog can close properly
             refetch={refetch} // Tambahkan refetch prop

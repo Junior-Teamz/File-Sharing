@@ -15,12 +15,23 @@ export const FavoriteFolderFileAdmin = () => {
     refetch: refetchFolders,
   } = useGetFolderFavorite();
 
-   // Ambil data folder dan file
-   const folders = folderData?.favorite_folders?.data || []; // Pastikan ini mengambil folder
-   const files = favoriteData?.favorite_files?.data || []; // Pastikan ini mengambil file
  
-   // Gabungkan folder dan file
-   const FolderFiles = [...folders, ...files];
+
+  // Handle loading and error states
+  if (isLoadingFavorites || isLoadingFolders) {
+    return <div>Loading...</div>;
+  }
+
+  if (errorFavorites || errorFolders) {
+    return <div>Error loading favorites or folders.</div>;
+  }
+
+  // Ambil data folder dan file
+  const folderss = folderData?.favorite_folders?.data || []; // Pastikan ini mengambil folder
+  const filess = favoriteData?.favorite_files?.data || []; // Pastikan ini mengambil file
+
+  // Gabungkan folder dan file
+  const FolderFiles = [...folderss, ...filess];
 
   return {
     FolderFiles,

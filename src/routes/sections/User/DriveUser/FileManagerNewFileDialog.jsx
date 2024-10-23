@@ -14,9 +14,9 @@ import Iconify from 'src/components/iconify';
 import { Upload } from 'src/components/upload';
 import { enqueueSnackbar } from 'notistack';
 import { FormProvider, useForm } from 'react-hook-form';
+import { useQueryClient } from '@tanstack/react-query';
 import { useMutationUploadFiles } from './view/FetchDriveUser/useMutationUploadFiles';
 import { useIndexTag } from './view/TagUser/useIndexTag';
-import { useQueryClient } from '@tanstack/react-query';
 import { RHFAutocomplete } from 'src/components/hook-form';
 import { fData } from 'src/utils/format-number';
 
@@ -44,7 +44,7 @@ export default function FileManagerNewFileDialog({
     if (!open) {
       setFiles([]);
       methods.reset();
-      setSelectedTags([]); // Reset selected tags when modal closes
+      setSelectedTags([]);
       setProgress(0);
     }
   }, [open, methods]);
@@ -60,25 +60,20 @@ export default function FileManagerNewFileDialog({
 
   const { mutate: uploadFiles, isPending: loadingUpload } = useMutationUploadFiles({
     onSuccess: () => {
-      enqueueSnackbar('Files Uploaded Successfully');
+      enqueueSnackbar('Files Uploaded Successfully', { variant: 'success' });
       handleRemoveAllFiles();
       methods.reset();
       onClose();
-      queryClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
     },
     onError: (error) => {
-      if (error.response && error.response.data && error.response.data.errors) {
-        const errors = error.response.data.errors;
-        for (const key in errors) {
-          if (errors.hasOwnProperty(key)) {
-            errors[key].forEach((message) => {
-              enqueueSnackbar(`${key}: ${message}`, { variant: 'error' });
-            });
-          }
-        }
-      } else {
-        enqueueSnackbar('Upload failed. Please try again.', { variant: 'error' });
-      }
+      const errorMessage =
+        error.response?.data?.errors
+          ? Object.entries(error.response.data.errors)
+              .flatMap(([key, messages]) => messages.map((message) => `${key}: ${message}`))
+              .join(', ')
+          : 'Upload failed. Please try again.';
+      enqueueSnackbar(errorMessage, { variant: 'error' });
     },
     onUploadProgress: (percentCompleted) => {
       setProgress(percentCompleted);
@@ -143,11 +138,11 @@ export default function FileManagerNewFileDialog({
                 label="Tags"
                 multiple
                 options={tagsData}
-                getOptionLabel={(option) => option.name} // Display tag names
+                getOptionLabel={(option) => option.name}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 onChange={(_, newValue) => {
-                  setSelectedTags(newValue.map((tag) => tag.id)); // Store tag ids
-                  methods.setValue('tags', newValue); // Show names in autocomplete
+                  setSelectedTags(newValue.map((tag) => tag.id));
+                  methods.setValue('tags', newValue);
                 }}
                 renderTags={(value, getTagProps) => (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>

@@ -132,7 +132,7 @@ export default function FileManagerFileDialog({
           />
         )}
         <FormControl fullWidth margin="dense">
-          <InputLabel id="tags-label">Tags</InputLabel>
+          <InputLabel id="tags-label">Tag</InputLabel>
           <Select
             labelId="tags-label"
             id="tags"
