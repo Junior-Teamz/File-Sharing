@@ -22,9 +22,7 @@ export default function NewsId() {
   // Update meta tags dynamically
   useEffect(() => {
     if (news) {
-      document.title = news.title;
-
-      // Update Open Graph tags
+   
       const metaTags = {
         title: document.querySelector('meta[property="og:title"]'),
         description: document.querySelector('meta[property="og:description"]'),
@@ -32,13 +30,21 @@ export default function NewsId() {
         url: document.querySelector('meta[property="og:url"]'),
       };
 
-      metaTags.title.setAttribute('content', news.title);
-      metaTags.description.setAttribute('content', news.description || 'Berita terbaru.');
-      metaTags.image.setAttribute('content', news.thumbnail_url); // Ganti dengan URL gambar yang sesuai
-      metaTags.url.setAttribute('content', window.location.href); // Atur URL ke halaman saat ini
+      if (metaTags.title) {
+        metaTags.title.setAttribute('content', news.title);
+      }
+      if (metaTags.description) {
+        metaTags.description.setAttribute('content', news.description || 'Berita terbaru.');
+      }
+      if (metaTags.image) {
+        metaTags.image.setAttribute('content', news.thumbnail_url); // Gambar dinamis
+      }
+      if (metaTags.url) {
+        metaTags.url.setAttribute('content', window.location.href);
+      }
     }
   }, [news]);
-
+  
   if (isLoading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
