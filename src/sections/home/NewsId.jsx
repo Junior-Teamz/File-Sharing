@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useFetchNewsSlug } from './view/fetchNews/useFetchNewsId';
 import { useParams } from 'react-router-dom';
 import { Grid, Typography, CircularProgress, Chip, CardMedia, Avatar } from '@mui/material';
@@ -19,15 +19,16 @@ export default function NewsId() {
       })
     : '';
 
-  // Update meta tags dynamically
   useEffect(() => {
     if (news) {
-   
+      document.title = news.title;
+
       const metaTags = {
         title: document.querySelector('meta[property="og:title"]'),
         description: document.querySelector('meta[property="og:description"]'),
         image: document.querySelector('meta[property="og:image"]'),
         url: document.querySelector('meta[property="og:url"]'),
+        appId: document.querySelector('meta[property="fb:app_id"]'),
       };
 
       if (metaTags.title) {
@@ -44,7 +45,7 @@ export default function NewsId() {
       }
     }
   }, [news]);
-  
+
   if (isLoading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
@@ -64,7 +65,7 @@ export default function NewsId() {
         item
         xs={12}
         md={12}
-        sx={{ position: 'absolute', display: 'flex', alignItems: 'flex-start', zIndex: 20 }} // Menaikkan zIndex
+        sx={{ display: 'flex', alignItems: 'flex-start', }}
       >
         <CustomBreadcrumbs
           links={[
@@ -74,18 +75,17 @@ export default function NewsId() {
             },
             {
               name: 'Daftar Berita',
-              href: '/berita',
+              href: paths.news.informasi,
             },
             {
               name: <span dangerouslySetInnerHTML={{ __html: news.title }} />,
+              href: '',
             },
           ]}
           sx={{
-            mb: { xs: 3, md: 5 },
-            fontSize: '1rem',
-            '& .MuiTypography-root': {
-              fontSize: '1rem',
-            },
+            mb: { xs: 3, md: 4 },
+            mt: { xs: 2, md: 2 },
+         
           }}
         />
       </Grid>
@@ -95,31 +95,31 @@ export default function NewsId() {
         {/* Gambar Thumbnail */}
         <CardMedia
           component="img"
-          height="auto" // Set height to auto for responsive design
-          width="100%" // Maintain width at 100%
-          image={news.thumbnail_url} // Use thumbnail_url instead of thumbnail
+          height="auto"
+          width="100%"
+          image={news.thumbnail_url}
           alt={news.title}
           sx={{
-            borderRadius: '20px', // Border radius untuk gambar
-            objectFit: 'cover', // Ensure the image covers the container
-            aspectRatio: '16/9', // Set the aspect ratio to landscape
-            maxHeight: '500px', // Optional: Set a maximum height to maintain consistency
+            borderRadius: '20px',
+            objectFit: 'cover',
+            aspectRatio: '16/9',
+            maxHeight: '500px',
           }}
         />
 
         {/* Tags */}
         <div style={{ marginTop: '10px', marginBottom: '10px' }}>
-          {Array.isArray(news.news_tags) &&
-            news.news_tags.map((tag, index) => (
+          {Array.isArray(news.tags) &&
+            news.tags.map((tag, index) => (
               <Chip
                 key={index}
-                label={tag.name} // Ensure tag has a name property
+                label={tag.name}
                 variant="outlined"
                 sx={{
                   marginRight: '8px',
                   marginTop: '4px',
-                  borderRadius: '16px', // Membuat Chip menjadi rounded
-                  backgroundColor: '#e0e0e0', // Background abu-abu
+                  borderRadius: '16px',
+                  backgroundColor: '#e0e0e0',
                 }}
               />
             ))}
@@ -154,10 +154,9 @@ export default function NewsId() {
           color="textPrimary"
           paragraph
           sx={{
-            lineHeight: 1.6, // Tetap ada pengaturan line-height
+            lineHeight: 1.6,
             marginBottom: 0,
             overflowWrap: 'break-word',
-            wordBreak: 'break-word',
           }}
         >
           <span dangerouslySetInnerHTML={{ __html: news.content }} />

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { m } from 'framer-motion';
 // @mui
 import { Stack, Container, Typography, Grid, IconButton, Box } from '@mui/material';
@@ -9,29 +9,74 @@ import { useFetchLegall } from './view/fetcLegalbasis/useFetchLegal';
 
 // ----------------------------------------------------------------------
 
+const PdfCard = React.memo(({ legalBasis, onClick }) => (
+  <Grid item xs={12} sm={6} md={6} key={legalBasis.id}>
+    <m.div variants={varFade().inUp}>
+      <Stack
+        alignItems="center"
+        justifyContent="center"
+        spacing={1}
+        onClick={onClick}
+        sx={{
+          p: 3,
+          borderRadius: 2,
+          backgroundColor: 'primary.main',
+          color: 'common.white',
+          textAlign: 'center',
+          cursor: 'pointer',
+          transition: 'transform 0.3s ease-in-out, backgroundColor 0.3s ease-in-out',
+          '&:hover': {
+            transform: 'scale(1.05)',
+            backgroundColor: 'primary.dark',
+          },
+        }}
+      >
+        <PictureAsPdfIcon fontSize="large" />
+        <Typography variant="body2">{legalBasis.name}</Typography>
+      </Stack>
+    </m.div>
+  </Grid>
+));
+
 export default function HomeLookingFor() {
   const [pdfToShow, setPdfToShow] = useState(null);
   const { data: legalBasisData = [], error, isLoading } = useFetchLegall();
+  
+  // Store the PDFs in state for quicker access
+  const [pdfUrls, setPdfUrls] = useState({});
 
-  const handleCardClick = (id) => {
-    const selectedBasis = legalBasisData.find((item) => item.id === id);
-    setPdfToShow(selectedBasis ? selectedBasis.file_url : null);
-  };
+  useEffect(() => {
+    // Preload PDF URLs into state
+    const urls = {};
+    legalBasisData.forEach(item => {
+      urls[item.id] = item.file_url;
+    });
+    setPdfUrls(urls);
+  }, [legalBasisData]);
+
+  const handleCardClick = useCallback((id) => {
+    // Check if PDF is already in urls state
+    const selectedPdfUrl = pdfUrls[id];
+    if (selectedPdfUrl) {
+      // Use Google Docs Viewer to display the PDF
+      setPdfToShow(`https://docs.google.com/gview?url=${selectedPdfUrl}&embedded=true`);
+    }
+  }, [pdfUrls]);
 
   const handleClose = () => setPdfToShow(null);
 
   return (
     <Container component={MotionViewport} sx={{ py: { xs: 10, md: 15 }, position: 'relative' }}>
       {/* Decorative Elements */}
-      <div //shape 2
+      <div
         style={{
           position: 'absolute',
-          bottom: '0px', // Ensure it's aligned with the first shape
-          left: '-29px', // Horizontal alignment should be consistent
+          bottom: '0px',
+          left: '-29px',
           width: '100px',
           height: '80px',
           backgroundColor: '#8FAF3E',
-          borderRadius: '0 300px 0 0', // Keep the radius complementary to the first shape
+          borderRadius: '0 300px 0 0',
           zIndex: 0,
         }}
       />
@@ -45,7 +90,7 @@ export default function HomeLookingFor() {
           width: '180%',
           height: '494px',
           zIndex: 0,
-          transform: 'scaleY(-1)', 
+          transform: 'scaleY(-1)',
         }}
       >
         <path
@@ -66,38 +111,16 @@ export default function HomeLookingFor() {
         </Grid>
 
         {/* PDF Cards */}
-        <Grid container item xs={12} spacing={2} sx={{ zIndex: 1,}}>
+        <Grid container item xs={12} spacing={2} sx={{ zIndex: 1 }}>
           {isLoading && <Typography>Loading...</Typography>}
           {error && <Typography>Error loading data!</Typography>}
           {Array.isArray(legalBasisData) && legalBasisData.length > 0 ? (
-            legalBasisData?.map((legalBasis) => (
-              <Grid item xs={12} sm={6} md={6} key={legalBasis.id}>
-                <m.div variants={varFade().inUp}>
-                  <Stack
-                    alignItems="center"
-                    justifyContent="center"
-                    spacing={1}
-                    onClick={() => handleCardClick(legalBasis.id)}
-                    sx={{
-                      p: 3,
-                      borderRadius: 2,
-                      backgroundColor: 'primary.main',
-                      color: 'common.white',
-                      textAlign: 'center',
-                      cursor: 'pointer',
-                     
-                      transition: 'transform 0.3s ease-in-out, backgroundColor 0.3s ease-in-out',
-                      '&:hover': {
-                        transform: 'scale(1.05)',
-                        backgroundColor: 'primary.dark',
-                      },
-                    }}
-                  >
-                    <PictureAsPdfIcon fontSize="large" />
-                    <Typography variant="body2">{legalBasis.name}</Typography>
-                  </Stack>
-                </m.div>
-              </Grid>
+            legalBasisData.map((legalBasis) => (
+              <PdfCard
+                key={legalBasis.id}
+                legalBasis={legalBasis}
+                onClick={() => handleCardClick(legalBasis.id)}
+              />
             ))
           ) : (
             <Grid item xs={12}>
@@ -136,7 +159,7 @@ export default function HomeLookingFor() {
                 sx={{
                   position: 'absolute',
                   top: 8,
-                  right: 8,
+                  left: 8,
                   zIndex: 1,
                   backgroundColor: 'rgba(0, 0, 0, 0.5)',
                   color: 'white',
