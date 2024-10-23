@@ -19,6 +19,26 @@ export default function NewsId() {
       })
     : '';
 
+  // Update meta tags dynamically
+  useEffect(() => {
+    if (news) {
+      document.title = news.title;
+
+      // Update Open Graph tags
+      const metaTags = {
+        title: document.querySelector('meta[property="og:title"]'),
+        description: document.querySelector('meta[property="og:description"]'),
+        image: document.querySelector('meta[property="og:image"]'),
+        url: document.querySelector('meta[property="og:url"]'),
+      };
+
+      metaTags.title.setAttribute('content', news.title);
+      metaTags.description.setAttribute('content', news.description || 'Berita terbaru.');
+      metaTags.image.setAttribute('content', news.thumbnail_url); // Ganti dengan URL gambar yang sesuai
+      metaTags.url.setAttribute('content', window.location.href); // Atur URL ke halaman saat ini
+    }
+  }, [news]);
+
   if (isLoading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
@@ -34,7 +54,12 @@ export default function NewsId() {
   return (
     <Grid container sx={{ padding: '20px' }}>
       {/* Custom Breadcrumbs on the left */}
-      <Grid item xs={12} md={12} sx={{ display: 'flex', alignItems: 'flex-start' }}>
+      <Grid
+        item
+        xs={12}
+        md={12}
+        sx={{ position: 'absolute', display: 'flex', alignItems: 'flex-start', zIndex: 20 }} // Menaikkan zIndex
+      >
         <CustomBreadcrumbs
           links={[
             {
@@ -60,7 +85,7 @@ export default function NewsId() {
       </Grid>
 
       {/* Main content centered */}
-      <Grid item xs={12} md={10} sx={{ mx: 'auto', maxWidth: '800px' }}>
+      <Grid item xs={12} md={10} sx={{ mx: 'auto', mt: 5, maxWidth: '800px' }}>
         {/* Gambar Thumbnail */}
         <CardMedia
           component="img"

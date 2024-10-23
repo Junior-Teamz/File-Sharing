@@ -30,6 +30,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import CloseIcon from '@mui/icons-material/Close';
 import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
+import AdminNewsEdit from '../AdminNewsEdit';
 
 export default function AdminListNews() {
   const settings = useSettingsContext();
@@ -42,6 +43,7 @@ export default function AdminListNews() {
   const [searchQuery, setSearchQuery] = useState('');
   const [popover, setPopover] = useState({ open: false, anchorEl: null, currentId: null });
   const [isOpen, setIsOpen] = useState(false);
+  const [editingNewsId, setEditingNewsId] = useState(null);
 
   // Fallback to an empty array if newsData is undefined
   const filteredNews = (newsData?.data?.data || []).filter((news) =>
@@ -54,17 +56,14 @@ export default function AdminListNews() {
   const handleDelete = async (id) => {
     if (!id) return; // Pastikan id tidak null atau undefined
     try {
-  
       const response = await deleteNews.mutateAsync(id);
-      
+
       enqueueSnackbar('Berita berhasil dihapus', { variant: 'success' });
       useClient.invalidateQueries({ queryKey: ['list.news'] });
     } catch (error) {
-     
       enqueueSnackbar('Gagal menghapus berita', { variant: 'error' });
     }
   };
-  
 
   const handlePopoverOpen = (event, id) => {
     setPopover({ open: true, anchorEl: event.currentTarget, currentId: id });
@@ -218,7 +217,12 @@ export default function AdminListNews() {
                       <TableCell>
                         <span
                           dangerouslySetInnerHTML={{ __html: content }}
-                          style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical', overflow: 'hidden', WebkitLineClamp: 3 }}
+                          style={{
+                            display: '-webkit-box',
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            WebkitLineClamp: 3,
+                          }}
                         />
                       </TableCell>
                       <TableCell>{status}</TableCell>
@@ -262,12 +266,18 @@ export default function AdminListNews() {
         <MenuItem onClick={() => handleDelete(popover.currentId)} sx={{ color: 'error.main' }}>
           <Iconify icon="solar:trash-bin-trash-bold" /> Hapus
         </MenuItem>
-        <Link to={`edit/${popover.currentId}`}>
-          <MenuItem>
-            <Iconify icon="solar:pen-bold" /> Edit
-          </MenuItem>
-        </Link>
+        <MenuItem onClick={() => setEditingNewsId(popover.currentId)}>
+          <Iconify icon="solar:pen-bold" /> Edit
+        </MenuItem>
       </CustomPopover>
+
+      {editingNewsId && (
+        <AdminNewsEdit
+          NewsId={editingNewsId}
+          open={Boolean(editingNewsId)}
+          onClose={() => setEditingNewsId(null)}
+        />
+      )}
     </Container>
   );
 }

@@ -207,32 +207,24 @@ export default function FIleManagerFileDetails({
   }, [is_favorite]);
 
   const handleFavoriteToggle = useCallback(async () => {
-    if (!id) {
-      enqueueSnackbar('File ID is required to toggle favorite status!', { variant: 'error' });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
       if (favorite.value) {
-        // Jika sudah difavoritkan, hapus dari favorit
         await removeFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
-        enqueueSnackbar('File removed from favorites!', { variant: 'success' });
+        enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
       } else {
         // Tambahkan ke favorit
         await addFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
-        enqueueSnackbar('File added to favorites!', { variant: 'success' });
+        enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });
       }
 
-      // Toggle status favorit di UI
       favorite.onToggle();
     } catch (error) {
-      console.error('Error updating favorite status:', error);
       if (error.response && error.response.data.errors && error.response.data.errors.file_id) {
-        enqueueSnackbar('The file id field is required.', { variant: 'error' });
+        enqueueSnackbar('file id harus di isi.', { variant: 'error' });
       } else {
-        enqueueSnackbar('Failed to update favorite status!', { variant: 'error' });
+        enqueueSnackbar('Error saat menambahkan favorite!', { variant: 'error' });
       }
     } finally {
       setIsLoading(false);
