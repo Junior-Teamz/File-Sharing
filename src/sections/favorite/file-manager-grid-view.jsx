@@ -85,15 +85,6 @@ export default function FileManagerGridView({
   return (
     <>
       <Box ref={containerRef}>
-        {/* Folders Panel */}
-        <FileManagerPanel
-          title="Folder"
-          subTitle={`${data.filter((item) => item.type === 'folder').length} folder`}
-          onOpen={newFolder.onTrue}
-          collapse={folders.value}
-          onCollapse={folders.onToggle}
-        />
-
         <Collapse in={!folders.value} unmountOnExit>
           <Box
             display="grid"
@@ -122,8 +113,6 @@ export default function FileManagerGridView({
 
         <Divider sx={{ my: 5, borderStyle: 'dashed' }} />
 
-        {/* Files Panel */}
-        <FileManagerPanel title="Files" onOpen={upload.onTrue} />
         <Box
           sx={{
             position: 'relative',

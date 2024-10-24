@@ -8,6 +8,8 @@ import Typography from '@mui/material/Typography';
 // components
 import { MotionContainer, varFade } from 'src/components/animate';
 import { textAlign } from '@mui/system';
+import { Helmet } from 'react-helmet-async';
+
 
 // ----------------------------------------------------------------------
 

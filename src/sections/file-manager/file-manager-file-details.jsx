@@ -37,7 +37,6 @@ import { useAddFavorite, useRemoveFavorite } from './view/favoritemutation';
 import { useQueryClient } from '@tanstack/react-query';
 import CloseIcon from '@mui/icons-material/Close';
 import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
-import Lightbox from 'yet-another-react-lightbox';
 
 // ----------------------------------------------------------------------
 
@@ -72,26 +71,6 @@ export default function FIleManagerFileDetails({
   } = item;
 
   const isFolder = item.type === 'folder';
-  const isImage = item.type === 'image';
-  const isVideo = item.type === 'video';
-  const isAudio = item.type === 'audio';
-
-  // Inside your component...
-  const [openLightbox, setOpenLightbox] = useState(false);
-  const [lightboxImages, setLightboxImages] = useState([]);
-  const [lightboxVideos, setLightboxVideos] = useState([]);
-  const [lightboxAudio, setLightboxAudio] = useState([]);
-
-  const handleOpenLightbox = () => {
-    if (isImage) {
-      setLightboxImages([file_url]); // Add your image URL
-    } else if (isVideo) {
-      setLightboxVideos([video_url]); // Add your video URL
-    } else if (isAudio) {
-      setLightboxAudio([file_url]); // Assuming file_url is audio
-    }
-    setOpenLightbox(true);
-  };
 
   const [isOpen, setIsOpen] = useState(false);
 

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -57,6 +57,12 @@ export default function FileManagerView() {
   const [filters, setFilters] = useState(defaultFilters);
 
   const [selectedTags, setSelectedTags] = useState([]);
+
+  useEffect(() => {
+    if (FolderFiles && FolderFiles.length !== tableData.length) {
+      setTableData(FolderFiles);
+    }
+  }, [FolderFiles]);
 
   const dateError =
     filters.startDate && filters.endDate
@@ -118,7 +124,6 @@ export default function FileManagerView() {
 
   const handleTagChange = (tags) => {
     setSelectedTags(tags); // Update the selected tags state
- 
   };
 
   const renderFilters = (
@@ -158,13 +163,6 @@ export default function FileManagerView() {
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h4">Favorit</Typography>
-          <Button
-            variant="contained"
-            startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-            onClick={upload.onTrue}
-          >
-            Upload
-          </Button>
         </Stack>
 
         <Stack

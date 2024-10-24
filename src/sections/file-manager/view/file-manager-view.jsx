@@ -18,14 +18,12 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import { useTable, getComparator } from 'src/components/table';
 //
-import FileManagerTable from '../file-manager-table';
 import FileManagerFilters from '../file-manager-filters';
 import FileManagerGridView from '../file-manager-grid-view';
 import FileManagerFiltersResult from '../file-manager-filters-result';
 import FileManagerNewFolderDialog from '../file-manager-new-folder-dialog';
 import { useFetchFolder } from 'src/sections/overview/app/view/folders';
 import { handleFolderFiles } from 'src/_mock/map/filesFolderApi';
-import Overlay from '../../../../public/assets/background/overlay_2.jpg';
 // ----------------------------------------------------------------------
 
 const defaultFilters = {
@@ -41,7 +39,6 @@ export default function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
 
   const { data, isLoading } = useFetchFolder();
-
 
   const { FolderFiles } = handleFolderFiles();
 
@@ -61,12 +58,11 @@ export default function FileManagerView() {
 
   const [selectedTags, setSelectedTags] = useState([]);
 
-  // Refetch Folder Files only when FolderFiles has meaningful changes
   useEffect(() => {
-    if (FolderFiles && FolderFiles !== tableData) {
+    if (FolderFiles && FolderFiles.length !== tableData.length) {
       setTableData(FolderFiles);
     }
-  }, [FolderFiles, tableData]);
+  }, [FolderFiles]);
 
   const dateError =
     filters.startDate && filters.endDate
@@ -128,7 +124,6 @@ export default function FileManagerView() {
 
   const handleTagChange = (tags) => {
     setSelectedTags(tags);
-   
   };
 
   const renderFilters = (

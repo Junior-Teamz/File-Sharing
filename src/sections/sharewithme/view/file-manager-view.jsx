@@ -40,7 +40,6 @@ const defaultFilters = {
 export default function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
 
- 
   const { FolderFiles } = FolderFileShare();
 
   const settings = useSettingsContext();
@@ -54,6 +53,12 @@ export default function FileManagerView() {
   const [view, setView] = useState('list');
 
   const [tableData, setTableData] = useState(Array.isArray(FolderFiles) ? FolderFiles : []);
+
+  useEffect(() => {
+    if (FolderFiles && FolderFiles.length !== tableData.length) {
+      setTableData(FolderFiles);
+    }
+  }, [FolderFiles]);
 
   const [filters, setFilters] = useState(defaultFilters);
 
@@ -119,7 +124,6 @@ export default function FileManagerView() {
 
   const handleTagChange = (tags) => {
     setSelectedTags(tags); // Update the selected tags state
-   
   };
 
   const renderFilters = (

@@ -136,7 +136,7 @@ export default function FileManagerGridView({
 
         <Divider sx={{ my: 5, borderStyle: 'dashed' }} />
 
-        <FileManagerPanel title="Upload File" onOpen={upload.onTrue} />
+        <FileManagerPanel title="File" onOpen={upload.onTrue} />
 
         <Box
           sx={{

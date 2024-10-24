@@ -24,11 +24,12 @@ import FileThumbnail, { fileFormat } from 'src/components/file-thumbnail';
 import FileManagerShareDialog from './file-manager-share-dialog';
 import FileManagerInvitedItem from './file-manager-invited-item';
 import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
-import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
-
+import { Dialog, DialogActions, DialogContent, DialogTitle, Modal } from '@mui/material';
 import { useMutationDeleteFiles, usePreviewImage } from '../file-manager/view/folderDetail';
 import { useAddFavorite, useRemoveFavorite } from '../file-manager/view/favoritemutation';
 import { useQueryClient } from '@tanstack/react-query';
+import CloseIcon from '@mui/icons-material/Close';
+import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
 
 // ----------------------------------------------------------------------
 
@@ -62,8 +63,11 @@ export default function FIleManagerFileDetails({
     file_url,
   } = item;
 
-  // // Only fetch preview if fileId is available
-  // const { data: preview, isLoading: loadingPreview, isError: errorPreview } = usePreviewImage(id);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpen = () => setIsOpen(true);
+  const handleClose = () => setIsOpen(false);
+
   const isFolder = item.type === 'folder';
   const { mutateAsync: addFavorite } = useAddFavorite();
   const { mutateAsync: removeFavorite } = useRemoveFavorite();
@@ -130,7 +134,6 @@ export default function FIleManagerFileDetails({
 
   const handleCopyLink = () => {
     const fileUrl = item.id; // Ensure this is the correct property for URL
-
 
     if (!fileUrl) {
       enqueueSnackbar('No URL to copy.', { variant: 'warning' });
@@ -349,13 +352,86 @@ export default function FIleManagerFileDetails({
               src="/assets/icons/files/ic_folder.svg"
               alt="Folder Icon"
             />
-          ) : ['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(item.type) ? (
-            <Box
-              component="img"
-              src={file_url}
-              alt={item.name}
-              style={{ maxWidth: '100%', height: 'auto' }}
-            />
+          ) : ['jpg', 'jpeg', 'gif', 'bmp', 'png', 'svg'].includes(item.type) ? (
+            <>
+              <Box
+                sx={{
+                  position: 'relative',
+                  cursor: 'zoom-in',
+                  '&:hover .zoom-icon': {
+                    opacity: 1,
+                  },
+                }}
+              >
+                <Box
+                  component="img"
+                  src={file_url}
+                  alt={item.name}
+                  onClick={handleOpen} // Open modal for zoomed view
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                    cursor: 'zoom-in',
+                  }}
+                />
+                <IconButton
+                  className="zoom-icon"
+                  sx={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    color: 'white',
+                    opacity: 0,
+                    transition: 'opacity 0.3s',
+                  }}
+                  onClick={handleOpen} // Open modal for zoom
+                >
+                  <ZoomInMapIcon />
+                </IconButton>
+              </Box>
+
+              <Modal
+                open={isOpen}
+                onClose={handleClose}
+                aria-labelledby="zoomed-image-modal"
+                aria-describedby="modal-with-zoomed-image"
+              >
+                <Box
+                  position="relative"
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  height="100vh"
+                  bgcolor="rgba(0, 0, 0, 0.8)"
+                  onClick={handleClose}
+                >
+                  <Box
+                    component="img"
+                    src={file_url}
+                    alt={item.name}
+                    style={{
+                      maxWidth: '50%',
+                      maxHeight: '50%',
+                      transform: 'scale(1.5)',
+                      transition: 'transform 0.3s ease-in-out',
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+
+                  <IconButton
+                    onClick={handleClose}
+                    style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      color: '#fff',
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+              </Modal>
+            </>
           ) : [
               'mp4',
               'mkv',
@@ -378,17 +454,17 @@ export default function FIleManagerFileDetails({
             ].includes(item.type) ? (
             <video controls style={{ maxWidth: '100%', height: 'auto' }}>
               <source src={video_url} type={`video/${item.type}`} />
-              Your browser does not support the video tag.
+              Browser Anda tidak mendukung tag video.
             </video>
-          ) : ['mp3', 'wav', 'ogg'].includes(item.type) ? (
+          ) : ['aif', 'mp3', 'wav', 'ogg', 'm4p', 'mxp4', 'msv', 'aac'].includes(item.type) ? (
             <Box component="div">
               <audio controls>
                 <source src={file_url} type={`audio/${item.type}`} />
-                Your browser does not support the audio element.
+                browser Anda tidak mendukung tag audio.
               </audio>
             </Box>
           ) : (
-            <span>Unsupported file type</span> // Optional fallback for unsupported types
+            <span>Tidak ada preview</span>
           )}
 
           <Typography variant="subtitle2">{name}</Typography>

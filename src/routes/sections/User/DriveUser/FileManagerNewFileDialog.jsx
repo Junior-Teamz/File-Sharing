@@ -64,7 +64,7 @@ export default function FileManagerNewFileDialog({
       handleRemoveAllFiles();
       methods.reset();
       onClose();
-      queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      queryClient.invalidateQueries({ queryKey: ['fetch.folder'] });
     },
     onError: (error) => {
       const errorMessage =
