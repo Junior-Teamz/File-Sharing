@@ -156,9 +156,9 @@ export default function FIleManagerFileDetails({
             tag_id: tagId,
           });
         }
-        enqueueSnackbar('Tags added successfully!', { variant: 'success' });
+        enqueueSnackbar('Tag berhasil ditambahkan!', { variant: 'success' });
       } else {
-        enqueueSnackbar('No new tags to add.', { variant: 'info' });
+        enqueueSnackbar('Tidak ada tag baru untuk ditambahkan.', { variant: 'info' });
       }
     } catch (error) {
       console.error('Error adding tags:', error);
@@ -167,7 +167,7 @@ export default function FIleManagerFileDetails({
           enqueueSnackbar('Tag sudah ada di file.', { variant: 'warning' });
         }
       }
-      enqueueSnackbar('Error adding tags.', { variant: 'error' });
+      enqueueSnackbar('Error saat menambahkan tag', { variant: 'error' });
     }
   };
 
@@ -290,7 +290,7 @@ export default function FIleManagerFileDetails({
           renderInput={(params) => <TextField {...params} placeholder="#Add a tag" />}
         />
       )}
-      <Button onClick={handleSaveTags}>Save Tags</Button>
+      <Button onClick={handleSaveTags}>simpan tags</Button>
     </Stack>
   );
 

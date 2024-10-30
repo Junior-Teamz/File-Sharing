@@ -135,9 +135,9 @@ export default function FolderDetail({
             tag_id: tagId,
           });
         }
-        enqueueSnackbar('Tags added successfully!', { variant: 'success' });
+        enqueueSnackbar('Tag berhasil ditambahkan!', { variant: 'success' });
       } else {
-        enqueueSnackbar('No new tags to add.', { variant: 'info' });
+        enqueueSnackbar('Tidak ada tag baru untuk ditambahkan.', { variant: 'info' });
       }
     } catch (error) {
       console.error('Error adding tags:', error);
@@ -145,10 +145,10 @@ export default function FolderDetail({
         // Log specific errors from the server
         console.error('Server errors:', error.response.data.errors);
         if (error.response.data.errors.tag_id) {
-          enqueueSnackbar('Tag already exists in folder.', { variant: 'warning' });
+          enqueueSnackbar('Tag sudah ada dalam folder.', { variant: 'warning' });
         }
       }
-      enqueueSnackbar('Error adding tags.', { variant: 'error' });
+      enqueueSnackbar('Error saat menambahkan tag', { variant: 'error' });
     }
   };
 
@@ -158,12 +158,12 @@ export default function FolderDetail({
 
     try {
       await deleteFolder({ folder_id: flatFolderIds }); // Updated to use flatFolderIds
-      enqueueSnackbar('Folder deleted successfully!', { variant: 'success' });
+      enqueueSnackbar('Folder berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
     } catch (error) {
       console.error('Error deleting folder:', error);
-      enqueueSnackbar('Error deleting folder.', { variant: 'error' });
+      enqueueSnackbar('Terjadi kesalahan saat menghapus folder.', { variant: 'error' });
     }
   };
 
@@ -222,18 +222,18 @@ export default function FolderDetail({
         // If already favorited, remove it
      
         await removeFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
-        enqueueSnackbar('Folder removed from favorites!', { variant: 'success' });
+        enqueueSnackbar('Folder dihapus dari favorit!', { variant: 'success' });
       } else {
     
         await addFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
-        enqueueSnackbar('Folder added to favorites!', { variant: 'success' });
+        enqueueSnackbar('Folder ditambahkan ke favorit!', { variant: 'success' });
       }
 
       // Toggle the UI state
       favorite.onToggle();
     } catch (error) {
       console.error('Error updating favorite status:', error);
-      enqueueSnackbar('Failed to update favorite status!', { variant: 'error' });
+      enqueueSnackbar('Gagal memperbarui status favorit!', { variant: 'error' });
     } finally {
       setIsLoading(false);
     }
@@ -283,7 +283,7 @@ export default function FolderDetail({
           renderInput={(params) => <TextField {...params} placeholder="#Add a tag" />}
         />
       )}
-      <Button onClick={handleSaveTags}>Save Tags</Button>
+      <Button onClick={handleSaveTags}>simpan tags</Button>
     </Stack>
   );
 

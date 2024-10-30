@@ -142,7 +142,7 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
       useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
       useClient.invalidateQueries({ queryKey: ['detail-folder'] });
     } catch (error) {
-      enqueueSnackbar('Failed to update favorite status!', { variant: 'error' });
+      enqueueSnackbar('Gagal memperbarui status favorit!', { variant: 'error' });
     }
   }, [favorite.value, file.id, addFavorite, removeFavorite, enqueueSnackbar, useClient]);
 

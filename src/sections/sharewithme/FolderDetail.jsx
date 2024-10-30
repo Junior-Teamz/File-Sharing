@@ -24,7 +24,7 @@ import FileThumbnail, { fileFormat } from 'src/components/file-thumbnail';
 import FileManagerInvitedItem from './file-manager-invited-item';
 
 import { useIndexTag } from '../tag/view/TagMutation';
-import { useSnackbar } from 'notistack'; 
+import { useSnackbar } from 'notistack';
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 
 import FileManagerShareDialogFolder from './FileManagerShareDialogFolder';
@@ -106,14 +106,12 @@ export default function FolderDetail({
     }
   }, []);
 
-  const handleOpenConfirmDialog = (folderId) => {
-    setFolderIdToDelete(folderId);
+  const handleOpenConfirmDialog = () => {
     setOpenConfirmDialog(true);
   };
 
   const handleCloseConfirmDialog = () => {
     setOpenConfirmDialog(false);
-    setFolderIdToDelete(null);
   };
 
   const handleSaveTags = async () => {
@@ -134,9 +132,9 @@ export default function FolderDetail({
             tag_id: tagId,
           });
         }
-        enqueueSnackbar('Tags added successfully!', { variant: 'success' });
+        enqueueSnackbar('Tag berhasil ditambahkan!', { variant: 'success' });
       } else {
-        enqueueSnackbar('No new tags to add.', { variant: 'info' });
+        enqueueSnackbar('Tidak ada tag baru untuk ditambahkan.', { variant: 'info' });
       }
     } catch (error) {
       console.error('Error adding tags:', error);
@@ -144,22 +142,23 @@ export default function FolderDetail({
         // Log specific errors from the server
         console.error('Server errors:', error.response.data.errors);
         if (error.response.data.errors.tag_id) {
-          enqueueSnackbar('Tag already exists in folder.', { variant: 'warning' });
+          enqueueSnackbar('Tag sudah ada dalam folder.', { variant: 'warning' });
         }
       }
-      enqueueSnackbar('Error adding tags.', { variant: 'error' });
+      enqueueSnackbar('Error saat menambahkan tag', { variant: 'error' });
     }
   };
 
   const handleDeleteFolder = async () => {
     try {
-      await deleteFolder({ folder_id: folderIdToDelete }); // Updated to use folder_id
-      enqueueSnackbar('Folder deleted successfully!', { variant: 'success' });
+      await deleteFolder(item.folder_id);
+      enqueueSnackbar('Folder berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
+      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
     } catch (error) {
       console.error('Error deleting folder:', error);
-      enqueueSnackbar('Error deleting folder.', { variant: 'error' });
+      enqueueSnackbar('Terjadi kesalahan saat menghapus folder.', { variant: 'error' });
     }
   };
 
@@ -182,7 +181,6 @@ export default function FolderDetail({
   const handleCopyLink = () => {
     const folderUrl = folder_id; // Ensure this is the correct property for URL
 
-   
     if (!folderUrl) {
       enqueueSnackbar('No URL to copy.', { variant: 'warning' });
       return;
@@ -225,7 +223,7 @@ export default function FolderDetail({
       favorite.onToggle();
     } catch (error) {
       console.error('Error updating favorite status:', error);
-      enqueueSnackbar('Failed to update favorite status!', { variant: 'error' });
+      enqueueSnackbar('Gagal memperbarui status favorit!', { variant: 'error' });
     } finally {
       setIsLoading(false);
     }
@@ -239,13 +237,7 @@ export default function FolderDetail({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Tags
-        <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
-          <Iconify
-            icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
-            sx={{ color: favorite.value ? 'yellow' : 'gray' }}
-          />
-        </IconButton>
+        Tag
       </Stack>
 
       {toggleTags.value && (
@@ -275,7 +267,7 @@ export default function FolderDetail({
           renderInput={(params) => <TextField {...params} placeholder="#Add a tag" />}
         />
       )}
-      <Button onClick={handleSaveTags}>Save Tags</Button>
+      <Button onClick={handleSaveTags}>simpan tag</Button>
     </Stack>
   );
 
@@ -287,7 +279,7 @@ export default function FolderDetail({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Properties
+        Properti
         <IconButton size="small" onClick={properties.onToggle}>
           <Iconify
             icon={properties.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
@@ -299,21 +291,21 @@ export default function FolderDetail({
         <>
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Size
+              Ukuran
             </Box>
             {fData(total_size)}
           </Stack>
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Updated
+              Diperbarui
             </Box>
             {fDateTime(updated_at)}
           </Stack>
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Type
+              Tipe
             </Box>
             {fileFormat(type)}
           </Stack>
@@ -427,7 +419,7 @@ export default function FolderDetail({
             </Stack>
             <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
               <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-                Name
+                Nama
               </Box>
               {user?.name}
             </Stack>
@@ -458,7 +450,7 @@ export default function FolderDetail({
             )}
           </Stack>
 
-          <FileManagerShareDialogFolder
+          {/* <FileManagerShareDialogFolder
             open={share.value}
             folderId={folder_id}
             shared={shared_with}
@@ -471,7 +463,7 @@ export default function FolderDetail({
             }}
           />
 
-          {renderShared}
+          {renderShared} */}
 
           <Button fullWidth size="small" color="inherit" variant="outlined" onClick={onClose}>
             Close
@@ -484,7 +476,7 @@ export default function FolderDetail({
               color="error"
               size="large"
               startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-              onClick={() => handleOpenConfirmDialog(item.id)}
+              onClick={handleOpenConfirmDialog}
             >
               Delete
             </Button>

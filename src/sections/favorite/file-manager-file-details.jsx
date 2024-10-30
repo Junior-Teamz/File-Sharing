@@ -145,20 +145,19 @@ export default function FIleManagerFileDetails({
             tag_id: tagId,
           });
         }
-        enqueueSnackbar('Tags added successfully!', { variant: 'success' });
+        enqueueSnackbar('Tag berhasil ditambahkan!', { variant: 'success' });
       } else {
-        enqueueSnackbar('No new tags to add.', { variant: 'info' });
+        enqueueSnackbar('Tidak ada tag baru untuk ditambahkan.', { variant: 'info' });
       }
     } catch (error) {
-      console.error('Error adding tags:', error);
       if (error.response && error.response.data.errors) {
         // Log specific errors from the server
-        console.error('Server errors:', error.response.data.errors);
+
         if (error.response.data.errors.tag_id) {
-          enqueueSnackbar('Tag already exists in folder.', { variant: 'warning' });
+          enqueueSnackbar('Tag sudah ada dalam folder.', { variant: 'warning' });
         }
       }
-      enqueueSnackbar('Error adding tags.', { variant: 'error' });
+      enqueueSnackbar('Error saat menambahkan tag', { variant: 'error' });
     }
   };
 
@@ -285,7 +284,7 @@ export default function FIleManagerFileDetails({
           renderInput={(params) => <TextField {...params} placeholder="#Add a tag" />}
         />
       )}
-      <Button onClick={handleSaveTags}>Save Tags</Button>
+      <Button onClick={handleSaveTags}>simpan tags</Button>
     </Stack>
   );
 
@@ -499,7 +498,6 @@ export default function FIleManagerFileDetails({
             </>
           ) : [
               'mp4',
-              'mkv',
               'webm',
               '.mov',
               'mpeg1',
@@ -519,6 +517,11 @@ export default function FIleManagerFileDetails({
             ].includes(item.type) ? (
             <video controls style={{ maxWidth: '100%', height: 'auto' }}>
               <source src={video_url} type={`video/${item.type}`} />
+              Browser Anda tidak mendukung tag video.
+            </video>
+          ) : ['mkv'].includes(item.type) ? (
+            <video controls style={{ maxWidth: '100%', height: 'auto' }}>
+              <source src={file_url} />
               Browser Anda tidak mendukung tag video.
             </video>
           ) : ['aif', 'mp3', 'wav', 'ogg', 'm4p', 'mxp4', 'msv', 'aac'].includes(item.type) ? (
