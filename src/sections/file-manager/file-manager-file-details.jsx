@@ -23,13 +23,7 @@ import Scrollbar from 'src/components/scrollbar';
 import FileThumbnail, { fileFormat } from 'src/components/file-thumbnail';
 import FileManagerShareDialog from './file-manager-share-dialog';
 import FileManagerInvitedItem from './file-manager-invited-item';
-import {
-  useAddFileTag,
-  useRemoveTagFile,
-  useMutationDeleteFiles,
-  usePreviewImage,
-  usePreviewVideo,
-} from './view/folderDetail/index';
+import { useAddFileTag, useRemoveTagFile, useMutationDeleteFiles } from './view/folderDetail/index';
 import { useIndexTag } from '../tag/view/TagMutation';
 import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
 import { Dialog, DialogActions, DialogContent, DialogTitle, Modal } from '@mui/material';

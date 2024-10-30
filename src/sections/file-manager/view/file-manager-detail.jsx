@@ -52,7 +52,6 @@ export const FIleManagerDetail = () => {
       enqueueSnackbar('Folder successfully created.', { variant: 'success' });
       refetch();
       handleCloseCreateFolderDialog();
-
     },
     onError: (error) => {
       console.error('Error creating folder:', error);
@@ -76,9 +75,6 @@ export const FIleManagerDetail = () => {
       tag_ids: selectedTagIds,
       parent_id: id,
     };
-
- 
-
 
     createFolder(folderData);
   };
@@ -120,24 +116,11 @@ export const FIleManagerDetail = () => {
     }
   };
 
-  // Fetch folder details when ID changes
   useEffect(() => {
     if (id) {
       refetch();
     }
   }, [id, refetch]);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error fetching folder details.</div>;
-  }
-
-  if (tagsError) {
-    return <div>Error fetching tags.</div>;
-  }
 
   return (
     <>
@@ -172,7 +155,7 @@ export const FIleManagerDetail = () => {
                   navigate(`/dashboard/file-manager/info/${folder.id}`, { replace: true });
                 }}
               >
-               {folder.name} &raquo; {/* Use `folder.name` instead of `folderId` */}
+                {folder.name} &raquo; {/* Use `folder.name` instead of `folderId` */}
               </span>
             ))}
 
@@ -191,29 +174,29 @@ export const FIleManagerDetail = () => {
         {data.subfolders.length === 0 && data.files.length === 0 ? (
           <>
             <Button variant="contained" onClick={handleOpenCreateFolderDialog}>
-              Create New Folder
+              Buat Folder Baru
             </Button>
             <FileManagerPanel
-              title="Upload Files"
+              title="Upload File"
               link={paths.dashboard.fileManager}
               onOpen={handleOpenUploadDialog}
               sx={{ mt: 5 }}
             />
-            <EmptyContent filled title="No Content" sx={{ py: 10 }} />
+            <EmptyContent filled title="Tidak ada data" sx={{ py: 10 }} />
           </>
         ) : (
           <>
             <Button variant="contained" onClick={handleOpenCreateFolderDialog}>
-              Create New Folder
+              Buat Folder Baru
             </Button>
             <FileManagerPanel
-              title="Upload Files"
+              title="Upload File"
               link={paths.dashboard.fileManager}
               onOpen={handleOpenUploadDialog}
               sx={{ mt: 5 }}
             />
 
-            <Typography sx={{ mb: 2, mt: 10 }}>Subfolders</Typography>
+            <Typography sx={{ mb: 2, mt: 10 }}>Folder</Typography>
             {data.subfolders.map((folder) => (
               <div key={folder.id} onClick={() => handleSubfolderClick(folder.id, folder.name)}>
                 <FileRecentItem
@@ -226,7 +209,7 @@ export const FIleManagerDetail = () => {
 
             {data.files.length > 0 && (
               <Stack spacing={2} sx={{ mt: 5 }}>
-                <Typography sx={{ mb: 2, mt: 5 }}>Files</Typography>
+                <Typography sx={{ mb: 2, mt: 5 }}>File</Typography>
                 {data.files.map((file) => (
                   <FileRecentItem
                     key={file.id}
@@ -245,9 +228,7 @@ export const FIleManagerDetail = () => {
       <Dialog open={openCreateFolderDialog} onClose={handleCloseCreateFolderDialog}>
         <DialogTitle>Create Folder</DialogTitle>
         <DialogContent>
-          <DialogContentText sx={{ mb: 3 }}>
-            Please enter the name of the folder you want to create.
-          </DialogContentText>
+          <DialogContentText sx={{ mb: 3 }}>Nama folder</DialogContentText>
           <TextField
             autoFocus
             margin="dense"
@@ -263,7 +244,7 @@ export const FIleManagerDetail = () => {
 
           {/* Tag selection */}
           <FormControl fullWidth margin="dense">
-            <InputLabel id="tags-label">Tags</InputLabel>
+            <InputLabel id="tags-label">Tag</InputLabel>
             <Select
               labelId="tags-label"
               id="tags"
@@ -312,14 +293,12 @@ export const FIleManagerDetail = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Upload Files Dialog */}
+      {/* Upload File Dialog */}
       <FileManagerNewDialogParent
-        title="Upload Files"
+        title="Upload File"
         open={openUploadDialog}
         onClose={handleCloseUploadDialog}
         id={id}
-        // onCreate={() => {}} // Define these handlers or remove if not needed
-        // onUpdate={() => {}}
         folderName={folderName}
         onChangeFolderName={(name) => setFolderName(name)}
         refetch={refetch}

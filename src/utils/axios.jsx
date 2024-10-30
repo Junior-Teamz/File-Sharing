@@ -133,6 +133,7 @@ export const endpoints = {
   },
   Permissions: {
     PermissionsFile: '/api/permission/file/grantPermission',
+    getPermissionFolder: '/api/permission/folder/grantPermission',
   },
   file: {
     upload: '/api/file/upload',

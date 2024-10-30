@@ -24,7 +24,6 @@ import FileManagerGridView from '../file-manager-grid-view';
 import FileManagerFiltersResult from '../file-manager-filters-result';
 import FileManagerNewFolderDialog from '../file-manager-new-folder-dialog';
 import { FolderFileShare } from 'src/_mock/map/FolderFileShare';
-import { indexShareAdmin } from '../fetchShare';
 
 // ----------------------------------------------------------------------
 

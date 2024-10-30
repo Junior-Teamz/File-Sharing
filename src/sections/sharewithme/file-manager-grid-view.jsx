@@ -42,8 +42,8 @@ import TableShare from 'src/components/table/tableshare';
 const TABLE_HEAD = [
   { id: 'name', label: 'Nama File' },
   { id: 'size', label: 'Ukuran', width: 120 },
-  { id: 'type', label: 'Jenis', width: 120 },
-  { id: 'modifiedAt', label: 'Modified', width: 140 },
+  { id: 'type', label: 'Tipe', width: 120 },
+  { id: 'created_at', label: 'tanggal dibagikan', width: 200 },
   { id: 'shared', label: 'Dibagikan Oleh', align: 'right', width: 140 },
 ];
 
@@ -56,20 +56,12 @@ export default function FileManagerGridView({
   onOpenConfirm,
 }) {
   const {
-    dense,
     page,
-    order,
-    orderBy,
     rowsPerPage,
-    //
+    dense,
     selected,
-    onSelectRow,
-    onSelectAllRows,
-    //
-    onSort,
-    onChangeDense,
-    onChangePage,
-    onChangeRowsPerPage,
+    onSelectRow: onSelectItem,
+    onSelectAllRows: onSelectAllItems,
   } = table;
   const theme = useTheme();
 
@@ -95,7 +87,7 @@ export default function FileManagerGridView({
   const endIndex = startIndex + rowsPerPage;
   const currentData = dataFiltered
     .filter((i) => i.type !== 'folder')
-    .sort((a, b) => new Date(b.modifiedAt) - new Date(a.modifiedAt)) // Sort by modifiedAt in descending order
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // Sort by modifiedAt in descending order
     .slice(startIndex, endIndex);
 
   // Render
@@ -212,12 +204,9 @@ export default function FileManagerGridView({
               }}
             >
               <TableHeadCustom
-                order={order}
-                orderBy={orderBy}
                 headLabel={TABLE_HEAD}
                 rowCount={dataFiltered.length}
                 numSelected={selected.length}
-                onSort={onSort}
                 onSelectAllRows={(checked) =>
                   onSelectAllItems(
                     checked,
@@ -267,19 +256,12 @@ export default function FileManagerGridView({
 
         {/* Pagination */}
         <TablePaginationCustom
-          count={dataFiltered.filter((i) => i.type !== 'folder').length} // Total count for files only
-          page={page}
-          rowsPerPage={rowsPerPage}
-          onPageChange={onChangePage}
-          onRowsPerPageChange={onChangeRowsPerPage}
-          //
-          dense={dense}
-          onChangeDense={onChangeDense}
-          sx={{
-            [`& .${tablePaginationClasses.toolbar}`]: {
-              borderTopColor: 'transparent',
-            },
-          }}
+          count={dataFiltered.length}
+          page={0}
+          rowsPerPage={10}
+          onPageChange={() => {}}
+          onRowsPerPageChange={() => {}}
+          sx={{ [`& .${tablePaginationClasses.toolbar}`]: { borderTopColor: 'transparent' } }}
         />
       </Box>
 

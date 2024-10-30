@@ -52,7 +52,7 @@ export default function FileManagerShareDialogFolder({
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(inputSearch);
-    }, 300); 
+    }, 1500); 
 
     return () => {
       clearTimeout(handler);
@@ -147,7 +147,8 @@ export default function FileManagerShareDialogFolder({
                 searchResults.map((user) => (
                   <FileManagerInvitedItem
                     key={user.id}
-                    person={user}
+                   
+                    user={user}
                     onClick={() => handleUserSelect(user)} 
                   />
                 ))

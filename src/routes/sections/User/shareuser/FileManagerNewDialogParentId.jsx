@@ -181,7 +181,7 @@ export default function FileManagerNewDialogParent({
           startIcon={<Iconify icon="eva:cloud-upload-fill" />}
           onClick={handleUpload}
         >
-          {loadingUpload ? 'Loading...' : 'Upload Files'}
+          {loadingUpload ? 'Loading...' : 'Upload File'}
         </Button>
 
         {!!files.length && (

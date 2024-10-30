@@ -86,7 +86,7 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
       });
     }
   }, [currentUser, resetForm]);
-  
+
   // Form submission handler
   const onSubmit = (data) => {
     const userData = {
@@ -117,16 +117,13 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
       }}
     >
       <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-        <DialogTitle>Quick Update</DialogTitle>
+        <DialogTitle>Edit User</DialogTitle>
 
         <DialogContent>
-          <Alert variant="outlined" severity="info" sx={{ mb: 3 }}>
-            Account is waiting for confirmation
-          </Alert>
-
           <Box
             rowGap={3}
             columnGap={2}
+            mt={2}
             display="grid"
             gridTemplateColumns={{
               xs: 'repeat(1, 1fr)',
@@ -156,11 +153,7 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
               </Select>
             </FormControl>
 
-            <RHFTextField
-              name="password"
-              label="Password"
-              type="password"
-            />
+            <RHFTextField name="password" label="Password" type="password" />
             <RHFTextField name="confirmPassword" label="Confirm Password" type="password" />
           </Box>
         </DialogContent>
@@ -171,7 +164,7 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
           </Button>
 
           <Button variant="contained" type="submit">
-            {isPending ? "Update User...." : "Update User"}
+            {isPending ? 'Update User....' : 'Update User'}
           </Button>
         </DialogActions>
       </FormProvider>

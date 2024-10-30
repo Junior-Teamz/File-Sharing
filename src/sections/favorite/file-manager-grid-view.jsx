@@ -37,9 +37,9 @@ import FileManagerFileDialog from './FileManagerFileDialog';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Name' },
-  { id: 'size', label: 'Size', width: 120 },
-  { id: 'type', label: 'Type', width: 120 },
+  { id: 'name', label: 'Nama File' },
+  { id: 'size', label: 'Ukuran', width: 120 },
+  { id: 'type', label: 'Tipe', width: 120 },
   { id: 'modifiedAt', label: 'Modified', width: 140 },
   { id: 'shared', label: 'Shared', align: 'right', width: 140 },
   { id: '', width: 88 },
@@ -132,11 +132,11 @@ export default function FileManagerGridView({
             }
             action={
               <>
-                <Tooltip title="Share">
+                {/* <Tooltip title="Share">
                   <IconButton color="primary">
                     <Iconify icon="solar:share-bold" />
                   </IconButton>
-                </Tooltip>
+                </Tooltip> */}
                 <Tooltip title="Delete">
                   <IconButton color="primary" onClick={onOpenConfirm}>
                     <Iconify icon="solar:trash-bin-trash-bold" />

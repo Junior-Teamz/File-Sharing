@@ -30,6 +30,7 @@ import { useAddFavorite, useRemoveFavorite } from '../file-manager/view/favorite
 import { useQueryClient } from '@tanstack/react-query';
 import CloseIcon from '@mui/icons-material/Close';
 import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
+import { useIndexTag } from '../tag/view/TagMutation';
 
 // ----------------------------------------------------------------------
 
@@ -63,6 +64,10 @@ export default function FIleManagerFileDetails({
     file_url,
   } = item;
 
+  const hasPermission = (permissionType) => {
+    return shared_with.some(({ permissions }) => permissions.includes(permissionType));
+  };
+
   const [isOpen, setIsOpen] = useState(false);
 
   const handleOpen = () => setIsOpen(true);
@@ -74,6 +79,16 @@ export default function FIleManagerFileDetails({
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
   const useClient = useQueryClient();
+
+  const { data: tagData, isLoading, isError } = useIndexTag();
+
+  useEffect(() => {
+    if (!isLoading && !isError && tagData && Array.isArray(tagData.data)) {
+      setAvailableTags(tagData.data);
+    } else if (isError) {
+      console.error('Error fetching tag data:', isError);
+    }
+  }, [tagData, isLoading, isError]);
 
   const toggleTags = useBoolean(true);
   const share = useBoolean();
@@ -102,6 +117,39 @@ export default function FIleManagerFileDetails({
     setFileIdToDelete(null);
   };
 
+  const handleSaveTags = async () => {
+    if (!addTagFile.mutateAsync) {
+      console.error('addTagFile.mutateAsync is not a function');
+      return;
+    }
+
+    try {
+      // Determine which tags are new
+      const existingTagIds = new Set(initialTags.map((tag) => tag.id));
+      const newTagIds = tags.filter((tagId) => !existingTagIds.has(tagId));
+
+      if (newTagIds.length > 0) {
+        for (const tagId of newTagIds) {
+          await addTagFile.mutateAsync({
+            file_id: item.id,
+            tag_id: tagId,
+          });
+        }
+        enqueueSnackbar('Tags added successfully!', { variant: 'success' });
+      } else {
+        enqueueSnackbar('No new tags to add.', { variant: 'info' });
+      }
+    } catch (error) {
+      console.error('Error adding tags:', error);
+      if (error.response && error.response.data.errors) {
+        if (error.response.data.errors.tag_id) {
+          enqueueSnackbar('Tag sudah ada di file.', { variant: 'warning' });
+        }
+      }
+      enqueueSnackbar('Error adding tags.', { variant: 'error' });
+    }
+  };
+
   const handleDeleteFile = async () => {
     try {
       await deleteFile({ file_id: fileIdToDelete });
@@ -116,7 +164,18 @@ export default function FIleManagerFileDetails({
     }
   };
 
+  const handleChangeTags = useCallback((event, newValue) => {
+    if (Array.isArray(newValue)) {
+      setTags(newValue.map((tag) => tag.id)); // Assuming newValue is an array of tag objects
+    }
+  }, []);
+
   const handleRemoveTag = async (tagId) => {
+    if (!hasPermission('edit')) {
+      enqueueSnackbar('Anda tidak memiliki izin untuk menghapus tag.', { variant: 'error' });
+      return;
+    }
+
     if (tags.length <= 1) {
       enqueueSnackbar('Kamu harus menyisakan satu tag', { variant: 'warning' });
       return;
@@ -125,10 +184,10 @@ export default function FIleManagerFileDetails({
     try {
       await removeTagFile({ file_id: item.id, tag_id: tagId });
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
-      enqueueSnackbar('Tag removed successfully!', { variant: 'success' });
+      enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
     } catch (error) {
       console.error('Error removing tag:', error);
-      enqueueSnackbar('Error removing tag.', { variant: 'error' });
+      enqueueSnackbar('Error saat menghapus tag.', { variant: 'error' });
     }
   };
 
@@ -153,24 +212,31 @@ export default function FIleManagerFileDetails({
   }, [is_favorite]);
 
   const handleFavoriteToggle = useCallback(async () => {
+    if (!hasPermission('read') && !hasPermission('edit')) {
+      enqueueSnackbar('Anda tidak memiliki izin untuk mengubah status favorit.', {
+        variant: 'error',
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       if (favorite.value) {
         await removeFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
-        enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
+        enqueueSnackbar('File berhasil dihapus dari favorit!', { variant: 'success' });
       } else {
         // Tambahkan ke favorit
         await addFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
-        enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });
+        enqueueSnackbar('File berhasil ditambahkan ke favorit', { variant: 'success' });
       }
 
       favorite.onToggle();
     } catch (error) {
       if (error.response && error.response.data.errors && error.response.data.errors.file_id) {
-        enqueueSnackbar('file id harus di isi.', { variant: 'error' });
+        enqueueSnackbar('File ID harus diisi.', { variant: 'error' });
       } else {
-        enqueueSnackbar('Error saat menambahkan favorite!', { variant: 'error' });
+        enqueueSnackbar('Error saat menambahkan favorit!', { variant: 'error' });
       }
     } finally {
       setIsLoading(false);
@@ -185,13 +251,13 @@ export default function FIleManagerFileDetails({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Tags
-        <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
+        Tag
+        {/* <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
           <Iconify
             icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
             sx={{ color: favorite.value ? 'yellow' : 'gray' }}
           />
-        </IconButton>
+        </IconButton> */}
       </Stack>
 
       {toggleTags.value && (
@@ -200,6 +266,7 @@ export default function FIleManagerFileDetails({
           options={availableTags}
           getOptionLabel={(option) => option.name}
           value={availableTags.filter((tag) => tags.includes(tag.id))} // Display selected tags
+          onChange={handleChangeTags} // Update tags state
           renderOption={(props, option) => (
             <li {...props} key={option.id}>
               {option.name}
@@ -220,7 +287,7 @@ export default function FIleManagerFileDetails({
           renderInput={(params) => <TextField {...params} placeholder="#Add a tag" />}
         />
       )}
-      {/* <Button onClick={handleSaveTags}>Save Tags</Button> */}
+      <Button onClick={handleSaveTags}>Save Tags</Button>
     </Stack>
   );
 
@@ -518,7 +585,7 @@ export default function FIleManagerFileDetails({
             )}
           </Stack>
 
-          <FileManagerShareDialog
+          {/* <FileManagerShareDialog
             open={share.value}
             fileId={id}
             shared={shared_with}
@@ -531,7 +598,7 @@ export default function FIleManagerFileDetails({
             }}
           />
 
-          {renderShared}
+          {renderShared} */}
 
           <Button fullWidth size="small" color="inherit" variant="outlined" onClick={onClose}>
             Close

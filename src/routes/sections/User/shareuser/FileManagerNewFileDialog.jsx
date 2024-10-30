@@ -195,7 +195,7 @@ export default function FileManagerNewFileDialog({
               onClick={handleUpload}
               disabled={loadingUpload}
             >
-              {loadingUpload ? 'Loading...' : 'Upload Files'}
+              {loadingUpload ? 'Loading...' : 'Upload File'}
             </Button>
 
             {!!files.length && (

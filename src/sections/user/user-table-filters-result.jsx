@@ -29,6 +29,11 @@ export default function UserTableFiltersResult({
     onFilters('role', newValue);
   };
 
+  const handleRemoveInstance = (inputValue) => {
+    const newValue = filters.instances.filter((item) => item !== inputValue);
+    onFilters('instances', newValue);
+  };
+
   return (
     <Stack spacing={1.5} {...other}>
       <Box sx={{ typography: 'body2' }}>
@@ -49,6 +54,19 @@ export default function UserTableFiltersResult({
           <Block label="Role:">
             {filters.role.map((item) => (
               <Chip key={item} label={item} size="small" onDelete={() => handleRemoveRole(item)} />
+            ))}
+          </Block>
+        )}
+
+        {!!filters.instances.length && (
+          <Block label="Instances:">
+            {filters.instances.map((item) => (
+              <Chip
+                key={item}
+                label={item}
+                size="small"
+                onDelete={() => handleRemoveInstance(item)}
+              />
             ))}
           </Block>
         )}

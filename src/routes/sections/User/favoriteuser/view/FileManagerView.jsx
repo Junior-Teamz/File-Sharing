@@ -25,10 +25,10 @@ import FileManagerNewFolderDialog from '../FileManagerNewFolderDialog';
 import FileManagerPanel from '../FileManagerPanel';
 import { useDeleteFolder, useEditFolder, useMutationFolder } from './FetchFolderUser';
 import FileManagerNewFileDialog from '../FileManagerNewFileDialog';
-import { handleFolderFiles } from 'src/_mock/map/FilesFolderUser';
 import { FILE_TYPE_OPTIONS } from 'src/_mock';
 import { Typography } from '@mui/material';
 import { enqueueSnackbar } from 'notistack';
+import { FavoriteFolderFileAdmin } from 'src/_mock/map/FavoriteFolderFileAdmin';
 
 const defaultFilters = {
   name: '',
@@ -39,7 +39,7 @@ const defaultFilters = {
 
 export default function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
-  const { FolderFiles, refetch } = handleFolderFiles();
+  const { FolderFiles, refetch } = FavoriteFolderFileAdmin();
   const settings = useSettingsContext();
 
   const [view, setView] = useState('list');
@@ -54,12 +54,6 @@ export default function FileManagerView() {
   const openDateRange = useBoolean();
   const confirm = useBoolean();
   const upload = useBoolean();
-  const folderDialog = useBoolean();
-  const editDialog = useBoolean();
-
-  const { mutate: createFolder } = useMutationFolder();
-  const { mutate: editFolder } = useEditFolder();
-  const { mutate: deleteFolder } = useDeleteFolder();
 
   // Refetch Folder Files only when FolderFiles has meaningful changes
   useEffect(() => {
@@ -67,7 +61,6 @@ export default function FileManagerView() {
       setTableData(FolderFiles);
     }
   }, [FolderFiles, tableData]);
-
 
   const canReset =
     !!filters.name || !!filters.type.length || (!!filters.startDate && !!filters.endDate);
@@ -102,7 +95,6 @@ export default function FileManagerView() {
 
   const handleTagChange = (tags) => {
     setSelectedTags(tags); // Update the selected tags state
-  
   };
 
   const handleDeleteItem = useCallback(
@@ -166,14 +158,7 @@ export default function FileManagerView() {
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'} sx={{ mt: '10px' }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Typography variant="h4">File Manager</Typography>
-          <Button
-            variant="contained"
-            startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-            onClick={upload.onTrue}
-          >
-            Upload
-          </Button>
+          <Typography variant="h4">Favorite</Typography>
         </Stack>
 
         <Stack

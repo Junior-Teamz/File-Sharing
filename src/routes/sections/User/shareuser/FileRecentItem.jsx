@@ -73,11 +73,11 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
 
     try {
       await updateNameFile({ fileId: file.id, data: { name: newFileName } });
-      enqueueSnackbar('File name updated successfully!', { variant: 'success' });
+      enqueueSnackbar('Nama file berhasil diperbarui!', { variant: 'success' });
       onRefetch(); // Call to re-fetch the file data
       edit.onFalse(); // Close the edit dialog
     } catch (error) {
-      enqueueSnackbar('Failed to update file name!', { variant: 'error' });
+      enqueueSnackbar('Gagal memperbarui nama file!', { variant: 'error' });
     }
   }, [file.id, newFileName, originalFileType, updateNameFile, enqueueSnackbar, edit, onRefetch]);
 
@@ -111,7 +111,7 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
         await removeFavorite(payload, {
           // Pass the entire payload object
           onSuccess: () => {
-            enqueueSnackbar('File removed from favorites!', { variant: 'success' });
+            enqueueSnackbar('File dihapus dari favorit!', { variant: 'success' });
           },
           onError: () => {
             enqueueSnackbar('Failed to remove from favorites!', { variant: 'error' });
@@ -123,7 +123,7 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
         await addFavorite(payload, {
           // Pass the entire payload object
           onSuccess: () => {
-            enqueueSnackbar('File added to favorites!', { variant: 'success' });
+            enqueueSnackbar('File telah ditambahkan ke favorit!', { variant: 'success' });
           },
           onError: () => {
             enqueueSnackbar('Failed to add to favorites!', { variant: 'error' });
@@ -202,7 +202,12 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
 
   const renderText = (
     <ListItemText
-      onClick={details.onTrue}
+    onClick={() => {
+      // Cek jika file.type adalah 'folder', jika ya, jangan buka detail
+      if (originalFileType !== 'folder') {
+        details.onTrue();
+      }
+    }}
       primary={file.name}
       secondary={
         <>

@@ -183,7 +183,6 @@ export default function FolderDetail({
   const handleCopyLink = () => {
     const folderUrl = folder_id; // Ensure this is the correct property for URL
 
-
     if (!folderUrl) {
       enqueueSnackbar('No URL to copy.', { variant: 'warning' });
       return;
@@ -207,24 +206,24 @@ export default function FolderDetail({
       enqueueSnackbar('Folder ID is required to toggle favorite status!', { variant: 'error' });
       return;
     }
-  
+
     setIsLoading(true);
-  
+
     try {
       // Log folder_id before making the API call
-   
+
       if (favorite.value) {
         // If already favorited, remove it
-       
+
         await removeFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
         enqueueSnackbar('Folder removed from favorites!', { variant: 'success' });
       } else {
         // Otherwise, add it
-      
+
         await addFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
         enqueueSnackbar('Folder added to favorites!', { variant: 'success' });
       }
-  
+
       // Toggle the UI state
       favorite.onToggle();
     } catch (error) {
@@ -234,8 +233,6 @@ export default function FolderDetail({
       setIsLoading(false);
     }
   }, [favorite.value, folder_id, addFavorite, removeFavorite, enqueueSnackbar]);
-  
-  
 
   const renderTags = (
     <Stack spacing={1.5}>
@@ -245,13 +242,7 @@ export default function FolderDetail({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Tags
-        <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
-          <Iconify
-            icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
-            sx={{ color: favorite.value ? 'yellow' : 'gray' }}
-          />
-        </IconButton>
+        Tag
       </Stack>
 
       {toggleTags.value && (
@@ -281,7 +272,7 @@ export default function FolderDetail({
           renderInput={(params) => <TextField {...params} placeholder="#Add a tag" />}
         />
       )}
-      <Button onClick={handleSaveTags}>Save Tags</Button>
+      <Button onClick={handleSaveTags}>Simpan Tag</Button>
     </Stack>
   );
 

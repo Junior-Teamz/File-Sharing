@@ -165,10 +165,10 @@ export default function FIleManagerFileDetails({
   const handleDeleteFile = async () => {
     try {
       await deleteFile({ file_id: fileIdToDelete });
-      enqueueSnackbar('File deleted successfully!', { variant: 'success' });
+      enqueueSnackbar('File berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
-      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      useClient.invalidateQueries({ queryKey: ['list.favorite.admin'] });
       // Optionally, call a prop function to refresh the file list
     } catch (error) {
       console.error('Error deleting file:', error);
@@ -183,6 +183,7 @@ export default function FIleManagerFileDetails({
     }
 
     try {
+      useClient.invalidateQueries({ queryKey: ['list.favorite.admin'] });
       await removeTagFile({ file_id: item.id, tag_id: tagId });
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
       enqueueSnackbar('Tag removed successfully!', { variant: 'success' });
@@ -218,9 +219,11 @@ export default function FIleManagerFileDetails({
 
     try {
       if (favorite.value) {
+        useClient.invalidateQueries({ queryKey: ['list.favorite.admin'] });
         await removeFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
         enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
       } else {
+        useClient.invalidateQueries({ queryKey: ['list.favorite.admin'] });
         // Tambahkan ke favorit
         await addFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
         enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });

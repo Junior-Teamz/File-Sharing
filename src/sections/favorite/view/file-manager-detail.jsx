@@ -191,29 +191,29 @@ export const FIleManagerDetail = () => {
         {data.subfolders.length === 0 && data.files.length === 0 ? (
           <>
             <Button variant="contained" onClick={handleOpenCreateFolderDialog}>
-              Create New Folder
+            Buat Folder Baru
             </Button>
             <FileManagerPanel
-              title="Upload Files"
+              title="Upload File"
               link={paths.dashboard.fileManager}
               onOpen={handleOpenUploadDialog}
               sx={{ mt: 5 }}
             />
-            <EmptyContent filled title="No Content" sx={{ py: 10 }} />
+            <EmptyContent filled title="Tidak ada data" sx={{ py: 10 }} />
           </>
         ) : (
           <>
             <Button variant="contained" onClick={handleOpenCreateFolderDialog}>
-              Create New Folder
+            Buat Folder Baru
             </Button>
             <FileManagerPanel
-              title="Upload Files"
+              title="Upload File"
               link={paths.dashboard.fileManager}
               onOpen={handleOpenUploadDialog}
               sx={{ mt: 5 }}
             />
 
-            <Typography sx={{ mb: 2, mt: 10 }}>Subfolders</Typography>
+            <Typography sx={{ mb: 2, mt: 10 }}>Folder</Typography>
             {data.subfolders.map((folder) => (
               <div key={folder.id} onClick={() => handleSubfolderClick(folder.id, folder.name)}>
                 <FileRecentItem
@@ -246,7 +246,7 @@ export const FIleManagerDetail = () => {
         <DialogTitle>Create Folder</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 3 }}>
-            Please enter the name of the folder you want to create.
+          Nama folder
           </DialogContentText>
           <TextField
             autoFocus
@@ -312,9 +312,9 @@ export const FIleManagerDetail = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Upload Files Dialog */}
+      {/* Upload File Dialog */}
       <FileManagerNewDialogParent
-        title="Upload Files"
+        title="Upload File"
         open={openUploadDialog}
         onClose={handleCloseUploadDialog}
         id={id}

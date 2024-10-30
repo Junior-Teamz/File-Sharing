@@ -18,6 +18,7 @@ import { useMutationUploadFiles } from './view/folderDetail/useMutationUploadFil
 import { useIndexTag } from '../tag/view/TagMutation';
 import { RHFAutocomplete } from 'src/components/hook-form';
 import { Box, Chip, FormControl } from '@mui/material';
+import { fData } from 'src/utils/format-number';
 
 export default function FileManagerFileDialog({
   title,
@@ -44,7 +45,7 @@ export default function FileManagerFileDialog({
   useEffect(() => {
     if (!open) {
       setFiles([]);
-      setProgress(0); 
+      setProgress(0);
       reset();
     }
   }, [open, reset]);
@@ -63,13 +64,13 @@ export default function FileManagerFileDialog({
       enqueueSnackbar('Files Uploaded Successfully');
       handleRemoveAllFiles();
       reset();
-      setProgress(0); 
+      setProgress(0);
       onClose();
       queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
     },
     onError: (error) => {
       enqueueSnackbar(error.message, { variant: 'error' });
-      setProgress(0); 
+      setProgress(0);
     },
     onUploadProgress: (percentCompleted) => {
       setProgress(percentCompleted);
@@ -161,7 +162,7 @@ export default function FileManagerFileDialog({
                     />
                   </Box>
                   <Box sx={{ textAlign: 'center', mt: 1 }}>
-                    {file.name} - {Math.round(file.size / 1024)} KB - {progress}%
+                    {file.name} - {fData(file.size)} {progress}%
                   </Box>
                 </Box>
               ))}
@@ -182,7 +183,7 @@ export default function FileManagerFileDialog({
             onClick={handleSubmit(handleUpload)}
             disabled={loadingUpload}
           >
-            {loadingUpload ? 'Uploading...' : 'Upload Files'}
+            {loadingUpload ? 'Uploading...' : 'Upload File'}
           </Button>
 
           {!!files.length && (

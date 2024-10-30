@@ -214,11 +214,11 @@ export default function FolderDetail({
       if (favorite.value) {
         // If already favorited, remove it
         await removeFavorite(payload);
-        enqueueSnackbar('File removed from favorites!', { variant: 'success' });
+        enqueueSnackbar('File dihapus dari favorit!', { variant: 'success' });
       } else {
         // Otherwise, add it
         await addFavorite(payload);
-        enqueueSnackbar('File added to favorites!', { variant: 'success' });
+        enqueueSnackbar('File telah ditambahkan ke favorit!', { variant: 'success' });
       }
 
       // Toggle the UI state

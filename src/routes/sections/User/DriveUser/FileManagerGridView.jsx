@@ -102,7 +102,7 @@ export default function FileManagerGridView({
       <Box ref={containerRef}>
         <FileManagerPanel
           title="Folder"
-          subTitle={`${data.filter((item) => item.type === 'folder').length} folders`}
+          subTitle={`${data.filter((item) => item.type === 'folder').length} folder`}
           onOpen={newFolder.onTrue}
           collapse={folders.value}
           onCollapse={folders.onToggle}
@@ -157,11 +157,6 @@ export default function FileManagerGridView({
             }
             action={
               <>
-                {/* <Tooltip title="Share">
-                  <IconButton color="primary">
-                    <Iconify icon="solar:share-bold" />
-                  </IconButton>
-                </Tooltip> */}
                 <Tooltip title="Delete">
                   <IconButton color="primary" onClick={onOpenConfirm}>
                     <Iconify icon="solar:trash-bin-trash-bold" />

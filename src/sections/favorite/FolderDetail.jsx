@@ -183,8 +183,6 @@ export default function FolderDetail({
   const handleCopyLink = () => {
     const folderUrl = folder_id; // Ensure this is the correct property for URL
 
-   
-
     if (!folderUrl) {
       enqueueSnackbar('No URL to copy.', { variant: 'warning' });
       return;
@@ -216,11 +214,11 @@ export default function FolderDetail({
       if (favorite.value) {
         // If already favorited, remove it
         await removeFavorite(payload);
-        enqueueSnackbar('File removed from favorites!', { variant: 'success' });
+        enqueueSnackbar('File dihapus dari favorit!', { variant: 'success' });
       } else {
         // Otherwise, add it
         await addFavorite(payload);
-        enqueueSnackbar('File added to favorites!', { variant: 'success' });
+        enqueueSnackbar('File telah ditambahkan ke favorit!', { variant: 'success' });
       }
 
       // Toggle the UI state
@@ -241,13 +239,13 @@ export default function FolderDetail({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Tags
-        <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
+        Tag
+        {/* <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
           <Iconify
             icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
             sx={{ color: favorite.value ? 'yellow' : 'gray' }}
           />
-        </IconButton>
+        </IconButton> */}
       </Stack>
 
       {toggleTags.value && (
@@ -289,7 +287,7 @@ export default function FolderDetail({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Properties
+        Properti
         <IconButton size="small" onClick={properties.onToggle}>
           <Iconify
             icon={properties.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
@@ -301,21 +299,21 @@ export default function FolderDetail({
         <>
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Size
+              Ukuran
             </Box>
             {fData(total_size)}
           </Stack>
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Updated
+              Diperbarui
             </Box>
             {fDateTime(updated_at)}
           </Stack>
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Type
+              Tipe
             </Box>
             {fileFormat(type)}
           </Stack>
@@ -327,7 +325,7 @@ export default function FolderDetail({
   const renderShared = (
     <>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2.5 }}>
-        <Typography variant="subtitle2"> File Shared With </Typography>
+        <Typography variant="subtitle2"> File Dibagikan Kepada </Typography>
 
         <IconButton
           size="small"
@@ -429,7 +427,7 @@ export default function FolderDetail({
             </Stack>
             <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
               <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-                Name
+                Nama
               </Box>
               {user?.name}
             </Stack>

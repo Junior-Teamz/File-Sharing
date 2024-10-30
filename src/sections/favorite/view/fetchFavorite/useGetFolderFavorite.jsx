@@ -3,7 +3,7 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 
 export const useGetFolderFavorite = () => {
   const { data, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ['list.favorite'],
+    queryKey: ['list.favorite.admin'],
     queryFn: async () => {
       const response = await axiosInstance.get(endpoints.folder.getFavorit);
       return response.data;

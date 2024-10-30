@@ -115,7 +115,7 @@ export default function FileManagerTableRow({
         await removeFavorite(payload, {
           // Pass the entire payload object
           onSuccess: () => {
-            enqueueSnackbar('File removed from favorites!', { variant: 'success' });
+            enqueueSnackbar('File dihapus dari favorit!', { variant: 'success' });
           },
           onError: () => {
             enqueueSnackbar('Failed to remove from favorites!', { variant: 'error' });
@@ -127,7 +127,7 @@ export default function FileManagerTableRow({
         await addFavorite(payload, {
           // Pass the entire payload object
           onSuccess: () => {
-            enqueueSnackbar('File added to favorites!', { variant: 'success' });
+            enqueueSnackbar('File telah ditambahkan ke favorit!', { variant: 'success' });
           },
           onError: () => {
             enqueueSnackbar('Failed to add to favorites!', { variant: 'error' });

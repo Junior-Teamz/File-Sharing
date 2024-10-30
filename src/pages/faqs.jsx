@@ -8,7 +8,7 @@ export default function FaqsPage() {
   return (
     <>
       <Helmet>
-        <title> Faqs</title>
+        <title> Faq</title>
       </Helmet>
 
       <FaqsView />

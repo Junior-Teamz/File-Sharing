@@ -19,6 +19,7 @@ import { useIndexTag } from '../tag/view/TagMutation';
 import { RHFAutocomplete } from 'src/components/hook-form';
 import { Box, Chip, FormControl } from '@mui/material';
 
+
 export default function FileManagerFileDialog({
   title,
   open,
@@ -182,7 +183,7 @@ export default function FileManagerFileDialog({
             onClick={handleSubmit(handleUpload)}
             disabled={loadingUpload}
           >
-            {loadingUpload ? 'Uploading...' : 'Upload Files'}
+            {loadingUpload ? 'Uploading...' : 'Upload File'}
           </Button>
 
           {!!files.length && (

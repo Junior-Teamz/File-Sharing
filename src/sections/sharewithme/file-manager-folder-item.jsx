@@ -31,6 +31,8 @@ import { Link } from 'react-router-dom';
 import FileManagerShareDialogFolder from './FileManagerShareDialogFolder';
 import FolderDetail from './FolderDetail';
 import InfoIcon from '@mui/icons-material/Info';
+import { Folder } from '@mui/icons-material';
+import { Tooltip, Typography } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -81,17 +83,17 @@ export default function FileManagerFolderItem({
       <IconButton onClick={details.onTrue}>
         <InfoIcon />
       </IconButton>
-
+{/* 
       <Checkbox
         color="warning"
         icon={<Iconify icon="eva:star-outline" />}
         checkedIcon={<Iconify icon="eva:star-fill" />}
         checked={favorite.value}
         onChange={favorite.onToggle}
-      />
-      <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
+      /> */}
+      {/* <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
         <Iconify icon="eva:more-vertical-fill" />
-      </IconButton>
+      </IconButton> */}
     </Stack>
   );
 
@@ -116,7 +118,7 @@ export default function FileManagerFolderItem({
               bgcolor: 'currentColor',
             }}
           />
-          {folder.total_file} files
+          {folder.total_file} file
         </>
       }
       primaryTypographyProps={{
@@ -135,22 +137,32 @@ export default function FileManagerFolderItem({
   );
 
   const renderAvatar = (
-    <AvatarGroup
-      max={3}
-      sx={{
-        [`& .${avatarGroupClasses.avatar}`]: {
-          width: 24,
-          height: 24,
-          '&:first-of-type': {
-            fontSize: 12,
-          },
-        },
-      }}
-    >
-      {folder.shared_with?.map((person) => (
-        <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
-      ))}
-    </AvatarGroup>
+    <Box sx={{ cursor: 'pointer', display: 'flex' }}>
+      {folder.user ? (
+        <>
+          <Avatar
+            alt={folder.user.name}
+            src={folder.user.avatarUrl}
+            sx={{ width: 24, height: 24, mr: 1 }} // Menambahkan margin right
+          />
+          <Tooltip title={folder.user.email}>
+            <Typography
+              variant="caption"
+              sx={{
+                maxWidth: 120, // Atur sesuai kebutuhan
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {folder.user.email}
+            </Typography>
+          </Tooltip>
+        </>
+      ) : (
+        'Tidak ada pengguna'
+      )}
+    </Box>
   );
 
   return (
@@ -183,7 +195,7 @@ export default function FileManagerFolderItem({
         </Link>
 
         {renderAction}
-
+        <Typography variant='caption'>Dibagikan oleh</Typography>
         {!!folder?.shared_with?.length && renderAvatar}
       </Stack>
 

@@ -18,7 +18,7 @@ export default function FaqsList() {
         <AccordionSummary expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}>
           <Typography variant="subtitle1">Apa itu file sharing?</Typography>
         </AccordionSummary>
-        <AccordionDetails sx={{ backgroundColor: detailsBgColor, color: 'white' }}>
+        <AccordionDetails>
           <Typography>
             File sharing adalah platform yang memungkinkan pengguna berbagi dan mentransfer file
             antar perangkat atau pengguna melalui jaringan. Dengan aplikasi ini, file seperti
@@ -63,8 +63,16 @@ export default function FaqsList() {
         </AccordionSummary>
         <AccordionDetails>
           <Typography>Anda bisa melihat panduan lengkap penggunaan di bawah ini.</Typography>
-          <Button variant="outlined" href="/files/user-guide.pdf" target="_blank" sx={{ mt: 2 }}>
+          <Button
+            variant="outlined"
+            href="/files/user-guide.pdf"
+            target="_blank"
+            sx={{ mt: 2, mr: 2 }}
+          >
             Lihat PDF
+          </Button>
+          <Button variant="contained" href="/files/premium-guide.pdf" download sx={{ mt: 2 }}>
+            Download PDF
           </Button>
         </AccordionDetails>
       </Accordion>
@@ -72,15 +80,21 @@ export default function FaqsList() {
       {/* Pertanyaan 5 */}
       <Accordion>
         <AccordionSummary expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}>
-          <Typography variant="subtitle1">Bagaimana cara menggunakan fitur premium?</Typography>
+          <Typography variant="subtitle1">
+            {' '}
+            Apakah pengguna harus memiliki akun untuk mengakses file yang saya bagikan di aplikasi
+            file sharing?
+          </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Typography>
-            Untuk menggunakan fitur premium, silakan download panduan berikut.
+            file sharing mengharuskan pengguna memiliki akun untuk mengakses file yang dibagikan.
+            Ini dilakukan untuk menjaga keamanan dan memastikan bahwa hanya orang-orang tertentu
+            yang dapat melihat atau mengunduh file tersebut. Dengan memiliki akun, pengguna juga
+            bisa mendapatkan izin akses yang lebih spesifik, seperti hanya-baca atau edit, sesuai
+            dengan pengaturan yang Anda tentukan. Pastikan untuk memeriksa pengaturan berbagi di
+            aplikasi Anda agar sesuai dengan kebutuhan privasi dan keamanan file yang Anda bagikan.
           </Typography>
-          <Button variant="contained" href="/files/premium-guide.pdf" download sx={{ mt: 2 }}>
-            Download PDF
-          </Button>
         </AccordionDetails>
       </Accordion>
     </>

@@ -35,11 +35,11 @@ import debounce from 'lodash/debounce';
 import { useIndexInstance } from 'src/sections/instancepages/view/Instance';
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Name', width: 180 },
+  { id: 'name', label: 'Nama', width: 180 },
   { id: 'email', label: 'Email', width: 240 },
   { id: 'instance', label: 'Instansi', width: 180 },
   { id: 'role', label: 'Role', width: 180 },
-  { id: 'action', label: 'Action', width: 120 },
+  { id: 'action', label: 'Aksi', width: 120 },
 ];
 
 const DEBOUNCE_DELAY = 1500;
@@ -95,6 +95,7 @@ export default function UserListView() {
     inputData: tableData,
     comparator: getComparator(table.order, table.orderBy),
     filters,
+    allowedInstances: instanceOptions, // Passing allowed instances dynamically
   });
 
   const dataInPage = dataFiltered.slice(
@@ -174,7 +175,10 @@ export default function UserListView() {
               numSelected={table.selected.length}
               rowCount={tableData.length}
               onSelectAllRows={(checked) =>
-                table.onSelectAllRows(checked, tableData.map((row) => row.id))
+                table.onSelectAllRows(
+                  checked,
+                  tableData.map((row) => row.id)
+                )
               }
               action={
                 <Tooltip title="Delete">
@@ -195,7 +199,10 @@ export default function UserListView() {
                   numSelected={table.selected.length}
                   onSort={table.onSort}
                   onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(checked, tableData.map((row) => row.id))
+                    table.onSelectAllRows(
+                      checked,
+                      tableData.map((row) => row.id)
+                    )
                   }
                 />
 
@@ -239,7 +246,7 @@ export default function UserListView() {
         title="Delete"
         content={
           <div>
-            Are you sure you want to delete <strong>{table.selected.length}</strong> items?
+            Apa kamu yakin hapus <strong>{table.selected.length}</strong> items?
           </div>
         }
         action={
@@ -251,7 +258,7 @@ export default function UserListView() {
               confirm.onFalse();
             }}
           >
-            Delete
+            Hapus
           </Button>
         }
       />
@@ -259,17 +266,22 @@ export default function UserListView() {
   );
 }
 
-function applyFilter({  inputData, comparator, filters = {} }) {
+function applyFilter({ inputData, comparator, filters = {} }) {
   const { search, role, instances } = filters;
 
   if (!Array.isArray(inputData)) {
-    console.error('Expected inputData to be an array but received:', inputData);
     return [];
   }
 
-  let filteredData = [...inputData];
-  filteredData = filteredData.sort((a, b) => comparator(a, b));
+  const stabilizedThis = inputData.map((el, index) => [el, index]);
 
+  stabilizedThis.sort((a, b) => {
+    const order = comparator(a[0], b[0]);
+    if (order !== 0) return order;
+    return a[1] - b[1];
+  });
+
+  let filteredData = stabilizedThis.map((el) => el[0]);
 
   // Filter by name
   if (search) {
@@ -280,14 +292,23 @@ function applyFilter({  inputData, comparator, filters = {} }) {
     );
   }
 
-  // Filter by role if selected
   if (role.length > 0) {
-    filteredData = filteredData.filter((user) => role.includes(user.role));
+    filteredData = filteredData.filter((user) => {
+      const userRole = typeof user.role === 'string' ? user.role : String(user.role);
+
+      return role.some((selectedRole) => selectedRole.toLowerCase() === userRole.toLowerCase());
+    });
   }
 
-  // Filter by instances if selected
   if (instances.length > 0) {
-    filteredData = filteredData.filter((user) => instances.includes(user.instance));
+    filteredData = filteredData.filter((user) => {
+      const userInstance =
+        typeof user.instances === 'string' ? user.instances : String(user.instances);
+
+      return instances.some(
+        (selectedInstances) => selectedInstances.toLowerCase() === userInstance.toLowerCase()
+      );
+    });
   }
 
   return filteredData;

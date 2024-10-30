@@ -112,11 +112,11 @@ export default function Informasi() {
                       <Typography
                         variant="body1"
                         sx={{
-                          maxWidth: 400,
-                          maxHeight: 110,
-                          overflowY: 'auto',
+                          display: { xs: 'none', md: '-webkit-box' },
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
                           textOverflow: 'ellipsis',
-                          whiteSpace: 'initial',
+                          WebkitLineClamp: 2,
                         }}
                       >
                         <span dangerouslySetInnerHTML={{ __html: news.content }} />

@@ -90,24 +90,16 @@ export default function FileManagerGridView({
   const endIndex = startIndex + rowsPerPage;
   const currentData = dataFiltered
     .filter((i) => i.type !== 'folder')
-    .sort((a, b) => new Date(b.modifiedAt) - new Date(a.modifiedAt)) 
+    .sort((a, b) => new Date(b.modifiedAt) - new Date(a.modifiedAt))
     .slice(startIndex, endIndex);
 
   const handleTagChange = useCallback((tags) => {
-    setSelectedTags(tags); 
-  }, []); 
+    setSelectedTags(tags);
+  }, []);
 
   return (
     <>
       <Box ref={containerRef}>
-        <FileManagerPanel
-          title="Folders"
-          subTitle={`${data.filter((item) => item.type === 'folder').length} folders`}
-          onOpen={newFolder.onTrue}
-          collapse={folders.value}
-          onCollapse={folders.onToggle}
-        />
-
         <Collapse in={!folders.value} unmountOnExit>
           <Box
             gap={3}
@@ -136,8 +128,6 @@ export default function FileManagerGridView({
 
         <Divider sx={{ my: 5, borderStyle: 'dashed' }} />
 
-        <FileManagerPanel title="Files" onOpen={upload.onTrue} />
-
         <Box
           sx={{
             position: 'relative',
@@ -157,11 +147,6 @@ export default function FileManagerGridView({
             }
             action={
               <>
-                {/* <Tooltip title="Share">
-                  <IconButton color="primary">
-                    <Iconify icon="solar:share-bold" />
-                  </IconButton>
-                </Tooltip> */}
                 <Tooltip title="Delete">
                   <IconButton color="primary" onClick={onOpenConfirm}>
                     <Iconify icon="solar:trash-bin-trash-bold" />
