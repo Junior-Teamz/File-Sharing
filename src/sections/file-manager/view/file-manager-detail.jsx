@@ -15,6 +15,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  IconButton,
 } from '@mui/material';
 import { Box, Container, Stack } from '@mui/system';
 import InfoIcon from '@mui/icons-material/Info';
@@ -24,13 +25,27 @@ import EmptyContent from 'src/components/empty-content';
 import FileManagerPanel from '../file-manager-panel';
 import FileManagerNewDialogParent from '../file-manager-new-dialog-parent-id';
 import { useFetchDetail } from './folderDetail';
-import { useMutationFolder } from 'src/sections/overview/app/view/folders';
+import { useFetchFolder, useMutationFolder } from 'src/sections/overview/app/view/folders';
 import { useIndexTag } from 'src/sections/tag/view/TagMutation';
 import { paths } from 'src/routes/paths';
+import FolderRecentItem from '../folder-recent-item';
+import FolderDetail from '../FolderDetail';
+import { useBoolean } from 'src/hooks/use-boolean';
+import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
 
 export const FIleManagerDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const details = useBoolean();
+
+  const { copy } = useCopyToClipboard();
+  const { data: folderss, isLoading: loading, refetch: refetc, isFetching } = useFetchFolder();
+  const favorite = useBoolean(folderss?.is_favorite || false); // Safely access is_favorite
+
+  const handleCopy = useCallback(() => {
+    enqueueSnackbar('Copied!');
+    copy(folderss);
+  }, [copy, enqueueSnackbar, folderss]);
 
   // Fetch folder details and tags
   const { data, isLoading, refetch, error } = useFetchDetail(id);
@@ -163,11 +178,9 @@ export const FIleManagerDetail = () => {
             <span style={{ color: 'black' }}>{data.folder_info.name}</span>
 
             {/* InfoIcon displays folder.id */}
-            <InfoIcon
-              fontSize="medium"
-              sx={{ mt: 3, cursor: 'pointer' }}
-              onClick={handleInfoClick}
-            />
+            <IconButton onClick={details.onTrue}>
+              <InfoIcon />
+            </IconButton>
           </Typography>
         </Box>
 
@@ -199,7 +212,7 @@ export const FIleManagerDetail = () => {
             <Typography sx={{ mb: 2, mt: 10 }}>Folder</Typography>
             {data.subfolders.map((folder) => (
               <div key={folder.id} onClick={() => handleSubfolderClick(folder.id, folder.name)}>
-                <FileRecentItem
+                <FolderRecentItem
                   file={{ ...folder, type: 'folder' }}
                   onRefetch={refetch}
                   onDelete={() => console.info('DELETE', folder.id)}
@@ -292,6 +305,42 @@ export const FIleManagerDetail = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {folderss.folders
+        ? // Render untuk data folders
+          folderss.folders.map((folder) => (
+            <FolderDetail
+              key={folder.folder_id}
+              item={{ ...folder, type: 'folder' }}
+              favorited={favorite.value}
+              onFavorite={favorite.onToggle}
+              onCopyLink={handleCopy}
+              open={details.value}
+              onClose={details.onFalse}
+              onDelete={() => {
+                details.onFalse();
+                onDelete();
+              }}
+            />
+          ))
+        : data.folder_info
+        ? // Render untuk data subfolders
+          data.subfolders.map((subfolder) => (
+            <FolderDetail
+              key={subfolder.folder_id}
+              item={{ ...subfolder, type: 'subfolder' }}
+              favorited={favorite.value}
+              onFavorite={favorite.onToggle}
+              onCopyLink={handleCopy}
+              open={details.value}
+              onClose={details.onFalse}
+              onDelete={() => {
+                details.onFalse();
+                onDelete();
+              }}
+            />
+          ))
+        : null}
 
       {/* Upload File Dialog */}
       <FileManagerNewDialogParent

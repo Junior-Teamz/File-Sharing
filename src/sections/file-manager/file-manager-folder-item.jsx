@@ -53,7 +53,7 @@ export default function FileManagerFolderItem({
   const popover = usePopover();
   const confirm = useBoolean();
   const details = useBoolean();
-  const favorite = useBoolean(folder.isFavorited);
+  const favorite = useBoolean(folder.is_favorite);
 
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value);
@@ -81,8 +81,6 @@ export default function FileManagerFolderItem({
       <IconButton onClick={details.onTrue}>
         <InfoIcon />
       </IconButton>
-
-     
     </Stack>
   );
 
@@ -166,7 +164,11 @@ export default function FileManagerFolderItem({
         }}
         {...other}
       >
-        <Link key={folder.id} to={`info/${folder.folder_id}`}>
+        <Link
+          style={{ textDecoration: 'none', color: 'inherit' }}
+          key={folder.id}
+          to={`info/${folder.folder_id}`}
+        >
           <Box onMouseEnter={checkbox.onTrue} onMouseLeave={checkbox.onFalse}>
             {renderIcon}
           </Box>

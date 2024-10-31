@@ -36,6 +36,7 @@ import {
   useRemoveTagFolder,
 } from './view/Folder';
 import FileManagerShareDialogFolder from './FileManagerShareDialogFolder';
+import { useQueryClient } from '@tanstack/react-query';
 
 // ----------------------------------------------------------------------
 
@@ -70,6 +71,7 @@ export default function FolderDetail({
 
   const { mutateAsync: addFavorite } = useAddFavoriteFolder();
   const { mutateAsync: removeFavorite } = useRemoveFavoriteFolder();
+  const useClient = useQueryClient();
 
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
@@ -212,18 +214,19 @@ export default function FolderDetail({
     setIsLoading(true);
 
     try {
-     
+      // Log folder_id before making the API call
 
       if (favorite.value) {
         // If already favorited, remove it
-      
+
         await removeFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
         enqueueSnackbar('Folder dihapus dari favorit!', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
       } else {
         // Otherwise, add it
-      
         await addFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
         enqueueSnackbar('Folder ditambahkan ke favorit!', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
       }
 
       // Toggle the UI state
@@ -330,7 +333,7 @@ export default function FolderDetail({
   const renderShared = (
     <>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2.5 }}>
-        <Typography variant="subtitle2"> File Shared With </Typography>
+        <Typography variant="subtitle2"> File dibagikan dengan </Typography>
 
         <IconButton
           size="small"

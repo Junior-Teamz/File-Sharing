@@ -28,7 +28,7 @@ import FileManagerNewFileDialog from '../FileManagerNewFileDialog';
 import { FILE_TYPE_OPTIONS } from 'src/_mock';
 import { Typography } from '@mui/material';
 import { enqueueSnackbar } from 'notistack';
-import { FavoriteFolderFileAdmin } from 'src/_mock/map/FavoriteFolderFileAdmin';
+import { FavoriteFolderFileUser } from 'src/_mock/map/favoriteFolderFileUser';
 
 const defaultFilters = {
   name: '',
@@ -39,11 +39,10 @@ const defaultFilters = {
 
 export default function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
-  const { FolderFiles, refetch } = FavoriteFolderFileAdmin();
+  const { FolderFiles, refetch } = FavoriteFolderFileUser();
   const settings = useSettingsContext();
-
   const [view, setView] = useState('list');
-  const [tableData, setTableData] = useState(FolderFiles);
+  const [tableData, setTableData] = useState(FolderFiles || []);
   const [filters, setFilters] = useState(defaultFilters);
   const [selectedTags, setSelectedTags] = useState([]);
   const dateError =
@@ -55,13 +54,12 @@ export default function FileManagerView() {
   const confirm = useBoolean();
   const upload = useBoolean();
 
-  // Refetch Folder Files only when FolderFiles has meaningful changes
   useEffect(() => {
     if (FolderFiles && FolderFiles !== tableData) {
       setTableData(FolderFiles);
     }
-  }, [FolderFiles, tableData]);
-
+  }, [FolderFiles]);
+  
   const canReset =
     !!filters.name || !!filters.type.length || (!!filters.startDate && !!filters.endDate);
 
@@ -254,3 +252,4 @@ function applyFilter({ inputData, comparator, filters, dateError }) {
 
   return inputData;
 }
+

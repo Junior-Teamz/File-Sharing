@@ -194,9 +194,7 @@ export default function FileManagerView() {
           {canReset && renderResults}
         </Stack>
 
-        {notFound ? (
-          <EmptyContent filled title="Tidak ada data" sx={{ py: 10 }} />
-        ) : (
+
           <FileManagerGridView
             table={table}
             data={tableData}
@@ -204,7 +202,7 @@ export default function FileManagerView() {
             onDeleteItem={handleDeleteItem}
             onOpenConfirm={confirm.onTrue}
           />
-        )}
+   
       </Container>
 
       <FileManagerNewFileDialog

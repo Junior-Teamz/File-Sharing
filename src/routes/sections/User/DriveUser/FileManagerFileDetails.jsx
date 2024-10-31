@@ -325,7 +325,7 @@ export default function FIleManagerFileDetails({
   const renderShared = (
     <>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2.5 }}>
-        <Typography variant="subtitle2"> File Shared With </Typography>
+        <Typography variant="subtitle2"> File dibagikan dengan </Typography>
 
         <IconButton
           size="small"
@@ -355,7 +355,7 @@ export default function FIleManagerFileDetails({
         ))
       ) : (
         <Typography variant="body2" color="text.secondary">
-          Not shared with anyone.
+          Tidak dibagikan kepada siapa pun.
         </Typography>
       )}
     </>

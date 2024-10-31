@@ -41,7 +41,7 @@ import { useQueryClient } from '@tanstack/react-query';
 // ----------------------------------------------------------------------
 
 export default function FolderDetail({
-  item,
+  item=[],
   open,
   favorited,
   onFavorite,
@@ -110,7 +110,6 @@ export default function FolderDetail({
 
   const handleOpenConfirmDialog = () => {
     setOpenConfirmDialog(true);
-   
   };
 
   const handleCloseConfirmDialog = () => {
@@ -325,7 +324,7 @@ export default function FolderDetail({
   const renderShared = (
     <>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2.5 }}>
-        <Typography variant="subtitle2"> File Shared With </Typography>
+        <Typography variant="subtitle2"> File dibagikan dengan </Typography>
 
         <IconButton
           size="small"
@@ -484,7 +483,7 @@ export default function FolderDetail({
               color="error"
               size="large"
               startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-              onClick={handleOpenConfirmDialog} 
+              onClick={handleOpenConfirmDialog}
             >
               Delete
             </Button>

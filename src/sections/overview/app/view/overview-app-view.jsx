@@ -251,10 +251,12 @@ export default function OverviewAppView() {
           ...bgGradient({
             color: alpha(
               theme.palette.background.default,
-              theme.palette.mode === 'light' ? 0.90 : 0.94
+              theme.palette.mode === 'light' ? 0.8 : 0.80 // Mengurangi nilai alpha agar warna tidak terlalu terang
             ),
             imgUrl: '/assets/background/overlay_2.jpg',
           }),
+          backgroundPosition: 'center', // Menempatkan background di tengah
+          backgroundSize: 'cover', // Mengatur ukuran background agar menutupi seluruh area
           position: 'absolute',
           top: 0,
           left: 0,
@@ -263,6 +265,7 @@ export default function OverviewAppView() {
           zIndex: -1,
         }}
       />
+
       <Container maxWidth={settings.themeStretch ? false : 'xl'}>
         <Grid container spacing={3}>
           <Grid xs={12} md={14}>
@@ -604,7 +607,7 @@ export default function OverviewAppView() {
                             onChange={(event) => handleSelectOne(event, folder.folder_id)}
                           />
                         </TableCell>
-                        <TableCell sx={{alignItems: 'center'}}>{idx + 1}</TableCell>
+                        <TableCell sx={{ alignItems: 'center' }}>{idx + 1}</TableCell>
                         <TableCell sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           <img src={imageFolder} alt="folder" />
                           {/* Bungkus hanya pada TableCell yang menampilkan nama */}

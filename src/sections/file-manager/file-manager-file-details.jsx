@@ -19,14 +19,20 @@ import { fDateTime } from 'src/utils/format-time';
 import { useBoolean } from 'src/hooks/use-boolean';
 // components
 import Iconify from 'src/components/iconify';
+import EditIcon from '@mui/icons-material/Edit';
 import Scrollbar from 'src/components/scrollbar';
 import FileThumbnail, { fileFormat } from 'src/components/file-thumbnail';
 import FileManagerShareDialog from './file-manager-share-dialog';
 import FileManagerInvitedItem from './file-manager-invited-item';
-import { useAddFileTag, useRemoveTagFile, useMutationDeleteFiles } from './view/folderDetail/index';
+import {
+  useAddFileTag,
+  useRemoveTagFile,
+  useMutationDeleteFiles,
+  useChangeNameFile,
+} from './view/folderDetail/index';
 import { useIndexTag } from '../tag/view/TagMutation';
 import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
-import { Dialog, DialogActions, DialogContent, DialogTitle, Modal } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Modal, Tooltip } from '@mui/material';
 import { useAddFavorite, useRemoveFavorite } from './view/favoritemutation';
 import { useQueryClient } from '@tanstack/react-query';
 import CloseIcon from '@mui/icons-material/Close';
@@ -53,13 +59,14 @@ export default function FIleManagerFileDetails({
     type,
     shared,
     shared_with,
-    modifiedAt,
+    modified_at,
     email,
     video_url,
     user,
     instance,
     tags: initialTags,
     updated_at,
+    created_at,
     is_favorite,
     file_url,
   } = item;
@@ -67,9 +74,12 @@ export default function FIleManagerFileDetails({
   const isFolder = item.type === 'folder';
 
   const [isOpen, setIsOpen] = useState(false);
+  const [newFileName, setNewFileName] = useState(item.name);
+  const [originalFileType, setOriginalFileType] = useState(item.type);
 
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
+  const { mutateAsync: updateNameFile } = useChangeNameFile();
 
   // Inside your FileRecentItem component
   const { mutateAsync: addFavorite } = useAddFavorite();
@@ -77,7 +87,7 @@ export default function FIleManagerFileDetails({
 
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
-  const useClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   const toggleTags = useBoolean(true);
   const share = useBoolean();
@@ -93,6 +103,12 @@ export default function FIleManagerFileDetails({
   const addTagFile = useAddFileTag();
   const { mutateAsync: removeTagFile } = useRemoveTagFile();
   const { mutateAsync: deleteFile } = useMutationDeleteFiles();
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    setNewFileName(item.name);
+    setOriginalFileType(item.type);
+  }, [item]);
 
   useEffect(() => {
     if (!isLoading && !isError && tagData && Array.isArray(tagData.data)) {
@@ -141,6 +157,7 @@ export default function FIleManagerFileDetails({
           });
         }
         enqueueSnackbar('Tag berhasil ditambahkan!', { variant: 'success' });
+        queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
       } else {
         enqueueSnackbar('Tidak ada tag baru untuk ditambahkan.', { variant: 'info' });
       }
@@ -157,11 +174,11 @@ export default function FIleManagerFileDetails({
 
   const handleDeleteFile = async () => {
     try {
-      await deleteFile({ file_id: fileIdToDelete });
+      await deleteFile(fileIdToDelete);
       enqueueSnackbar('File berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
-      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
     } catch (error) {
       console.error('Error deleting file:', error);
       enqueueSnackbar('Gagal menghapus file', { variant: 'error' });
@@ -178,6 +195,7 @@ export default function FIleManagerFileDetails({
       await removeTagFile({ file_id: item.id, tag_id: tagId });
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
       enqueueSnackbar('Tag removed successfully!', { variant: 'success' });
+      queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
     } catch (error) {
       console.error('Error removing tag:', error);
       enqueueSnackbar('Error removing tag.', { variant: 'error' });
@@ -201,6 +219,24 @@ export default function FIleManagerFileDetails({
       });
   };
 
+  const handleRename = useCallback(async () => {
+    const newFileType = newFileName.split('.').pop();
+
+    if (newFileType !== originalFileType.split('.').pop()) {
+      enqueueSnackbar('Type file tidak boleh diubah!', { variant: 'error' });
+      return;
+    }
+
+    try {
+      await updateNameFile({ fileId: item.id, data: { name: newFileName } });
+      enqueueSnackbar('Nama file berhasil diperbarui!', { variant: 'success' });
+      setIsEditing(false);
+      queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+    } catch (error) {
+      enqueueSnackbar('Gagal memperbarui nama file!', { variant: 'error' });
+    }
+  }, [item.id, newFileName, originalFileType, updateNameFile, enqueueSnackbar]);
+
   useEffect(() => {
     favorite.setValue(is_favorite);
   }, [is_favorite]);
@@ -212,10 +248,12 @@ export default function FIleManagerFileDetails({
       if (favorite.value) {
         await removeFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
         enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
+        queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
       } else {
         // Tambahkan ke favorit
         await addFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
         enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });
+        queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
       }
 
       favorite.onToggle();
@@ -238,7 +276,7 @@ export default function FIleManagerFileDetails({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Tags
+        Tag
         {/* <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
           <Iconify
             icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
@@ -286,7 +324,7 @@ export default function FIleManagerFileDetails({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Properties
+        Properti
         <IconButton size="small" onClick={properties.onToggle}>
           <Iconify
             icon={properties.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
@@ -298,21 +336,28 @@ export default function FIleManagerFileDetails({
         <>
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Size
+              Ukuran
             </Box>
             {fData(size)}
           </Stack>
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Updated
+              Dibuat
+            </Box>
+            {fDateTime(created_at)}
+          </Stack>
+
+          <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
+            <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
+              Diperbarui
             </Box>
             {fDateTime(updated_at)}
           </Stack>
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Type
+              Tipe
             </Box>
             {fileFormat(type)}
           </Stack>
@@ -324,7 +369,7 @@ export default function FIleManagerFileDetails({
   const renderShared = (
     <>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2.5 }}>
-        <Typography variant="subtitle2"> File Shared With </Typography>
+        <Typography variant="subtitle2"> File dibagikan dengan </Typography>
 
         <IconButton
           size="small"
@@ -354,7 +399,7 @@ export default function FIleManagerFileDetails({
         ))
       ) : (
         <Typography variant="body2" color="text.secondary">
-          Not shared with anyone.
+          Tidak dibagikan kepada siapa pun.
         </Typography>
       )}
     </>
@@ -510,7 +555,7 @@ export default function FIleManagerFileDetails({
             </video>
           ) : ['mkv'].includes(item.type) ? (
             <video controls style={{ maxWidth: '100%', height: 'auto' }}>
-              <source src={file_url}  />
+              <source src={file_url} />
               Browser Anda tidak mendukung tag video.
             </video>
           ) : ['aif', 'mp3', 'wav', 'ogg', 'm4p', 'mxp4', 'msv', 'aac'].includes(item.type) ? (
@@ -524,7 +569,29 @@ export default function FIleManagerFileDetails({
             <span>Tidak ada preview</span>
           )}
 
-          <Typography variant="subtitle2">{name}</Typography>
+          {isEditing ? (
+            <TextField
+              value={newFileName}
+              onChange={(e) => setNewFileName(e.target.value)}
+              onBlur={handleRename} // Menangani rename saat blur
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleRename(); // Menangani rename saat tekan Enter
+                }
+              }}
+              size="small"
+              autoFocus
+            />
+          ) : (
+            <Typography variant="subtitle2">
+              {name}
+              <Tooltip title="Edit nama file">
+                <IconButton size="small" onClick={() => setIsEditing(true)}>
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Typography>
+          )}
           <Typography variant="body2" color="text.secondary">
             {fData(size)}
           </Typography>
