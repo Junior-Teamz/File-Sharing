@@ -1,7 +1,7 @@
 import { useGetFavoriteUser } from 'src/routes/sections/User/favoriteuser/view/FetchDriveUser/useGetFavoriteUser';
 
 export const FavoriteFolderFileUser = () => {
-  const { data: DataFavorite, refetch: refetchFavorites } = useGetFavoriteUser();
+  const { data: DataFavorite, refetch } = useGetFavoriteUser();
 
   // Ambil data folder dan file
   const folderss = DataFavorite?.favorite_folders?.data || []; // Pastikan ini mengambil folder
@@ -12,6 +12,6 @@ export const FavoriteFolderFileUser = () => {
 
   return {
     FolderFiles,
-    refetch: refetchFavorites,
+    refetch
   };
 };

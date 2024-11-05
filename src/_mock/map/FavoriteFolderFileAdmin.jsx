@@ -3,7 +3,7 @@ import { useGetFolderFavorite } from 'src/sections/favorite/view/fetchFavorite';
 export const FavoriteFolderFileAdmin = () => {
   const {
     data: DataFavorite,
-    refetch: refetchFavorites,
+    refetch
   } = useGetFolderFavorite();
 
   // Ambil data folder dan file
@@ -15,6 +15,6 @@ export const FavoriteFolderFileAdmin = () => {
 
   return {
     FolderFiles,
-    refetch: refetchFavorites,
+    refetch,
   };
 };

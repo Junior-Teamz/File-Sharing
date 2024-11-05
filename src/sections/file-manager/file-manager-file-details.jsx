@@ -96,7 +96,7 @@ export default function FIleManagerFileDetails({
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
 
   const [inviteEmail, setInviteEmail] = useState('');
-  const favorite = useBoolean(is_favorite); // Set initial value from props
+  const favorite = useBoolean(is_favorite);
   const [issLoading, setIsLoading] = useState(false);
 
   const { data: tagData, isLoading, isError } = useIndexTag();
@@ -124,7 +124,7 @@ export default function FIleManagerFileDetails({
 
   const handleChangeTags = useCallback((event, newValue) => {
     if (Array.isArray(newValue)) {
-      setTags(newValue.map((tag) => tag.id)); // Assuming newValue is an array of tag objects
+      setTags(newValue.map((tag) => tag.id));
     }
   }, []);
 
@@ -139,11 +139,6 @@ export default function FIleManagerFileDetails({
   };
 
   const handleSaveTags = async () => {
-    if (!addTagFile.mutateAsync) {
-      console.error('addTagFile.mutateAsync is not a function');
-      return;
-    }
-
     try {
       // Determine which tags are new
       const existingTagIds = new Set(initialTags.map((tag) => tag.id));
@@ -235,7 +230,7 @@ export default function FIleManagerFileDetails({
     } catch (error) {
       enqueueSnackbar('Gagal memperbarui nama file!', { variant: 'error' });
     }
-  }, [item.id, newFileName, originalFileType, updateNameFile, enqueueSnackbar]);
+  }, [item.id, newFileName, originalFileType, updateNameFile, enqueueSnackbar, queryClient]);
 
   useEffect(() => {
     favorite.setValue(is_favorite);
@@ -267,6 +262,26 @@ export default function FIleManagerFileDetails({
       setIsLoading(false);
     }
   }, [favorite.value, id, addFavorite, removeFavorite, enqueueSnackbar]);
+
+  const [isConfirmOpenn, setConfirmOpenn] = useState(false);
+
+  const handleDownload = useCallback(() => {
+    const link = document.createElement('a');
+    link.href = file_url;
+    link.download = item.name; // Set the download filename to item.name
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setConfirmOpenn(false); // Close the confirmation dialog after download
+  }, [file_url, item.name]);
+
+  const openConfirmDialogg = () => {
+    setConfirmOpenn(true);
+  };
+
+  const closeConfirmDialogg = () => {
+    setConfirmOpenn(false);
+  };
 
   const renderTags = (
     <Stack spacing={1.5}>
@@ -309,10 +324,10 @@ export default function FIleManagerFileDetails({
               />
             ))
           }
-          renderInput={(params) => <TextField {...params} placeholder="#Add a tag" />}
+          renderInput={(params) => <TextField {...params} placeholder="#Tambahkan tag" />}
         />
       )}
-      <Button onClick={handleSaveTags}>simpan tags</Button>
+      <Button onClick={handleSaveTags}>simpan tag</Button>
     </Stack>
   );
 
@@ -465,7 +480,7 @@ export default function FIleManagerFileDetails({
                   component="img"
                   src={file_url}
                   alt={item.name}
-                  onClick={handleOpen} // Open modal for zoomed view
+                  onClick={handleOpen} 
                   style={{
                     maxWidth: '100%',
                     height: 'auto',
@@ -482,7 +497,7 @@ export default function FIleManagerFileDetails({
                     opacity: 0,
                     transition: 'opacity 0.3s',
                   }}
-                  onClick={handleOpen} // Open modal for zoom
+                  onClick={handleOpen} 
                 >
                   <ZoomInMapIcon />
                 </IconButton>
@@ -566,7 +581,12 @@ export default function FIleManagerFileDetails({
               </audio>
             </Box>
           ) : (
-            <span>Tidak ada preview</span>
+            <span>
+              Tidak ada preview
+              <Button variant="contained" onClick={openConfirmDialogg} sx={{ mt: 2 }}>
+                Download File
+              </Button>
+            </span>
           )}
 
           {isEditing ? (
@@ -611,7 +631,7 @@ export default function FIleManagerFileDetails({
             </Stack>
             <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
               <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-                Name
+                Nama
               </Box>
               {user?.name}
             </Stack>
@@ -658,7 +678,7 @@ export default function FIleManagerFileDetails({
           {renderShared}
 
           <Button fullWidth size="small" color="inherit" variant="outlined" onClick={onClose}>
-            Close
+            Tutup
           </Button>
 
           <Box sx={{ p: 2.5 }}>
@@ -670,22 +690,36 @@ export default function FIleManagerFileDetails({
               startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
               onClick={() => handleOpenConfirmDialog(item.id)}
             >
-              Delete
+              Hapus
             </Button>
           </Box>
         </Stack>
       </Scrollbar>
+
       <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to delete this file?</Typography>
+          <Typography>Apakah Anda yakin ingin menghapus file ini?</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseConfirmDialog} color="primary">
-            Cancel
+            Batal
           </Button>
-          <Button onClick={handleDeleteFile} color="error">
-            Delete
+          <Button onClick={handleDeleteFile} color="error" variant="contained">
+            Hapus
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={isConfirmOpenn} onClose={closeConfirmDialogg}>
+        <DialogTitle>Konfirmasi Download</DialogTitle>
+        <DialogContent>Apakah Anda yakin ingin mendownload file ini?</DialogContent>
+        <DialogActions>
+          <Button onClick={closeConfirmDialogg} color="error">
+            Batal
+          </Button>
+          <Button onClick={handleDownload} color="primary" variant="contained">
+            Download
           </Button>
         </DialogActions>
       </Dialog>

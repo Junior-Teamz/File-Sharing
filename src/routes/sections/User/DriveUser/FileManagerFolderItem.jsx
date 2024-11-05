@@ -32,6 +32,7 @@ import { Link } from 'react-router-dom';
 import FolderDetail from './FolderDetail';
 import FileManagerShareDialogFolder from './FileManagerShareDialogFolder';
 import { useAddFavoriteFolder, useRemoveFavoriteFolder } from '../favoriteuser/view/Folder';
+import { Tooltip } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -121,17 +122,19 @@ export default function FileManagerFolderItem({
         position: 'absolute',
       }}
     >
-      <IconButton onClick={details.onTrue}>
-        <InfoIcon />
-      </IconButton>
+      <Tooltip title="Informasi Folder">
+        <IconButton onClick={details.onTrue}>
+          <InfoIcon />
+        </IconButton>
+      </Tooltip>
 
-      <Checkbox
+      {/* <Checkbox
         color="warning"
         icon={<Iconify icon="eva:star-outline" />}
         checkedIcon={<Iconify icon="eva:star-fill" />}
         checked={favorite.value}
         onChange={handleFavoriteToggle}
-      />
+      /> */}
     </Stack>
   );
 
@@ -156,7 +159,7 @@ export default function FileManagerFolderItem({
               bgcolor: 'currentColor',
             }}
           />
-          {folder.total_file} files
+          {folder.total_file} file
         </>
       }
       primaryTypographyProps={{

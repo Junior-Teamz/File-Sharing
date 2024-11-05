@@ -264,7 +264,7 @@ export default function FolderDetail({
               />
             ))
           }
-          renderInput={(params) => <TextField {...params} placeholder="#Add a tag" />}
+          renderInput={(params) => <TextField {...params} placeholder="#Tambahkan tag" />}
         />
       )}
       <Button onClick={handleSaveTags}>simpan tag</Button>

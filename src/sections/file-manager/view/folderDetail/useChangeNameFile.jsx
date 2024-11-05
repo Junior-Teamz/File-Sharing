@@ -9,7 +9,7 @@ export const useChangeNameFile = () => {
         throw new Error('File ID is required');
       }
       const response = await axiosInstance.put(`${endpoints.files.change}/${fileId}`, data);
-      return response.data; // Return the response data
+      return response.data;
     },
   });
 };

@@ -36,11 +36,11 @@ import {
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Name' },
-  { id: 'size', label: 'Size', width: 120 },
-  { id: 'type', label: 'Type', width: 120 },
-  { id: 'modifiedAt', label: 'Modified', width: 140 },
-  { id: 'shared', label: 'Shared', align: 'right', width: 140 },
+  { id: 'name', label: 'Nama' },
+  { id: 'size', label: 'Ukuran', width: 120 },
+  { id: 'type', label: 'Tipe', width: 120 },
+  { id: 'modifiedAt', label: 'Diperbarui', width: 140 },
+  { id: 'shared', label: 'Dibagikan', align: 'right', width: 140 },
   { id: '', width: 88 },
 ];
 
@@ -90,7 +90,7 @@ export default function FileManagerGridView({
   const endIndex = startIndex + rowsPerPage;
   const currentData = dataFiltered
     .filter((i) => i.type !== 'folder')
-    .sort((a, b) => new Date(b.modifiedAt) - new Date(a.modifiedAt))
+    .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
     .slice(startIndex, endIndex);
 
   const handleTagChange = useCallback((tags) => {
@@ -125,8 +125,6 @@ export default function FileManagerGridView({
                 <FileManagerFolderItem
                   key={idx}
                   folder={folder}
-                  selected={selected.includes(folder.id)}
-                  onSelect={() => onSelectItem(folder.id)}
                   onDelete={() => onDeleteItem(folder.id)}
                   sx={{ maxWidth: 'auto' }}
                 />

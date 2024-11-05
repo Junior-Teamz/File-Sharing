@@ -72,15 +72,6 @@ export default function FIleManagerFileDetails({
   } = item;
 
   const isFolder = item.type === 'folder';
-  const isImage = item.type === 'image';
-  const isVideo = item.type === 'video';
-  const isAudio = item.type === 'audio';
-
-  // Inside your component...
-  const [openLightbox, setOpenLightbox] = useState(false);
-  const [lightboxImages, setLightboxImages] = useState([]);
-  const [lightboxVideos, setLightboxVideos] = useState([]);
-  const [lightboxAudio, setLightboxAudio] = useState([]);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -178,7 +169,7 @@ export default function FIleManagerFileDetails({
       enqueueSnackbar('File berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
-      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      useClient.invalidateQueries({ queryKey: ['favorite.user'] });
     } catch (error) {
       enqueueSnackbar('Gagal menghapus file', { variant: 'error' });
     }
@@ -227,10 +218,12 @@ export default function FIleManagerFileDetails({
     try {
       if (favorite.value) {
         await removeFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
+        useClient.invalidateQueries({ queryKey: ['favorite.user'] });
         enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
       } else {
         // Tambahkan ke favorit
         await addFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
+        useClient.invalidateQueries({ queryKey: ['favorite.user'] });
         enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });
       }
 
@@ -287,7 +280,7 @@ export default function FIleManagerFileDetails({
               />
             ))
           }
-          renderInput={(params) => <TextField {...params} placeholder="#Add a tag" />}
+          renderInput={(params) => <TextField {...params} placeholder="#Tambahkan tag" />}
         />
       )}
       <Button onClick={handleSaveTags}>simpan tags</Button>
