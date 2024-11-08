@@ -37,6 +37,8 @@ export default function AccountPopover() {
 
   const { user } = useAuthContext(AuthContext); // Mengambil data pengguna dari AuthContext
 
+  console.log(user);
+
   const { logout } = useAuthContext();
 
   const { enqueueSnackbar } = useSnackbar();
