@@ -33,6 +33,7 @@ import { RouterLink } from 'src/routes/components';
 import { useBoolean } from 'src/hooks/use-boolean';
 import debounce from 'lodash/debounce';
 import { useIndexInstance } from 'src/sections/instancepages/view/Instance';
+import { useSnackbar } from 'notistack';
 
 const TABLE_HEAD = [
   { id: 'name', label: 'Nama', width: 180 },
@@ -56,6 +57,7 @@ const allowedRoles = ['user', 'admin'];
 export default function UserListView() {
   const table = useTable();
   const settings = useSettingsContext();
+  const { enqueueSnackbar } = useSnackbar();
   const confirm = useBoolean();
   const [filters, setFilters] = useState(defaultFilters);
   const [searchTerm, setSearchTerm] = useState(filters.name);
@@ -108,10 +110,13 @@ export default function UserListView() {
 
   const { mutate: deleteUser } = useDeleteUser({
     onSuccess: () => {
+      enqueueSnackbar('User Berhasil Dihapus', { variant: 'success' });
       refetch();
       confirm.onFalse();
     },
-    onError: (error) => console.error(`Failed to delete user: ${error.message}`),
+    onError: (error) => {
+      enqueueSnackbar(`Gagal menghapus user: ${error.message}`, { variant: 'error' });
+    },
   });
 
   const handleDeleteRow = useCallback((ids) => deleteUser(ids), [deleteUser]);
@@ -138,12 +143,8 @@ export default function UserListView() {
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs
-          heading="List"
-          links={[
-            { name: 'Dashboard', href: paths.dashboard.root },
-            { name: 'User', href: paths.dashboard.user.root },
-            { name: 'List' },
-          ]}
+          heading="Daftar User"
+          links={[{ name: 'Dashboard', href: paths.dashboard.root }, { name: 'Daftar User' }]}
           action={
             <Button
               component={RouterLink}
@@ -161,6 +162,7 @@ export default function UserListView() {
           <UserTableToolbar
             filters={filters}
             onFilters={handleFilters}
+            
             onSearchChange={handleSearchChange}
             searchTerm={searchTerm}
             roleOptions={roleOptions}
@@ -246,7 +248,7 @@ export default function UserListView() {
         title="Delete"
         content={
           <div>
-            Apa kamu yakin hapus <strong>{table.selected.length}</strong> items?
+            Apa kamu yakin hapus <strong>{table.selected.length}</strong> User?
           </div>
         }
         action={

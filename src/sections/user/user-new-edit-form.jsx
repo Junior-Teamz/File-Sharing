@@ -24,18 +24,16 @@ export default function UserNewEditForm({ currentUser }) {
 
   const { mutate: CreateUser, isPending } = useCreateUser({
     onSuccess: () => {
-      enqueueSnackbar('User created successfully', { variant: 'success' });
+      enqueueSnackbar('User berhasil dibuat', { variant: 'success' });
       reset();
       router.push(paths.dashboard.user.list);
       queryClient.invalidateQueries({ queryKey: ['list.instansi'] });
     },
     onError: (error) => {
-      // Check if the error has the expected structure
       if (error.errors && error.errors.email) {
-        // Set form error for the name field
         methods.setError('email', {
           type: 'manual',
-          message: error.errors.email[0], // "Instance name already exists."
+          message: error.errors.email[0],
         });
       } else {
         enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
@@ -58,11 +56,11 @@ export default function UserNewEditForm({ currentUser }) {
   ];
 
   const NewUserSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required').max(100, 'Name must be at most 100 characters'),
-    instansi: Yup.string().required('Instansi is required'),
+    name: Yup.string().required('Nama harus di isi').max(100, 'Name must be at most 100 characters'),
+    instansi: Yup.string().required('Instansi harus di isi'),
     email: Yup.string()
-      .required('Email is required')
-      .email('Email must be a valid email address')
+      .required('Email harus di isi')
+      .email('Email harus berupa alamat email yang valid')
       .matches(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,})+$/, 'Invalid email format')
       .test('is-valid-domain', 'Invalid email domain', (value) => {
         const domain = value ? value.split('@')[1] : '';
@@ -99,14 +97,13 @@ export default function UserNewEditForm({ currentUser }) {
   const { reset, refetch, handleSubmit } = methods;
 
   const onSubmit = async (data) => {
-  
     const { confirmPassword, ...restData } = data;
     const payload = {
       ...restData,
       password_confirmation: confirmPassword,
       instance_id: restData.instansi,
     };
-   
+
     CreateUser(payload);
   };
 
@@ -124,10 +121,10 @@ export default function UserNewEditForm({ currentUser }) {
                 sm: 'repeat(2, 1fr)',
               }}
             >
-              <RHFTextField name="name" label="Full Name" />
-              <RHFTextField name="email" label="Email Address" />
+              <RHFTextField name="name" label="Nama" />
+              <RHFTextField name="email" label="Email" />
               <RHFTextField name="password" label="Password" type="password" />
-              <RHFTextField name="confirmPassword" label="Confirm Password" type="password" />
+              <RHFTextField name="confirmPassword" label="Konfirmasi Password" type="password" />
               <RHFSelect name="role" label="Role">
                 <MenuItem value="admin">Admin</MenuItem>
                 <MenuItem value="user">User</MenuItem>
@@ -143,7 +140,7 @@ export default function UserNewEditForm({ currentUser }) {
             </Box>
             <Stack alignItems="flex-end" sx={{ mt: 3 }}>
               <Button variant="outlined" type="submit">
-                {isPending ? 'Creating User...' : 'Create User'}
+                {isPending ? 'Membuat User...' : 'Buat User'}
               </Button>
             </Stack>
           </Card>

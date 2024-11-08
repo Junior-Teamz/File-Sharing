@@ -33,6 +33,7 @@ export default function AccountGeneral() {
   const { enqueueSnackbar } = useSnackbar();
 
   const { user } = useContext(AuthContext);
+ 
   const instances = user.instances.map((instansi) => instansi.name);
   
 

@@ -246,7 +246,7 @@ export default function FIleManagerFileDetails({
     try {
       await removeTagFile({ file_id: item.id, tag_id: tagId });
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
-      enqueueSnackbar('Tag removed successfully!', { variant: 'success' });
+      enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
     } catch (error) {
       enqueueSnackbar('Error removing tag.', { variant: 'error' });
     }
@@ -339,7 +339,7 @@ export default function FIleManagerFileDetails({
               />
             ))
           }
-          renderInput={(params) => <TextField {...params} placeholder="#Tambahkan tag" />}
+          renderInput={(params) => <TextField {...params} placeholder="Tambahkan tag" />}
         />
       )}
       <Button onClick={handleSaveTags}>simpan tag</Button>

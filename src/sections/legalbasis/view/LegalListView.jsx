@@ -191,9 +191,8 @@ export default function LegalListView() {
       />
 
       <TextField
-        label="Search"
+        label="Cari dasar hukum"
         variant="outlined"
-        fullWidth
         onChange={handleSearchChange}
         sx={{ mb: 2 }}
       />
@@ -206,9 +205,9 @@ export default function LegalListView() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>File</TableCell>
-                  <TableCell align="right">Action</TableCell>
+                  <TableCell>Nama</TableCell>
+                  <TableCell>File dasar hukum</TableCell>
+                  <TableCell align="right">Aksi</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -222,7 +221,7 @@ export default function LegalListView() {
                           setEditingDocument(doc);
                         }}
                       >
-                        View File
+                        Lihat File
                       </Button>
                     </TableCell>
                     <TableCell align="right">
@@ -355,7 +354,7 @@ export default function LegalListView() {
         <DialogTitle id="alert-dialog-title">{'Konfirmasi Hapus'}</DialogTitle>
         <DialogContent>
           <Typography id="alert-dialog-description">
-            Apakah kamu yakin ingin menghapus dasar hukum ini? 
+            Apakah kamu yakin ingin menghapus dasar hukum ini?
           </Typography>
         </DialogContent>
         <DialogActions>

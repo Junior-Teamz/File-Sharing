@@ -80,6 +80,9 @@ export default function FileManagerGridView({
   const upload = useBoolean();
   const files = useBoolean();
   const folders = useBoolean();
+   // Filter folders and limit the number shown based on collapse state
+   const folderData = dataFiltered.filter((i) => i.type === 'folder');
+   const visibleFolders = folders.value ? folderData : folderData.slice(0, 4);
 
   const handleChangeInvite = useCallback((event) => setInviteEmail(event.target.value), []);
   const handleChangeFolderName = useCallback((event) => setFolderName(event.target.value), []);
@@ -100,10 +103,8 @@ export default function FileManagerGridView({
   return (
     <>
       <Box ref={containerRef}>
-        <FileManagerPanel
+       <FileManagerPanel
           title="Folder"
-          subTitle={`${data.filter((item) => item.type === 'folder').length} folder`}
-          onOpen={newFolder.onTrue}
           collapse={folders.value}
           onCollapse={folders.onToggle}
         />
@@ -119,22 +120,20 @@ export default function FileManagerGridView({
               lg: 'repeat(4, 1fr)',
             }}
           >
-            {dataFiltered
-              .filter((i) => i.type === 'folder')
-              .map((folder, idx) => (
-                <FileManagerFolderItem
-                  key={idx}
-                  folder={folder}
-                  onDelete={() => onDeleteItem(folder.id)}
-                  sx={{ maxWidth: 'auto' }}
-                />
-              ))}
+           {visibleFolders.map((folder, idx) => (
+              <FileManagerFolderItem
+                key={idx}
+                folder={folder}
+                onDelete={() => onDeleteItem(folder.id)}
+                sx={{ maxWidth: 'auto' }}
+              />
+            ))}
           </Box>
         </Collapse>
 
         <Divider sx={{ my: 5, borderStyle: 'dashed' }} />
 
-        <FileManagerPanel title="File" onOpen={upload.onTrue} />
+        <FileManagerPanel title="File"  />
 
         <Box
           sx={{

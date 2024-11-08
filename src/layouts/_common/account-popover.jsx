@@ -25,7 +25,7 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 const OPTIONS = [
   {
-    label: 'Profile',
+    label: 'Profil',
     linkTo: paths.dashboard.user.account,
   },
 ];
@@ -35,9 +35,7 @@ const OPTIONS = [
 export default function AccountPopover() {
   const router = useRouter();
 
-  const { user } = useAuthContext(AuthContext); // Mengambil data pengguna dari AuthContext
-
-  console.log(user);
+  const { user } = useAuthContext(AuthContext);
 
   const { logout } = useAuthContext();
 

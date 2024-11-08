@@ -23,7 +23,7 @@ import AccountChangePassword from '../account-change-password';
 const TABS = [
   {
     value: 'general',
-    label: 'General',
+    label: 'Akun',
     icon: <Iconify icon="solar:user-id-bold" width={24} />,
   },
   // {
@@ -43,7 +43,7 @@ const TABS = [
   // },
   {
     value: 'security',
-    label: 'Security',
+    label: 'Ganti password',
     icon: <Iconify icon="ic:round-vpn-key" width={24} />,
   },
 ];
@@ -62,12 +62,8 @@ export default function AccountView() {
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
-        heading="Account"
-        links={[
-          { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'User', href: paths.dashboard.user.root },
-          { name: 'Account' },
-        ]}
+        heading="Profil"
+        links={[{ name: 'Dashboard', href: paths.dashboard.root }, { name: 'Profil' }]}
         sx={{
           mb: { xs: 3, md: 5 },
         }}

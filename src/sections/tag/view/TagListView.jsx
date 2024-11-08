@@ -135,7 +135,7 @@ export default function TagListView() {
       editTag({ tagId: popover.currentId, data });
       setEditDialogOpen(false);
     } else {
-      enqueueSnackbar('ID tidak ditemukan untuk mengedit tag', { variant: 'error' });
+      enqueueSnackbar('Id tag tidak ditemukan untuk mengedit tag', { variant: 'error' });
     }
   };
 
@@ -186,7 +186,7 @@ export default function TagListView() {
         heading="Daftar Tag"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'List Tag', href: paths.dashboard.tag.list },
+          { name: 'Daftar Tag', href: paths.dashboard.tag.list },
         ]}
         action={
           <Button
@@ -195,7 +195,7 @@ export default function TagListView() {
             variant="contained"
             startIcon={<Iconify icon="mingcute:add-line" />}
           >
-            New Tag
+            Buat Tag Baru
           </Button>
         }
         sx={{ mb: { xs: 3, md: 5 } }}
@@ -263,8 +263,8 @@ export default function TagListView() {
                         onChange={handleSelectAll}
                       />
                     </TableCell>
-                    <TableCell>Name</TableCell>
-                    <TableCell align="right">Action</TableCell>
+                    <TableCell>Nama</TableCell>
+                    <TableCell align="right">Aksi</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

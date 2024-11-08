@@ -25,7 +25,7 @@ export default function TagCreateView() {
             name: 'Daftar Tag',
             href: paths.dashboard.tag.list,
           },
-          { name: 'Tag Create' },
+          { name: 'Buat Tag Baru' },
         ]}
         sx={{
           mb: { xs: 3, md: 5 },

@@ -318,7 +318,7 @@ export default function FIleManagerFileDetails({
               />
             ))
           }
-          renderInput={(params) => <TextField {...params} placeholder="#Tambahkan tag" />}
+          renderInput={(params) => <TextField {...params} placeholder="Tambahkan tag" />}
         />
       )}
       <Button onClick={handleSaveTags}>simpan tags</Button>
