@@ -36,11 +36,12 @@ import {
   useAddFavoriteFolder,
   useDeleteFolder,
 } from './view/useFolder';
+import { useQueryClient } from '@tanstack/react-query';
 
 // ----------------------------------------------------------------------
 
 export default function FolderDetail({
-  item,
+  item=[],
   open,
   favorited,
   onFavorite,
@@ -65,11 +66,13 @@ export default function FolderDetail({
     instance,
     tags: initialTags = [],
     updated_at,
+    created_at,
     is_favorite,
   } = item;
 
   const { mutateAsync: addFavorite } = useAddFavoriteFolder();
   const { mutateAsync: removeFavorite } = useRemoveFavoriteFolder();
+  const useClient = useQueryClient();
 
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
@@ -77,7 +80,6 @@ export default function FolderDetail({
   const toggleTags = useBoolean(true);
   const share = useBoolean();
   const properties = useBoolean(true);
-  const [folderIdToDelete, setFolderIdToDelete] = useState(null);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
 
   const [inviteEmail, setInviteEmail] = useState('');
@@ -107,14 +109,12 @@ export default function FolderDetail({
     }
   }, []);
 
-  const handleOpenConfirmDialog = (folderId) => {
-    setFolderIdToDelete(folderId);
+  const handleOpenConfirmDialog = () => {
     setOpenConfirmDialog(true);
   };
 
   const handleCloseConfirmDialog = () => {
     setOpenConfirmDialog(false);
-    setFolderIdToDelete(null);
   };
 
   const handleSaveTags = async () => {
@@ -135,9 +135,9 @@ export default function FolderDetail({
             tag_id: tagId,
           });
         }
-        enqueueSnackbar('Tags added successfully!', { variant: 'success' });
+        enqueueSnackbar('Tag berhasil ditambahkan!', { variant: 'success' });
       } else {
-        enqueueSnackbar('No new tags to add.', { variant: 'info' });
+        enqueueSnackbar('Tidak ada tag baru untuk ditambahkan.', { variant: 'info' });
       }
     } catch (error) {
       console.error('Error adding tags:', error);
@@ -145,22 +145,23 @@ export default function FolderDetail({
         // Log specific errors from the server
         console.error('Server errors:', error.response.data.errors);
         if (error.response.data.errors.tag_id) {
-          enqueueSnackbar('Tag already exists in folder.', { variant: 'warning' });
+          enqueueSnackbar('Tag sudah ada dalam folder.', { variant: 'warning' });
         }
       }
-      enqueueSnackbar('Error adding tags.', { variant: 'error' });
+      enqueueSnackbar('Error saat menambahkan tag', { variant: 'error' });
     }
   };
 
   const handleDeleteFolder = async () => {
     try {
-      await deleteFolder({ folder_id: folderIdToDelete }); // Updated to use folder_id
-      enqueueSnackbar('Folder deleted successfully!', { variant: 'success' });
+      await deleteFolder(item.folder_id);
+      enqueueSnackbar('Folder berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
+      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
     } catch (error) {
       console.error('Error deleting folder:', error);
-      enqueueSnackbar('Error deleting folder.', { variant: 'error' });
+      enqueueSnackbar('Terjadi kesalahan saat menghapus folder.', { variant: 'error' });
     }
   };
 
@@ -174,6 +175,7 @@ export default function FolderDetail({
       await removeTagFolder({ folder_id: folder_id, tag_id: tagId }); // Updated to use folder_id
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
       enqueueSnackbar('Tag removed successfully!', { variant: 'success' });
+      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
     } catch (error) {
       console.error('Error removing tag:', error);
       enqueueSnackbar('Error removing tag.', { variant: 'error' });
@@ -182,8 +184,6 @@ export default function FolderDetail({
 
   const handleCopyLink = () => {
     const folderUrl = folder_id; // Ensure this is the correct property for URL
-
-    console.log('Folder URL:', folderUrl); // Debugging line
 
     if (!folderUrl) {
       enqueueSnackbar('No URL to copy.', { variant: 'warning' });
@@ -208,36 +208,34 @@ export default function FolderDetail({
       enqueueSnackbar('Folder ID is required to toggle favorite status!', { variant: 'error' });
       return;
     }
-  
+
     setIsLoading(true);
-  
+
     try {
       // Log folder_id before making the API call
-      console.log('Toggling favorite for folder:', folder_id);
-  
+
       if (favorite.value) {
         // If already favorited, remove it
-        console.log('Removing from favorites:', { folder_id });
+
         await removeFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
-        enqueueSnackbar('Folder removed from favorites!', { variant: 'success' });
+        enqueueSnackbar('Folder dihapus dari favorit!', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
       } else {
         // Otherwise, add it
-        console.log('Adding to favorites:', { folder_id });
         await addFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
-        enqueueSnackbar('Folder added to favorites!', { variant: 'success' });
+        enqueueSnackbar('Folder ditambahkan ke favorit!', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
       }
-  
+
       // Toggle the UI state
       favorite.onToggle();
     } catch (error) {
       console.error('Error updating favorite status:', error);
-      enqueueSnackbar('Failed to update favorite status!', { variant: 'error' });
+      enqueueSnackbar('Gagal memperbarui status favorit!', { variant: 'error' });
     } finally {
       setIsLoading(false);
     }
   }, [favorite.value, folder_id, addFavorite, removeFavorite, enqueueSnackbar]);
-  
-  
 
   const renderTags = (
     <Stack spacing={1.5}>
@@ -247,13 +245,7 @@ export default function FolderDetail({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Tags
-        <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
-          <Iconify
-            icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
-            sx={{ color: favorite.value ? 'yellow' : 'gray' }}
-          />
-        </IconButton>
+        Tag
       </Stack>
 
       {toggleTags.value && (
@@ -280,10 +272,10 @@ export default function FolderDetail({
               />
             ))
           }
-          renderInput={(params) => <TextField {...params} placeholder="#Add a tag" />}
+          renderInput={(params) => <TextField {...params} placeholder="#Tambahkan tag" />}
         />
       )}
-      <Button onClick={handleSaveTags}>Save Tags</Button>
+      <Button onClick={handleSaveTags}>Simpan Tag</Button>
     </Stack>
   );
 
@@ -295,7 +287,7 @@ export default function FolderDetail({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Properties
+        Properti
         <IconButton size="small" onClick={properties.onToggle}>
           <Iconify
             icon={properties.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
@@ -307,21 +299,28 @@ export default function FolderDetail({
         <>
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Size
+              Ukuran
             </Box>
             {fData(total_size)}
           </Stack>
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Updated
+              Dibuat
+            </Box>
+            {fDateTime(created_at)}
+          </Stack>
+
+          <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
+            <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
+              Diperbarui
             </Box>
             {fDateTime(updated_at)}
           </Stack>
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Type
+              Tipe
             </Box>
             {fileFormat(type)}
           </Stack>
@@ -333,7 +332,7 @@ export default function FolderDetail({
   const renderShared = (
     <>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2.5 }}>
-        <Typography variant="subtitle2"> File Shared With </Typography>
+        <Typography variant="subtitle2"> File dibagikan dengan </Typography>
 
         <IconButton
           size="small"
@@ -492,7 +491,7 @@ export default function FolderDetail({
               color="error"
               size="large"
               startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-              onClick={() => handleOpenConfirmDialog(item.id)}
+              onClick={handleOpenConfirmDialog}
             >
               Delete
             </Button>
@@ -518,7 +517,7 @@ export default function FolderDetail({
 }
 
 FolderDetail.propTypes = {
-  item: PropTypes.object.isRequired,
+  item: PropTypes.object,
   open: PropTypes.bool,
   favorited: PropTypes.bool,
   onFavorite: PropTypes.func,

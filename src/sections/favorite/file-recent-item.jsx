@@ -76,7 +76,7 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
       await deleteFile(file.id);
 
       // Notify user of successful deletion
-      enqueueSnackbar('File deleted successfully!', { variant: 'success' });
+      enqueueSnackbar('File berhasil dihapus!', { variant: 'success' });
 
       useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
       useClient.invalidateQueries({ queryKey: ['detail-folder'] });
@@ -95,17 +95,17 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
 
     try {
       await updateNameFile({ fileId: file.id, data: { name: newFileName } });
-      enqueueSnackbar('File name updated successfully!', { variant: 'success' });
+      enqueueSnackbar('Nama file berhasil diperbarui!', { variant: 'success' });
       useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
       useClient.invalidateQueries({ queryKey: ['detail-folder'] });
       edit.onFalse(); // Close the edit dialog
     } catch (error) {
-      enqueueSnackbar('Failed to update file name!', { variant: 'error' });
+      enqueueSnackbar('Gagal memperbarui nama file!', { variant: 'error' });
     }
   }, [file.id, newFileName, originalFileType, updateNameFile, enqueueSnackbar, edit, onRefetch]);
 
   const handleCopy = useCallback(() => {
-    console.log(file.id);
+  
     if (file?.id) {
       enqueueSnackbar('Berhasil di Copied!');
       copy(file.id); // Mengakses file.id langsung, tanpa [0] karena file bukan array
@@ -122,8 +122,7 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
   const handleDownload = useCallback(async () => {
     try {
       const idsToDownload = Array.isArray(file.ids) && file.ids.length ? file.ids : [file.id];
-      console.log('IDs to Download:', idsToDownload);
-
+     
       // Send the correct payload to the API
       const response = await downloadFile(idsToDownload);
 
@@ -163,10 +162,10 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
     try {
       if (favorite.value) {
         await removeFavorite(payload);
-        enqueueSnackbar('File removed from favorites!', { variant: 'success' });
+        enqueueSnackbar('File dihapus dari favorit!', { variant: 'success' });
       } else {
         await addFavorite(payload);
-        enqueueSnackbar('File added to favorites!', { variant: 'success' });
+        enqueueSnackbar('File telah ditambahkan ke favorit!', { variant: 'success' });
       }
 
       // Immediately toggle favorite state in the UI
@@ -176,7 +175,7 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
       useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
       useClient.invalidateQueries({ queryKey: ['detail-folder'] });
     } catch (error) {
-      enqueueSnackbar('Failed to update favorite status!', { variant: 'error' });
+      enqueueSnackbar('Gagal memperbarui status favorit!', { variant: 'error' });
     }
   }, [favorite.value, file.id, addFavorite, removeFavorite, enqueueSnackbar, useClient]);
 
@@ -208,7 +207,12 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
 
   const renderText = (
     <ListItemText
-      onClick={details.onTrue}
+    onClick={() => {
+      // Cek jika file.type adalah 'folder', jika ya, jangan buka detail
+      if (originalFileType !== 'folder') {
+        details.onTrue();
+      }
+    }}
       primary={file.name}
       secondary={
         <>

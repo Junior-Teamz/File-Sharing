@@ -82,7 +82,7 @@ export default function FileManagerFolderItem({
         <InfoIcon />
       </IconButton>
 
-      <Checkbox
+      {/* <Checkbox
         color="warning"
         icon={<Iconify icon="eva:star-outline" />}
         checkedIcon={<Iconify icon="eva:star-fill" />}
@@ -91,7 +91,7 @@ export default function FileManagerFolderItem({
       />
       <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
         <Iconify icon="eva:more-vertical-fill" />
-      </IconButton>
+      </IconButton> */}
     </Stack>
   );
 
@@ -175,7 +175,11 @@ export default function FileManagerFolderItem({
         }}
         {...other}
       >
-        <Link key={folder.id} to={`info/${folder.folder_id}`}>
+        <Link
+          style={{ textDecoration: 'none', color: 'inherit' }}
+          key={folder.id}
+          to={`info/${folder.id}`}
+        >
           <Box onMouseEnter={checkbox.onTrue} onMouseLeave={checkbox.onFalse}>
             {renderIcon}
           </Box>

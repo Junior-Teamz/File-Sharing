@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -31,6 +31,8 @@ import InfoIcon from '@mui/icons-material/Info';
 import { Link } from 'react-router-dom';
 import FolderDetail from './FolderDetail';
 import FileManagerShareDialogFolder from './FileManagerShareDialogFolder';
+import { useAddFavoriteFolder, useRemoveFavoriteFolder } from '../favoriteuser/view/Folder';
+import { Tooltip } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -42,6 +44,9 @@ export default function FileManagerFolderItem({
   sx,
   ...other
 }) {
+  const { mutateAsync: addFavorite } = useAddFavoriteFolder();
+  const { mutateAsync: removeFavorite } = useRemoveFavoriteFolder();
+
   const { enqueueSnackbar } = useSnackbar();
 
   const { copy } = useCopyToClipboard();
@@ -56,13 +61,43 @@ export default function FileManagerFolderItem({
 
   const share = useBoolean();
 
-  const popover = usePopover();
-
   const confirm = useBoolean();
 
   const details = useBoolean();
 
-  const favorite = useBoolean(folder.isFavorited);
+  const favorite = useBoolean(folder.is_favorite);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    favorite.setValue(folder.is_favorite); // Set the state from props or backend response
+  }, [folder.is_favorite]);
+
+  const handleFavoriteToggle = useCallback(async () => {
+    const folder_id = folder.folder_id; // Ensure folder_id comes from folder object
+
+    if (!folder_id) {
+      enqueueSnackbar('ID Folder diperlukan untuk mengubah status favorit!', { variant: 'error' });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      if (favorite.value) {
+        await removeFavorite({ folder_id });
+        enqueueSnackbar('Folder dihapus dari favorit!', { variant: 'success' });
+      } else {
+        await addFavorite({ folder_id });
+        enqueueSnackbar('Folder ditambahkan ke favorit!', { variant: 'success' });
+      }
+      favorite.onToggle();
+    } catch (error) {
+      enqueueSnackbar('Gagal memperbarui status favorit!', { variant: 'error' });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [favorite.value, folder.folder_id, addFavorite, removeFavorite, enqueueSnackbar]);
 
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value);
@@ -87,21 +122,19 @@ export default function FileManagerFolderItem({
         position: 'absolute',
       }}
     >
-       <IconButton onClick={details.onTrue}>
-        <InfoIcon />
-      </IconButton>
-      
-      <Checkbox
+      <Tooltip title="Informasi Folder">
+        <IconButton onClick={details.onTrue}>
+          <InfoIcon />
+        </IconButton>
+      </Tooltip>
+
+      {/* <Checkbox
         color="warning"
         icon={<Iconify icon="eva:star-outline" />}
         checkedIcon={<Iconify icon="eva:star-fill" />}
         checked={favorite.value}
-        onChange={favorite.onToggle}
-      />
-
-      <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
-        <Iconify icon="eva:more-vertical-fill" />
-      </IconButton>
+        onChange={handleFavoriteToggle}
+      /> */}
     </Stack>
   );
 
@@ -126,7 +159,7 @@ export default function FileManagerFolderItem({
               bgcolor: 'currentColor',
             }}
           />
-          {folder.total_file} files
+          {folder.total_file} file
         </>
       }
       primaryTypographyProps={{
@@ -197,69 +230,9 @@ export default function FileManagerFolderItem({
         {!!folder?.shared_with?.length && renderAvatar}
       </Stack>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 160 }}
-      >
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-            handleCopy();
-          }}
-        >
-          <Iconify icon="eva:link-2-fill" />
-          Copy Link
-        </MenuItem>
-
-        <MenuItem
-          onClick={() => {
-            confirm.onTrue();
-            popover.onClose();
-          }}
-        >
-          <Iconify icon="solar:download-minimalistic-bold" />
-          Download
-        </MenuItem>
-
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-            share.onTrue();
-          }}
-        >
-          <Iconify icon="solar:share-bold" />
-          Share
-        </MenuItem>
-
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-            editFolder.onTrue();
-          }}
-        >
-          <Iconify icon="solar:pen-bold" />
-          Edit
-        </MenuItem>
-
-        <Divider sx={{ borderStyle: 'dashed' }} />
-
-        <MenuItem
-          onClick={() => {
-            confirm.onTrue();
-            popover.onClose();
-          }}
-          sx={{ color: 'error.main' }}
-        >
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          Delete
-        </MenuItem>
-      </CustomPopover>
-
       <FileManagerShareDialogFolder
         open={share.value}
-        folderId={folder.id} // Use folder.id instead of id
+        folderId={folder.id}
         shared={folder.shared_with}
         inviteEmail={inviteEmail}
         onChangeInvite={handleChangeInvite}

@@ -37,11 +37,11 @@ import FileManagerFileDialog from './FileManagerFileDialog';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Name' },
-  { id: 'size', label: 'Size', width: 120 },
-  { id: 'type', label: 'Type', width: 120 },
-  { id: 'modifiedAt', label: 'Modified', width: 140 },
-  { id: 'shared', label: 'Shared', align: 'right', width: 140 },
+  { id: 'name', label: 'Nama' },
+  { id: 'size', label: 'Ukuran', width: 120 },
+  { id: 'type', label: 'Tipe', width: 120 },
+  { id: 'modifiedAt', label: 'Diperbarui', width: 140 },
+  { id: 'shared', label: 'Dibagikan', align: 'right', width: 140 },
   { id: '', width: 88 },
 ];
 
@@ -85,15 +85,6 @@ export default function FileManagerGridView({
   return (
     <>
       <Box ref={containerRef}>
-        {/* Folders Panel */}
-        <FileManagerPanel
-          title="Folder"
-          subTitle={`${data.filter((item) => item.type === 'folder').length} folder`}
-          onOpen={newFolder.onTrue}
-          collapse={folders.value}
-          onCollapse={folders.onToggle}
-        />
-
         <Collapse in={!folders.value} unmountOnExit>
           <Box
             display="grid"
@@ -122,8 +113,6 @@ export default function FileManagerGridView({
 
         <Divider sx={{ my: 5, borderStyle: 'dashed' }} />
 
-        {/* Files Panel */}
-        <FileManagerPanel title="Files" onOpen={upload.onTrue} />
         <Box
           sx={{
             position: 'relative',
@@ -143,11 +132,11 @@ export default function FileManagerGridView({
             }
             action={
               <>
-                <Tooltip title="Share">
+                {/* <Tooltip title="Share">
                   <IconButton color="primary">
                     <Iconify icon="solar:share-bold" />
                   </IconButton>
-                </Tooltip>
+                </Tooltip> */}
                 <Tooltip title="Delete">
                   <IconButton color="primary" onClick={onOpenConfirm}>
                     <Iconify icon="solar:trash-bin-trash-bold" />

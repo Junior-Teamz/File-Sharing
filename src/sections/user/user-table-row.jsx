@@ -112,7 +112,7 @@ function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, refe
         content="Are you sure you want to delete this item?"
         action={
           <Button variant="contained" color="error" onClick={onDeleteRow}>
-            Delete
+            Hapus
           </Button>
         }
       />

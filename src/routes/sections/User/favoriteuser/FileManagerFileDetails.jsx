@@ -72,15 +72,6 @@ export default function FIleManagerFileDetails({
   } = item;
 
   const isFolder = item.type === 'folder';
-  const isImage = item.type === 'image';
-  const isVideo = item.type === 'video';
-  const isAudio = item.type === 'audio';
-
-  // Inside your component...
-  const [openLightbox, setOpenLightbox] = useState(false);
-  const [lightboxImages, setLightboxImages] = useState([]);
-  const [lightboxVideos, setLightboxVideos] = useState([]);
-  const [lightboxAudio, setLightboxAudio] = useState([]);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -156,9 +147,9 @@ export default function FIleManagerFileDetails({
             tag_id: tagId,
           });
         }
-        enqueueSnackbar('Tags added successfully!', { variant: 'success' });
+        enqueueSnackbar('Tag berhasil ditambahkan!', { variant: 'success' });
       } else {
-        enqueueSnackbar('No new tags to add.', { variant: 'info' });
+        enqueueSnackbar('Tidak ada tag baru untuk ditambahkan.', { variant: 'info' });
       }
     } catch (error) {
       console.error('Error adding tags:', error);
@@ -167,18 +158,18 @@ export default function FIleManagerFileDetails({
           enqueueSnackbar('Tag sudah ada di file.', { variant: 'warning' });
         }
       }
-      enqueueSnackbar('Error adding tags.', { variant: 'error' });
+      enqueueSnackbar('Error saat menambahkan tag', { variant: 'error' });
     }
   };
 
   const handleDeleteFile = async () => {
     try {
       // Kirim file_id sebagai array UUID secara langsung
-      await deleteFile({ file_ids: fileIdToDelete });
+      await deleteFile(fileIdToDelete);
       enqueueSnackbar('File berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
-      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      useClient.invalidateQueries({ queryKey: ['favorite.user'] });
     } catch (error) {
       enqueueSnackbar('Gagal menghapus file', { variant: 'error' });
     }
@@ -222,32 +213,26 @@ export default function FIleManagerFileDetails({
   }, [is_favorite]);
 
   const handleFavoriteToggle = useCallback(async () => {
-    if (!id) {
-      enqueueSnackbar('File ID is required to toggle favorite status!', { variant: 'error' });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
       if (favorite.value) {
-        // Jika sudah difavoritkan, hapus dari favorit
         await removeFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
-        enqueueSnackbar('File removed from favorites!', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['favorite.user'] });
+        enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
       } else {
         // Tambahkan ke favorit
         await addFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
-        enqueueSnackbar('File added to favorites!', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['favorite.user'] });
+        enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });
       }
 
-      // Toggle status favorit di UI
       favorite.onToggle();
     } catch (error) {
-      console.error('Error updating favorite status:', error);
       if (error.response && error.response.data.errors && error.response.data.errors.file_id) {
-        enqueueSnackbar('The file id field is required.', { variant: 'error' });
+        enqueueSnackbar('file id harus di isi.', { variant: 'error' });
       } else {
-        enqueueSnackbar('Failed to update favorite status!', { variant: 'error' });
+        enqueueSnackbar('Error saat menambahkan favorite!', { variant: 'error' });
       }
     } finally {
       setIsLoading(false);
@@ -295,10 +280,10 @@ export default function FIleManagerFileDetails({
               />
             ))
           }
-          renderInput={(params) => <TextField {...params} placeholder="#Add a tag" />}
+          renderInput={(params) => <TextField {...params} placeholder="#Tambahkan tag" />}
         />
       )}
-      <Button onClick={handleSaveTags}>Save Tags</Button>
+      <Button onClick={handleSaveTags}>simpan tags</Button>
     </Stack>
   );
 
@@ -348,7 +333,7 @@ export default function FIleManagerFileDetails({
   const renderShared = (
     <>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2.5 }}>
-        <Typography variant="subtitle2"> File Shared With </Typography>
+        <Typography variant="subtitle2"> File dibagikan dengan </Typography>
 
         <IconButton
           size="small"
@@ -378,7 +363,7 @@ export default function FIleManagerFileDetails({
         ))
       ) : (
         <Typography variant="body2" color="text.secondary">
-          Not shared with anyone.
+          Tidak dibagikan kepada siapa pun.
         </Typography>
       )}
     </>

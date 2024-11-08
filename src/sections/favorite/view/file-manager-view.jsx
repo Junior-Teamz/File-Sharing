@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -26,7 +26,6 @@ import FileManagerNewFolderDialog from '../file-manager-new-folder-dialog';
 import { FavoriteFolderFileAdmin } from 'src/_mock/map/FavoriteFolderFileAdmin';
 import { useGetFolderFavorite } from './fetchFavorite';
 
-
 // ----------------------------------------------------------------------
 
 const defaultFilters = {
@@ -41,11 +40,7 @@ const defaultFilters = {
 export default function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
 
-
-
-  // console.log(data);
   const { FolderFiles } = FavoriteFolderFileAdmin();
-  console.log(FolderFiles);
 
   const settings = useSettingsContext();
 
@@ -62,6 +57,12 @@ export default function FileManagerView() {
   const [filters, setFilters] = useState(defaultFilters);
 
   const [selectedTags, setSelectedTags] = useState([]);
+
+  useEffect(() => {
+    if (FolderFiles && FolderFiles.length !== tableData.length) {
+      setTableData(FolderFiles);
+    }
+  }, [FolderFiles]);
 
   const dateError =
     filters.startDate && filters.endDate
@@ -123,7 +124,6 @@ export default function FileManagerView() {
 
   const handleTagChange = (tags) => {
     setSelectedTags(tags); // Update the selected tags state
-    console.log('Selected Tags:', tags);
   };
 
   const renderFilters = (
@@ -163,13 +163,6 @@ export default function FileManagerView() {
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h4">Favorit</Typography>
-          <Button
-            variant="contained"
-            startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-            onClick={upload.onTrue}
-          >
-            Upload
-          </Button>
         </Stack>
 
         <Stack
@@ -233,10 +226,6 @@ export default function FileManagerView() {
 
 function applyFilter({ inputData, comparator, filters, dateError }) {
   const { name, type, startDate, endDate } = filters;
-  console.log(inputData);
-  console.log(comparator);
-  console.log(filters);
-  console.log(dateError);
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 
@@ -262,8 +251,8 @@ function applyFilter({ inputData, comparator, filters, dateError }) {
     if (startDate && endDate) {
       inputData = inputData.filter(
         (file) =>
-          fTimestamp(file.createdAt) >= fTimestamp(startDate) &&
-          fTimestamp(file.createdAt) <= fTimestamp(endDate)
+          fTimestamp(file.created_at) >= fTimestamp(startDate) &&
+          fTimestamp(file.created_at) <= fTimestamp(endDate)
       );
     }
   }

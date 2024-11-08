@@ -3,38 +3,29 @@ import { HOST_API } from 'src/config-global';
 
 // ----------------------------------------------------------------------
 
-const axiosInstance = axios.create({ baseURL: HOST_API, withCredentials: true,});
+const axiosInstance = axios.create({
+  baseURL: HOST_API,
+  withCredentials: true,
+});
 
 // Function to set the token
-export const setToken = (accessToken, refreshToken) => {
+export const setToken = (accessToken) => {
   if (accessToken) {
     sessionStorage.setItem('accessToken', accessToken);
   } else {
     sessionStorage.removeItem('accessToken');
   }
-
-  if (refreshToken) {
-    sessionStorage.setItem('refreshToken', refreshToken);
-  } else {
-    sessionStorage.removeItem('refreshToken');
-  }
 };
 
-// Function to get refresh token
-const getRefreshToken = () => {
-  return sessionStorage.getItem('refreshToken'); // Ambil refresh_token dari sessionStorage
-};
-
-// Function untuk refresh access_token
-const refreshAccessToken = async () => {
-  const refreshToken = getRefreshToken();
+// Function to refresh access_token
+const refreshAccessToken = async (refreshToken) => {
   if (!refreshToken) {
     throw new Error('No refresh token available');
   }
 
   const response = await axiosInstance.post('/api/refreshToken', { token: refreshToken });
   const newAccessToken = response.data.accessToken; // Ambil access_token baru
-  setToken(newAccessToken, refreshToken); // Simpan access_token baru
+  setToken(newAccessToken); // Simpan access_token baru
   return newAccessToken;
 };
 
@@ -57,16 +48,16 @@ axiosInstance.interceptors.response.use(
     // Cek status respons
     if (error.response) {
       const originalRequest = error.config; // Simpan request yang gagal
+      const refreshToken = originalRequest.refreshToken; // Ambil refresh_token dari request yang gagal
       if (error.response.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true; // Tandai request yang sudah dicoba
 
         try {
-          const newAccessToken = await refreshAccessToken(); // Dapatkan access_token baru
+          const newAccessToken = await refreshAccessToken(refreshToken); // Dapatkan access_token baru
           originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`; // Tambahkan token baru ke header
           return axiosInstance(originalRequest); // Ulangi request dengan token baru
         } catch (refreshError) {
           // Tangani kesalahan saat refresh token
-          handleLogout(); // Misalnya, logout pengguna
           return Promise.reject(refreshError);
         }
       } else if (error.response.status === 403) {
@@ -115,8 +106,8 @@ export const endpoints = {
     preview: '/api/file/preview/',
   },
 
-  previewStorage:{
-    storage:'/api/storageSizeUsage'
+  previewStorage: {
+    storage: '/api/storageSizeUsage',
   },
 
   //get data di landing page
@@ -142,6 +133,7 @@ export const endpoints = {
   },
   Permissions: {
     PermissionsFile: '/api/permission/file/grantPermission',
+    getPermissionFolder: '/api/permission/folder/grantPermission',
   },
   file: {
     upload: '/api/file/upload',
@@ -220,6 +212,7 @@ export const endpoints = {
     getFavorit: '/api/admin/file/favorite',
     addFavorit: '/api/admin/file/addToFavorite',
     deleteFavorit: '/api/admin/file/deleteFavorite',
+    generateLink: '/api/admin/file/generateShareLink',
   },
   permission: {
     getPermissionFolder: '/api/admin/permission/folder/grantPermission',
@@ -242,6 +235,7 @@ export const endpoints = {
     getFavorit: '/api/admin/folder/favorite',
     addFavorit: '/api/admin/folder/addToFavorite',
     deleteFavorit: '/api/admin/folder/deleteFavorite',
+    generateLink: '/api/admin/folder/generateShareLink',
   },
   users: {
     list: '/api/admin/users/list',

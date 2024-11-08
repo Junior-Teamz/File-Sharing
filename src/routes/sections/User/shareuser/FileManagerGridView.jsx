@@ -36,11 +36,11 @@ import {
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Name' },
-  { id: 'size', label: 'Size', width: 120 },
-  { id: 'type', label: 'Type', width: 120 },
-  { id: 'modifiedAt', label: 'Modified', width: 140 },
-  { id: 'shared', label: 'Shared', align: 'right', width: 140 },
+  { id: 'name', label: 'Nama' },
+  { id: 'size', label: 'Ukuran', width: 120 },
+  { id: 'type', label: 'Tipe', width: 120 },
+  { id: 'modifiedAt', label: 'Diperbarui', width: 140 },
+  { id: 'shared', label: 'Dibagikan', align: 'right', width: 140 },
   { id: '', width: 88 },
 ];
 
@@ -58,18 +58,16 @@ export default function FileManagerGridView({
     order,
     orderBy,
     rowsPerPage,
-    //
     selected,
     onSelectRow,
     onSelectAllRows,
-    //
     onSort,
     onChangeDense,
     onChangePage,
     onChangeRowsPerPage,
   } = table;
-  const theme = useTheme();
 
+  const theme = useTheme();
   const containerRef = useRef(null);
   const [folderName, setFolderName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
@@ -81,8 +79,10 @@ export default function FileManagerGridView({
   const files = useBoolean();
   const folders = useBoolean();
 
+  // Handlers
   const handleChangeInvite = useCallback((event) => setInviteEmail(event.target.value), []);
   const handleChangeFolderName = useCallback((event) => setFolderName(event.target.value), []);
+  const handleTagChange = (tags) => setSelectedTags(tags);
 
   const denseHeight = dense ? 58 : 78;
 
@@ -90,20 +90,25 @@ export default function FileManagerGridView({
   const endIndex = startIndex + rowsPerPage;
   const currentData = dataFiltered
     .filter((i) => i.type !== 'folder')
-    .sort((a, b) => new Date(b.modifiedAt) - new Date(a.modifiedAt))
+    .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
     .slice(startIndex, endIndex);
-
-  const handleTagChange = useCallback((tags) => {
-    setSelectedTags(tags);
-  }, []);
 
   return (
     <>
       <Box ref={containerRef}>
+        {/* Folders Panel */}
+        <FileManagerPanel
+          title="Folder"
+          subTitle={`${data.filter((item) => item.type === 'folder').length} folder`}
+          onOpen={newFolder.onTrue}
+          collapse={folders.value}
+          onCollapse={folders.onToggle}
+        />
+
         <Collapse in={!folders.value} unmountOnExit>
           <Box
-            gap={3}
             display="grid"
+            gap={3}
             gridTemplateColumns={{
               xs: 'repeat(1, 1fr)',
               sm: 'repeat(2, 1fr)',
@@ -113,12 +118,12 @@ export default function FileManagerGridView({
           >
             {dataFiltered
               .filter((i) => i.type === 'folder')
-              .map((folder, idx) => (
+              .map((folder) => (
                 <FileManagerFolderItem
-                  key={idx}
+                  key={folder.id}
                   folder={folder}
                   selected={selected.includes(folder.id)}
-                  onSelect={() => onSelectItem(folder.id)}
+                  onSelect={() => onSelectRow(folder.id)}
                   onDelete={() => onDeleteItem(folder.id)}
                   sx={{ maxWidth: 'auto' }}
                 />
@@ -128,6 +133,8 @@ export default function FileManagerGridView({
 
         <Divider sx={{ my: 5, borderStyle: 'dashed' }} />
 
+        {/* Files Panel */}
+        <FileManagerPanel title="Files" onOpen={upload.onTrue} />
         <Box
           sx={{
             position: 'relative',
@@ -240,7 +247,6 @@ export default function FileManagerGridView({
           rowsPerPage={rowsPerPage}
           onPageChange={onChangePage}
           onRowsPerPageChange={onChangeRowsPerPage}
-          //
           dense={dense}
           onChangeDense={onChangeDense}
           sx={{
@@ -258,7 +264,7 @@ export default function FileManagerGridView({
         onChangeInvite={handleChangeInvite}
         onClose={() => {
           share.onFalse();
-          setInviteEmail('');
+          setInviteEmail(''); // Reset email when closing
         }}
       />
 
@@ -275,7 +281,7 @@ export default function FileManagerGridView({
         onCreate={() => {
           console.info('CREATE NEW FOLDER', folderName);
           newFolder.onFalse();
-          setFolderName('');
+          setFolderName(''); // Reset folder name when closing
         }}
         folderName={folderName}
         onChangeFolderName={handleChangeFolderName}
@@ -285,31 +291,9 @@ export default function FileManagerGridView({
 }
 
 FileManagerGridView.propTypes = {
-  table: PropTypes.shape({
-    dense: PropTypes.bool,
-    order: PropTypes.string,
-    orderBy: PropTypes.string,
-    page: PropTypes.number,
-    rowsPerPage: PropTypes.number,
-    selected: PropTypes.array,
-    onSelectRow: PropTypes.func,
-    onSelectAllRows: PropTypes.func,
-    onSort: PropTypes.func,
-    onChangeDense: PropTypes.func,
-    onChangePage: PropTypes.func,
-    onChangeRowsPerPage: PropTypes.func,
-  }),
-  data: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      size: PropTypes.number,
-      type: PropTypes.string.isRequired,
-      modifiedAt: PropTypes.string.isRequired,
-      shared: PropTypes.bool,
-    })
-  ).isRequired,
-  dataFiltered: PropTypes.array.isRequired,
+  table: PropTypes.object,
+  data: PropTypes.array,
+  dataFiltered: PropTypes.array,
   notFound: PropTypes.bool,
   onDeleteItem: PropTypes.func,
   onOpenConfirm: PropTypes.func,

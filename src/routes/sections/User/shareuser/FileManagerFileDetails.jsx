@@ -208,7 +208,6 @@ export default function FIleManagerFileDetails({
       .writeText(fileUrl)
       .then(() => enqueueSnackbar('Link copied to clipboard!', { variant: 'success' }))
       .catch((err) => {
-        console.error('Failed to copy link:', err);
         enqueueSnackbar('Failed to copy link.', { variant: 'error' });
       });
   };
@@ -218,26 +217,22 @@ export default function FIleManagerFileDetails({
   }, [is_favorite]);
 
   const handleFavoriteToggle = useCallback(async () => {
-    if (!id) {
-      enqueueSnackbar('ID File diperlukan untuk menambahkan favorit!', { variant: 'error' });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
       if (favorite.value) {
-        await removeFavorite({ file_id: id });
+        await removeFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
         enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
       } else {
-        await addFavorite({ file_id: id });
-        enqueueSnackbar('File berhasil di tambahkan ke favorite!', { variant: 'success' });
+        // Tambahkan ke favorit
+        await addFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
+        enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });
       }
 
       favorite.onToggle();
     } catch (error) {
       if (error.response && error.response.data.errors && error.response.data.errors.file_id) {
-        enqueueSnackbar('Kolom id file wajib diisi.', { variant: 'error' });
+        enqueueSnackbar('file id harus di isi.', { variant: 'error' });
       } else {
         enqueueSnackbar('Error saat menambahkan favorite!', { variant: 'error' });
       }
@@ -287,10 +282,10 @@ export default function FIleManagerFileDetails({
               />
             ))
           }
-          renderInput={(params) => <TextField {...params} placeholder="#Add a tag" />}
+          renderInput={(params) => <TextField {...params} placeholder="#Tambahkan tag" />}
         />
       )}
-      <Button onClick={handleSaveTags}>Save Tags</Button>
+      <Button onClick={handleSaveTags}>simpan tags</Button>
     </Stack>
   );
 

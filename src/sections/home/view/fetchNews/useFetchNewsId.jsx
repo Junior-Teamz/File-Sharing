@@ -7,7 +7,7 @@ export const useFetchNewsSlug = (slug) => {  // Change to use slug
     queryFn: async () => {
       const response = await axiosInstance.get(`${endpoints.News.getNewsSlug}/${slug}`);  // Use slug in the API call
       const { data: result } = response.data;
-      console.log(result);
+  
       return result;
     },
   });

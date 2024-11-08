@@ -71,7 +71,7 @@ export default function TagNewsListView() {
   });
 
   const tags = Array.isArray(data?.data) ? data?.data : [];
-  console.log('Tags array:', tags);
+
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);

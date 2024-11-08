@@ -6,7 +6,7 @@ export const useEditFolder = ({  onSuccess = () => {}, onError = () => {} } = {}
     mutationKey: ['edit.folder'],
     mutationFn: async ({ folderId, data }) => {
       const response = await axiosInstance.put(`${endpoints.folders.edit}/${folderId}`, data);
-      console.log(response);
+     
       return response;
     },
     onSuccess,

@@ -1,26 +1,20 @@
+// Atur FileManagerFileItem agar semua elemen dalam satu baris sejajar
 import PropTypes from 'prop-types';
 import { useState, useCallback } from 'react';
 // @mui
 import {
   Box,
-  Paper,
   Stack,
   Button,
   Avatar,
-  Divider,
-  MenuItem,
   Checkbox,
-  IconButton,
   Typography,
   AvatarGroup,
   TableRow,
   ListItemText,
+  Tooltip,
 } from '@mui/material';
-import Tooltip from '@mui/material/Tooltip';
 import { alpha, useTheme } from '@mui/material/styles';
-import { avatarGroupClasses } from '@mui/material/AvatarGroup';
-import { tableRowClasses } from '@mui/material/TableRow';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useDoubleClick } from 'src/hooks/use-double-click';
@@ -28,49 +22,36 @@ import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
 // utils
 import { fDateTime } from 'src/utils/format-time';
 import { fData } from 'src/utils/format-number';
-
 // components
 import Iconify from 'src/components/iconify';
-import CustomPopover, { usePopover } from 'src/components/custom-popover';
-import { useSnackbar } from 'src/components/snackbar';
-import TextMaxLine from 'src/components/text-max-line';
 import FileThumbnail from 'src/components/file-thumbnail';
-import { ConfirmDialog } from 'src/components/custom-dialog';
-import FileManagerShareDialog from './file-manager-share-dialog';
 import FileManagerFileDetails from './file-manager-file-details';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import { tableRowClasses } from '@mui/material/TableRow';
+import FileManagerShareDialog from './file-manager-share-dialog';
+import { useAddFavorite, useRemoveFavorite } from '../file-manager/view/favoritemutation';
+import { useSnackbar } from 'src/components/snackbar';
 
-export default function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ...other }) {
+export default function FileManagerFileItem({ file, selected, onSelect, onDelete }) {
   const theme = useTheme();
-  const { enqueueSnackbar } = useSnackbar();
   const { copy } = useCopyToClipboard();
+  const { enqueueSnackbar } = useSnackbar();
+
+  const { mutateAsync: addFavorite } = useAddFavorite();
+  const { mutateAsync: removeFavorite } = useRemoveFavorite();
 
   const [inviteEmail, setInviteEmail] = useState('');
-
   const checkbox = useBoolean();
   const share = useBoolean();
   const confirm = useBoolean();
   const details = useBoolean();
-  const favorite = useBoolean(file.isFavorited);
-  const popover = usePopover();
-
-  const handleChangeInvite = useCallback((event) => {
-    setInviteEmail(event.target.value);
-  }, []);
-
-  const handleCopy = useCallback(() => {
-    console.log('File URL:', file.url);
-    if (file.url) {
-      enqueueSnackbar('Berhasil di Copied!');
-      copy(file.url);
-    } else {
-      enqueueSnackbar('Failed to copy: URL is undefined');
-    }
-  }, [copy, enqueueSnackbar, file.url]);
+  const [issLoading, setIsLoading] = useState(false);
 
   const handleClick = useDoubleClick({
     click: details.onTrue,
     doubleClick: () => console.info('DOUBLE CLICK'),
   });
+  const favorite = useBoolean(file.is_favorite);
 
   const defaultStyles = {
     borderTop: `solid 1px ${alpha(theme.palette.grey[500], 0.16)}`,
@@ -86,6 +67,40 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
       borderRight: `solid 1px ${alpha(theme.palette.grey[500], 0.16)}`,
     },
   };
+
+  const handleCopy = useCallback(() => {
+    if (file.url) {
+      enqueueSnackbar('Berhasil di Copied!');
+      copy(file.url);
+    } else {
+      enqueueSnackbar('Failed to copy: URL is undefined');
+    }
+  }, [copy, enqueueSnackbar, file.url]);
+
+  const handleFavoriteToggle = useCallback(async () => {
+    setIsLoading(true);
+
+    try {
+      if (favorite.value) {
+        await removeFavorite({ file_id: file.id }); // Pastikan mengirim objek dengan file_id
+        enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
+      } else {
+        // Tambahkan ke favorit
+        await addFavorite({ file_id: file.id }); // Pastikan mengirim objek dengan file_id
+        enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });
+      }
+
+      favorite.onToggle();
+    } catch (error) {
+      if (error.response && error.response.data.errors && error.response.data.errors.file_id) {
+        enqueueSnackbar('file id harus di isi.', { variant: 'error' });
+      } else {
+        enqueueSnackbar('Error saat menambahkan favorite!', { variant: 'error' });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [favorite.value, file.id, addFavorite, removeFavorite, enqueueSnackbar]);
 
   return (
     <>
@@ -121,7 +136,6 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
             onClick={onSelect}
           />
         </TableCell>
-
         <TableCell onClick={handleClick}>
           <Stack direction="row" alignItems="center" spacing={2}>
             <FileThumbnail file={file.type} sx={{ width: 36, height: 36 }} />
@@ -148,48 +162,52 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
         </TableCell>
 
         <TableCell onClick={handleClick} sx={{ whiteSpace: 'nowrap' }}>
-          <ListItemText
-            primary={fDateTime(file.updated_at, 'dd MMM yyyy')}
-            secondary={fDateTime(file.updated_at, 'p')}
-            primaryTypographyProps={{ typography: 'body2' }}
-            secondaryTypographyProps={{
-              mt: 0.5,
-              component: 'span',
-              typography: 'caption',
-            }}
-          />
+          {file.shared_with?.[0]?.created_at ? (
+            <ListItemText
+              primary={fDateTime(file.shared_with[0].created_at, 'dd MMM yyyy')}
+              secondary={fDateTime(file.shared_with[0].created_at, 'p')}
+              primaryTypographyProps={{ variant: 'body2' }}
+              secondaryTypographyProps={{
+                mt: 0.5,
+                component: 'span',
+                typography: 'caption',
+              }}
+            />
+          ) : (
+            'Tidak ada tanggal dibagikan'
+          )}
         </TableCell>
 
-        <TableCell align="right" onClick={handleClick}>
-  <Stack direction="row" alignItems="center" spacing={1}>
-    <AvatarGroup
-      max={4}
-      sx={{
-        display: 'inline-flex',
-        [`& .${avatarGroupClasses.avatar}`]: {
-          width: 24,
-          height: 24,
-          '&:first-of-type': {
-            fontSize: 12,
-          },
-        },
-      }}
-    >
-      {file.user ? (
-        <Avatar key={file.user.id} alt={file.user.name} src={file.user.avatarUrl} />
-      ) : (
-        <Avatar alt="No user" />
-      )}
-    </AvatarGroup>
-    <Tooltip title={file.user?.email} arrow>
-      <Typography variant="body2" noWrap sx={{ maxWidth: 150 }}>
-        {file.user?.email.length > 10 ? `${file.user.email.substring(0, 10)}...` : file.user.email}
-      </Typography>
-    </Tooltip>
-  </Stack>
-</TableCell>
+        <TableCell onClick={handleClick} align="right">
+          <Box sx={{ cursor: 'pointer', display: 'flex' }}>
+            {file.user ? (
+              <>
+                <Avatar
+                  alt={file.user.name}
+                  src={file.user.avatarUrl}
+                  sx={{ width: 24, height: 24, ml: 1 }} // Menambahkan margin right
+                />
+                <Tooltip title={file.user.email}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      maxWidth: 70, // Atur sesuai kebutuhan
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {file.user.email}
+                  </Typography>
+                </Tooltip>
+              </>
+            ) : (
+              'Tidak ada pengguna'
+            )}
+          </Box>
+        </TableCell>
 
-        {/* <TableCell
+        <TableCell
           align="right"
           sx={{
             px: 1,
@@ -201,60 +219,11 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
             icon={<Iconify icon="eva:star-outline" />}
             checkedIcon={<Iconify icon="eva:star-fill" />}
             checked={favorite.value}
-            onChange={favorite.onToggle}
+            onChange={handleFavoriteToggle}
             sx={{ p: 0.75 }}
           />
-          <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
-            <Iconify icon="eva:more-vertical-fill" />
-          </IconButton>
-        </TableCell> */}
+        </TableCell>
       </TableRow>
-
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 160 }}
-      >
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-            handleCopy();
-          }}
-        >
-          <Iconify icon="eva:link-2-fill" />
-          Copy Link
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            confirm.onTrue();
-            popover.onClose();
-          }}
-        >
-          <Iconify icon="solar:download-minimalistic-bold" />
-          Download
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-            share.onTrue();
-          }}
-        >
-          <Iconify icon="solar:share-bold" />
-          Share
-        </MenuItem>
-        <Divider sx={{ borderStyle: 'dashed' }} />
-        <MenuItem
-          onClick={() => {
-            confirm.onTrue();
-            popover.onClose();
-          }}
-          sx={{ color: 'error.main' }}
-        >
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          Delete
-        </MenuItem>
-      </CustomPopover>
 
       <FileManagerFileDetails
         item={file}
@@ -273,24 +242,11 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
         open={share.value}
         shared={file.shared}
         inviteEmail={inviteEmail}
-        onChangeInvite={handleChangeInvite}
         onCopyLink={handleCopy}
         onClose={() => {
           share.onFalse();
           setInviteEmail('');
         }}
-      />
-
-      <ConfirmDialog
-        open={confirm.value}
-        onClose={confirm.onFalse}
-        title="Delete"
-        content="Are you sure want to delete?"
-        action={
-          <Button variant="contained" color="error" onClick={onDelete}>
-            Delete
-          </Button>
-        }
       />
     </>
   );
@@ -301,5 +257,4 @@ FileManagerFileItem.propTypes = {
   selected: PropTypes.bool,
   onSelect: PropTypes.func,
   onDelete: PropTypes.func,
-  sx: PropTypes.object,
 };

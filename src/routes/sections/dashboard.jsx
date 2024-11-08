@@ -43,6 +43,7 @@ import FolderDetail from 'src/sections/file-manager/FolderDetail';
 import ShareWithMe from 'src/pages/dashboard/sharewithme';
 import FolderDetailShare from 'src/sections/sharewithme/FolderDetail';
 import { FIleManagerDetaill } from 'src/sections/sharewithme/view/file-manager-detail';
+
 import AdminEditView from 'src/sections/AdminNews/view/AdminEditView';
 
 //Legal
@@ -55,6 +56,7 @@ const NewsCreateView = lazy(() => import('src/sections/AdminNews/view/NewsCreate
 const TagNewsCreateView = lazy(() => import('src/sections/newsTag/view/TagNewsCreateView'));
 const TagNewsListView = lazy(() => import('src/sections/newsTag/view/TagNewsListView'));
 const ListHelmetFavorite = lazy(() => import('src/sections/favorite/ListHelmetFavorite'));
+import { FIleManagerDetailFavorite } from 'src/sections/favorite/view/file-manager-detail';
 
 // ----------------------------------------------------------------------
 
@@ -73,8 +75,15 @@ export const dashboardRoutes = [
     children: [
       { element: <IndexPage />, index: true },
       { path: 'analytics', element: <OverviewAnalyticsPage /> },
-      { path: 'favorite', element: <ListHelmetFavorite /> },
-      { path: 'file', element: <OverviewFilePage /> },
+    
+      {
+        path: 'favorite',
+        children: [
+          { element: <ListHelmetFavorite />, index: true },
+          { path: 'info/:id', element: <FIleManagerDetailFavorite /> },
+        ],
+      },
+      // { path: 'file', element: <OverviewFilePage /> },
       {
         path: 'shared-with-me',
         children: [
@@ -144,7 +153,6 @@ export const dashboardRoutes = [
           { element: <FileManagerPage />, index: true },
           { path: 'info/:id', element: <FIleManagerDetail /> },
           { path: 'folder', element: <FolderDetail /> },
-        
         ],
       },
     ],

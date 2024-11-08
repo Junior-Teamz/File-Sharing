@@ -24,7 +24,6 @@ import FileManagerGridView from '../file-manager-grid-view';
 import FileManagerFiltersResult from '../file-manager-filters-result';
 import FileManagerNewFolderDialog from '../file-manager-new-folder-dialog';
 import { FolderFileShare } from 'src/_mock/map/FolderFileShare';
-import { indexShareAdmin } from '../fetchShare';
 
 // ----------------------------------------------------------------------
 
@@ -40,7 +39,6 @@ const defaultFilters = {
 export default function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
 
-  // console.log(data);
   const { FolderFiles } = FolderFileShare();
 
   const settings = useSettingsContext();
@@ -54,6 +52,12 @@ export default function FileManagerView() {
   const [view, setView] = useState('list');
 
   const [tableData, setTableData] = useState(Array.isArray(FolderFiles) ? FolderFiles : []);
+
+  useEffect(() => {
+    if (FolderFiles && FolderFiles.length !== tableData.length) {
+      setTableData(FolderFiles);
+    }
+  }, [FolderFiles]);
 
   const [filters, setFilters] = useState(defaultFilters);
 
@@ -119,7 +123,6 @@ export default function FileManagerView() {
 
   const handleTagChange = (tags) => {
     setSelectedTags(tags); // Update the selected tags state
-    console.log('Selected Tags:', tags);
   };
 
   const renderFilters = (

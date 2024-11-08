@@ -27,7 +27,7 @@ import NavDesktop from './nav/desktop';
 import { SettingsButton, HeaderShadow, LoginButton } from '../_common';
 import { typography } from '@mui/system';
 import { Typography } from '@mui/material';
-import Kemen from '../../../public/logo/kemen3.png';
+import Kemen from '../../../public/logo/kemen22.png';
 
 // ----------------------------------------------------------------------
 

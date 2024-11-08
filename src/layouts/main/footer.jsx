@@ -14,7 +14,7 @@ import { RouterLink } from 'src/routes/components';
 import { _socials } from 'src/_mock';
 import Logo from 'src/components/logo';
 import Iconify from 'src/components/iconify';
-import Kemen from '../../../public/logo/kemen3.png';
+import Kemen from '../../../public/logo/kemen22.png';
 import Grid from '@mui/system/Unstable_Grid/Grid';
 
 import Overlay from '../../../public/assets/background/kemenkopoverlay.jpg';
@@ -38,7 +38,7 @@ const LINKS = [
   },
   {
     headline: 'CONTACT',
-    children: [{ name: 'kemenkop@gmail.com', href: '#' }],
+    children: [{ name: 'kemenkopukm.go.id', href: '#' }],
   },
 ];
 
@@ -78,8 +78,8 @@ export default function Footer() {
             height: 'auto', // Agar proporsional
             objectFit: 'contain', // Menjaga gambar tetap dalam batas tanpa dipotong
             mx: { xs: 'auto', md: -1 }, // Memastikan logo terpusat di perangkat kecil
-            mt: -16,
-            mb: { xs: -8, md: -12 }, // Jarak bawah untuk responsivitas
+            mt: 2,
+            mb: { xs: 1, md: 1 }, // Jarak bawah untuk responsivitas
           }}
         />
 
@@ -94,7 +94,7 @@ export default function Footer() {
           <Grid
             xs={12}
             md={3}
-            sx={{ textAlign: { xs: 'center', md: 'left' }, mb: { xs: 3, md: 0 } }}
+            sx={{ textAlign: { xs: 'center', md: 'left' }, mb: { xs: 1, md: 0 } }}
           >
             <Typography
               variant="body2"

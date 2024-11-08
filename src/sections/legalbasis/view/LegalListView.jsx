@@ -52,6 +52,9 @@ export default function LegalListView() {
   const [viewPdfOpen, setViewPdfOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState(null); // Simpan dokumen yang akan dihapus
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -65,16 +68,26 @@ export default function LegalListView() {
     setSearchQuery(event.target.value);
   };
 
-  const handleDelete = (id) => {
-    deleteLegal.mutate(id, {
+  const confirmDelete = (id) => {
+    setDocumentToDelete(id);
+    setDeleteDialogOpen(true); // Buka dialog konfirmasi delete
+  };
+
+  const handleDelete = () => {
+    deleteLegal.mutate(documentToDelete, {
       onSuccess: () => {
         enqueueSnackbar('Dasar hukum berhasil dihapus', { variant: 'success' });
         refetch();
+        setDeleteDialogOpen(false); // Tutup dialog setelah sukses
       },
       onError: (error) => {
         enqueueSnackbar(`Gagal menghapus dasar hukum: ${error.message}`, { variant: 'error' });
       },
     });
+  };
+
+  const handleDeleteDialogClose = () => {
+    setDeleteDialogOpen(false); // Tutup dialog tanpa menghapus
   };
 
   const handleEditDialogClose = () => {
@@ -292,7 +305,7 @@ export default function LegalListView() {
       </Dialog>
 
       {/* PDF View Dialog */}
-      <Dialog open={viewPdfOpen} onClose={handleViewPdfClose}  maxWidth="md" fullWidth>
+      <Dialog open={viewPdfOpen} onClose={handleViewPdfClose} maxWidth="md" fullWidth>
         <DialogTitle>Document PDF</DialogTitle>
         <DialogContent>
           <iframe
@@ -327,11 +340,33 @@ export default function LegalListView() {
           <Iconify icon="solar:pen-bold" />
           Edit
         </MenuItem>
-        <MenuItem onClick={() => handleDelete(popover.currentId)} sx={{ color: 'error.main' }}>
+        <MenuItem onClick={() => confirmDelete(popover.currentId)} sx={{ color: 'error.main' }}>
           <Iconify icon="solar:trash-bin-minimalistic-bold" />
           Delete
         </MenuItem>
       </CustomPopover>
+
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteDialogClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{'Konfirmasi Hapus'}</DialogTitle>
+        <DialogContent>
+          <Typography id="alert-dialog-description">
+            Apakah kamu yakin ingin menghapus dasar hukum ini? 
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteDialogClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDelete} color="error">
+            Hapus
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

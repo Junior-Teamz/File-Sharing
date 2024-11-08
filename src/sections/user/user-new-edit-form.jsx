@@ -99,14 +99,14 @@ export default function UserNewEditForm({ currentUser }) {
   const { reset, refetch, handleSubmit } = methods;
 
   const onSubmit = async (data) => {
-    console.log('Form submitted with data:', data);
+  
     const { confirmPassword, ...restData } = data;
     const payload = {
       ...restData,
       password_confirmation: confirmPassword,
       instance_id: restData.instansi,
     };
-    console.log('Payload:', payload); // Add this line to log the payload
+   
     CreateUser(payload);
   };
 

@@ -130,7 +130,7 @@ export default function AdminNewsForm() {
             <Grid container spacing={3}>
               {/* Title Section */}
               <Grid xs={12} sm={6}>
-                <Typography variant="h6">Title:</Typography>
+                <Typography variant="h6">Judul:</Typography>
                 <TextField
                   fullWidth
                   variant="outlined"
@@ -142,7 +142,7 @@ export default function AdminNewsForm() {
 
               {/* Content Section */}
               <Grid xs={12} sm={6}>
-                <Typography variant="h6">Content:</Typography>
+                <Typography variant="h6">Isi:</Typography>
                 {editorLoading && (
                   <Box sx={{ textAlign: 'center', mt: 2 }}>
                     <CircularProgress />
@@ -264,7 +264,7 @@ export default function AdminNewsForm() {
 
               {/* Tags Section */}
               <Grid xs={12}>
-                <Typography variant="h6">Tags:</Typography>
+                <Typography variant="h6">Tag:</Typography>
                 <RHFAutocomplete
                   name="tag"
                   label="Tag"

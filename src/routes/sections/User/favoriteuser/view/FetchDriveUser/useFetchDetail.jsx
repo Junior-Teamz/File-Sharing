@@ -6,7 +6,7 @@ export const useFetchDetail = (id) => {
     queryKey: ['detail-folder', id], // Include id for uniqueness
     queryFn: async () => {
       const accessToken = localStorage.getItem('accessToken');
-      console.log('Testing API Call with Token:', accessToken);
+    
       
       fetch(`${endpoints.folders.detail}${id}`, {
         method: 'GET',
@@ -20,9 +20,7 @@ export const useFetchDetail = (id) => {
         }
         return response.json();
       })
-      .then(data => console.log('Data:', data))
-      .catch(error => console.error('Fetch error:', error));
-      
+    
 
        
     },

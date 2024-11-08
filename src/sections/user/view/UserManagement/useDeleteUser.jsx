@@ -6,7 +6,6 @@ export const useDeleteUser = ({ onSuccess, onError }) => {
     mutationKey: ['delete.user'],
     mutationFn: async (userId) => {
       const response = await axiosInstance.delete(`${endpoints.users.delete}/${userId}`);
-      console.log(response);
       return response;
     },
     onSuccess,

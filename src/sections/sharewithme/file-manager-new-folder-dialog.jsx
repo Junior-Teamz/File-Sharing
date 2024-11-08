@@ -1,159 +1,158 @@
 import PropTypes from 'prop-types';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 // @mui
-import {
-  Button,
-  TextField,
-  DialogTitle,
-  DialogActions,
-  DialogContent,
-  Dialog,
-  FormControl,
-} from '@mui/material';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import Dialog from '@mui/material/Dialog';
+import FormControl from '@mui/material/FormControl';
+import Chip from '@mui/material/Chip';
+import Box from '@mui/material/Box';
 // components
-import Iconify from 'src/components/iconify';
 import { enqueueSnackbar } from 'notistack';
-import { useForm } from 'react-hook-form';
-import { useQueryClient } from '@tanstack/react-query';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useMutationFolder } from '../overview/app/view/folders';
 import { useIndexTag } from '../tag/view/TagMutation';
-import SlimSelect from 'slim-select';
-import '../../theme/Css/slimSelect.css';
+import { useQueryClient } from '@tanstack/react-query';
+import { RHFAutocomplete } from 'src/components/hook-form';
+
+// ----------------------------------------------------------------------
 
 export default function FileManagerNewFolderDialog({
   title,
   open,
   onClose,
-  onTagChange,
+  refetch = () => {}, 
   ...other
 }) {
+  const methods = useForm();
   const [files, setFiles] = useState([]);
-  const [selectedTags, setSelectedTags] = useState([]);
-  const selectRef = useRef(null);
-
-  const queryClient = useQueryClient();
   const { data, isLoading: isLoadingTags } = useIndexTag();
   const tagsData = data?.data || [];
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setError,
-    formState: { errors },
-  } = useForm();
+  const [selectedTags, setSelectedTags] = useState([]);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (open) {
-      reset(); // Reset form on open
+      methods.reset();
       setFiles([]);
       setSelectedTags([]);
+      methods.setValue('name', '');
     }
-  }, [open, reset]);
+  }, [open, methods]);
 
-  useEffect(() => {
-    if (selectRef.current) {
-      const slimSelect = new SlimSelect({
-        select: selectRef.current,
-        placeholder: 'Pilih tag',
-        closeOnSelect: false,
-        onChange: (info) => {
-          const values = info.map((tag) => tag.value);
-          setSelectedTags(values);
-          console.log('Selected Tags:', values); // Debug log
-          if (typeof onTagChange === 'function') {
-            onTagChange(values);
-          }
-        },
-      });
-
-      return () => {
-        slimSelect.destroy(); // Clean up on component unmount
-      };
-    }
-  }, [tagsData, onTagChange]);
-
-  const { mutate: createFolder, isPending: loadingUpload } = useMutationFolder({
+  const { mutate: CreateFolder, isPending: loadingUpload } = useMutationFolder({
     onSuccess: () => {
-      enqueueSnackbar('Berhasil Membuat Folder', { variant: 'success' });
+      enqueueSnackbar('Folder berhasil dibuat');
+      handleRemoveAllFiles();
+      methods.reset(); // Reset form after successful upload
       queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
-      reset();
-      setFiles([]);
-      setSelectedTags([]); // Reset selected tags
-      onClose();
+      onClose(); 
     },
     onError: (error) => {
-      if (error.errors && error.errors.name) {
-        setError('name', {
-          type: 'manual',
-          message: error.errors.name[0],
-        });
-      } else {
-        enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
-      }
+      enqueueSnackbar(error.message, { variant: 'error' });
     },
   });
 
-  const onSubmit = (formData) => {
-    const { name } = formData;
-    console.log('Form Data:', formData); // Debug log
-    console.log('Selected Tags:', selectedTags); // Debug log
-    if (!name || selectedTags.length === 0) {
-      enqueueSnackbar('Please fill in the required fields: name and tags', {
-        variant: 'warning',
-      });
+  const handleCreate = () => {
+    const nameValue = methods.getValues('name');
+    // Validate both name and tags
+    if (!nameValue || !selectedTags.length) {
+      enqueueSnackbar('Please fill in the required fields: name and tags', { variant: 'warning' });
       return;
     }
 
-    const data = new FormData();
-    files.forEach((file) => data.append('file[]', file));
-    selectedTags.forEach((tagId) => data.append('tag_ids[]', tagId));
-    data.append('name', name);
+    const formData = new FormData();
 
-    createFolder(data);
+    selectedTags.forEach((tag) => {
+      formData.append('tag_ids[]', tag.id); // Assuming each tag has an id
+    });
+
+    formData.append('name', nameValue);
+
+    CreateFolder(formData);
+  };
+
+  const handleTagChange = (event, newValue) => {
+    setSelectedTags(newValue); // Keep track of selected tags
+  };
+
+  const handleRemoveAllFiles = () => {
+    setFiles([]);
   };
 
   return (
     <Dialog fullWidth maxWidth="sm" open={open} onClose={onClose} {...other}>
-      <DialogTitle sx={{ p: (theme) => theme.spacing(3, 3, 2, 3) }}>{title}</DialogTitle>
+      <FormProvider {...methods}>
+        <form onSubmit={methods.handleSubmit(() => handleCreate())}>
+          <DialogTitle>{title}</DialogTitle>
 
-      <DialogContent dividers sx={{ pt: 1, pb: 0, border: 'none' }}>
-        <TextField
-          fullWidth
-          label="Name"
-          {...register('name', { required: 'Nama Folder Harus Di Isi' })}
-          error={!!errors.name}
-          helperText={errors.name ? errors.name.message : ''}
-          sx={{ mb: 3 }}
-        />
+          <DialogContent dividers sx={{ pt: 1, pb: 0, border: 'none' }}>
+            <TextField fullWidth label="Name" {...methods.register('name')} required />
+            <FormControl fullWidth margin="dense">
+              <RHFAutocomplete
+                name="tags"
+                label="Tags"
+                multiple
+                options={tagsData}
+                getOptionLabel={(option) => option.name}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                onChange={handleTagChange}
+                renderTags={(value, getTagProps) => (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: 0.5,
+                      maxHeight: 100,
+                      overflowY: 'auto',
+                    }}
+                  >
+                    {value.map((tag, index) => (
+                      <Chip key={tag.id} label={tag.name} {...getTagProps({ index })} />
+                    ))}
+                  </Box>
+                )}
+                renderOption={(props, option) => (
+                  <li {...props} key={option.id}>
+                    {option.name}
+                  </li>
+                )}
+                loading={isLoadingTags}
+              />
+            </FormControl>
+          </DialogContent>
 
-        <FormControl fullWidth margin="dense">
-          <select ref={selectRef} id="tag-label" multiple>
-            {tagsData.map((tag) => (
-              <option key={tag.id} value={tag.id}>
-                {tag.name}
-              </option>
-            ))}
-          </select>
-        </FormControl>
-      </DialogContent>
-
-      <DialogActions>
-        <Button
-          variant="contained"
-          startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-          onClick={handleSubmit(onSubmit)}
-        >
-          {loadingUpload ? 'Loading...' : 'Buat Folder'}
-        </Button>
-      </DialogActions>
+          <DialogActions>
+            <Button type="submit" variant="contained" disabled={loadingUpload}>
+              Buat Folder
+            </Button>
+          </DialogActions>
+        </form>
+      </FormProvider>
     </Dialog>
   );
 }
 
 FileManagerNewFolderDialog.propTypes = {
-  title: PropTypes.string,
-  open: PropTypes.bool,
+  folderName: PropTypes.string,
+  onChangeFolderName: PropTypes.func,
   onClose: PropTypes.func,
+  onCreate: PropTypes.func,
+  onUpdate: PropTypes.func,
+  open: PropTypes.bool,
+  title: PropTypes.string,
+  refetch: PropTypes.func,
   onTagChange: PropTypes.func.isRequired,
+  tagsData: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+    })
+  ),
+  selectedTags: PropTypes.arrayOf(PropTypes.string),
+  isLoadingTags: PropTypes.bool,
 };

@@ -12,7 +12,6 @@ import FormControl from '@mui/material/FormControl';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
 // components
-import Iconify from 'src/components/iconify';
 import { enqueueSnackbar } from 'notistack';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useIndexTag } from './view/TagUser/useIndexTag';
@@ -26,12 +25,7 @@ export default function FileManagerNewFolderDialog({
   title,
   open,
   onClose,
-  onCreate,
-  onUpdate,
-  folderName,
-  onChangeFolderName,
-  onTagChange,
-  refetch = () => {}, // Provide a fallback function
+  refetch = () => {}, 
   ...other
 }) {
   const methods = useForm();
@@ -43,40 +37,20 @@ export default function FileManagerNewFolderDialog({
 
   useEffect(() => {
     if (open) {
-      methods.reset(); // Reset form when dialog is opened
-      setFiles([]); // Clear files on dialog open
-      setSelectedTags([]); // Reset selected tags on dialog open
-      methods.setValue('name', ''); // Ensure the folder name is also reset
+      methods.reset();
+      setFiles([]);
+      setSelectedTags([]);
+      methods.setValue('name', '');
     }
   }, [open, methods]);
 
-  const handleDrop = useCallback(
-    (acceptedFiles) => {
-      const newFiles = acceptedFiles.map((file) =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file),
-        })
-      );
-
-      if (acceptedFiles.length && !methods.getValues('name')) {
-        const folderName = acceptedFiles[0].webkitRelativePath
-          ? acceptedFiles[0].webkitRelativePath.split('/')[0]
-          : acceptedFiles[0].name;
-        methods.setValue('name', folderName); // Set the folder name
-      }
-
-      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-    },
-    [methods]
-  );
-
   const { mutate: CreateFolder, isPending: loadingUpload } = useMutationFolder({
     onSuccess: () => {
-      enqueueSnackbar('Folder Created Successfully');
+      enqueueSnackbar('Folder berhasil dibuat');
       handleRemoveAllFiles();
       methods.reset(); // Reset form after successful upload
       queryClient.invalidateQueries({ queryKey: ['fetch.folder'] });
-      onClose(); // Close dialog after successful upload
+      onClose(); 
     },
     onError: (error) => {
       enqueueSnackbar(error.message, { variant: 'error' });
@@ -85,18 +59,16 @@ export default function FileManagerNewFolderDialog({
 
   const handleCreate = () => {
     const nameValue = methods.getValues('name');
+    // Validate both name and tags
     if (!nameValue || !selectedTags.length) {
       enqueueSnackbar('Please fill in the required fields: name and tags', { variant: 'warning' });
       return;
     }
 
     const formData = new FormData();
-    files.forEach((file) => {
-      formData.append('file[]', file);
-    });
 
-    selectedTags.forEach((tagId) => {
-      formData.append('tag_ids[]', tagId);
+    selectedTags.forEach((tag) => {
+      formData.append('tag_ids[]', tag.id); // Assuming each tag has an id
     });
 
     formData.append('name', nameValue);
@@ -104,26 +76,18 @@ export default function FileManagerNewFolderDialog({
     CreateFolder(formData);
   };
 
-  const handleRemoveFile = (inputFile) => {
-    setFiles((prevFiles) => prevFiles.filter((file) => file !== inputFile));
+  const handleTagChange = (event, newValue) => {
+    setSelectedTags(newValue); // Keep track of selected tags
   };
 
   const handleRemoveAllFiles = () => {
     setFiles([]);
   };
 
-  const handleTagChange = (event) => {
-    const value = event.target.value;
-    setSelectedTags(value);
-    if (typeof onTagChange === 'function') {
-      onTagChange(value);
-    }
-  };
-
   return (
     <Dialog fullWidth maxWidth="sm" open={open} onClose={onClose} {...other}>
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit((data) => console.log(data))}>
+        <form onSubmit={methods.handleSubmit(() => handleCreate())}>
           <DialogTitle>{title}</DialogTitle>
 
           <DialogContent dividers sx={{ pt: 1, pb: 0, border: 'none' }}>
@@ -136,11 +100,17 @@ export default function FileManagerNewFolderDialog({
                 options={tagsData}
                 getOptionLabel={(option) => option.name}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
-                onChange={(_, newValue) => {
-                  methods.setValue('tags', newValue);
-                }}
+                onChange={handleTagChange}
                 renderTags={(value, getTagProps) => (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxHeight: 100, overflowY: 'auto' }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: 0.5,
+                      maxHeight: 100,
+                      overflowY: 'auto',
+                    }}
+                  >
                     {value.map((tag, index) => (
                       <Chip key={tag.id} label={tag.name} {...getTagProps({ index })} />
                     ))}
@@ -157,7 +127,7 @@ export default function FileManagerNewFolderDialog({
           </DialogContent>
 
           <DialogActions>
-            <Button type="submit" variant="contained">
+            <Button type="submit" variant="contained" disabled={loadingUpload}>
               Buat Folder
             </Button>
           </DialogActions>

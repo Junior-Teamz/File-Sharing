@@ -25,16 +25,8 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 const OPTIONS = [
   {
-    label: 'Home',
-    linkTo: '/',
-  },
-  {
     label: 'Profile',
-    linkTo: paths.dashboarduser.profil,
-  },
-  {
-    label: 'Settings',
-    linkTo: paths.dashboarduser.akun,
+    linkTo: paths.dashboard.user.account,
   },
 ];
 

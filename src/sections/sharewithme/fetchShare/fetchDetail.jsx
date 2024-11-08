@@ -7,7 +7,7 @@ export const fetchDetail = (id) => {
     queryFn: async () => {
       const response = await axiosInstance.get(`${endpoints.folder.detail}${id}`);
       const { data: result } = response.data;
-      console.log(result);
+     
       return result;
     },
   });

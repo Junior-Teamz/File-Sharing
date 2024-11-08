@@ -14,6 +14,11 @@ import {
   Tooltip,
   TextField,
   MenuItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Box,
 } from '@mui/material';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import CustomPopover from 'src/components/custom-popover';
@@ -22,48 +27,109 @@ import Scrollbar from 'src/components/scrollbar';
 import { useSettingsContext } from 'src/components/settings';
 import { RouterLink } from 'src/routes/components';
 import { paths } from 'src/routes/paths';
-import { useDeleteLegal, useFetchNews } from './fetchNews';
+import { useDeleteNews, useFetchNews, useUpdateNews } from './fetchNews';
 import { useSnackbar } from 'notistack';
 import { useQueryClient } from '@tanstack/react-query';
+import { Editor } from '@tinymce/tinymce-react';
+import { TINY_API } from 'src/config-global';
+import { useIndexTag } from 'src/sections/tag/view/TagMutation';
+import { RHFAutocomplete } from 'src/components/hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
+import Chip from '@mui/material/Chip';
 
 export default function AdminListNews() {
+  const methods = useForm();
   const settings = useSettingsContext();
   const { data: newsData, isLoading } = useFetchNews();
-  const deleteNews = useDeleteLegal();
+  const deleteNews = useDeleteNews();
+  const updateNews = useUpdateNews();
   const { enqueueSnackbar } = useSnackbar();
-  const useClient = useQueryClient();
+  const queryClient = useQueryClient();
+
+  const { data: tagsData } = useIndexTag(); // Fetch available tags
+  const availableTags = tagsData?.data || [];
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
-  const [popover, setPopover] = useState({ open: false, anchorEl: null, currentId: null });
+  const [editingNewsId, setEditingNewsId] = useState(null);
+  const [editedNews, setEditedNews] = useState({
+    title: '',
+    content: '',
+    thumbnail_url: '',
+    status: '',
+    news_tags_ids: [], // Changed to news_tags_ids
+  });
+  const [popoverAnchor, setPopoverAnchor] = useState(null);
+  const [popoverCurrentId, setPopoverCurrentId] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [zoomImage, setZoomImage] = useState(false);
 
-  // Fallback to an empty array if newsData is undefined
   const filteredNews = (newsData?.data?.data || []).filter((news) =>
     news.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const sortedNews = filteredNews.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
   const handleDelete = async (id) => {
+    if (!id) return;
     try {
       await deleteNews.mutateAsync(id);
       enqueueSnackbar('Berita berhasil dihapus', { variant: 'success' });
-      useClient.invalidateQueries({ queryKey: ['list.news'] });
-    } catch {
+      queryClient.invalidateQueries({ queryKey: ['list.news'] });
+    } catch (error) {
       enqueueSnackbar('Gagal menghapus berita', { variant: 'error' });
     }
+    setPopoverAnchor(null);
   };
 
-  const handlePopoverOpen = (event, id) => {
-    setPopover({ open: true, anchorEl: event.currentTarget, currentId: id });
+  const handleEditClick = (news) => {
+    if (news) {
+      const { id, title, content, thumbnail_url, status, news_tags_ids = [] } = news;
+      setEditingNewsId(id); // Make sure this is correctly set
+      setEditedNews({ title, content, thumbnail_url, status, news_tags_ids });
+      setDialogOpen(true);
+      setPopoverAnchor(null);
+    } else {
+      console.error('No news data provided for editing.');
+    }
   };
+  
 
-  const handlePopoverClose = () => {
-    setPopover({ open: false, anchorEl: null, currentId: null });
+  const handleSaveEdit = async () => {
+    if (!editingNewsId) {
+      console.error('No news ID available for update.'); // Additional logging
+      enqueueSnackbar('ID berita diperlukan untuk memperbarui.', { variant: 'error' });
+      return;
+    }
+    try {
+      await updateNews.mutateAsync({ id: editingNewsId, ...editedNews });
+      enqueueSnackbar('Berita berhasil diperbarui', { variant: 'success' });
+      queryClient.invalidateQueries({ queryKey: ['list.news'] });
+      setEditingNewsId(null);
+      setDialogOpen(false);
+    } catch (error) {
+      console.error('Update error:', error); // More detailed logging
+      enqueueSnackbar('Gagal memperbarui berita', { variant: 'error' });
+    }
   };
+  
+
 
   const handleChangePage = (event, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(+event.target.value);
     setPage(0);
+  };
+
+  const handlePopoverOpen = (event, newsId) => {
+    setPopoverAnchor(event.currentTarget);
+    setPopoverCurrentId(newsId);
+  };
+
+  const handlePopoverClose = () => {
+    setPopoverAnchor(null);
+    setPopoverCurrentId(null);
   };
 
   return (
@@ -102,7 +168,7 @@ export default function AdminListNews() {
               <TableRow>
                 <TableCell>Thumbnail</TableCell>
                 <TableCell>Judul</TableCell>
-                <TableCell>Content</TableCell>
+                <TableCell>Isi</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell align="right">Aksi</TableCell>
               </TableRow>
@@ -114,65 +180,153 @@ export default function AdminListNews() {
                     Loading...
                   </TableCell>
                 </TableRow>
-              ) : filteredNews.length > 0 ? (
-                filteredNews
+              ) : sortedNews.length > 0 ? (
+                sortedNews
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map(({ id, title, content, status, thumbnail_url }) => (
+                  .map(({ id, title, content, status, thumbnail_url, news_tags_ids }) => (
                     <TableRow key={id}>
                       <TableCell>
-                        <img src={thumbnail_url} alt={title} style={{ width: '100px' }} />
+                        <IconButton onClick={() => setZoomImage(thumbnail_url)}>
+                          <Box
+                            component="img"
+                            src={thumbnail_url}
+                            alt={title}
+                            sx={{ maxWidth: '50%', height: 'auto' }}
+                          />
+                        </IconButton>
                       </TableCell>
                       <TableCell>
                         <span dangerouslySetInnerHTML={{ __html: title }} />
                       </TableCell>
                       <TableCell>
-                        <span dangerouslySetInnerHTML={{ __html: content }} />
+                        <span
+                          dangerouslySetInnerHTML={{ __html: content }}
+                          style={{
+                            display: '-webkit-box',
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            WebkitLineClamp: 3,
+                          }}
+                        />
                       </TableCell>
                       <TableCell>{status}</TableCell>
                       <TableCell align="right">
                         <Tooltip title="More Actions" placement="top">
-                          <IconButton onClick={(event) => handlePopoverOpen(event, id)}>
+                          <IconButton onClick={(e) => handlePopoverOpen(e, id)}>
                             <Iconify icon="eva:more-vertical-fill" />
                           </IconButton>
                         </Tooltip>
+                        <CustomPopover
+                          anchorEl={popoverAnchor}
+                          open={Boolean(popoverAnchor) && popoverCurrentId === id}
+                          onClose={handlePopoverClose}
+                        >
+                          <MenuItem
+                            onClick={() => handleDelete(popoverCurrentId)}
+                            sx={{ color: 'error.main' }}
+                          >
+                            <Iconify icon="solar:trash-bin-trash-bold" /> Hapus
+                          </MenuItem>
+                          <MenuItem
+                            onClick={() =>
+                              handleEditClick({
+                                id,
+                                title,
+                                content,
+                                thumbnail_url,
+                                status,
+                                news_tags_ids,
+                              })
+                            }
+                          >
+                            <Iconify icon="solar:pen-bold" /> Edit
+                          </MenuItem>
+                        </CustomPopover>
                       </TableCell>
                     </TableRow>
                   ))
               ) : (
                 <TableRow>
                   <TableCell colSpan={5} align="center">
-                    Tidak ada berita
+                    Tidak ada berita ditemukan.
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={filteredNews.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
       </Scrollbar>
 
-      <CustomPopover
-        open={popover.open}
-        anchorEl={popover.anchorEl}
-        onClose={handlePopoverClose}
-        arrow="right-top"
-        sx={{ width: 140 }}
-      >
-        <MenuItem onClick={() => handleDelete(popover.currentId)} sx={{ color: 'error.main' }}>
-          <Iconify icon="solar:trash-bin-trash-bold" /> Hapus
-        </MenuItem>
-        <MenuItem onClick={() => RouterLink.push(`/edit/${popover.currentId}`)}>
-          <Iconify icon="solar:pen-bold" /> Edit
-        </MenuItem>
-      </CustomPopover>
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        count={sortedNews.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
+
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
+        <DialogTitle>Edit Berita</DialogTitle>
+        <DialogContent>
+          <FormProvider {...methods}>
+            <TextField
+              label="Judul"
+              fullWidth
+              value={editedNews.title}
+              onChange={(e) => setEditedNews((prev) => ({ ...prev, title: e.target.value }))}
+              sx={{ mt: 2, mb: 2 }}
+            />
+            <Editor
+              apiKey={TINY_API}
+              initialValue={editedNews.content}
+              onEditorChange={(newText) => setEditedNews((prev) => ({ ...prev, content: newText }))}
+              init={{
+                height: 300,
+                menubar: false,
+                plugins: 'link image code',
+                toolbar:
+                  'undo redo | styleselect | bold italic | alignleft aligncenter alignright | code',
+              }}
+            />
+            <TextField
+              label="Thumbnail URL"
+              fullWidth
+              value={editedNews.thumbnail_url}
+              onChange={(e) =>
+                setEditedNews((prev) => ({ ...prev, thumbnail_url: e.target.value }))
+              }
+              sx={{ mt: 2 }}
+            />
+            <RHFAutocomplete
+              name="tags"
+              options={availableTags}
+              getOptionLabel={(option) => option.name}
+              multiple
+              onChange={(event, newValue) =>
+                setEditedNews((prev) => ({ ...prev, news_tags_ids: newValue.map((tag) => tag.id) }))
+              }
+              renderInput={(params) => <TextField {...params} label="Tags" />}
+            />
+            <TextField
+              label="Status"
+              fullWidth
+              select
+              value={editedNews.status}
+              onChange={(e) => setEditedNews((prev) => ({ ...prev, status: e.target.value }))}
+              sx={{ mt: 2 }}
+            >
+              <MenuItem value="published">Publik</MenuItem>
+              <MenuItem value="archived">Arsip</MenuItem>
+            </TextField>
+          </FormProvider>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDialogOpen(false)}>Batal</Button>
+          <Button onClick={handleSaveEdit}>Simpan</Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

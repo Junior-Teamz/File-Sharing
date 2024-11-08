@@ -47,8 +47,13 @@ import FileRecentItem from 'src/sections/file-manager/file-recent-item';
 import { Link } from 'react-router-dom';
 import { AuthContext } from 'src/auth/context/jwt/auth-context';
 import { useIndexTag } from 'src/sections/tag/view/TagMutation';
+import FileManagerFileDialog from 'src/sections/favorite/FileManagerFileDialog';
+// theme
+import { bgGradient } from 'src/theme/css';
+import { alpha, useTheme } from '@mui/material/styles';
 
 export default function OverviewAppView() {
+  const theme = useTheme();
   const { user } = useContext(AuthContext);
   const settings = useSettingsContext();
   const { enqueueSnackbar } = useSnackbar();
@@ -235,103 +240,45 @@ export default function OverviewAppView() {
   };
 
   return (
-    <Container maxWidth={settings.themeStretch ? false : 'xl'}>
-      <Grid container spacing={3}>
-        <Grid xs={12} md={14}>
-          <AppWelcome title={`Selamat datang ${user?.name} 👋`} img={<SeoIllustration />} />
-        </Grid>
-        <Grid xs={12} md={12} lg={12}>
-          <FileManagerPanel
-            title="Folder"
-            link={paths.dashboard.fileManager}
-            onOpen={handleClickOpened}
-            sx={{ mt: 5 }}
-          />
+    <Box
+      sx={{
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <Box
+        sx={{
+          ...bgGradient({
+            color: alpha(
+              theme.palette.background.default,
+              theme.palette.mode === 'light' ? 0.8 : 0.80 // Mengurangi nilai alpha agar warna tidak terlalu terang
+            ),
+            imgUrl: '/assets/background/overlay_2.jpg',
+          }),
+          backgroundPosition: 'center', // Menempatkan background di tengah
+          backgroundSize: 'cover', // Mengatur ukuran background agar menutupi seluruh area
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: -1,
+        }}
+      />
 
-          <Dialog open={opened} onClose={handleClosed}>
-            <DialogTitle>Buat Folder</DialogTitle>
-            <DialogContent>
-              <form onSubmit={handleSubmit(Onsubmit)}>
-                <DialogContentText sx={{ mb: 3 }}>
-                  Silahkan masukkan nama folder yang ingin dibuat disini.
-                </DialogContentText>
-                <Stack spacing={2}>
-                  <TextField
-                    autoFocus
-                    margin="dense"
-                    id="name"
-                    name="name"
-                    label="Nama Folder"
-                    type="text"
-                    fullWidth
-                    variant="outlined"
-                    {...register('name')}
-                  />
-                  <FormControl fullWidth margin="dense">
-                    <InputLabel id="tags-label">Tag folder</InputLabel>
-                    <Select
-                      labelId="tags-label"
-                      id="tags"
-                      multiple
-                      value={selectedTags}
-                      onChange={(event) => handleTagChange(event)} // Kirim event langsung
-                      input={<OutlinedInput id="select-multiple-chip" label="Tags" />}
-                      renderValue={(selected) => (
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 0.5,
-                            maxHeight: 100,
-                            overflowY: 'auto',
-                          }}
-                        >
-                          {selected?.map((tagId) => {
-                            const tag = tagsData.find((t) => t.id === tagId);
-                            return (
-                              <Chip
-                                key={tagId}
-                                label={tag ? tag.name : `Tag ${tagId} tidak di temukan`}
-                                sx={{ mb: 0.5 }}
-                              />
-                            );
-                          })}
-                        </Box>
-                      )}
-                    >
-                      {isLoadingTags ? (
-                        <MenuItem disabled>Loading...</MenuItem>
-                      ) : tagsData.length > 0 ? (
-                        tagsData.map((tag) => (
-                          <MenuItem key={tag.id} value={tag.id}>
-                            {tag.name}
-                          </MenuItem>
-                        ))
-                      ) : (
-                        <MenuItem disabled>Tidak ada tag yang tersedia</MenuItem>
-                      )}
-                    </Select>
-                  </FormControl>
-                </Stack>
-                <DialogActions>
-                  <Button variant="outlined" onClick={handleClosed}>
-                    Cancel
-                  </Button>
-                  <Button variant="outlined" type="submit">
-                    {isPending ? 'Membuat...' : 'Buat'}
-                  </Button>
-                </DialogActions>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </Grid>
-
-        {data.folders.length === 0 ? (
-          <>
-            <EmptyContent filled title="Folder Kosong" sx={{ py: 10 }} />
-          </>
-        ) : (
+      <Container maxWidth={settings.themeStretch ? false : 'xl'}>
+        <Grid container spacing={3}>
+          <Grid xs={12} md={14}>
+            <AppWelcome title={`Selamat datang ${user?.name} 👋`} img={<SeoIllustration />} />
+          </Grid>
           <Grid xs={12} md={12} lg={12}>
+            <FileManagerPanel
+              title="Folder"
+              link={paths.dashboard.fileManager}
+              onOpen={handleClickOpened}
+              sx={{ mt: 5 }}
+            />
+
             <Dialog open={opened} onClose={handleClosed}>
               <DialogTitle>Buat Folder</DialogTitle>
               <DialogContent>
@@ -358,7 +305,7 @@ export default function OverviewAppView() {
                         id="tags"
                         multiple
                         value={selectedTags}
-                        onChange={handleTagChange}
+                        onChange={(event) => handleTagChange(event)} // Kirim event langsung
                         input={<OutlinedInput id="select-multiple-chip" label="Tags" />}
                         renderValue={(selected) => (
                           <Box
@@ -370,12 +317,12 @@ export default function OverviewAppView() {
                               overflowY: 'auto',
                             }}
                           >
-                            {selected.map((tagId) => {
+                            {selected?.map((tagId) => {
                               const tag = tagsData.find((t) => t.id === tagId);
                               return (
                                 <Chip
                                   key={tagId}
-                                  label={tag ? tag.name : `Tag ${tagId} tidak ditemukan`}
+                                  label={tag ? tag.name : `Tag ${tagId} tidak di temukan`}
                                   sx={{ mb: 0.5 }}
                                 />
                               );
@@ -399,7 +346,7 @@ export default function OverviewAppView() {
                   </Stack>
                   <DialogActions>
                     <Button variant="outlined" onClick={handleClosed}>
-                      Batal
+                      Cancel
                     </Button>
                     <Button variant="outlined" type="submit">
                       {isPending ? 'Membuat...' : 'Buat'}
@@ -408,223 +355,308 @@ export default function OverviewAppView() {
                 </form>
               </DialogContent>
             </Dialog>
+          </Grid>
 
-            <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
-              <DialogContent>
-                <form onSubmit={handleSubmit(handleEditSubmit)}>
-                  <DialogContentText sx={{ mb: 3 }}>
-                    Silahkan masukkan nama folder yang ingin diubah disini.
-                  </DialogContentText>
-                  <TextField
-                    autoFocus
-                    margin="dense"
-                    id="name"
-                    name="name"
-                    label="Nama Folder"
-                    type="text"
-                    fullWidth
-                    variant="outlined"
-                    {...register('name')}
-                  />
-                  <FormControl fullWidth margin="dense">
-                    <InputLabel id="tags-label">Tags</InputLabel>
-                    <Select
-                      multiple
-                      labelId="tags-label"
-                      id="tags"
-                      value={selectedTags || []}
-                      onChange={handleTagChange}
-                      input={<OutlinedInput id="select-multiple-chip" label="Tags" />}
-                      renderValue={(selected) => (
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 0.5,
-                            maxHeight: 100,
-                            overflowY: 'auto',
-                          }}
+          {data.folders.length === 0 ? (
+            <>
+              <EmptyContent filled title="Folder Kosong" sx={{ py: 10 }} />
+            </>
+          ) : (
+            <Grid xs={12} md={12} lg={12}>
+              <Dialog open={opened} onClose={handleClosed}>
+                <DialogTitle>Buat Folder</DialogTitle>
+                <DialogContent>
+                  <form onSubmit={handleSubmit(Onsubmit)}>
+                    <DialogContentText sx={{ mb: 3 }}>
+                      Silahkan masukkan nama folder yang ingin dibuat disini.
+                    </DialogContentText>
+                    <Stack spacing={2}>
+                      <TextField
+                        autoFocus
+                        margin="dense"
+                        id="name"
+                        name="name"
+                        label="Nama Folder"
+                        type="text"
+                        fullWidth
+                        variant="outlined"
+                        {...register('name')}
+                      />
+                      <FormControl fullWidth margin="dense">
+                        <InputLabel id="tags-label">Tag folder</InputLabel>
+                        <Select
+                          labelId="tags-label"
+                          id="tags"
+                          multiple
+                          value={selectedTags}
+                          onChange={handleTagChange}
+                          input={<OutlinedInput id="select-multiple-chip" label="Tags" />}
+                          renderValue={(selected) => (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: 0.5,
+                                maxHeight: 100,
+                                overflowY: 'auto',
+                              }}
+                            >
+                              {selected.map((tagId) => {
+                                const tag = tagsData.find((t) => t.id === tagId);
+                                return (
+                                  <Chip
+                                    key={tagId}
+                                    label={tag ? tag.name : `Tag ${tagId} tidak ditemukan`}
+                                    sx={{ mb: 0.5 }}
+                                  />
+                                );
+                              })}
+                            </Box>
+                          )}
                         >
-                          {selected.map((tagId) => {
-                            const tag = tags.find((t) => t.id === tagId);
-                            return (
-                              <Chip
-                                key={tagId}
-                                label={tag ? tag.name : `Tag ${tagId} not found`}
-                                sx={{ mb: 0.5 }}
-                              />
-                            );
-                          })}
-                        </Box>
-                      )}
-                    >
-                      {isLoadingTags ? (
-                        <MenuItem disabled>Loading...</MenuItem>
-                      ) : tags.length > 0 ? (
-                        tags.map((tag) => (
-                          <MenuItem key={tag.id} value={tag.id}>
-                            {tag.name}
-                          </MenuItem>
-                        ))
-                      ) : (
-                        <MenuItem disabled>No tags available</MenuItem>
-                      )}
-                    </Select>
-                  </FormControl>
-                  <DialogActions>
-                    <Button variant="outlined" onClick={handleEditDialogClose}>
-                      Cancel
-                    </Button>
-                    <Button variant="outlined" type="submit">
-                      {loadingEditFolder ? 'Editing' : 'Edit'}
-                    </Button>
-                  </DialogActions>
-                </form>
-              </DialogContent>
-            </Dialog>
+                          {isLoadingTags ? (
+                            <MenuItem disabled>Loading...</MenuItem>
+                          ) : tagsData.length > 0 ? (
+                            tagsData.map((tag) => (
+                              <MenuItem key={tag.id} value={tag.id}>
+                                {tag.name}
+                              </MenuItem>
+                            ))
+                          ) : (
+                            <MenuItem disabled>Tidak ada tag yang tersedia</MenuItem>
+                          )}
+                        </Select>
+                      </FormControl>
+                    </Stack>
+                    <DialogActions>
+                      <Button variant="outlined" onClick={handleClosed}>
+                        Batal
+                      </Button>
+                      <Button variant="outlined" type="submit">
+                        {isPending ? 'Membuat...' : 'Buat'}
+                      </Button>
+                    </DialogActions>
+                  </form>
+                </DialogContent>
+              </Dialog>
 
-            <Dialog open={deleteConfirmOpen} onClose={handleDeleteConfirmClose}>
-              <DialogTitle>Konfirmasi Penghapusan</DialogTitle>
-              <DialogContent>
-                <DialogContentText>Kamu yakin hapus folder-folder ini?</DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleDeleteConfirmClose}>Batal</Button>
-                <Button onClick={handleDeleteSelected} color="error">
-                  {loadingDelete ? 'Menghapus...' : 'Hapus'}
-                </Button>
-              </DialogActions>
-            </Dialog>
-
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    {selected.length > 0 ? (
-                      <>
-                        <TableCell padding="checkbox">
-                          <Checkbox
-                            indeterminate={selected.length > 0 && selected.length < data.length}
-                            checked={data.length > 0 && selected.length === data.length}
-                            onChange={handleSelectAll}
-                          />
-                        </TableCell>
-                        <TableCell colSpan={4}>
-                          <div
-                            style={{
+              <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
+                <DialogContent>
+                  <form onSubmit={handleSubmit(handleEditSubmit)}>
+                    <DialogContentText sx={{ mb: 3 }}>
+                      Silahkan masukkan nama folder yang ingin diubah disini.
+                    </DialogContentText>
+                    <TextField
+                      autoFocus
+                      margin="dense"
+                      id="name"
+                      name="name"
+                      label="Nama Folder"
+                      type="text"
+                      fullWidth
+                      variant="outlined"
+                      {...register('name')}
+                    />
+                    <FormControl fullWidth margin="dense">
+                      <InputLabel id="tags-label">Tags</InputLabel>
+                      <Select
+                        multiple
+                        labelId="tags-label"
+                        id="tags"
+                        value={selectedTags || []}
+                        onChange={handleTagChange}
+                        input={<OutlinedInput id="select-multiple-chip" label="Tags" />}
+                        renderValue={(selected) => (
+                          <Box
+                            sx={{
                               display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
+                              flexWrap: 'wrap',
+                              gap: 0.5,
+                              maxHeight: 100,
+                              overflowY: 'auto',
                             }}
                           >
-                            <Typography variant="body1">{selected.length} dipilih</Typography>
-                            <div>
-                              <Tooltip
-                                title={
-                                  selected.length !== 1
-                                    ? 'Silakan pilih satu folder untuk diedit'
-                                    : ''
-                                }
-                              >
-                                <span>
-                                  <IconButton
-                                    onClick={() =>
-                                      handleEditDialogOpen(
-                                        selected[0],
-                                        data?.folders.find(
-                                          (folder) => folder.folder_id === selected[0]
-                                        )?.name
-                                      )
-                                    }
-                                    disabled={selected.length !== 1}
-                                  >
-                                    <EditIcon />
-                                  </IconButton>
-                                </span>
-                              </Tooltip>
-                              <IconButton onClick={handleDeleteConfirmOpen}>
-                                <DeleteIcon />
-                              </IconButton>
+                            {selected.map((tagId) => {
+                              const tag = tags.find((t) => t.id === tagId);
+                              return (
+                                <Chip
+                                  key={tagId}
+                                  label={tag ? tag.name : `Tag ${tagId} not found`}
+                                  sx={{ mb: 0.5 }}
+                                />
+                              );
+                            })}
+                          </Box>
+                        )}
+                      >
+                        {isLoadingTags ? (
+                          <MenuItem disabled>Loading...</MenuItem>
+                        ) : tags.length > 0 ? (
+                          tags.map((tag) => (
+                            <MenuItem key={tag.id} value={tag.id}>
+                              {tag.name}
+                            </MenuItem>
+                          ))
+                        ) : (
+                          <MenuItem disabled>No tags available</MenuItem>
+                        )}
+                      </Select>
+                    </FormControl>
+                    <DialogActions>
+                      <Button variant="outlined" onClick={handleEditDialogClose}>
+                        Cancel
+                      </Button>
+                      <Button variant="outlined" type="submit">
+                        {loadingEditFolder ? 'Editing' : 'Edit'}
+                      </Button>
+                    </DialogActions>
+                  </form>
+                </DialogContent>
+              </Dialog>
+
+              <Dialog open={deleteConfirmOpen} onClose={handleDeleteConfirmClose}>
+                <DialogTitle>Konfirmasi Penghapusan</DialogTitle>
+                <DialogContent>
+                  <DialogContentText>Kamu yakin hapus folder-folder ini?</DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleDeleteConfirmClose}>Batal</Button>
+                  <Button onClick={handleDeleteSelected} color="error">
+                    {loadingDelete ? 'Menghapus...' : 'Hapus'}
+                  </Button>
+                </DialogActions>
+              </Dialog>
+
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      {selected.length > 0 ? (
+                        <>
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              indeterminate={selected.length > 0 && selected.length < data.length}
+                              checked={data.length > 0 && selected.length === data.length}
+                              onChange={handleSelectAll}
+                            />
+                          </TableCell>
+                          <TableCell colSpan={4}>
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                              }}
+                            >
+                              <Typography variant="body1">{selected.length} dipilih</Typography>
+                              <div>
+                                <Tooltip
+                                  title={
+                                    selected.length !== 1
+                                      ? 'Silakan pilih satu folder untuk diedit'
+                                      : ''
+                                  }
+                                >
+                                  <span>
+                                    <IconButton
+                                      onClick={() =>
+                                        handleEditDialogOpen(
+                                          selected[0],
+                                          data?.folders.find(
+                                            (folder) => folder.folder_id === selected[0]
+                                          )?.name
+                                        )
+                                      }
+                                      disabled={selected.length !== 1}
+                                    >
+                                      <EditIcon />
+                                    </IconButton>
+                                  </span>
+                                </Tooltip>
+                                <IconButton onClick={handleDeleteConfirmOpen}>
+                                  <DeleteIcon />
+                                </IconButton>
+                              </div>
                             </div>
-                          </div>
-                        </TableCell>
-                      </>
-                    ) : (
-                      <>
+                          </TableCell>
+                        </>
+                      ) : (
+                        <>
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              indeterminate={selected.length > 0 && selected.length < data.length}
+                              checked={data.length > 0 && selected.length === data.length}
+                              onChange={handleSelectAll}
+                            />
+                          </TableCell>
+                          <TableCell>Nomor</TableCell>
+                          <TableCell>Nama</TableCell>
+                        </>
+                      )}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {data?.folders?.map((folder, idx) => (
+                      <TableRow
+                        key={folder.folder_id}
+                        selected={selected.indexOf(folder.folder_id) !== -1}
+                      >
                         <TableCell padding="checkbox">
                           <Checkbox
-                            indeterminate={selected.length > 0 && selected.length < data.length}
-                            checked={data.length > 0 && selected.length === data.length}
-                            onChange={handleSelectAll}
+                            checked={selected.indexOf(folder.folder_id) !== -1}
+                            onChange={(event) => handleSelectOne(event, folder.folder_id)}
                           />
                         </TableCell>
-                        <TableCell>Number</TableCell>
-                        <TableCell>Name</TableCell>
-                      </>
-                    )}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {data?.folders?.map((folder, idx) => (
-                    <TableRow
-                      key={folder.folder_id}
-                      selected={selected.indexOf(folder.folder_id) !== -1}
-                    >
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          checked={selected.indexOf(folder.folder_id) !== -1}
-                          onChange={(event) => handleSelectOne(event, folder.folder_id)}
-                        />
-                      </TableCell>
-                      <TableCell>{idx + 1}</TableCell>
-                      <TableCell sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <img src={imageFolder} alt="folder" />
-                        {/* Bungkus hanya pada TableCell yang menampilkan nama */}
-                        <Link
-                          to={`file-manager/info/${folder.folder_id}`}
-                          style={{ textDecoration: 'none', color: 'inherit' }}
-                        >
-                          {folder.name}
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Grid>
-        )}
-        <Grid xs={12} md={12} lg={12} sx={{ mt: 10 }}>
-          <FileManagerPanel
-            title="Files"
-            link={paths.dashboard.fileManager}
-            onOpen={handleClickOpen}
-            sx={{ mt: 5 }}
-          />
-          <FileManagerNewFolderDialog
-            title="Upload Files"
-            open={open} // Use the same state
-            onClose={handleClose} // Ensure the dialog can close properly
-            refetch={refetch} // Tambahkan refetch prop
-          />
+                        <TableCell sx={{ alignItems: 'center' }}>{idx + 1}</TableCell>
+                        <TableCell sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <img src={imageFolder} alt="folder" />
+                          {/* Bungkus hanya pada TableCell yang menampilkan nama */}
+                          <Link
+                            to={`file-manager/info/${folder.folder_id}`}
+                            style={{ textDecoration: 'none', color: 'inherit' }}
+                          >
+                            {folder.name}
+                          </Link>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Grid>
+          )}
+          <Grid xs={12} md={12} lg={12} sx={{ mt: 10 }}>
+            <FileManagerPanel
+              title="Files"
+              link={paths.dashboard.fileManager}
+              onOpen={handleClickOpen}
+              sx={{ mt: 5 }}
+            />
+            <FileManagerFileDialog
+              title="Upload File"
+              open={open} // Use the same state
+              onClose={handleClose} // Ensure the dialog can close properly
+              refetch={refetch} // Tambahkan refetch prop
+            />
 
-          <Stack spacing={2}>
-            {files.length === 0 && (
-              <>
-                <EmptyContent filled title="File Kosong" sx={{ py: 10 }} />
-              </>
-            )}
-            {files?.map((file) => (
-              <FileRecentItem
-                key={file.id}
-                onRefetch={refetch}
-                file={file}
-                onDelete={() => console.info('DELETE', file.id)}
-              />
-            ))}
-          </Stack>
+            <Stack spacing={2}>
+              {files.length === 0 && (
+                <>
+                  <EmptyContent filled title="File Kosong" sx={{ py: 10 }} />
+                </>
+              )}
+              {files?.map((file) => (
+                <FileRecentItem
+                  key={file.id}
+                  onRefetch={refetch}
+                  file={file}
+                  onDelete={() => console.info('DELETE', file.id)}
+                />
+              ))}
+            </Stack>
+          </Grid>
         </Grid>
-      </Grid>
-    </Container>
+      </Container>
+    </Box>
   );
 }

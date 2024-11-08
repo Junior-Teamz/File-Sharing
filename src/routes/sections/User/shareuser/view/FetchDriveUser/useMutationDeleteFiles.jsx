@@ -13,7 +13,7 @@ export const useMutationDeleteFiles = () => {
 
       const response = await axiosInstance.post(`${endpoints.file.delete}`, payload);
 
-      console.log(response);
+   
       return response;
     },
   });

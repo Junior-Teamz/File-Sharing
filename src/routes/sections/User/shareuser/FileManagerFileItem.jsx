@@ -35,45 +35,33 @@ import { useSnackbar } from 'src/components/snackbar';
 import TextMaxLine from 'src/components/text-max-line';
 import FileThumbnail from 'src/components/file-thumbnail';
 import { ConfirmDialog } from 'src/components/custom-dialog';
-//
 import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerFileDetails from './FileManagerFileDetails';
-//
+import { useAddFavoriteUser,useRemoveFavoriteUser } from './view/FetchFolderUser';
 
-// ----------------------------------------------------------------------
-
-export default function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ...other }) {
+export default function FileManagerFileItem({ file,  selected, onSelect, onDelete, sx, ...other }) {
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
-
   const { copy } = useCopyToClipboard();
+
+  // Inside your FileRecentItem component
+  const { mutateAsync: addFavorite } = useAddFavoriteUser();
+  const { mutateAsync: removeFavorite } = useRemoveFavoriteUser();
 
   const [inviteEmail, setInviteEmail] = useState('');
 
   const checkbox = useBoolean();
-
   const share = useBoolean();
-
   const confirm = useBoolean();
-
   const details = useBoolean();
-
-  const favorite = useBoolean(file.isFavorited);
-
-  const popover = usePopover();
+  const favorite = useBoolean(file.is_favorite);
+  const [issLoading, setIsLoading] = useState(false);
 
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value);
   }, []);
 
-  
-  const handleClick = useDoubleClick({
-    click: details.onTrue,
-    doubleClick: () => console.info('DOUBLE CLICK'),
-  });
-
   const handleCopy = useCallback(() => {
-    console.log('File URL:', file.url); // Log the file URL to check if it's correct
     if (file.url) {
       enqueueSnackbar('Berhasil di Copied!');
       copy(file.url);
@@ -81,6 +69,11 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
       enqueueSnackbar('Failed to copy: URL is undefined');
     }
   }, [copy, enqueueSnackbar, file.url]);
+
+  const handleClick = useDoubleClick({
+    click: details.onTrue,
+    doubleClick: () => console.info('DOUBLE CLICK'),
+  });
 
   const defaultStyles = {
     borderTop: `solid 1px ${alpha(theme.palette.grey[500], 0.16)}`,
@@ -97,35 +90,30 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
     },
   };
 
-  const renderIcon =
-    (checkbox.value || selected) && onSelect ? (
-      <Checkbox
-        size="medium"
-        checked={selected}
-        onClick={onSelect}
-        icon={<Iconify icon="eva:radio-button-off-fill" />}
-        checkedIcon={<Iconify icon="eva:checkmark-circle-2-fill" />}
-        sx={{ p: 0.75 }}
-      />
-    ) : (
-      <FileThumbnail file={file.type} sx={{ width: 36, height: 36 }} />
-    );
+  const handleFavoriteToggle = useCallback(async () => {
+    setIsLoading(true);
 
-  const renderAction = (
-    <Stack direction="row" alignItems="center" sx={{ top: 8, right: 8, position: 'absolute' }}>
-      <Checkbox
-        color="warning"
-        icon={<Iconify icon="eva:star-outline" />}
-        checkedIcon={<Iconify icon="eva:star-fill" />}
-        checked={favorite.value}
-        onChange={favorite.onToggle}
-      />
+    try {
+      if (favorite.value) {
+        await removeFavorite({ file_id: file.id }); // Pastikan mengirim objek dengan file_id
+        enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
+      } else {
+        // Tambahkan ke favorit
+        await addFavorite({ file_id: file.id }); // Pastikan mengirim objek dengan file_id
+        enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });
+      }
 
-      <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
-        <Iconify icon="eva:more-vertical-fill" />
-      </IconButton>
-    </Stack>
-  );
+      favorite.onToggle();
+    } catch (error) {
+      if (error.response && error.response.data.errors && error.response.data.errors.file_id) {
+        enqueueSnackbar('file id harus di isi.', { variant: 'error' });
+      } else {
+        enqueueSnackbar('Error saat menambahkan favorite!', { variant: 'error' });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [favorite.value, file.id, addFavorite, removeFavorite, enqueueSnackbar]);
 
   return (
     <>
@@ -189,8 +177,8 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
 
         <TableCell onClick={handleClick} sx={{ whiteSpace: 'nowrap' }}>
           <ListItemText
-            primary={fDateTime(file.updated_at, 'dd MMM yyyy')}
-            secondary={fDateTime(file.updated_at, 'p')}
+            primary={fDateTime(file.shared_with.created_at, 'dd MMM yyyy')}
+            secondary={fDateTime(file.shared_with.created_at, 'p')}
             primaryTypographyProps={{ typography: 'body2' }}
             secondaryTypographyProps={{
               mt: 0.5,
@@ -232,60 +220,11 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
             icon={<Iconify icon="eva:star-outline" />}
             checkedIcon={<Iconify icon="eva:star-fill" />}
             checked={favorite.value}
-            onChange={favorite.onToggle}
+            onChange={handleFavoriteToggle} // Toggle favorite state
             sx={{ p: 0.75 }}
           />
-          <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
-            <Iconify icon="eva:more-vertical-fill" />
-          </IconButton>
         </TableCell>
       </TableRow>
-
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 160 }}
-      >
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-            handleCopy();
-          }}
-        >
-          <Iconify icon="eva:link-2-fill" />
-          Copy Link
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            confirm.onTrue();
-            popover.onClose();
-          }}
-        >
-          <Iconify icon="solar:download-minimalistic-bold" />
-          Download
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-            share.onTrue();
-          }}
-        >
-          <Iconify icon="solar:share-bold" />
-          Share
-        </MenuItem>
-        <Divider sx={{ borderStyle: 'dashed' }} />
-        <MenuItem
-          onClick={() => {
-            confirm.onTrue();
-            popover.onClose();
-          }}
-          sx={{ color: 'error.main' }}
-        >
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          Delete
-        </MenuItem>
-      </CustomPopover>
 
       <FileManagerFileDetails
         item={file}

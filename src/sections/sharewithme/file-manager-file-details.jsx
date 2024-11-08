@@ -24,11 +24,13 @@ import FileThumbnail, { fileFormat } from 'src/components/file-thumbnail';
 import FileManagerShareDialog from './file-manager-share-dialog';
 import FileManagerInvitedItem from './file-manager-invited-item';
 import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
-import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
-
+import { Dialog, DialogActions, DialogContent, DialogTitle, Modal } from '@mui/material';
 import { useMutationDeleteFiles, usePreviewImage } from '../file-manager/view/folderDetail';
 import { useAddFavorite, useRemoveFavorite } from '../file-manager/view/favoritemutation';
 import { useQueryClient } from '@tanstack/react-query';
+import CloseIcon from '@mui/icons-material/Close';
+import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
+import { useIndexTag } from '../tag/view/TagMutation';
 
 // ----------------------------------------------------------------------
 
@@ -62,14 +64,31 @@ export default function FIleManagerFileDetails({
     file_url,
   } = item;
 
-  // // Only fetch preview if fileId is available
-  // const { data: preview, isLoading: loadingPreview, isError: errorPreview } = usePreviewImage(id);
+  const hasPermission = (permissionType) => {
+    return shared_with.some(({ permissions }) => permissions.includes(permissionType));
+  };
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpen = () => setIsOpen(true);
+  const handleClose = () => setIsOpen(false);
+
   const isFolder = item.type === 'folder';
   const { mutateAsync: addFavorite } = useAddFavorite();
   const { mutateAsync: removeFavorite } = useRemoveFavorite();
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
   const useClient = useQueryClient();
+
+  const { data: tagData, isLoading, isError } = useIndexTag();
+
+  useEffect(() => {
+    if (!isLoading && !isError && tagData && Array.isArray(tagData.data)) {
+      setAvailableTags(tagData.data);
+    } else if (isError) {
+      console.error('Error fetching tag data:', isError);
+    }
+  }, [tagData, isLoading, isError]);
 
   const toggleTags = useBoolean(true);
   const share = useBoolean();
@@ -98,6 +117,39 @@ export default function FIleManagerFileDetails({
     setFileIdToDelete(null);
   };
 
+  const handleSaveTags = async () => {
+    if (!addTagFile.mutateAsync) {
+      console.error('addTagFile.mutateAsync is not a function');
+      return;
+    }
+
+    try {
+      // Determine which tags are new
+      const existingTagIds = new Set(initialTags.map((tag) => tag.id));
+      const newTagIds = tags.filter((tagId) => !existingTagIds.has(tagId));
+
+      if (newTagIds.length > 0) {
+        for (const tagId of newTagIds) {
+          await addTagFile.mutateAsync({
+            file_id: item.id,
+            tag_id: tagId,
+          });
+        }
+        enqueueSnackbar('Tag berhasil ditambahkan!', { variant: 'success' });
+      } else {
+        enqueueSnackbar('Tidak ada tag baru untuk ditambahkan.', { variant: 'info' });
+      }
+    } catch (error) {
+      console.error('Error adding tags:', error);
+      if (error.response && error.response.data.errors) {
+        if (error.response.data.errors.tag_id) {
+          enqueueSnackbar('Tag sudah ada di file.', { variant: 'warning' });
+        }
+      }
+      enqueueSnackbar('Error saat menambahkan tag', { variant: 'error' });
+    }
+  };
+
   const handleDeleteFile = async () => {
     try {
       await deleteFile({ file_id: fileIdToDelete });
@@ -112,7 +164,18 @@ export default function FIleManagerFileDetails({
     }
   };
 
+  const handleChangeTags = useCallback((event, newValue) => {
+    if (Array.isArray(newValue)) {
+      setTags(newValue.map((tag) => tag.id)); // Assuming newValue is an array of tag objects
+    }
+  }, []);
+
   const handleRemoveTag = async (tagId) => {
+    if (!hasPermission('edit')) {
+      enqueueSnackbar('Anda tidak memiliki izin untuk menghapus tag.', { variant: 'error' });
+      return;
+    }
+
     if (tags.length <= 1) {
       enqueueSnackbar('Kamu harus menyisakan satu tag', { variant: 'warning' });
       return;
@@ -121,17 +184,15 @@ export default function FIleManagerFileDetails({
     try {
       await removeTagFile({ file_id: item.id, tag_id: tagId });
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
-      enqueueSnackbar('Tag removed successfully!', { variant: 'success' });
+      enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
     } catch (error) {
       console.error('Error removing tag:', error);
-      enqueueSnackbar('Error removing tag.', { variant: 'error' });
+      enqueueSnackbar('Error saat menghapus tag.', { variant: 'error' });
     }
   };
 
   const handleCopyLink = () => {
     const fileUrl = item.id; // Ensure this is the correct property for URL
-
-    console.log('File URL:', fileUrl); // Debugging line
 
     if (!fileUrl) {
       enqueueSnackbar('No URL to copy.', { variant: 'warning' });
@@ -142,40 +203,41 @@ export default function FIleManagerFileDetails({
       .writeText(fileUrl)
       .then(() => enqueueSnackbar('Link copied to clipboard!', { variant: 'success' }))
       .catch((err) => {
-        console.error('Failed to copy link:', err);
         enqueueSnackbar('Failed to copy link.', { variant: 'error' });
       });
   };
 
   useEffect(() => {
-    favorite.setValue(is_favorite); // Set the state from props or backend response
+    favorite.setValue(is_favorite);
   }, [is_favorite]);
 
   const handleFavoriteToggle = useCallback(async () => {
-    if (!id) {
-      enqueueSnackbar('File ID is required to toggle favorite status!', { variant: 'error' });
+    if (!hasPermission('read') && !hasPermission('edit')) {
+      enqueueSnackbar('Anda tidak memiliki izin untuk mengubah status favorit.', {
+        variant: 'error',
+      });
       return;
     }
 
     setIsLoading(true);
-    const payload = { file_id: id };
 
     try {
       if (favorite.value) {
-        // If already favorited, remove it
-        await removeFavorite(payload);
-        enqueueSnackbar('File removed from favorites!', { variant: 'success' });
+        await removeFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
+        enqueueSnackbar('File berhasil dihapus dari favorit!', { variant: 'success' });
       } else {
-        // Otherwise, add it
-        await addFavorite(payload);
-        enqueueSnackbar('File added to favorites!', { variant: 'success' });
+        // Tambahkan ke favorit
+        await addFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
+        enqueueSnackbar('File berhasil ditambahkan ke favorit', { variant: 'success' });
       }
 
-      // Toggle the UI state
       favorite.onToggle();
     } catch (error) {
-      console.error('Error updating favorite status:', error);
-      enqueueSnackbar('Failed to update favorite status!', { variant: 'error' });
+      if (error.response && error.response.data.errors && error.response.data.errors.file_id) {
+        enqueueSnackbar('File ID harus diisi.', { variant: 'error' });
+      } else {
+        enqueueSnackbar('Error saat menambahkan favorit!', { variant: 'error' });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -189,13 +251,13 @@ export default function FIleManagerFileDetails({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Tags
-        <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
+        Tag
+        {/* <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
           <Iconify
             icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
             sx={{ color: favorite.value ? 'yellow' : 'gray' }}
           />
-        </IconButton>
+        </IconButton> */}
       </Stack>
 
       {toggleTags.value && (
@@ -204,6 +266,7 @@ export default function FIleManagerFileDetails({
           options={availableTags}
           getOptionLabel={(option) => option.name}
           value={availableTags.filter((tag) => tags.includes(tag.id))} // Display selected tags
+          onChange={handleChangeTags} // Update tags state
           renderOption={(props, option) => (
             <li {...props} key={option.id}>
               {option.name}
@@ -221,10 +284,10 @@ export default function FIleManagerFileDetails({
               />
             ))
           }
-          renderInput={(params) => <TextField {...params} placeholder="#Add a tag" />}
+          renderInput={(params) => <TextField {...params} placeholder="#Tambahkan tag" />}
         />
       )}
-      {/* <Button onClick={handleSaveTags}>Save Tags</Button> */}
+      <Button onClick={handleSaveTags}>simpan tags</Button>
     </Stack>
   );
 
@@ -274,7 +337,7 @@ export default function FIleManagerFileDetails({
   const renderShared = (
     <>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2.5 }}>
-        <Typography variant="subtitle2"> File Shared With </Typography>
+        <Typography variant="subtitle2"> File dibagikan dengan </Typography>
 
         <IconButton
           size="small"
@@ -304,7 +367,7 @@ export default function FIleManagerFileDetails({
         ))
       ) : (
         <Typography variant="body2" color="text.secondary">
-          Not shared with anyone.
+          Tidak dibagikan kepada siapa pun.
         </Typography>
       )}
     </>
@@ -356,16 +419,88 @@ export default function FIleManagerFileDetails({
               src="/assets/icons/files/ic_folder.svg"
               alt="Folder Icon"
             />
-          ) : ['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(item.type) ? (
-            <Box
-              component="img"
-              src={file_url}
-              alt={item.name}
-              style={{ maxWidth: '100%', height: 'auto' }}
-            />
+          ) : ['jpg', 'jpeg', 'gif', 'bmp', 'png', 'svg'].includes(item.type) ? (
+            <>
+              <Box
+                sx={{
+                  position: 'relative',
+                  cursor: 'zoom-in',
+                  '&:hover .zoom-icon': {
+                    opacity: 1,
+                  },
+                }}
+              >
+                <Box
+                  component="img"
+                  src={file_url}
+                  alt={item.name}
+                  onClick={handleOpen} // Open modal for zoomed view
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                    cursor: 'zoom-in',
+                  }}
+                />
+                <IconButton
+                  className="zoom-icon"
+                  sx={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    color: 'white',
+                    opacity: 0,
+                    transition: 'opacity 0.3s',
+                  }}
+                  onClick={handleOpen} // Open modal for zoom
+                >
+                  <ZoomInMapIcon />
+                </IconButton>
+              </Box>
+
+              <Modal
+                open={isOpen}
+                onClose={handleClose}
+                aria-labelledby="zoomed-image-modal"
+                aria-describedby="modal-with-zoomed-image"
+              >
+                <Box
+                  position="relative"
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  height="100vh"
+                  bgcolor="rgba(0, 0, 0, 0.8)"
+                  onClick={handleClose}
+                >
+                  <Box
+                    component="img"
+                    src={file_url}
+                    alt={item.name}
+                    style={{
+                      maxWidth: '50%',
+                      maxHeight: '50%',
+                      transform: 'scale(1.5)',
+                      transition: 'transform 0.3s ease-in-out',
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+
+                  <IconButton
+                    onClick={handleClose}
+                    style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      color: '#fff',
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+              </Modal>
+            </>
           ) : [
               'mp4',
-              'mkv',
               'webm',
               '.mov',
               'mpeg1',
@@ -385,17 +520,22 @@ export default function FIleManagerFileDetails({
             ].includes(item.type) ? (
             <video controls style={{ maxWidth: '100%', height: 'auto' }}>
               <source src={video_url} type={`video/${item.type}`} />
-              Your browser does not support the video tag.
+              Browser Anda tidak mendukung tag video.
             </video>
-          ) : ['mp3', 'wav', 'ogg'].includes(item.type) ? (
+          ) : ['mkv'].includes(item.type) ? (
+            <video controls style={{ maxWidth: '100%', height: 'auto' }}>
+              <source src={file_url} />
+              Browser Anda tidak mendukung tag video.
+            </video>
+          ) : ['aif', 'mp3', 'wav', 'ogg', 'm4p', 'mxp4', 'msv', 'aac'].includes(item.type) ? (
             <Box component="div">
               <audio controls>
                 <source src={file_url} type={`audio/${item.type}`} />
-                Your browser does not support the audio element.
+                browser Anda tidak mendukung tag audio.
               </audio>
             </Box>
           ) : (
-            <span>Unsupported file type</span> // Optional fallback for unsupported types
+            <span>Tidak ada preview</span>
           )}
 
           <Typography variant="subtitle2">{name}</Typography>
@@ -449,7 +589,7 @@ export default function FIleManagerFileDetails({
             )}
           </Stack>
 
-          <FileManagerShareDialog
+          {/* <FileManagerShareDialog
             open={share.value}
             fileId={id}
             shared={shared_with}
@@ -462,7 +602,7 @@ export default function FIleManagerFileDetails({
             }}
           />
 
-          {renderShared}
+          {renderShared} */}
 
           <Button fullWidth size="small" color="inherit" variant="outlined" onClick={onClose}>
             Close
@@ -501,7 +641,7 @@ export default function FIleManagerFileDetails({
 }
 
 FIleManagerFileDetails.propTypes = {
-  item: PropTypes.object.isRequired,
+  item: PropTypes.object,
   open: PropTypes.bool,
   favorited: PropTypes.bool,
   onFavorite: PropTypes.func,

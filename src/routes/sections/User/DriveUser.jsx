@@ -15,7 +15,7 @@ export default function DriveUser() {
     <Container sx={{mt: 5, }} maxWidth={settings.themeStretch ? false : 'xl'}>
       <Grid container spacing={3}>
         <Grid item xs={12} md={14}>
-          <AppWelcome title={`Welcome To File Sharing ${user?.name} 👋`} img={<SeoIllustration />} />
+          <AppWelcome title={`Selamat datang  ${user?.name} 👋`} img={<SeoIllustration />} />
         </Grid>
 
         <FileManagerView/>

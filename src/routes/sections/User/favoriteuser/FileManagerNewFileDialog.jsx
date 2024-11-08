@@ -126,7 +126,7 @@ export default function FileManagerNewFileDialog({
       <DialogTitle>{title}</DialogTitle>
 
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit((data) => console.log(data))}>
+        <form onSubmit={methods.handleSubmit}>
           <DialogContent dividers>
             {(onCreate || onUpdate) && (
               <TextField
@@ -195,7 +195,7 @@ export default function FileManagerNewFileDialog({
               onClick={handleUpload}
               disabled={loadingUpload}
             >
-              {loadingUpload ? 'Loading...' : 'Upload Files'}
+              {loadingUpload ? 'Loading...' : 'Upload File'}
             </Button>
 
             {!!files.length && (

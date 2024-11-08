@@ -15,6 +15,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  IconButton,
 } from '@mui/material';
 import { Box, Container, Stack } from '@mui/system';
 import InfoIcon from '@mui/icons-material/Info';
@@ -27,10 +28,16 @@ import { useMutationFolder } from '../DriveUser/view/FetchFolderUser';
 import FileManagerNewDialogParent from '../DriveUser/FileManagerNewDialogParentId';
 import FileRecentItem from '../DriveUser/FileRecentItem';
 import FileManagerPanel from '../DriveUser/FileManagerPanel';
+import { useBoolean } from 'src/hooks/use-boolean';
+import FolderDetail from '../DriveUser/FolderDetail';
 
 export const FileManagerDetailUsers = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const Folder = useBoolean();
+
+  const details = useBoolean();
 
   // Fetch folder details and tags
   const { data, isLoading, refetch, error } = useFetchDetailFolderUsers(id);
@@ -41,6 +48,7 @@ export const FileManagerDetailUsers = () => {
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   // Folder navigation state
   const [folderStack, setFolderStack] = useState([]);
+
 
   const [openCreateFolderDialog, setOpenCreateFolderDialog] = useState(false);
   const [folderName, setFolderName] = useState('');
@@ -76,7 +84,7 @@ export const FileManagerDetailUsers = () => {
       parent_id: id,
     };
 
-    console.log('Folder Data to be sent:', folderData);
+  
 
     createFolder(folderData);
   };
@@ -177,41 +185,38 @@ export const FileManagerDetailUsers = () => {
             {/* Current folder name */}
             <span style={{ color: 'black' }}>{data.folder_info.name}</span>
 
-            {/* InfoIcon displays folder.id */}
-            <InfoIcon
-              fontSize="medium"
-              sx={{ mt: 3, cursor: 'pointer' }}
-              onClick={handleInfoClick}
-            />
+            <IconButton onClick={details.onTrue} sx={{ mt: 3, cursor: 'pointer' }}>
+              <InfoIcon fontSize="medium" />
+            </IconButton>
           </Typography>
         </Box>
 
         {data.subfolders.length === 0 && data.files.length === 0 ? (
           <>
             <Button variant="contained" onClick={handleOpenCreateFolderDialog}>
-              Create New Folder
+            Buat Folder Baru
             </Button>
             <FileManagerPanel
-              title="Upload Files"
+              title="Upload File"
               link={paths.dashboarduser.root}
               onOpen={handleOpenUploadDialog}
               sx={{ mt: 5 }}
             />
-            <EmptyContent filled title="No Content" sx={{ py: 10 }} />
+            <EmptyContent filled title="Tidak ada data" sx={{ py: 10 }} />
           </>
         ) : (
           <>
             <Button variant="contained" onClick={handleOpenCreateFolderDialog}>
-              Create New Folder
+            Buat Folder Baru
             </Button>
             <FileManagerPanel
-              title="Upload Files"
+              title="Upload File"
               link={paths.dashboarduser.root}
               onOpen={handleOpenUploadDialog}
               sx={{ mt: 5 }}
             />
 
-            <Typography sx={{ mb: 2, mt: 10 }}>Subfolders</Typography>
+            <Typography sx={{ mb: 2, mt: 10 }}>Folder</Typography>
             {data.subfolders.map((folder) => (
               <div key={folder.id} onClick={() => handleSubfolderClick(folder.id, folder.name)}>
                 <FileRecentItem
@@ -244,7 +249,7 @@ export const FileManagerDetailUsers = () => {
         <DialogTitle>Create Folder</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 3 }}>
-            Please enter the name of the folder you want to create.
+          Nama folder
           </DialogContentText>
           <TextField
             autoFocus
@@ -310,9 +315,9 @@ export const FileManagerDetailUsers = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Upload Files Dialog */}
+      {/* Upload File Dialog */}
       <FileManagerNewDialogParent
-        title="Upload Files"
+        title="Upload File"
         open={openUploadDialog}
         onClose={handleCloseUploadDialog}
         id={id}
@@ -325,6 +330,8 @@ export const FileManagerDetailUsers = () => {
         selectedTags={selectedTagIds} // Ensure 'selectedTagIds' is used here
         onTagChange={handleTagChange} // Ensure 'handleTagChange' is used here
       />
+
+      <FolderDetail open={details.value} onClose={details.onFalse} />
     </>
   );
 };

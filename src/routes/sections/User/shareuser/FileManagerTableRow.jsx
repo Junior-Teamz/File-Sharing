@@ -107,16 +107,15 @@ export default function FileManagerTableRow({
     }
 
     const payload = { file_id: file.id }; // Create a payload with the required structure
-    console.log('Payload:', payload); // Log the payload for debugging
-
+   
     try {
       if (favorite.value) {
         // If currently favorited, call removeFavorite
-        console.log('Removing favorite with payload:', payload); // Log the payload for removal
+      
         await removeFavorite(payload, {
           // Pass the entire payload object
           onSuccess: () => {
-            enqueueSnackbar('File removed from favorites!', { variant: 'success' });
+            enqueueSnackbar('File dihapus dari favorit!', { variant: 'success' });
           },
           onError: () => {
             enqueueSnackbar('Failed to remove from favorites!', { variant: 'error' });
@@ -124,11 +123,11 @@ export default function FileManagerTableRow({
         });
       } else {
         // If not favorited, call addFavorite
-        console.log('Adding favorite with payload:', payload); // Log the payload for addition
+      
         await addFavorite(payload, {
           // Pass the entire payload object
           onSuccess: () => {
-            enqueueSnackbar('File added to favorites!', { variant: 'success' });
+            enqueueSnackbar('File telah ditambahkan ke favorit!', { variant: 'success' });
           },
           onError: () => {
             enqueueSnackbar('Failed to add to favorites!', { variant: 'error' });
@@ -144,7 +143,7 @@ export default function FileManagerTableRow({
       useClient.invalidateQueries({ queryKey: ['detail-folder'] });
     } catch (error) {
       console.error('Error updating favorite status:', error); // Log the error
-      enqueueSnackbar('Failed to update favorite status!', { variant: 'error' });
+      enqueueSnackbar('Gagal memperbarui status favorit!', { variant: 'error' });
     }
   }, [favorite.value, file.id, removeFavorite, addFavorite, enqueueSnackbar, useClient]);
 
