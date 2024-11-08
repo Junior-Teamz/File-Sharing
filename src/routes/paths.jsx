@@ -14,7 +14,7 @@ const ROOTS = {
   DASHBOARD: '/dashboard',
   DashboardUser: '/dashboarduser',
 };
-
+s;
 // ----------------------------------------------------------------------
 
 export const paths = {
