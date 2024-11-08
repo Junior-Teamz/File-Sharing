@@ -310,9 +310,6 @@ export default function TagListView() {
       <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
         <DialogTitle>Edit Tag</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            To edit this tag, please modify the name below and click save.
-          </DialogContentText>
           <TextField
             autoFocus
             margin="dense"

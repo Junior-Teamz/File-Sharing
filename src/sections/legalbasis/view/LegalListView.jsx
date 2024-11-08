@@ -32,10 +32,13 @@ import { RouterLink } from 'src/routes/components';
 import { paths } from 'src/routes/paths';
 import { useDeleteLegal, useFetchLegal, useEditLegal } from './fetchLegalBasis';
 import { useSnackbar } from 'notistack';
+import { useForm } from 'react-hook-form';
 
 export default function LegalListView() {
   const settings = useSettingsContext();
   const { data: legalDocuments, refetch, isLoading } = useFetchLegal();
+  console.log(legalDocuments)
+  const { register, handleSubmit, setValue } = useForm();
   const deleteLegal = useDeleteLegal();
   const { mutateAsync: editLegal, isLoading: isUpdating } = useEditLegal();
   const { enqueueSnackbar } = useSnackbar();
@@ -126,12 +129,11 @@ export default function LegalListView() {
       }
 
       setFile(selectedFile);
-      setFileError(''); // Hapus error jika file dipilih
+      setFileError('');
       setEditingDocument((prev) => ({
         ...prev,
         file: selectedFile,
-        file_name: selectedFile.name, // Memperbarui nama file
-      })); // Memperbarui state dengan file baru
+      }));
     }
   };
 
@@ -146,13 +148,12 @@ export default function LegalListView() {
       return;
     }
 
-    const { id, name, file_url, file_name } = editingDocument;
+    const { id, name, file_url, file_name, file } = editingDocument;
 
     try {
       const updateData = {
         name: name || undefined,
-        file_name: file_name ? file.name : editingDocument.file_name, // Gunakan nama file baru jika ada, jika tidak, gunakan yang lama
-        file_url: file_url ? file.file_url : editingDocument.file_url, // Gunakan URL yang ada terlebih dahulu
+        file: file ? file : editingDocument.file, 
       };
 
       await editLegal({ id: id, data: updateData });
@@ -287,9 +288,9 @@ export default function LegalListView() {
           />
 
           {/* Menampilkan nama file yang sedang digunakan */}
-          {editingDocument && editingDocument.file_name && !file && (
+          {editingDocument && editingDocument.file && !file && (
             <Typography variant="body2" sx={{ mt: 1 }}>
-              File saat ini: {editingDocument.file_name}
+              File saat ini: {editingDocument.file}
             </Typography>
           )}
         </DialogContent>
