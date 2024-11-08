@@ -22,20 +22,18 @@ export default function AccountChangePassword() {
   const password = useBoolean();
 
   const ChangePassWordSchema = Yup.object().shape({
-    oldPassword: Yup.string().required('Old Password is required'),
     newPassword: Yup.string()
-      .required('New Password is required')
-      .min(6, 'Password must be at least 6 characters')
-      .test(
-        'no-match',
-        'New password must be different than old password',
-        (value, { parent }) => value !== parent.oldPassword
-      ),
-    confirmNewPassword: Yup.string().oneOf([Yup.ref('newPassword')], 'Passwords must match'),
+      .required('Password baru harus di isi')
+      .min(8, 'Password minimal 8 karakter'),
+    // .test(
+    //   'no-match',
+    //   'New password must be different than old password',
+    //   (value, { parent }) => value !== parent.oldPassword
+    // ),
+    confirmNewPassword: Yup.string().oneOf([Yup.ref('newPassword')], 'Password tidak sama'),
   });
 
   const defaultValues = {
-    oldPassword: '',
     newPassword: '',
     confirmNewPassword: '',
   };
@@ -55,7 +53,7 @@ export default function AccountChangePassword() {
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
       reset();
-      enqueueSnackbar('Update success!');
+      enqueueSnackbar('Update password berhasil!');
       console.info('DATA', data);
     } catch (error) {
       console.error(error);
@@ -65,7 +63,7 @@ export default function AccountChangePassword() {
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
       <Stack component={Card} spacing={3} sx={{ p: 3 }}>
-        <RHFTextField
+        {/* <RHFTextField
           name="oldPassword"
           type={password.value ? 'text' : 'password'}
           label="Old Password"
@@ -78,11 +76,11 @@ export default function AccountChangePassword() {
               </InputAdornment>
             ),
           }}
-        />
+        /> */}
 
         <RHFTextField
           name="newPassword"
-          label="New Password"
+          label="Password baru"
           type={password.value ? 'text' : 'password'}
           InputProps={{
             endAdornment: (
@@ -95,8 +93,8 @@ export default function AccountChangePassword() {
           }}
           helperText={
             <Stack component="span" direction="row" alignItems="center">
-              <Iconify icon="eva:info-fill" width={16} sx={{ mr: 0.5 }} /> Password must be minimum
-              6+
+              <Iconify icon="eva:info-fill" width={16} sx={{ mr: 0.5 }} /> Password minimal 8
+              karakter
             </Stack>
           }
         />
@@ -104,7 +102,7 @@ export default function AccountChangePassword() {
         <RHFTextField
           name="confirmNewPassword"
           type={password.value ? 'text' : 'password'}
-          label="Confirm New Password"
+          label="Konfirmasi password baru"
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -117,7 +115,7 @@ export default function AccountChangePassword() {
         />
 
         <LoadingButton type="submit" variant="contained" loading={isSubmitting} sx={{ ml: 'auto' }}>
-          Save Changes
+          Simpan Perubahan
         </LoadingButton>
       </Stack>
     </FormProvider>

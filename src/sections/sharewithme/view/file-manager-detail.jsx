@@ -47,9 +47,9 @@ export const FIleManagerDetaill = () => {
     return <div>Error fetching folder details.</div>;
   }
 
-  if (tagsError) {
-    return <div>Error fetching tags.</div>;
-  }
+  // if (tagsError) {
+  //   return <div>Error fetching tags.</div>;
+  // }
 
   return (
     <>
@@ -63,9 +63,9 @@ export const FIleManagerDetaill = () => {
                 textDecoration: 'underline',
                 marginRight: '8px',
               }}
-              onClick={() => navigate(paths.dashboard.root)}
+              onClick={() => navigate(paths.dashboard.shareFilFolder)}
             >
-              My Drive &raquo;
+              Dibagikan kepada saya &raquo;
             </span>
 
             {folderStack.map((folder, index) => (

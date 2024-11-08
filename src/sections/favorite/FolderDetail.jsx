@@ -36,11 +36,12 @@ import {
   useAddFavoriteFolder,
   useDeleteFolder,
 } from './view/useFolder';
+import { useQueryClient } from '@tanstack/react-query';
 
 // ----------------------------------------------------------------------
 
 export default function FolderDetail({
-  item,
+  item=[],
   open,
   favorited,
   onFavorite,
@@ -70,6 +71,7 @@ export default function FolderDetail({
 
   const { mutateAsync: addFavorite } = useAddFavoriteFolder();
   const { mutateAsync: removeFavorite } = useRemoveFavoriteFolder();
+  const useClient = useQueryClient();
 
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
@@ -77,7 +79,6 @@ export default function FolderDetail({
   const toggleTags = useBoolean(true);
   const share = useBoolean();
   const properties = useBoolean(true);
-
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
 
   const [inviteEmail, setInviteEmail] = useState('');
@@ -173,6 +174,7 @@ export default function FolderDetail({
       await removeTagFolder({ folder_id: folder_id, tag_id: tagId }); // Updated to use folder_id
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
       enqueueSnackbar('Tag removed successfully!', { variant: 'success' });
+      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
     } catch (error) {
       console.error('Error removing tag:', error);
       enqueueSnackbar('Error removing tag.', { variant: 'error' });
@@ -201,7 +203,7 @@ export default function FolderDetail({
   }, [is_favorite]);
 
   const handleFavoriteToggle = useCallback(async () => {
-    if (!id) {
+    if (!folder_id) {
       enqueueSnackbar('Folder ID is required to toggle favorite status!', { variant: 'error' });
       return;
     }
@@ -209,18 +211,19 @@ export default function FolderDetail({
     setIsLoading(true);
 
     try {
-      // Log id before making the API call
+      // Log folder_id before making the API call
 
       if (favorite.value) {
         // If already favorited, remove it
 
-        await removeFavorite({ id }); // Ensure payload is an object with `id`
+        await removeFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
         enqueueSnackbar('Folder dihapus dari favorit!', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
       } else {
         // Otherwise, add it
-
-        await addFavorite({ folder_id: id }); // Ensure payload is an object with `folder_id`
+        await addFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
         enqueueSnackbar('Folder ditambahkan ke favorit!', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
       }
 
       // Toggle the UI state

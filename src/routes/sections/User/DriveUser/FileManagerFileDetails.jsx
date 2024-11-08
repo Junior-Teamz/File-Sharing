@@ -19,6 +19,7 @@ import { fDateTime } from 'src/utils/format-time';
 import { useBoolean } from 'src/hooks/use-boolean';
 // components
 import Iconify from 'src/components/iconify';
+import EditIcon from '@mui/icons-material/Edit';
 import Scrollbar from 'src/components/scrollbar';
 import FileThumbnail, { fileFormat } from 'src/components/file-thumbnail';
 import { useIndexTag } from './view/TagUser/useIndexTag';
@@ -27,12 +28,14 @@ import {
   useAddFileTag,
   useRemoveTagFile,
   useMutationDeleteFiles,
+  useChangeNameFile,
+  useDownloadFile,
 } from './view/FetchDriveUser/index';
 
 import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerInvitedItem from './FileManagerInvitedItem';
 import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
-import { Dialog, DialogActions, DialogContent, DialogTitle, Modal } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Modal, Tooltip } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import CloseIcon from '@mui/icons-material/Close';
 import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
@@ -67,7 +70,7 @@ export default function FIleManagerFileDetails({
     updated_at,
     is_favorite,
     file_url,
-    created_at
+    created_at,
   } = item;
 
   const isFolder = item.type === 'folder';
@@ -90,15 +93,22 @@ export default function FIleManagerFileDetails({
   const properties = useBoolean(true);
   const [fileIdToDelete, setFileIdToDelete] = useState(null);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const { mutateAsync: updateNameFile } = useChangeNameFile();
+  const [originalFileType, setOriginalFileType] = useState(item.type);
 
   const [inviteEmail, setInviteEmail] = useState('');
-  const favorite = useBoolean(is_favorite); // Set initial value from props
+  const favorite = useBoolean(is_favorite);
   const [issLoading, setIsLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [newFileName, setNewFileName] = useState(item.name);
+  
+  const [isConfirmOpenn, setConfirmOpenn] = useState(false);
 
   const { data: tagData, isLoading, isError } = useIndexTag();
   const addTagFile = useAddFileTag();
   const { mutateAsync: removeTagFile } = useRemoveTagFile();
   const { mutateAsync: deleteFile } = useMutationDeleteFiles();
+  const { mutateAsync: downloadFile } = useDownloadFile();
 
   useEffect(() => {
     if (!isLoading && !isError && tagData && Array.isArray(tagData.data)) {
@@ -107,6 +117,62 @@ export default function FIleManagerFileDetails({
       console.error('Error fetching tag data:', isError);
     }
   }, [tagData, isLoading, isError]);
+
+  useEffect(() => {
+    setNewFileName(item.name);
+    setOriginalFileType(item.type);
+  }, [item]);
+
+  const handleRename = useCallback(async () => {
+    const newFileType = newFileName.split('.').pop();
+
+    if (newFileType !== originalFileType.split('.').pop()) {
+      enqueueSnackbar('Type file tidak boleh diubah!', { variant: 'error' });
+      return;
+    }
+
+    try {
+      await updateNameFile({ fileId: item.id, data: { name: newFileName } });
+      enqueueSnackbar('Nama file berhasil diperbarui!', { variant: 'success' });
+      setIsEditing(false);
+      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+    } catch (error) {
+      enqueueSnackbar('Gagal memperbarui nama file!', { variant: 'error' });
+    }
+  }, [item.id, newFileName, originalFileType, updateNameFile, enqueueSnackbar, useClient]);
+
+  const handleDownload = useCallback(async () => {
+    try {
+      const idsToDownload = Array.isArray(item.ids) && item.ids.length ? item.ids : [item.id];
+
+      const response = await downloadFile(idsToDownload);
+
+      if (response.data) {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', item.name || 'download');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        enqueueSnackbar('Download berhasil!', { variant: 'success' });
+      } else {
+        enqueueSnackbar('Tidak ada data untuk di download!', { variant: 'error' });
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      const errorMessage = error.response?.data?.error || 'Download gagal!';
+      enqueueSnackbar(errorMessage, { variant: 'error' });
+    }
+  }, [downloadFile, item, enqueueSnackbar]);
+
+  const openConfirmDialogg = () => {
+    setConfirmOpenn(true);
+  };
+
+  const closeConfirmDialogg = () => {
+    setConfirmOpenn(false);
+  };
 
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value);
@@ -414,7 +480,7 @@ export default function FIleManagerFileDetails({
               src="/assets/icons/files/ic_folder.svg"
               alt="Folder Icon"
             />
-          ) : ['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(item.type) ? (
+          ) : ['jpg', 'jpeg', 'gif', 'bmp', 'png', 'svg'].includes(item.type) ? (
             <>
               <Box
                 sx={{
@@ -429,7 +495,7 @@ export default function FIleManagerFileDetails({
                   component="img"
                   src={file_url}
                   alt={item.name}
-                  onClick={handleOpen} // Open modal for zoomed view
+                  onClick={handleOpen}
                   style={{
                     maxWidth: '100%',
                     height: 'auto',
@@ -446,7 +512,7 @@ export default function FIleManagerFileDetails({
                     opacity: 0,
                     transition: 'opacity 0.3s',
                   }}
-                  onClick={handleOpen} // Open modal for zoom
+                  onClick={handleOpen}
                 >
                   <ZoomInMapIcon />
                 </IconButton>
@@ -496,7 +562,6 @@ export default function FIleManagerFileDetails({
             </>
           ) : [
               'mp4',
-              'mkv',
               'webm',
               '.mov',
               'mpeg1',
@@ -518,7 +583,12 @@ export default function FIleManagerFileDetails({
               <source src={video_url} type={`video/${item.type}`} />
               Browser Anda tidak mendukung tag video.
             </video>
-          ) : ['mp3', 'wav', 'ogg', 'm4p', 'mxp4', 'msv'].includes(item.type) ? (
+          ) : ['mkv'].includes(item.type) ? (
+            <video controls style={{ maxWidth: '100%', height: 'auto' }}>
+              <source src={file_url} />
+              Browser Anda tidak mendukung tag video.
+            </video>
+          ) : ['aif', 'mp3', 'wav', 'ogg', 'm4p', 'mxp4', 'msv', 'aac'].includes(item.type) ? (
             <Box component="div">
               <audio controls>
                 <source src={file_url} type={`audio/${item.type}`} />
@@ -526,10 +596,37 @@ export default function FIleManagerFileDetails({
               </audio>
             </Box>
           ) : (
-            <span>Tidak ada preview</span>
+            <span>
+              Tidak ada preview
+              <Button variant="contained" onClick={openConfirmDialogg} sx={{ mt: 2 }}>
+                Download File
+              </Button>
+            </span>
           )}
 
-          <Typography variant="subtitle2">{name}</Typography>
+          {isEditing ? (
+            <TextField
+              value={newFileName}
+              onChange={(e) => setNewFileName(e.target.value)}
+              onBlur={handleRename} // Menangani rename saat blur
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleRename(); // Menangani rename saat tekan Enter
+                }
+              }}
+              size="small"
+              autoFocus
+            />
+          ) : (
+            <Typography variant="subtitle2">
+              {name}
+              <Tooltip title="Edit nama file">
+                <IconButton size="small" onClick={() => setIsEditing(true)}>
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Typography>
+          )}
           <Typography variant="body2" color="text.secondary">
             {fData(size)}
           </Typography>
@@ -624,6 +721,19 @@ export default function FIleManagerFileDetails({
           </Button>
           <Button onClick={handleDeleteFile} color="error">
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={isConfirmOpenn} onClose={closeConfirmDialogg}>
+        <DialogTitle>Konfirmasi Download</DialogTitle>
+        <DialogContent>Apakah Anda yakin ingin mendownload file ini?</DialogContent>
+        <DialogActions>
+          <Button onClick={closeConfirmDialogg} color="error">
+            Batal
+          </Button>
+          <Button onClick={handleDownload} color="primary" variant="contained">
+            Download
           </Button>
         </DialogActions>
       </Dialog>

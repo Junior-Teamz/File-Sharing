@@ -82,12 +82,12 @@ export function useNavData() {
             icon: ICONS.folder,
           },
           {
-            title: t('analytics'),
+            title: t('analitik'),
             path: paths.dashboard.general.analytics,
             icon: ICONS.analytics,
           },
           {
-            title: t('shared with me'),
+            title: t('dibagikan kepada saya'),
             path: paths.dashboard.shareFilFolder,
             icon: ICONS.share,
           },

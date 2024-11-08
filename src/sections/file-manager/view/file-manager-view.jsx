@@ -24,6 +24,8 @@ import FileManagerFiltersResult from '../file-manager-filters-result';
 import FileManagerNewFolderDialog from '../file-manager-new-folder-dialog';
 import { useFetchFolder } from 'src/sections/overview/app/view/folders';
 import { handleFolderFiles } from 'src/_mock/map/filesFolderApi';
+import { ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
+import FileManagerFileDialog from '../FileManagerFileDialog';
 // ----------------------------------------------------------------------
 
 const defaultFilters = {
@@ -57,6 +59,16 @@ export default function FileManagerView() {
   const [filters, setFilters] = useState(defaultFilters);
 
   const [selectedTags, setSelectedTags] = useState([]);
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     if (FolderFiles && FolderFiles.length !== tableData.length) {
@@ -162,14 +174,47 @@ export default function FileManagerView() {
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Typography variant="h4">File Manager</Typography>
+          <Typography variant="h4">File manajer</Typography>
           <Button
             variant="contained"
-            startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-            onClick={upload.onTrue}
+            startIcon={<Iconify icon="eva:plus-fill" />}
+            onClick={handleClick}
           >
-            Upload
+            New
           </Button>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+            // MenuListProps={{
+            //   sx: { padding: 1 },
+            // }}
+          >
+            <MenuItem
+              onClick={() => {
+                upload.onTrue();
+                handleClose();
+              }}
+              sx={{ padding: '6px 6px' }}
+            >
+              <ListItemIcon>
+                <Iconify icon="eva:cloud-upload-fill" fontSize="large" />
+              </ListItemIcon>
+              <ListItemText primary="Upload File" primaryTypographyProps={{ fontSize: '1rem' }} />
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                create.onTrue();
+                handleClose();
+              }}
+              sx={{ padding: '6px 6px' }}
+            >
+              <ListItemIcon>
+                <Iconify icon="eva:folder-add-fill" fontSize="large" />
+              </ListItemIcon>
+              <ListItemText primary="Buat Folder" primaryTypographyProps={{ fontSize: '1rem' }} />
+            </MenuItem>
+          </Menu>
         </Stack>
 
         <Stack
@@ -198,6 +243,12 @@ export default function FileManagerView() {
 
       <FileManagerNewFolderDialog
         title="Buat Folder Baru "
+        onTagChange={handleTagChange}
+        open={upload.value}
+        onClose={upload.onFalse}
+      />
+
+      <FileManagerFileDialog
         onTagChange={handleTagChange}
         open={upload.value}
         onClose={upload.onFalse}

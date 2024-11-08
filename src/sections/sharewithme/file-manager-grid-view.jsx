@@ -40,11 +40,12 @@ import TableShare from 'src/components/table/tableshare';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Nama File' },
+  { id: 'name', label: 'Nama' },
   { id: 'size', label: 'Ukuran', width: 120 },
   { id: 'type', label: 'Tipe', width: 120 },
   { id: 'created_at', label: 'tanggal dibagikan', width: 200 },
   { id: 'shared', label: 'Dibagikan Oleh', align: 'right', width: 140 },
+  { id: '', label: '', align: 'right', width: 140 },
 ];
 
 export default function FileManagerGridView({

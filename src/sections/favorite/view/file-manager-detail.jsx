@@ -15,6 +15,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  IconButton,
 } from '@mui/material';
 import { Box, Container, Stack } from '@mui/system';
 import InfoIcon from '@mui/icons-material/Info';
@@ -24,13 +25,27 @@ import EmptyContent from 'src/components/empty-content';
 import FileManagerPanel from '../file-manager-panel';
 import FileManagerNewDialogParent from '../file-manager-new-dialog-parent-id';
 import { useFetchDetail } from './folderDetail';
-import { useMutationFolder } from 'src/sections/overview/app/view/folders';
+import { useFetchFolder, useMutationFolder } from 'src/sections/overview/app/view/folders';
 import { useIndexTag } from 'src/sections/tag/view/TagMutation';
 import { paths } from 'src/routes/paths';
+import FolderRecentItem from '../folder-recent-item';
+import FolderDetail from '../FolderDetail';
+import { useBoolean } from 'src/hooks/use-boolean';
+import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
 
-export const FIleManagerDetail = () => {
+export const FIleManagerDetailFavorite = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const details = useBoolean();
+
+  const { copy } = useCopyToClipboard();
+  const { data: folderss, isLoading: loading, refetch: refetc, isFetching } = useFetchFolder();
+  const favorite = useBoolean(folderss?.is_favorite || false); // Safely access is_favorite
+
+  const handleCopy = useCallback(() => {
+    enqueueSnackbar('Copied!');
+    copy(folderss);
+  }, [copy, enqueueSnackbar, folderss]);
 
   // Fetch folder details and tags
   const { data, isLoading, refetch, error } = useFetchDetail(id);
@@ -52,7 +67,6 @@ export const FIleManagerDetail = () => {
       enqueueSnackbar('Folder successfully created.', { variant: 'success' });
       refetch();
       handleCloseCreateFolderDialog();
-
     },
     onError: (error) => {
       console.error('Error creating folder:', error);
@@ -76,9 +90,6 @@ export const FIleManagerDetail = () => {
       tag_ids: selectedTagIds,
       parent_id: id,
     };
-
-   
-
 
     createFolder(folderData);
   };
@@ -120,24 +131,11 @@ export const FIleManagerDetail = () => {
     }
   };
 
-  // Fetch folder details when ID changes
   useEffect(() => {
     if (id) {
       refetch();
     }
   }, [id, refetch]);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error fetching folder details.</div>;
-  }
-
-  if (tagsError) {
-    return <div>Error fetching tags.</div>;
-  }
 
   return (
     <>
@@ -151,9 +149,9 @@ export const FIleManagerDetail = () => {
                 textDecoration: 'underline', // Teks underline untuk menunjukkan bahwa bisa diklik
                 marginRight: '8px',
               }}
-              onClick={() => navigate(paths.dashboard.root)} // Navigasi ke root dashboard
+              onClick={() => navigate(paths.dashboard.favorite)} // Navigasi ke root dashboard
             >
-              My Drive &raquo;
+              Favorite &raquo;
             </span>
 
             {folderStack.map((folder, index) => (
@@ -172,7 +170,7 @@ export const FIleManagerDetail = () => {
                   navigate(`/dashboard/file-manager/info/${folder.id}`, { replace: true });
                 }}
               >
-               {folder.name} &raquo; {/* Use `folder.name` instead of `folderId` */}
+                {folder.name} &raquo; {/* Use `folder.name` instead of `folderId` */}
               </span>
             ))}
 
@@ -180,18 +178,16 @@ export const FIleManagerDetail = () => {
             <span style={{ color: 'black' }}>{data.folder_info.name}</span>
 
             {/* InfoIcon displays folder.id */}
-            <InfoIcon
-              fontSize="medium"
-              sx={{ mt: 3, cursor: 'pointer' }}
-              onClick={handleInfoClick}
-            />
+            <IconButton onClick={details.onTrue}>
+              <InfoIcon />
+            </IconButton>
           </Typography>
         </Box>
 
         {data.subfolders.length === 0 && data.files.length === 0 ? (
           <>
             <Button variant="contained" onClick={handleOpenCreateFolderDialog}>
-            Buat Folder Baru
+              Buat Folder Baru
             </Button>
             <FileManagerPanel
               title="Upload File"
@@ -204,7 +200,7 @@ export const FIleManagerDetail = () => {
         ) : (
           <>
             <Button variant="contained" onClick={handleOpenCreateFolderDialog}>
-            Buat Folder Baru
+              Buat Folder Baru
             </Button>
             <FileManagerPanel
               title="Upload File"
@@ -216,7 +212,7 @@ export const FIleManagerDetail = () => {
             <Typography sx={{ mb: 2, mt: 10 }}>Folder</Typography>
             {data.subfolders.map((folder) => (
               <div key={folder.id} onClick={() => handleSubfolderClick(folder.id, folder.name)}>
-                <FileRecentItem
+                <FolderRecentItem
                   file={{ ...folder, type: 'folder' }}
                   onRefetch={refetch}
                   onDelete={() => console.info('DELETE', folder.id)}
@@ -226,7 +222,7 @@ export const FIleManagerDetail = () => {
 
             {data.files.length > 0 && (
               <Stack spacing={2} sx={{ mt: 5 }}>
-                <Typography sx={{ mb: 2, mt: 5 }}>Files</Typography>
+                <Typography sx={{ mb: 2, mt: 5 }}>File</Typography>
                 {data.files.map((file) => (
                   <FileRecentItem
                     key={file.id}
@@ -245,9 +241,7 @@ export const FIleManagerDetail = () => {
       <Dialog open={openCreateFolderDialog} onClose={handleCloseCreateFolderDialog}>
         <DialogTitle>Create Folder</DialogTitle>
         <DialogContent>
-          <DialogContentText sx={{ mb: 3 }}>
-          Nama folder
-          </DialogContentText>
+          <DialogContentText sx={{ mb: 3 }}>Nama folder</DialogContentText>
           <TextField
             autoFocus
             margin="dense"
@@ -263,7 +257,7 @@ export const FIleManagerDetail = () => {
 
           {/* Tag selection */}
           <FormControl fullWidth margin="dense">
-            <InputLabel id="tags-label">Tags</InputLabel>
+            <InputLabel id="tags-label">Tag</InputLabel>
             <Select
               labelId="tags-label"
               id="tags"
@@ -312,14 +306,48 @@ export const FIleManagerDetail = () => {
         </DialogActions>
       </Dialog>
 
+      {folderss.folders
+        ? // Render untuk data folders
+          folderss.folders.map((folder) => (
+            <FolderDetail
+              key={folder.folder_id}
+              item={{ ...folder, type: 'folder' }}
+              favorited={favorite.value}
+              onFavorite={favorite.onToggle}
+              onCopyLink={handleCopy}
+              open={details.value}
+              onClose={details.onFalse}
+              onDelete={() => {
+                details.onFalse();
+                onDelete();
+              }}
+            />
+          ))
+        : data.folder_info
+        ? // Render untuk data subfolders
+          data.subfolders.map((subfolder) => (
+            <FolderDetail
+              key={subfolder.folder_id}
+              item={{ ...subfolder, type: 'subfolder' }}
+              favorited={favorite.value}
+              onFavorite={favorite.onToggle}
+              onCopyLink={handleCopy}
+              open={details.value}
+              onClose={details.onFalse}
+              onDelete={() => {
+                details.onFalse();
+                onDelete();
+              }}
+            />
+          ))
+        : null}
+
       {/* Upload File Dialog */}
       <FileManagerNewDialogParent
         title="Upload File"
         open={openUploadDialog}
         onClose={handleCloseUploadDialog}
         id={id}
-        // onCreate={() => {}} // Define these handlers or remove if not needed
-        // onUpdate={() => {}}
         folderName={folderName}
         onChangeFolderName={(name) => setFolderName(name)}
         refetch={refetch}

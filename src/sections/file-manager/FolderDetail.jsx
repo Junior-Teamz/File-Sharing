@@ -66,6 +66,7 @@ export default function FolderDetail({
     instance,
     tags: initialTags = [],
     updated_at,
+    created_at,
     is_favorite,
   } = item;
 
@@ -286,7 +287,7 @@ export default function FolderDetail({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Properties
+        Properti
         <IconButton size="small" onClick={properties.onToggle}>
           <Iconify
             icon={properties.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
@@ -298,21 +299,28 @@ export default function FolderDetail({
         <>
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Size
+              Ukuran
             </Box>
             {fData(total_size)}
           </Stack>
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Updated
+              Dibuat
+            </Box>
+            {fDateTime(created_at)}
+          </Stack>
+
+          <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
+            <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
+              Diperbarui
             </Box>
             {fDateTime(updated_at)}
           </Stack>
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Type
+              Tipe
             </Box>
             {fileFormat(type)}
           </Stack>

@@ -33,15 +33,14 @@ import {
 } from 'src/components/table';
 import FileManagerFileDialog from '../favorite/FileManagerFileDialog';
 
-
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Name' },
-  { id: 'size', label: 'Size', width: 120 },
-  { id: 'type', label: 'Type', width: 120 },
-  { id: 'modifiedAt', label: 'Modified', width: 140 },
-  { id: 'shared', label: 'Shared', align: 'right', width: 140 },
+  { id: 'name', label: 'Nama' },
+  { id: 'size', label: 'Ukuran', width: 120 },
+  { id: 'type', label: 'Tipe', width: 120 },
+  { id: 'modifiedAt', label: 'Diperbarui', width: 140 },
+  { id: 'shared', label: 'Dibagikan', align: 'right', width: 140 },
   { id: '', width: 88 },
 ];
 
@@ -67,7 +66,7 @@ export default function FileManagerGridView({
     onChangePage,
     onChangeRowsPerPage,
   } = table;
-  
+
   const theme = useTheme();
   const containerRef = useRef(null);
   const [folderName, setFolderName] = useState('');
@@ -91,7 +90,7 @@ export default function FileManagerGridView({
   const endIndex = startIndex + rowsPerPage;
   const currentData = dataFiltered
     .filter((i) => i.type !== 'folder')
-    .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at)) 
+    .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
     .slice(startIndex, endIndex);
 
   return (

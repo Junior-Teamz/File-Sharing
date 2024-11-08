@@ -100,7 +100,7 @@ export default function JwtLoginView() {
     <Stack spacing={2.5}>
       {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
-      <RHFTextField name="email" label="Email address" />
+      <RHFTextField name="email" label="Email" />
 
       <RHFTextField
         name="password"
@@ -117,7 +117,7 @@ export default function JwtLoginView() {
         }}
       />
 
-      <Link
+      {/* <Link
         component={RouterLink}
         href="/forgot-password"
         variant="body2"
@@ -125,8 +125,8 @@ export default function JwtLoginView() {
         underline="always"
         sx={{ alignSelf: 'flex-end' }}
       >
-        Forgot password?
-      </Link>
+        Lupa password?
+      </Link> */}
 
       <LoadingButton
         fullWidth

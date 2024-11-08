@@ -22,16 +22,14 @@ export default function LegalCreateForm() {
     onSuccess: () => {
       enqueueSnackbar('Dasar hukum berhasil dibuat', { variant: 'success' });
       reset();
-      router.push(paths.dashboard.legal.list); // Redirect to the legal document list
+      router.push(paths.dashboard.legal.list);
       queryClient.invalidateQueries({ queryKey: ['legal.admin'] });
     },
     onError: (error) => {
-      // Check if the error has the expected structure
       if (error.errors && error.errors.name) {
-        // Set form error for the name field
         methods.setError('name', {
           type: 'manual',
-          message: error.errors.name[0], // "Instance name already exists."
+          message: error.errors.name[0],
         });
       } else {
         enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
@@ -55,17 +53,15 @@ export default function LegalCreateForm() {
     formData.append('name', data.name);
     formData.append('file', data.file);
 
-    // Client-side validation for file size and type
     if (!data.file) {
-      enqueueSnackbar('File is required', { variant: 'error' });
+      enqueueSnackbar('File harus di isi', { variant: 'error' });
       return;
     }
 
     const fileSize = data.file.size;
     const fileType = data.file.type;
     if (fileSize > 5000000) {
-      // 2MB
-      enqueueSnackbar('File size exceeds 2MB', { variant: 'error' });
+      enqueueSnackbar('maxsimal ukuran file 5MB', { variant: 'error' });
       return;
     }
     if (
@@ -75,12 +71,12 @@ export default function LegalCreateForm() {
         'application/msword',
       ].includes(fileType)
     ) {
-      enqueueSnackbar('File must be a PDF, DOC, or DOCX', { variant: 'error' });
+      enqueueSnackbar('File harus berupa PDF, DOC, atau DOCX', { variant: 'error' });
       return;
     }
 
     try {
-      createLegal(formData); // Send the form data
+      createLegal(formData);
     } catch (error) {
       console.error(error);
     }
@@ -132,7 +128,7 @@ export default function LegalCreateForm() {
                 loading={isPending}
                 sx={{ minWidth: '150px' }}
               >
-                {isPending ? 'Creating...' : 'Create Dasar Hukum'}
+                {isPending ? 'Membuat...' : 'Buat Dasar Hukum'}
               </LoadingButton>
               <Button
                 variant="outlined"
@@ -140,7 +136,7 @@ export default function LegalCreateForm() {
                 onClick={() => reset()}
                 sx={{ minWidth: '150px' }}
               >
-                Reset
+                Reset form
               </Button>
             </Stack>
           </Card>

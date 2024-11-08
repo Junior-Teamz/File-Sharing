@@ -196,7 +196,7 @@ export default function FileManagerView() {
                 upload.onTrue();
                 handleClose();
               }}
-              sx={{ padding: '12px 12px' }}
+              sx={{ padding: '6px 6px' }}
             >
               <ListItemIcon>
                 <Iconify icon="eva:cloud-upload-fill" fontSize="large" />
@@ -208,7 +208,7 @@ export default function FileManagerView() {
                 create.onTrue();
                 handleClose();
               }}
-              sx={{ padding: '12px 12px' }}
+              sx={{ padding: '6px 6px' }}
             >
               <ListItemIcon>
                 <Iconify icon="eva:folder-add-fill" fontSize="large" />

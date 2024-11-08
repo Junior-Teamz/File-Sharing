@@ -13,9 +13,6 @@ import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
 import AccountGeneral from './account-general';
-// import AccountBilling from '../account-billing';
-// import AccountSocialLinks from '../account-social-links';
-// import AccountNotifications from '../account-notifications';
 import AccountChangePassword from './account-change-password';
 
 // ----------------------------------------------------------------------
@@ -26,21 +23,6 @@ const TABS = [
     label: 'Akun',
     icon: <Iconify icon="solar:user-id-bold" width={24} />,
   },
-  // {
-  //   value: 'billing',
-  //   label: 'Billing',
-  //   icon: <Iconify icon="solar:bill-list-bold" width={24} />,
-  // },
-  // {
-  //   value: 'notifications',
-  //   label: 'Notifications',
-  //   icon: <Iconify icon="solar:bell-bing-bold" width={24} />,
-  // },
-  // {
-  //   value: 'social',
-  //   label: 'Social links',
-  //   icon: <Iconify icon="solar:share-bold" width={24} />,
-  // },
   {
     value: 'security',
     label: 'Ganti Password',
@@ -63,10 +45,7 @@ export default function AccountView() {
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
         heading="Profil"
-        links={[
-          { name: 'My Drive', href: paths.dashboarduser.root },
-          { name: 'Profil' },
-        ]}
+        links={[{ name: 'My Drive', href: paths.dashboarduser.root }, { name: 'Profil' }]}
         sx={{
           mb: { xs: 3, md: 5 },
         }}
