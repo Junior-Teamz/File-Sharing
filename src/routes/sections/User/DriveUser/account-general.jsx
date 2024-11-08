@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
@@ -25,13 +25,16 @@ import FormProvider, {
   RHFUploadAvatar,
   RHFAutocomplete,
 } from 'src/components/hook-form';
+import { AuthContext } from 'src/auth/context/jwt';
 
 // ----------------------------------------------------------------------
 
 export default function AccountGeneral() {
   const { enqueueSnackbar } = useSnackbar();
 
-  const { user } = useMockedUser();
+  const { user } = useContext(AuthContext);
+  const instances = user.instances.map((instansi) => instansi.name);
+  
 
   const UpdateUserSchema = Yup.object().shape({
     displayName: Yup.string().required('Nama harus di isi'),
@@ -40,10 +43,10 @@ export default function AccountGeneral() {
   });
 
   const defaultValues = {
-    displayName: user?.displayName || '',
+    displayName: user?.name || '',
     email: user?.email || '',
+    instance: instances,
     photoURL: user?.photoURL || null,
-
     zipCode: user?.zipCode || '',
 
     // isPublic: user?.isPublic || false,
