@@ -33,20 +33,23 @@ import { paths } from 'src/routes/paths';
 import { useDeleteLegal, useFetchLegal, useEditLegal } from './fetchLegalBasis';
 import { useSnackbar } from 'notistack';
 import { useForm } from 'react-hook-form';
+import { Box } from '@mui/system';
 
 export default function LegalListView() {
   const settings = useSettingsContext();
   const { data: legalDocuments, refetch, isLoading } = useFetchLegal();
-  console.log(legalDocuments)
+  // console.log(legalDocuments.data.id);
   const { register, handleSubmit, setValue } = useForm();
   const deleteLegal = useDeleteLegal();
-  const { mutateAsync: editLegal, isLoading: isUpdating } = useEditLegal();
+  const [popover, setPopover] = useState({ open: false, anchorEl: null, currentId: null });
+  const idLegal = popover.currentId;
+  const { mutateAsync: editLegal, isLoading: isUpdating } = useEditLegal(idLegal);
   const { enqueueSnackbar } = useSnackbar();
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [popover, setPopover] = useState({ open: false, anchorEl: null, currentId: null });
+
   const [editingDocument, setEditingDocument] = useState({});
 
   const [file, setFile] = useState(null);
@@ -141,35 +144,39 @@ export default function LegalListView() {
     setEditingDocument({ ...editingDocument, name: e.target.value });
   };
 
-  const handleEditAction = async () => {
-    // Validasi ID dokumen
-    if (!editingDocument || !editingDocument.id) {
-      enqueueSnackbar('ID dokumen hukum diperlukan!', { variant: 'error' });
-      return;
-    }
+  // const handleEditAction = async () => {
+  //   // Validasi ID dokumen
+  //   if (!editingDocument || !editingDocument.id) {
+  //     enqueueSnackbar('ID dokumen hukum diperlukan!', { variant: 'error' });
+  //     return;
+  //   }
 
-    const { id, name, file_url, file_name, file } = editingDocument;
+  //   const { id, name, file_url, file_name, file } = editingDocument;
 
-    try {
-      const updateData = {
-        name: name || undefined,
-        file: file ? file : editingDocument.file, 
-      };
+  //   try {
+  //     const updateData = {
+  //       name: name || undefined,
+  //       file: file ? file : editingDocument.file,
+  //     };
 
-      await editLegal({ id: id, data: updateData });
-      enqueueSnackbar('Dokumen berhasil diperbarui', { variant: 'success' });
-      refetch();
-      handleEditDialogClose();
-    } catch (error) {
-      enqueueSnackbar('Gagal memperbarui dokumen', { variant: 'error' });
-    }
-  };
+  //     await editLegal({ id: id, data: updateData });
+  //     enqueueSnackbar('Dokumen berhasil diperbarui', { variant: 'success' });
+  //     refetch();
+  //     handleEditDialogClose();
+  //   } catch (error) {
+  //     enqueueSnackbar('Gagal memperbarui dokumen', { variant: 'error' });
+  //   }
+  // };
 
   // Filter and sort documents
   const filteredDocuments = legalDocuments?.data
     ?.filter((doc) => doc.name.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Sort by creation date (latest first)
 
+  const onEditSubmit = (data) => {
+    editLegal(data);
+    // console.log(data);
+  };
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
@@ -262,21 +269,27 @@ export default function LegalListView() {
         </Paper>
       )}
 
-      <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
+      <Dialog
+        component="form"
+        onSubmit={handleSubmit(onEditSubmit)}
+        open={editDialogOpen}
+        onClose={handleEditDialogClose}
+      >
         <DialogTitle>Edit Dokumen Hukum</DialogTitle>
         <DialogContent>
           <DialogContentText>
             Untuk mengedit dokumen ini, silakan masukkan detail baru.
           </DialogContentText>
+          {/* <Box component="form" > */}
           <TextField
             autoFocus
             margin="dense"
             label="Nama Dokumen"
             type="text"
+            name="name"
             fullWidth
             variant="standard"
-            value={editingDocument?.name || ''}
-            onChange={handleNameChange}
+            {...register('name')}
           />
           <TextField
             margin="dense"
@@ -284,9 +297,18 @@ export default function LegalListView() {
             fullWidth
             error={Boolean(fileError)}
             helperText={fileError}
-            onChange={handleFileChange}
+            name="file"
+            {...register('file')}
           />
-
+          <DialogActions>
+            <Button onClick={handleEditDialogClose} color="primary">
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isUpdating}>
+              {isUpdating ? <CircularProgress size={24} /> : 'Update'}
+            </Button>
+          </DialogActions>
+          {/* </Box> */}
           {/* Menampilkan nama file yang sedang digunakan */}
           {editingDocument && editingDocument.file && !file && (
             <Typography variant="body2" sx={{ mt: 1 }}>
@@ -294,14 +316,6 @@ export default function LegalListView() {
             </Typography>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleEditDialogClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleEditAction} color="primary" disabled={isUpdating}>
-            {isUpdating ? <CircularProgress size={24} /> : 'Update'}
-          </Button>
-        </DialogActions>
       </Dialog>
 
       {/* PDF View Dialog */}
