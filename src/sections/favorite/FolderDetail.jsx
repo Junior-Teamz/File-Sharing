@@ -173,7 +173,7 @@ export default function FolderDetail({
     try {
       await removeTagFolder({ folder_id: folder_id, tag_id: tagId }); // Updated to use folder_id
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
-      enqueueSnackbar('Tag removed successfully!', { variant: 'success' });
+      enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
       useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
     } catch (error) {
       console.error('Error removing tag:', error);
@@ -271,7 +271,7 @@ export default function FolderDetail({
               />
             ))
           }
-          renderInput={(params) => <TextField {...params} placeholder="#Tambahkan tag" />}
+          renderInput={(params) => <TextField {...params} placeholder="Tambahkan tag" />}
         />
       )}
       <Button onClick={handleSaveTags}>Simpan Tag</Button>

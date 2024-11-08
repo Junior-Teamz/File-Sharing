@@ -5,11 +5,12 @@ import { Outlet } from 'react-router-dom';
 import { LoadingScreen } from 'src/components/loading-screen';
 import UsersPage from './UsersPage';
 import DashboardUserLayout from '../dashboarduser/Layout';
-import { element } from 'prop-types';
 import { FileManagerDetailUsers } from './FileDetail/FileManagerDetailUsers';
 import AccountView from './DriveUser/user-account-view';
 import ShareUserPage from './ShareUserPage';
 import FavoritePage from './FavoritePage';
+import { FileManagerDetailUsersFavorite } from './favoriteuser/FileDetail/FileManagerDetailUsers';
+
 
 export const DashboardUser = [
   {
@@ -27,8 +28,19 @@ export const DashboardUser = [
       { element: <UsersPage />, index: true },
       { path: 'folder/:id', element: <FileManagerDetailUsers /> },
       { path: 'akun', element: <AccountView /> },
-      { path: 'shared-with-me', element: <ShareUserPage /> },
-      { path: 'favorite', element: <FavoritePage /> },
+      {
+        path: 'shared-with-me',
+        children: [
+          { element: <ShareUserPage />, index: 'true' },
+       
+        ],
+      },
+      { path: 'favorite', 
+        children:[
+          {element:<FavoritePage/>, index:'true'},
+          { path: 'folder/:id', element: <FileManagerDetailUsersFavorite /> },
+        ]
+      },
     ],
   },
 ];

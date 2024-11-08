@@ -29,6 +29,7 @@ import {
   useRemoveTagFile,
   useMutationDeleteFiles,
   useChangeNameFile,
+  useDownloadFile,
 } from './view/folderDetail/index';
 import { useIndexTag } from '../tag/view/TagMutation';
 import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
@@ -98,6 +99,7 @@ export default function FIleManagerFileDetails({
   const [inviteEmail, setInviteEmail] = useState('');
   const favorite = useBoolean(is_favorite);
   const [issLoading, setIsLoading] = useState(false);
+  const { mutateAsync: downloadFile } = useDownloadFile();
 
   const { data: tagData, isLoading, isError } = useIndexTag();
   const addTagFile = useAddFileTag();
@@ -137,6 +139,31 @@ export default function FIleManagerFileDetails({
     setOpenConfirmDialog(false);
     setFileIdToDelete(null);
   };
+
+  const handleDownload = useCallback(async () => {
+    try {
+      const idsToDownload = Array.isArray(item.ids) && item.ids.length ? item.ids : [item.id];
+
+      const response = await downloadFile(idsToDownload);
+
+      if (response.data) {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', item.name || 'download');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        enqueueSnackbar('Download berhasil!', { variant: 'success' });
+      } else {
+        enqueueSnackbar('Tidak ada data untuk di download!', { variant: 'error' });
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      const errorMessage = error.response?.data?.error || 'Download gagal!';
+      enqueueSnackbar(errorMessage, { variant: 'error' });
+    }
+  }, [downloadFile, item, enqueueSnackbar]);
 
   const handleSaveTags = async () => {
     try {
@@ -189,7 +216,7 @@ export default function FIleManagerFileDetails({
     try {
       await removeTagFile({ file_id: item.id, tag_id: tagId });
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
-      enqueueSnackbar('Tag removed successfully!', { variant: 'success' });
+      enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
       queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
     } catch (error) {
       console.error('Error removing tag:', error);
@@ -265,16 +292,6 @@ export default function FIleManagerFileDetails({
 
   const [isConfirmOpenn, setConfirmOpenn] = useState(false);
 
-  const handleDownload = useCallback(() => {
-    const link = document.createElement('a');
-    link.href = file_url;
-    link.download = item.name; // Set the download filename to item.name
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setConfirmOpenn(false); // Close the confirmation dialog after download
-  }, [file_url, item.name]);
-
   const openConfirmDialogg = () => {
     setConfirmOpenn(true);
   };
@@ -324,7 +341,7 @@ export default function FIleManagerFileDetails({
               />
             ))
           }
-          renderInput={(params) => <TextField {...params} placeholder="#Tambahkan tag" />}
+          renderInput={(params) => <TextField {...params} placeholder="Tambahkan tag" />}
         />
       )}
       <Button onClick={handleSaveTags}>simpan tag</Button>
@@ -480,7 +497,7 @@ export default function FIleManagerFileDetails({
                   component="img"
                   src={file_url}
                   alt={item.name}
-                  onClick={handleOpen} 
+                  onClick={handleOpen}
                   style={{
                     maxWidth: '100%',
                     height: 'auto',
@@ -497,7 +514,7 @@ export default function FIleManagerFileDetails({
                     opacity: 0,
                     transition: 'opacity 0.3s',
                   }}
-                  onClick={handleOpen} 
+                  onClick={handleOpen}
                 >
                   <ZoomInMapIcon />
                 </IconButton>

@@ -125,13 +125,13 @@ export default function FileManagerFolderItem({
         <InfoIcon />
       </IconButton>
 
-      <Checkbox
+      {/* <Checkbox
         color="warning"
         icon={<Iconify icon="eva:star-outline" />}
         checkedIcon={<Iconify icon="eva:star-fill" />}
         checked={favorite.value}
         onChange={handleFavoriteToggle}
-      />
+      /> */}
     </Stack>
   );
 
@@ -215,7 +215,7 @@ export default function FileManagerFolderItem({
         }}
         {...other}
       >
-        <Link key={folder.id} to={`folder/${folder.folder_id}`}>
+        <Link key={folder.id} to={`folder/${folder.id}`}>
           <Box onMouseEnter={checkbox.onTrue} onMouseLeave={checkbox.onFalse}>
             {renderIcon}
           </Box>

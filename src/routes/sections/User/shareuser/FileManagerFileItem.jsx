@@ -1,25 +1,20 @@
+// Atur FileManagerFileItem agar semua elemen dalam satu baris sejajar
 import PropTypes from 'prop-types';
 import { useState, useCallback } from 'react';
 // @mui
 import {
   Box,
-  Paper,
   Stack,
   Button,
   Avatar,
-  Divider,
-  MenuItem,
   Checkbox,
-  IconButton,
   Typography,
   AvatarGroup,
   TableRow,
   ListItemText,
+  Tooltip,
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
-import { avatarGroupClasses } from '@mui/material/AvatarGroup';
-import { tableRowClasses } from '@mui/material/TableRow';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useDoubleClick } from 'src/hooks/use-double-click';
@@ -27,7 +22,6 @@ import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
 // utils
 import { fDateTime } from 'src/utils/format-time';
 import { fData } from 'src/utils/format-number';
-
 // components
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
@@ -35,45 +29,32 @@ import { useSnackbar } from 'src/components/snackbar';
 import TextMaxLine from 'src/components/text-max-line';
 import FileThumbnail from 'src/components/file-thumbnail';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import { tableRowClasses } from '@mui/material/TableRow';
 import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerFileDetails from './FileManagerFileDetails';
-import { useAddFavoriteUser,useRemoveFavoriteUser } from './view/FetchFolderUser';
+import { useAddFavoriteUser, useRemoveFavoriteUser } from './view/FetchFolderUser';
 
-export default function FileManagerFileItem({ file,  selected, onSelect, onDelete, sx, ...other }) {
+export default function FileManagerFileItem({ file, selected, onSelect, onDelete }) {
   const theme = useTheme();
-  const { enqueueSnackbar } = useSnackbar();
   const { copy } = useCopyToClipboard();
+  const { enqueueSnackbar } = useSnackbar();
 
-  // Inside your FileRecentItem component
   const { mutateAsync: addFavorite } = useAddFavoriteUser();
   const { mutateAsync: removeFavorite } = useRemoveFavoriteUser();
 
   const [inviteEmail, setInviteEmail] = useState('');
-
   const checkbox = useBoolean();
   const share = useBoolean();
   const confirm = useBoolean();
   const details = useBoolean();
-  const favorite = useBoolean(file.is_favorite);
   const [issLoading, setIsLoading] = useState(false);
-
-  const handleChangeInvite = useCallback((event) => {
-    setInviteEmail(event.target.value);
-  }, []);
-
-  const handleCopy = useCallback(() => {
-    if (file.url) {
-      enqueueSnackbar('Berhasil di Copied!');
-      copy(file.url);
-    } else {
-      enqueueSnackbar('Failed to copy: URL is undefined');
-    }
-  }, [copy, enqueueSnackbar, file.url]);
 
   const handleClick = useDoubleClick({
     click: details.onTrue,
     doubleClick: () => console.info('DOUBLE CLICK'),
   });
+  const favorite = useBoolean(file.is_favorite);
 
   const defaultStyles = {
     borderTop: `solid 1px ${alpha(theme.palette.grey[500], 0.16)}`,
@@ -89,6 +70,15 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
       borderRight: `solid 1px ${alpha(theme.palette.grey[500], 0.16)}`,
     },
   };
+
+  const handleCopy = useCallback(() => {
+    if (file.url) {
+      enqueueSnackbar('Berhasil di Copied!');
+      copy(file.url);
+    } else {
+      enqueueSnackbar('Failed to copy: URL is undefined');
+    }
+  }, [copy, enqueueSnackbar, file.url]);
 
   const handleFavoriteToggle = useCallback(async () => {
     setIsLoading(true);
@@ -149,7 +139,6 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
             onClick={onSelect}
           />
         </TableCell>
-
         <TableCell onClick={handleClick}>
           <Stack direction="row" alignItems="center" spacing={2}>
             <FileThumbnail file={file.type} sx={{ width: 36, height: 36 }} />
@@ -176,36 +165,49 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
         </TableCell>
 
         <TableCell onClick={handleClick} sx={{ whiteSpace: 'nowrap' }}>
-          <ListItemText
-            primary={fDateTime(file.shared_with.created_at, 'dd MMM yyyy')}
-            secondary={fDateTime(file.shared_with.created_at, 'p')}
-            primaryTypographyProps={{ typography: 'body2' }}
-            secondaryTypographyProps={{
-              mt: 0.5,
-              component: 'span',
-              typography: 'caption',
-            }}
-          />
+          {file.shared_with?.[0]?.created_at ? (
+            <ListItemText
+              primary={fDateTime(file.shared_with[0].created_at, 'dd MMM yyyy')}
+              secondary={fDateTime(file.shared_with[0].created_at, 'p')}
+              primaryTypographyProps={{ variant: 'body2' }}
+              secondaryTypographyProps={{
+                mt: 0.5,
+                component: 'span',
+                typography: 'caption',
+              }}
+            />
+          ) : (
+            'Tidak ada tanggal dibagikan'
+          )}
         </TableCell>
 
-        <TableCell align="right" onClick={handleClick}>
-          <AvatarGroup
-            max={4}
-            sx={{
-              display: 'inline-flex',
-              [`& .${avatarGroupClasses.avatar}`]: {
-                width: 24,
-                height: 24,
-                '&:first-of-type': {
-                  fontSize: 12,
-                },
-              },
-            }}
-          >
-            {file.shared_with?.map((person) => (
-              <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
-            ))}
-          </AvatarGroup>
+        <TableCell onClick={handleClick} align="right">
+          <Box sx={{ cursor: 'pointer', display: 'flex' }}>
+            {file.user ? (
+              <>
+                <Avatar
+                  alt={file.user.name}
+                  src={file.user.avatarUrl}
+                  sx={{ width: 24, height: 24, ml: 1 }} // Menambahkan margin right
+                />
+                <Tooltip title={file.user.email}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      maxWidth: 70, // Atur sesuai kebutuhan
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {file.user.email}
+                  </Typography>
+                </Tooltip>
+              </>
+            ) : (
+              'Tidak ada pengguna'
+            )}
+          </Box>
         </TableCell>
 
         <TableCell
@@ -220,7 +222,7 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
             icon={<Iconify icon="eva:star-outline" />}
             checkedIcon={<Iconify icon="eva:star-fill" />}
             checked={favorite.value}
-            onChange={handleFavoriteToggle} // Toggle favorite state
+            onChange={handleFavoriteToggle}
             sx={{ p: 0.75 }}
           />
         </TableCell>
@@ -243,24 +245,11 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
         open={share.value}
         shared={file.shared}
         inviteEmail={inviteEmail}
-        onChangeInvite={handleChangeInvite}
         onCopyLink={handleCopy}
         onClose={() => {
           share.onFalse();
           setInviteEmail('');
         }}
-      />
-
-      <ConfirmDialog
-        open={confirm.value}
-        onClose={confirm.onFalse}
-        title="Delete"
-        content="Are you sure want to delete?"
-        action={
-          <Button variant="contained" color="error" onClick={onDelete}>
-            Delete
-          </Button>
-        }
       />
     </>
   );
@@ -271,5 +260,4 @@ FileManagerFileItem.propTypes = {
   selected: PropTypes.bool,
   onSelect: PropTypes.func,
   onDelete: PropTypes.func,
-  sx: PropTypes.object,
 };

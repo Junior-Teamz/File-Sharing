@@ -138,18 +138,17 @@ export default function UserTableToolbar({
                 </MenuItem>
               ))
             ) : (
-              <MenuItem disabled>No instances available</MenuItem>
+              <MenuItem disabled>Tidak ada instansi yang tersedia</MenuItem>
             )}
           </Select>
         </FormControl>
 
-        {/* Search Input */}
         <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
           <TextField
             fullWidth
-            value={searchTerm} // Bind input value to local searchTerm
-            onChange={handleFilterSearch} // Handle input changes
-            placeholder="Search by name or email..."
+            value={searchTerm}
+            onChange={handleFilterSearch}
+            placeholder="Cari berdasarkan nama atau email"
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -164,7 +163,6 @@ export default function UserTableToolbar({
         </Stack>
       </Stack>
 
-      {/* Popover Menu */}
       <CustomPopover
         open={popover.open}
         onClose={popover.onClose}
@@ -203,7 +201,7 @@ export default function UserTableToolbar({
 UserTableToolbar.propTypes = {
   filters: PropTypes.shape({
     role: PropTypes.array,
-    instansi: PropTypes.array, // New prop for instance filters
+    instansi: PropTypes.array,
     search: PropTypes.string,
   }),
   onFilters: PropTypes.func.isRequired,

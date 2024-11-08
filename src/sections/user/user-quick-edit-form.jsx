@@ -21,27 +21,30 @@ import {
 // components
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import { useQueryClient } from '@tanstack/react-query';
 
 // ----------------------------------------------------------------------
 
 export default function UserQuickEditForm({ currentUser, open, onClose, instances, onRefetch }) {
   const { enqueueSnackbar } = useSnackbar();
+  const useClient = useQueryClient();
   const { mutate: editUser, isPending } = useEditUser({
     onSuccess: () => {
-      enqueueSnackbar('User updated successfully', { variant: 'success' });
+      enqueueSnackbar('User berhasil di update', { variant: 'success' });
       resetForm({
         name: '',
         email: '',
         instance_id: '',
         password: '',
         confirmPassword: '',
-      }); // Reset form with new default values
-      if (onRefetch) onRefetch(); // Refetch user list if onRefetch callback is provided
-      onClose(); // Close the dialog on success
+      });
+      if (onRefetch) onRefetch();
+      onClose();
+      useClient.invalidateQueries({ queryKey: ['list.user'] });
     },
     onError: (error) => {
-      enqueueSnackbar('Error updating user', { variant: 'error' });
-      console.error('Error updating user', error);
+      enqueueSnackbar('Error update user', { variant: 'error' });
+      console.error('Error update user', error);
     },
   });
 

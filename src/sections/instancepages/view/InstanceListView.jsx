@@ -33,7 +33,6 @@ import CustomPopover from 'src/components/custom-popover';
 import { useForm } from 'react-hook-form';
 import EmptyContent from 'src/components/empty-content';
 
-
 export default function InstanceListView() {
   const settings = useSettingsContext();
   const { enqueueSnackbar } = useSnackbar();
@@ -70,7 +69,6 @@ export default function InstanceListView() {
 
   // Sort instances by creation date (most recent first)
   const sortedInstances = instances.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
 
   // Filter instances based on search term
   const filteredInstances = sortedInstances.filter((instance) =>
@@ -141,7 +139,7 @@ export default function InstanceListView() {
           heading="List"
           links={[
             { name: 'Dashboard', href: paths.dashboard.root },
-            { name: 'Instance List', href: paths.dashboard.instance.list },
+            { name: 'Daftar Instansi', href: paths.dashboard.instance.list },
           ]}
           action={
             <Button
@@ -150,7 +148,7 @@ export default function InstanceListView() {
               variant="contained"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
-              Instansi Baru
+              Buat Instansi
             </Button>
           }
           sx={{ mb: { xs: 3, md: 5 } }}
@@ -176,25 +174,31 @@ export default function InstanceListView() {
               <Table>
                 <TableHead>
                   <TableRow>
+                    <TableCell align="center">Nomor</TableCell>
                     <TableCell>Nama</TableCell>
                     <TableCell>Alamat</TableCell>
-                    <TableCell align="right">Aksi</TableCell>
+                    <TableCell align="center">Aksi</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredInstances
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((instance) => (
+                    .map((instance, idx) => (
                       <TableRow key={instance.id}>
+                        <TableCell align="center">{idx + 1}</TableCell>
                         <TableCell>{instance.name}</TableCell>
-                        <TableCell sx={{ maxWidth: 200, padding: '0', whiteSpace: 'nowrap' }}>
-                          <div
-                            style={{ overflowX: 'auto', maxWidth: '100%', display: 'inline-block' }}
-                          >
-                            {instance.address}
-                          </div>
+                        <TableCell
+                          sx={{
+                            maxWidth: 250,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            paddingRight: 2,
+                          }}
+                        >
+                          {instance.address}
                         </TableCell>
-                        <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                        <TableCell align="center" sx={{ whiteSpace: 'nowrap' }}>
                           <Tooltip title="Aksi Lainnya" placement="top">
                             <IconButton onClick={(event) => handlePopoverOpen(event, instance.id)}>
                               <Iconify icon="eva:more-vertical-fill" />
@@ -206,6 +210,7 @@ export default function InstanceListView() {
                 </TableBody>
               </Table>
             </TableContainer>
+
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"

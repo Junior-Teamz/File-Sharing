@@ -27,6 +27,7 @@ import {
   useAddFileTag,
   useRemoveTagFile,
   useMutationDeleteFiles,
+  useDownloadFile
 } from './view/FetchDriveUser/index';
 
 import FileManagerShareDialog from './FileManagerShareDialog';
@@ -100,11 +101,13 @@ export default function FIleManagerFileDetails({
   const [inviteEmail, setInviteEmail] = useState('');
   const favorite = useBoolean(is_favorite); // Set initial value from props
   const [issLoading, setIsLoading] = useState(false);
+  const [isConfirmOpenn, setConfirmOpenn] = useState(false);
 
   const { data: tagData, isLoading, isError } = useIndexTag();
   const addTagFile = useAddFileTag();
   const { mutateAsync: removeTagFile } = useRemoveTagFile();
   const { mutateAsync: deleteFile } = useMutationDeleteFiles();
+  const { mutateAsync: downloadFile } = useDownloadFile();
 
   useEffect(() => {
     if (!isLoading && !isError && tagData && Array.isArray(tagData.data)) {
@@ -241,6 +244,39 @@ export default function FIleManagerFileDetails({
     }
   }, [favorite.value, id, addFavorite, removeFavorite, enqueueSnackbar]);
 
+  const handleDownload = useCallback(async () => {
+    try {
+      const idsToDownload = Array.isArray(item.ids) && item.ids.length ? item.ids : [item.id];
+
+      const response = await downloadFile(idsToDownload);
+
+      if (response.data) {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', item.name || 'download');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        enqueueSnackbar('Download berhasil!', { variant: 'success' });
+      } else {
+        enqueueSnackbar('Tidak ada data untuk di download!', { variant: 'error' });
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      const errorMessage = error.response?.data?.error || 'Download gagal!';
+      enqueueSnackbar(errorMessage, { variant: 'error' });
+    }
+  }, [downloadFile, item, enqueueSnackbar]);
+
+  const openConfirmDialogg = () => {
+    setConfirmOpenn(true);
+  };
+
+  const closeConfirmDialogg = () => {
+    setConfirmOpenn(false);
+  };
+
   const renderTags = (
     <Stack spacing={1.5}>
       <Stack
@@ -282,7 +318,7 @@ export default function FIleManagerFileDetails({
               />
             ))
           }
-          renderInput={(params) => <TextField {...params} placeholder="#Tambahkan tag" />}
+          renderInput={(params) => <TextField {...params} placeholder="Tambahkan tag" />}
         />
       )}
       <Button onClick={handleSaveTags}>simpan tags</Button>
@@ -404,7 +440,7 @@ export default function FIleManagerFileDetails({
             bgcolor: 'background.neutral',
           }}
         >
-          {isFolder ? (
+ {isFolder ? (
             <Box
               sx={{
                 width: 50,
@@ -416,7 +452,7 @@ export default function FIleManagerFileDetails({
               src="/assets/icons/files/ic_folder.svg"
               alt="Folder Icon"
             />
-          ) : ['jpg', 'jpeg', 'png', 'gif', 'svg', 'bmp', 'tiff'].includes(item.type) ? (
+          ) : ['jpg', 'jpeg', 'gif', 'bmp', 'png', 'svg'].includes(item.type) ? (
             <>
               <Box
                 sx={{
@@ -498,7 +534,6 @@ export default function FIleManagerFileDetails({
             </>
           ) : [
               'mp4',
-              'mkv',
               'webm',
               '.mov',
               'mpeg1',
@@ -520,7 +555,12 @@ export default function FIleManagerFileDetails({
               <source src={video_url} type={`video/${item.type}`} />
               Browser Anda tidak mendukung tag video.
             </video>
-          ) : ['mp3', 'wav', 'ogg', 'm4p', 'mxp4', 'msv'].includes(item.type) ? (
+          ) : ['mkv'].includes(item.type) ? (
+            <video controls style={{ maxWidth: '100%', height: 'auto' }}>
+              <source src={file_url} />
+              Browser Anda tidak mendukung tag video.
+            </video>
+          ) : ['aif', 'mp3', 'wav', 'ogg', 'm4p', 'mxp4', 'msv', 'aac'].includes(item.type) ? (
             <Box component="div">
               <audio controls>
                 <source src={file_url} type={`audio/${item.type}`} />
@@ -528,7 +568,12 @@ export default function FIleManagerFileDetails({
               </audio>
             </Box>
           ) : (
-            <span>Tidak ada preview</span>
+            <span>
+              Tidak ada preview
+              <Button variant="contained" onClick={openConfirmDialogg} sx={{ mt: 2 }}>
+                Download File
+              </Button>
+            </span>
           )}
 
           <Typography variant="subtitle2">{name}</Typography>
@@ -626,6 +671,19 @@ export default function FIleManagerFileDetails({
           </Button>
           <Button onClick={handleDeleteFile} color="error">
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={isConfirmOpenn} onClose={closeConfirmDialogg}>
+        <DialogTitle>Konfirmasi Download</DialogTitle>
+        <DialogContent>Apakah Anda yakin ingin mendownload file ini?</DialogContent>
+        <DialogActions>
+          <Button onClick={closeConfirmDialogg} color="error">
+            Batal
+          </Button>
+          <Button onClick={handleDownload} color="primary" variant="contained">
+            Download
           </Button>
         </DialogActions>
       </Dialog>

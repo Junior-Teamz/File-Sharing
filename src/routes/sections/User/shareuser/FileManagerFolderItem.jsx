@@ -23,7 +23,7 @@ import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
-//
+// Other imports
 import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerFileDetails from './FileManagerFileDetails';
 import FileManagerNewFolderDialog from './FileManagerNewFolderDialog';
@@ -43,25 +43,16 @@ export default function FileManagerFolderItem({
   ...other
 }) {
   const { enqueueSnackbar } = useSnackbar();
-
   const { copy } = useCopyToClipboard();
 
   const [inviteEmail, setInviteEmail] = useState('');
-
   const [folderName, setFolderName] = useState(folder.name);
-
   const editFolder = useBoolean();
-
   const checkbox = useBoolean();
-
   const share = useBoolean();
-
   const popover = usePopover();
-
   const confirm = useBoolean();
-
   const details = useBoolean();
-
   const favorite = useBoolean(folder.isFavorited);
 
   const handleChangeInvite = useCallback((event) => {
@@ -87,21 +78,20 @@ export default function FileManagerFolderItem({
         position: 'absolute',
       }}
     >
-       <IconButton onClick={details.onTrue}>
+      <IconButton onClick={details.onTrue}>
         <InfoIcon />
       </IconButton>
-      
+{/* 
       <Checkbox
         color="warning"
         icon={<Iconify icon="eva:star-outline" />}
         checkedIcon={<Iconify icon="eva:star-fill" />}
         checked={favorite.value}
         onChange={favorite.onToggle}
-      />
-
-      <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
+      /> */}
+      {/* <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
         <Iconify icon="eva:more-vertical-fill" />
-      </IconButton>
+      </IconButton> */}
     </Stack>
   );
 
@@ -126,7 +116,7 @@ export default function FileManagerFolderItem({
               bgcolor: 'currentColor',
             }}
           />
-          {folder.total_file} files
+          {folder.total_file} file
         </>
       }
       primaryTypographyProps={{
@@ -145,22 +135,32 @@ export default function FileManagerFolderItem({
   );
 
   const renderAvatar = (
-    <AvatarGroup
-      max={3}
-      sx={{
-        [`& .${avatarGroupClasses.avatar}`]: {
-          width: 24,
-          height: 24,
-          '&:first-of-type': {
-            fontSize: 12,
-          },
-        },
-      }}
-    >
-      {folder.shared_with?.map((person) => (
-        <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
-      ))}
-    </AvatarGroup>
+    <Box sx={{ cursor: 'pointer', display: 'flex' }}>
+      {folder.user ? (
+        <>
+          <Avatar
+            alt={folder.user.name}
+            src={folder.user.avatarUrl}
+            sx={{ width: 24, height: 24, mr: 1 }} // Menambahkan margin right
+          />
+          <Tooltip title={folder.user.email}>
+            <Typography
+              variant="caption"
+              sx={{
+                maxWidth: 120, // Atur sesuai kebutuhan
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {folder.user.email}
+            </Typography>
+          </Tooltip>
+        </>
+      ) : (
+        'Tidak ada pengguna'
+      )}
+    </Box>
   );
 
   return (
@@ -185,7 +185,7 @@ export default function FileManagerFolderItem({
         }}
         {...other}
       >
-        <Link key={folder.id} to={`folder/${folder.folder_id}`}>
+        <Link key={folder.id} to={`info/${folder.id}`}>
           <Box onMouseEnter={checkbox.onTrue} onMouseLeave={checkbox.onFalse}>
             {renderIcon}
           </Box>
@@ -193,7 +193,7 @@ export default function FileManagerFolderItem({
         </Link>
 
         {renderAction}
-
+        <Typography variant='caption'>Dibagikan oleh</Typography>
         {!!folder?.shared_with?.length && renderAvatar}
       </Stack>
 
@@ -256,6 +256,19 @@ export default function FileManagerFolderItem({
           Delete
         </MenuItem>
       </CustomPopover>
+
+      <FileManagerFileDetails
+        item={folder}
+        favorited={favorite.value}
+        onFavorite={favorite.onToggle}
+        onCopyLink={handleCopy}
+        open={details.value}
+        onClose={details.onFalse}
+        onDelete={() => {
+          details.onFalse();
+          onDelete();
+        }}
+      />
 
       <FileManagerShareDialogFolder
         open={share.value}

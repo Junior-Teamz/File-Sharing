@@ -25,7 +25,7 @@ export default function LegalCreateView() {
             name: 'Daftar dasar hukum',
             href: paths.dashboard.legal.list,
           },
-          { name: 'Legal Create' },
+          { name: 'Buat dasar hukum baru' },
         ]}
         sx={{
           mb: { xs: 3, md: 5 },
