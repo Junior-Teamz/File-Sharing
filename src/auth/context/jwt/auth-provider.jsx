@@ -65,6 +65,7 @@ export function AuthProvider({ children }) {
         const response = await axiosInstance.get(endpoints.auth.me);
         const { data: user } = response.data;
 
+       
         dispatch({
           type: 'INITIAL',
           payload: { user, roles: user.roles || [], is_superadmin: user.is_superadmin || false },

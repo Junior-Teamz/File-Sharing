@@ -40,7 +40,7 @@ import FileManagerShareDialogFolder from './FileManagerShareDialogFolder';
 // ----------------------------------------------------------------------
 
 export default function FolderDetail({
-  item,
+  item={},
   open,
   favorited,
   onFavorite,

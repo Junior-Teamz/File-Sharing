@@ -20,6 +20,7 @@ import TextField from '@mui/material/TextField';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
+import { useDownloadFile, useChangeNameFile, useMutationDeleteFiles } from './view/folderDetail';
 // utils
 import { fData } from 'src/utils/format-number';
 import { fDateTime } from 'src/utils/format-time';
@@ -37,8 +38,9 @@ import { useQueryClient } from '@tanstack/react-query';
 
 // ----------------------------------------------------------------------
 
-export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other }) {
+export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...other }) {
   const { enqueueSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
   const { copy } = useCopyToClipboard();
   const smUp = useResponsive('up', 'sm');
   const [inviteEmail, setInviteEmail] = useState('');
@@ -47,12 +49,12 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
   const share = useBoolean();
   const edit = useBoolean();
   const details = useBoolean();
-  const favorite = useBoolean(file.isFavorited);
+  const favorite = useBoolean(file.is_favorite);
   const [originalFileType, setOriginalFileType] = useState(file.type);
   const useClient = useQueryClient();
-
   const { mutateAsync: updateNameFile } = useChangeNameFile();
   const { mutateAsync: downloadFile } = useDownloadFile();
+  const { mutateAsync: deleteFile } = useMutationDeleteFiles();
 
   useEffect(() => {
     setNewFileName(file.name);
@@ -63,8 +65,27 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
     setInviteEmail(event.target.value);
   }, []);
 
+  const handleDelete = useCallback(async () => {
+    try {
+      // Perform the delete operation
+      await deleteFile(file.id);
+
+      // Notify user of successful deletion
+      enqueueSnackbar('File berhasil dihapus!', { variant: 'success' });
+
+      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      useClient.invalidateQueries({ queryKey: ['detail-folder'] });
+    } catch (error) {
+      enqueueSnackbar('Gagal menghapus file!', { variant: 'error' });
+    }
+  }, [deleteFile, file.id, enqueueSnackbar, onRefetch]);
+
+  useEffect(() => {
+    favorite.setValue(file.is_favorite);
+  }, [file.is_favorite]);
+
   const handleRename = useCallback(async () => {
-    const newFileType = newFileName.split('.').pop(); // Extract new file type from name
+    const newFileType = newFileName.split('.').pop();
 
     if (newFileType !== originalFileType.split('.').pop()) {
       enqueueSnackbar('Type file tidak boleh diubah!', { variant: 'error' });
@@ -74,86 +95,27 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
     try {
       await updateNameFile({ fileId: file.id, data: { name: newFileName } });
       enqueueSnackbar('Nama file berhasil diperbarui!', { variant: 'success' });
-      onRefetch(); // Call to re-fetch the file data
-      edit.onFalse(); // Close the edit dialog
+      queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      queryClient.invalidateQueries({ queryKey: ['detail-folder'] });
+      edit.onFalse();
     } catch (error) {
       enqueueSnackbar('Gagal memperbarui nama file!', { variant: 'error' });
     }
-  }, [file.id, newFileName, originalFileType, updateNameFile, enqueueSnackbar, edit, onRefetch]);
+  }, [file.id, newFileName, originalFileType, updateNameFile, enqueueSnackbar, edit, queryClient]);
 
   const handleCopy = useCallback(() => {
-   
     if (file?.id) {
       enqueueSnackbar('Berhasil di Copied!');
-      copy(file.id); // Mengakses file.id langsung, tanpa [0] karena file bukan array
+      copy(file.id);
     } else {
       enqueueSnackbar('File URL is undefined!', { variant: 'error' });
     }
   }, [copy, enqueueSnackbar, file.id]);
 
-  const { mutateAsync: addFavorite } = useAddFavoriteUser();
-  const { mutateAsync: removeFavorite } = useRemoveFavoriteUser();
-
-  // Function to handle the favorite toggle
-  const handleFavoriteToggle = useCallback(async () => {
-    if (!file.id) {
-      enqueueSnackbar('File ID is required to toggle favorite status!', { variant: 'error' });
-      return; // Early return if file.id is not valid
-    }
-
-    const payload = { file_id: file.id }; // Create a payload with the required structure
-  
-
-    try {
-      if (favorite.value) {
-        // If currently favorited, call removeFavorite
-    
-        await removeFavorite(payload, {
-          // Pass the entire payload object
-          onSuccess: () => {
-            enqueueSnackbar('File dihapus dari favorit!', { variant: 'success' });
-          },
-          onError: () => {
-            enqueueSnackbar('Failed to remove from favorites!', { variant: 'error' });
-          },
-        });
-      } else {
-        // If not favorited, call addFavorite
-        
-        await addFavorite(payload, {
-          // Pass the entire payload object
-          onSuccess: () => {
-            enqueueSnackbar('File telah ditambahkan ke favorit!', { variant: 'success' });
-          },
-          onError: () => {
-            enqueueSnackbar('Failed to add to favorites!', { variant: 'error' });
-          },
-        });
-      }
-
-      // Toggle the favorite state
-      favorite.onToggle();
-
-      // Optionally refetch any relevant queries
-      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
-      useClient.invalidateQueries({ queryKey: ['detail-folder'] });
-    } catch (error) {
-      console.error('Error updating favorite status:', error); // Log the error
-      enqueueSnackbar('Gagal memperbarui status favorit!', { variant: 'error' });
-    }
-  }, [favorite.value, file.id, removeFavorite, addFavorite, enqueueSnackbar, useClient]);
-
-  // const handle = useCallback(() => {
-  //   enqueueSnackbar('Link copied!');
-  //   copy(folderData[0].url); // Adjust accordingly
-  // }, [copy, enqueueSnackbar,folderData]);
-
   const handleDownload = useCallback(async () => {
     try {
       const idsToDownload = Array.isArray(file.ids) && file.ids.length ? file.ids : [file.id];
-   
 
-      // Send the correct payload to the API
       const response = await downloadFile(idsToDownload);
 
       if (response.data) {
@@ -164,16 +126,47 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
         document.body.appendChild(link);
         link.click();
         link.remove();
-        enqueueSnackbar('Download started!', { variant: 'success' });
+        enqueueSnackbar('Download berhasil!', { variant: 'success' });
       } else {
-        enqueueSnackbar('No data received for download!', { variant: 'error' });
+        enqueueSnackbar('Tidak ada data untuk di download!', { variant: 'error' });
       }
     } catch (error) {
       console.error('Download error:', error);
-      const errorMessage = error.response?.data?.error || 'Download failed!'; // Use error message from server if available
+      const errorMessage = error.response?.data?.error || 'Download failed!';
       enqueueSnackbar(errorMessage, { variant: 'error' });
     }
   }, [downloadFile, file, enqueueSnackbar]);
+
+  // Inside your FileRecentItem component
+  const { mutateAsync: addFavorite } = useAddFavoriteUser();
+  const { mutateAsync: removeFavorite } = useRemoveFavoriteUser();
+
+  const handleFavoriteToggle = useCallback(async () => {
+    if (!file.id) {
+      enqueueSnackbar('File ID is required to toggle favorite status!', { variant: 'error' });
+      return;
+    }
+
+    const payload = { file_id: file.id };
+
+    try {
+      if (favorite.value) {
+        await removeFavorite(payload);
+        enqueueSnackbar('File dihapus dari favorit!', { variant: 'success' });
+      } else {
+        await addFavorite(payload);
+        enqueueSnackbar('File telah ditambahkan ke favorit!', { variant: 'success' });
+      }
+
+      favorite.onToggle();
+
+      // Refetch queries to get updated data
+      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      useClient.invalidateQueries({ queryKey: ['detail-folder'] });
+    } catch (error) {
+      enqueueSnackbar('Gagal memperbarui status favorit!', { variant: 'error' });
+    }
+  }, [favorite.value, file.id, addFavorite, removeFavorite, enqueueSnackbar, useClient]);
 
   const renderAction = (
     <Box
@@ -191,10 +184,14 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
         color="warning"
         icon={<Iconify icon="eva:star-outline" />}
         checkedIcon={<Iconify icon="eva:star-fill" />}
-        checked={favorite.value}
-        onChange={handleFavoriteToggle} // Update here to call handleFavoriteToggle
+        checked={favorite.value} // This should change based on favorite status
+        onChange={handleFavoriteToggle}
       />
-      <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
+
+      <IconButton
+        color="default"
+        onClick={popover.onOpen} // Open popover on IconButton click
+      >
         <Iconify icon="eva:more-vertical-fill" />
       </IconButton>
     </Box>
@@ -202,12 +199,12 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
 
   const renderText = (
     <ListItemText
-    onClick={() => {
-      // Cek jika file.type adalah 'folder', jika ya, jangan buka detail
-      if (originalFileType !== 'folder') {
-        details.onTrue();
-      }
-    }}
+      onClick={() => {
+        // Cek jika file.type adalah 'folder', jika ya, jangan buka detail
+        if (originalFileType !== 'folder') {
+          details.onTrue();
+        }
+      }}
       primary={file.name}
       secondary={
         <>
@@ -252,7 +249,7 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
         },
       }}
     >
-      {file.shared?.map((person) => (
+      {file.shared_with?.map((person) => (
         <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
       ))}
     </AvatarGroup>
@@ -282,7 +279,7 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
       >
         <FileThumbnail file={file.type} sx={{ width: 36, height: 36, mr: 1 }} />
         {renderText}
-        {!!file?.shared?.length && renderAvatar}
+        {!!file?.shared_with?.length && renderAvatar}
         {renderAction}
       </Stack>
 
@@ -322,7 +319,7 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
         <MenuItem
           onClick={() => {
             popover.onClose();
-            setNewFileName(file.name); // Set current file name
+            setNewFileName(file.name);
             edit.onTrue();
           }}
         >
@@ -333,7 +330,7 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
         <MenuItem
           onClick={() => {
             popover.onClose();
-            onDelete();
+            handleDelete();
           }}
           sx={{ color: 'error.main' }}
         >
@@ -374,7 +371,6 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
           <TextField
             autoFocus
             margin="dense"
-            label="New File Name"
             type="text"
             fullWidth
             variant="outlined"
@@ -383,8 +379,8 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={edit.onFalse}>Cancel</Button>
-          <Button onClick={handleRename}>Save</Button>
+          <Button onClick={edit.onFalse}>Batal</Button>
+          <Button onClick={handleRename}>Simpan</Button>
         </DialogActions>
       </Dialog>
     </>
@@ -394,6 +390,6 @@ export default function FileRecentItem({ file, onDelete, sx, onRefetch, ...other
 FileRecentItem.propTypes = {
   file: PropTypes.object.isRequired,
   onDelete: PropTypes.func,
-  onRefetch: PropTypes.func.isRequired, // Added prop type for refetch function
+  onRefetch: PropTypes.func.isRequired,
   sx: PropTypes.object,
 };

@@ -33,15 +33,19 @@ import {
   emptyRows,
 } from 'src/components/table';
 
+import Folderpanel from './Folderpanel';
+import EmptyContent from 'src/components/empty-content';
+import TableShare from 'src/components/table/tableshare';
+
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
   { id: 'name', label: 'Nama' },
   { id: 'size', label: 'Ukuran', width: 120 },
   { id: 'type', label: 'Tipe', width: 120 },
-  { id: 'modifiedAt', label: 'Diperbarui', width: 140 },
-  { id: 'shared', label: 'Dibagikan', align: 'right', width: 140 },
-  { id: '', width: 88 },
+  { id: 'created_at', label: 'tanggal dibagikan', width: 200 },
+  { id: 'shared', label: 'Dibagikan Oleh', align: 'right', width: 140 },
+  { id: '', label: '', align: 'right', width: 140 },
 ];
 
 export default function FileManagerGridView({
@@ -53,21 +57,15 @@ export default function FileManagerGridView({
   onOpenConfirm,
 }) {
   const {
-    dense,
     page,
-    order,
-    orderBy,
     rowsPerPage,
+    dense,
     selected,
-    onSelectRow,
-    onSelectAllRows,
-    onSort,
-    onChangeDense,
-    onChangePage,
-    onChangeRowsPerPage,
+    onSelectRow: onSelectItem,
+    onSelectAllRows: onSelectAllItems,
   } = table;
-
   const theme = useTheme();
+
   const containerRef = useRef(null);
   const [folderName, setFolderName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
@@ -90,19 +88,18 @@ export default function FileManagerGridView({
   const endIndex = startIndex + rowsPerPage;
   const currentData = dataFiltered
     .filter((i) => i.type !== 'folder')
-    .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // Sort by modifiedAt in descending order
     .slice(startIndex, endIndex);
 
+  // Render
   return (
     <>
       <Box ref={containerRef}>
         {/* Folders Panel */}
-        <FileManagerPanel
-          title="Folder"
-          subTitle={`${data.filter((item) => item.type === 'folder').length} folder`}
-          onOpen={newFolder.onTrue}
-          collapse={folders.value}
-          onCollapse={folders.onToggle}
+        <Folderpanel
+          title="Folder yang dibagikan"
+          showMore={folders.value}
+          onOpen={folders.onToggle}
         />
 
         <Collapse in={!folders.value} unmountOnExit>
@@ -116,25 +113,40 @@ export default function FileManagerGridView({
               lg: 'repeat(4, 1fr)',
             }}
           >
-            {dataFiltered
-              .filter((i) => i.type === 'folder')
-              .map((folder) => (
-                <FileManagerFolderItem
-                  key={folder.id}
-                  folder={folder}
-                  selected={selected.includes(folder.id)}
-                  onSelect={() => onSelectRow(folder.id)}
-                  onDelete={() => onDeleteItem(folder.id)}
-                  sx={{ maxWidth: 'auto' }}
-                />
-              ))}
+            {dataFiltered.filter((i) => i.type === 'folder').length > 0 ? (
+              dataFiltered
+                .filter((i) => i.type === 'folder')
+                .map((folder, idx) => (
+                  <FileManagerFolderItem
+                    key={folder.id}
+                    folder={folder}
+                    selected={selected.includes(folder.id)}
+                    onSelect={() => onSelectItem(folder.id)}
+                    onDelete={() => onDeleteItem(folder.id)}
+                    sx={{ maxWidth: 'auto' }}
+                  />
+                ))
+            ) : (
+              <EmptyContent
+                filled
+                title="Tidak ada folder yang dibagikan"
+                sx={{
+                  py: 10,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '100%', // Menyesuaikan tinggi dengan kontainer
+                  gridColumn: 'span 4', // Membuatnya memenuhi semua kolom (4 kolom di layout grid)
+                }}
+              />
+            )}
           </Box>
         </Collapse>
 
         <Divider sx={{ my: 5, borderStyle: 'dashed' }} />
 
         {/* Files Panel */}
-        <FileManagerPanel title="Files" onOpen={upload.onTrue} />
+        {/* <FileManagerPanel title="Files" onOpen={upload.onTrue} /> */}
         <Box
           sx={{
             position: 'relative',
@@ -147,13 +159,18 @@ export default function FileManagerGridView({
             numSelected={selected.length}
             rowCount={dataFiltered.length}
             onSelectAllRows={(checked) =>
-              onSelectAllRows(
+              onSelectAllItems(
                 checked,
                 dataFiltered.map((row) => row.id)
               )
             }
             action={
               <>
+                {/* <Tooltip title="Share">
+                  <IconButton color="primary">
+                    <Iconify icon="solar:share-bold" />
+                  </IconButton>
+                </Tooltip> */}
                 <Tooltip title="Delete">
                   <IconButton color="primary" onClick={onOpenConfirm}>
                     <Iconify icon="solar:trash-bin-trash-bold" />
@@ -178,6 +195,7 @@ export default function FileManagerGridView({
               p: theme.spacing(0, 3, 3, 3),
             }}
           >
+            <Folderpanel title="File yang dibagikan" />
             <Table
               size={dense ? 'small' : 'medium'}
               sx={{
@@ -187,14 +205,11 @@ export default function FileManagerGridView({
               }}
             >
               <TableHeadCustom
-                order={order}
-                orderBy={orderBy}
                 headLabel={TABLE_HEAD}
                 rowCount={dataFiltered.length}
                 numSelected={selected.length}
-                onSort={onSort}
                 onSelectAllRows={(checked) =>
-                  onSelectAllRows(
+                  onSelectAllItems(
                     checked,
                     dataFiltered.map((row) => row.id)
                   )
@@ -242,18 +257,12 @@ export default function FileManagerGridView({
 
         {/* Pagination */}
         <TablePaginationCustom
-          count={dataFiltered.filter((i) => i.type !== 'folder').length} // Total count for files only
-          page={page}
-          rowsPerPage={rowsPerPage}
-          onPageChange={onChangePage}
-          onRowsPerPageChange={onChangeRowsPerPage}
-          dense={dense}
-          onChangeDense={onChangeDense}
-          sx={{
-            [`& .${tablePaginationClasses.toolbar}`]: {
-              borderTopColor: 'transparent',
-            },
-          }}
+          count={dataFiltered.length}
+          page={0}
+          rowsPerPage={10}
+          onPageChange={() => {}}
+          onRowsPerPageChange={() => {}}
+          sx={{ [`& .${tablePaginationClasses.toolbar}`]: { borderTopColor: 'transparent' } }}
         />
       </Box>
 
@@ -264,7 +273,7 @@ export default function FileManagerGridView({
         onChangeInvite={handleChangeInvite}
         onClose={() => {
           share.onFalse();
-          setInviteEmail(''); // Reset email when closing
+          setInviteEmail('');
         }}
       />
 
@@ -281,7 +290,7 @@ export default function FileManagerGridView({
         onCreate={() => {
           console.info('CREATE NEW FOLDER', folderName);
           newFolder.onFalse();
-          setFolderName(''); // Reset folder name when closing
+          setFolderName('');
         }}
         folderName={folderName}
         onChangeFolderName={handleChangeFolderName}
@@ -291,10 +300,9 @@ export default function FileManagerGridView({
 }
 
 FileManagerGridView.propTypes = {
-  table: PropTypes.object,
-  data: PropTypes.array,
-  dataFiltered: PropTypes.array,
-  notFound: PropTypes.bool,
-  onDeleteItem: PropTypes.func,
-  onOpenConfirm: PropTypes.func,
+  table: PropTypes.object.isRequired,
+  data: PropTypes.array.isRequired,
+  dataFiltered: PropTypes.array.isRequired,
+  onDeleteItem: PropTypes.func.isRequired,
+  onOpenConfirm: PropTypes.func.isRequired,
 };

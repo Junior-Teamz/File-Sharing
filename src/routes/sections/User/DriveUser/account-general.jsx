@@ -25,13 +25,17 @@ import FormProvider, {
   RHFUploadAvatar,
   RHFAutocomplete,
 } from 'src/components/hook-form';
+import { useAuthContext } from 'src/auth/hooks';
+import { AuthContext } from 'src/auth/context/jwt/auth-context'; 
 
 // ----------------------------------------------------------------------
 
 export default function AccountGeneral() {
   const { enqueueSnackbar } = useSnackbar();
 
-  const { user } = useMockedUser();
+  
+
+  const { user } = useAuthContext(AuthContext);
 
   const UpdateUserSchema = Yup.object().shape({
     displayName: Yup.string().required('Nama harus di isi'),
@@ -40,7 +44,7 @@ export default function AccountGeneral() {
   });
 
   const defaultValues = {
-    displayName: user?.displayName || '',
+    displayName: user?.name || '',
     email: user?.email || '',
     photoURL: user?.photoURL || null,
 
