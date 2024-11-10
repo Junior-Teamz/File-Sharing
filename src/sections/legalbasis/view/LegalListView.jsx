@@ -32,13 +32,10 @@ import { RouterLink } from 'src/routes/components';
 import { paths } from 'src/routes/paths';
 import { useDeleteLegal, useFetchLegal, useEditLegal } from './fetchLegalBasis';
 import { useSnackbar } from 'notistack';
-import { useForm } from 'react-hook-form';
 
 export default function LegalListView() {
   const settings = useSettingsContext();
   const { data: legalDocuments, refetch, isLoading } = useFetchLegal();
-  console.log(legalDocuments)
-  const { register, handleSubmit, setValue } = useForm();
   const deleteLegal = useDeleteLegal();
   const { mutateAsync: editLegal, isLoading: isUpdating } = useEditLegal();
   const { enqueueSnackbar } = useSnackbar();
@@ -129,11 +126,12 @@ export default function LegalListView() {
       }
 
       setFile(selectedFile);
-      setFileError('');
+      setFileError(''); // Hapus error jika file dipilih
       setEditingDocument((prev) => ({
         ...prev,
         file: selectedFile,
-      }));
+        file_name: selectedFile.name, // Memperbarui nama file
+      })); // Memperbarui state dengan file baru
     }
   };
 
@@ -148,12 +146,13 @@ export default function LegalListView() {
       return;
     }
 
-    const { id, name, file_url, file_name, file } = editingDocument;
+    const { id, name, file_url, file_name } = editingDocument;
 
     try {
       const updateData = {
         name: name || undefined,
-        file: file ? file : editingDocument.file, 
+        file_name: file_name ? file.name : editingDocument.file_name, // Gunakan nama file baru jika ada, jika tidak, gunakan yang lama
+        file_url: file_url ? file.file_url : editingDocument.file_url, // Gunakan URL yang ada terlebih dahulu
       };
 
       await editLegal({ id: id, data: updateData });
@@ -192,8 +191,9 @@ export default function LegalListView() {
       />
 
       <TextField
-        label="Cari dasar hukum"
+        label="Search"
         variant="outlined"
+        fullWidth
         onChange={handleSearchChange}
         sx={{ mb: 2 }}
       />
@@ -206,9 +206,9 @@ export default function LegalListView() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Nama</TableCell>
-                  <TableCell>File dasar hukum</TableCell>
-                  <TableCell align="right">Aksi</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>File</TableCell>
+                  <TableCell align="right">Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -222,7 +222,7 @@ export default function LegalListView() {
                           setEditingDocument(doc);
                         }}
                       >
-                        Lihat File
+                        View File
                       </Button>
                     </TableCell>
                     <TableCell align="right">
@@ -288,9 +288,9 @@ export default function LegalListView() {
           />
 
           {/* Menampilkan nama file yang sedang digunakan */}
-          {editingDocument && editingDocument.file && !file && (
+          {editingDocument && editingDocument.file_name && !file && (
             <Typography variant="body2" sx={{ mt: 1 }}>
-              File saat ini: {editingDocument.file}
+              File saat ini: {editingDocument.file_name}
             </Typography>
           )}
         </DialogContent>
@@ -355,7 +355,7 @@ export default function LegalListView() {
         <DialogTitle id="alert-dialog-title">{'Konfirmasi Hapus'}</DialogTitle>
         <DialogContent>
           <Typography id="alert-dialog-description">
-            Apakah kamu yakin ingin menghapus dasar hukum ini?
+            Apakah kamu yakin ingin menghapus dasar hukum ini? 
           </Typography>
         </DialogContent>
         <DialogActions>

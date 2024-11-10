@@ -29,6 +29,7 @@ import {
   useRemoveTagFile,
   useMutationDeleteFiles,
   useChangeNameFile,
+  useDownloadFile,
 } from './view/folderDetail/index';
 import { useIndexTag } from '../tag/view/TagMutation';
 import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
@@ -37,6 +38,7 @@ import { useAddFavorite, useRemoveFavorite } from './view/favoritemutation';
 import { useQueryClient } from '@tanstack/react-query';
 import CloseIcon from '@mui/icons-material/Close';
 import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
+
 
 // ----------------------------------------------------------------------
 
@@ -103,6 +105,7 @@ export default function FIleManagerFileDetails({
   const addTagFile = useAddFileTag();
   const { mutateAsync: removeTagFile } = useRemoveTagFile();
   const { mutateAsync: deleteFile } = useMutationDeleteFiles();
+  const { mutateAsync: downloadFile } = useDownloadFile();
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
@@ -152,7 +155,7 @@ export default function FIleManagerFileDetails({
           });
         }
         enqueueSnackbar('Tag berhasil ditambahkan!', { variant: 'success' });
-        queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+        queryClient.invalidateQueries({ queryKey: ['favorite.admin'] });
       } else {
         enqueueSnackbar('Tidak ada tag baru untuk ditambahkan.', { variant: 'info' });
       }
@@ -173,7 +176,7 @@ export default function FIleManagerFileDetails({
       enqueueSnackbar('File berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
-      queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      queryClient.invalidateQueries({ queryKey: ['favorite.admin'] });
     } catch (error) {
       console.error('Error deleting file:', error);
       enqueueSnackbar('Gagal menghapus file', { variant: 'error' });
@@ -190,7 +193,7 @@ export default function FIleManagerFileDetails({
       await removeTagFile({ file_id: item.id, tag_id: tagId });
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
       enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
-      queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      queryClient.invalidateQueries({ queryKey: ['favorite.admin'] });
     } catch (error) {
       console.error('Error removing tag:', error);
       enqueueSnackbar('Error removing tag.', { variant: 'error' });
@@ -226,7 +229,7 @@ export default function FIleManagerFileDetails({
       await updateNameFile({ fileId: item.id, data: { name: newFileName } });
       enqueueSnackbar('Nama file berhasil diperbarui!', { variant: 'success' });
       setIsEditing(false);
-      queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      queryClient.invalidateQueries({ queryKey: ['favorite.admin'] });
     } catch (error) {
       enqueueSnackbar('Gagal memperbarui nama file!', { variant: 'error' });
     }
@@ -243,12 +246,12 @@ export default function FIleManagerFileDetails({
       if (favorite.value) {
         await removeFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
         enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
-        queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+        queryClient.invalidateQueries({ queryKey: ['favorite.admin'] });
       } else {
         // Tambahkan ke favorit
         await addFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
         enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });
-        queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+        queryClient.invalidateQueries({ queryKey: ['favorite.admin'] });
       }
 
       favorite.onToggle();
@@ -265,15 +268,31 @@ export default function FIleManagerFileDetails({
 
   const [isConfirmOpenn, setConfirmOpenn] = useState(false);
 
-  const handleDownload = useCallback(() => {
-    const link = document.createElement('a');
-    link.href = file_url;
-    link.download = item.name; // Set the download filename to item.name
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setConfirmOpenn(false); // Close the confirmation dialog after download
-  }, [file_url, item.name]);
+  
+  const handleDownload = useCallback(async () => {
+    try {
+      const idsToDownload = Array.isArray(item.ids) && item.ids.length ? item.ids : [item.id];
+
+      const response = await downloadFile(idsToDownload);
+
+      if (response.data) {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', item.name || 'download');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        enqueueSnackbar('Download berhasil!', { variant: 'success' });
+      } else {
+        enqueueSnackbar('Tidak ada data untuk di download!', { variant: 'error' });
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      const errorMessage = error.response?.data?.error || 'Download gagal!';
+      enqueueSnackbar(errorMessage, { variant: 'error' });
+    }
+  }, [downloadFile, item, enqueueSnackbar]);
 
   const openConfirmDialogg = () => {
     setConfirmOpenn(true);

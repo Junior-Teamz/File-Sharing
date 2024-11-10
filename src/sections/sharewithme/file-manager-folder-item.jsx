@@ -83,7 +83,7 @@ export default function FileManagerFolderItem({
       <IconButton onClick={details.onTrue}>
         <InfoIcon />
       </IconButton>
-{/* 
+      {/* 
       <Checkbox
         color="warning"
         icon={<Iconify icon="eva:star-outline" />}
@@ -187,7 +187,11 @@ export default function FileManagerFolderItem({
         }}
         {...other}
       >
-        <Link key={folder.id} to={`info/${folder.id}`}>
+        <Link
+          style={{ textDecoration: 'none', color: 'inherit' }}
+          key={folder.id}
+          to={`info/${folder.id}`}
+        >
           <Box onMouseEnter={checkbox.onTrue} onMouseLeave={checkbox.onFalse}>
             {renderIcon}
           </Box>
@@ -195,7 +199,7 @@ export default function FileManagerFolderItem({
         </Link>
 
         {renderAction}
-        <Typography variant='caption'>Dibagikan oleh</Typography>
+        <Typography variant="caption">Dibagikan oleh</Typography>
         {!!folder?.shared_with?.length && renderAvatar}
       </Stack>
 
