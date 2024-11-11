@@ -250,10 +250,10 @@ export default function OverviewAppView() {
         sx={{
           ...bgGradient({
             color: alpha(
-              theme.palette.background.default,
+              theme.palette.background.paper,
               theme.palette.mode === 'light' ? 0.8 : 0.80 // Mengurangi nilai alpha agar warna tidak terlalu terang
             ),
-            imgUrl: '/assets/background/overlay_2.jpg',
+            imgUrl: '/assets/background/overlay_3.jpg',
           }),
           backgroundPosition: 'center', // Menempatkan background di tengah
           backgroundSize: 'cover', // Mengatur ukuran background agar menutupi seluruh area

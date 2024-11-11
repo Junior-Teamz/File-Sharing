@@ -58,7 +58,7 @@ export default function AdminListNews() {
     content: '',
     thumbnail_url: '',
     status: '',
-    news_tags_ids: [], // Changed to news_tags_ids
+    news_tags_ids: [],
   });
   const [popoverAnchor, setPopoverAnchor] = useState(null);
   const [popoverCurrentId, setPopoverCurrentId] = useState(null);
@@ -83,38 +83,36 @@ export default function AdminListNews() {
     setPopoverAnchor(null);
   };
 
-  const handleEditClick = (news) => {
+  const handleEditSave = async (news = null) => {
     if (news) {
       const { id, title, content, thumbnail_url, status, news_tags_ids = [] } = news;
-      setEditingNewsId(id); // Make sure this is correctly set
+      if (!id) {
+        enqueueSnackbar('ID berita tidak ditemukan.', { variant: 'error' });
+        return;
+      }
+      console.log('Editing news ID:', id); // Debugging ID
+      setEditingNewsId(id);
       setEditedNews({ title, content, thumbnail_url, status, news_tags_ids });
       setDialogOpen(true);
       setPopoverAnchor(null);
+    } else if (editingNewsId && editedNews.title && editedNews.content) {
+      console.log('Saving edited news with ID:', editingNewsId); // Debugging log ID
+      const payload = { id: editingNewsId, ...editedNews };
+      console.log('Payload before sending to API:', payload); // Log payload
+      try {
+        await updateNews.mutateAsync(payload);
+        enqueueSnackbar('Berita berhasil diperbarui', { variant: 'success' });
+        queryClient.invalidateQueries({ queryKey: ['list.news'] });
+        setEditingNewsId(null);
+        setDialogOpen(false);
+      } catch (error) {
+        console.error('Update error:', error);
+        enqueueSnackbar('Gagal memperbarui berita', { variant: 'error' });
+      }
     } else {
-      console.error('No news data provided for editing.');
+      enqueueSnackbar('ID berita dan data harus ada untuk memperbarui.', { variant: 'error' });
     }
   };
-  
-
-  const handleSaveEdit = async () => {
-    if (!editingNewsId) {
-      console.error('No news ID available for update.'); // Additional logging
-      enqueueSnackbar('ID berita diperlukan untuk memperbarui.', { variant: 'error' });
-      return;
-    }
-    try {
-      await updateNews.mutateAsync({ id: editingNewsId, ...editedNews });
-      enqueueSnackbar('Berita berhasil diperbarui', { variant: 'success' });
-      queryClient.invalidateQueries({ queryKey: ['list.news'] });
-      setEditingNewsId(null);
-      setDialogOpen(false);
-    } catch (error) {
-      console.error('Update error:', error); // More detailed logging
-      enqueueSnackbar('Gagal memperbarui berita', { variant: 'error' });
-    }
-  };
-  
-
 
   const handleChangePage = (event, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (event) => {
@@ -229,7 +227,7 @@ export default function AdminListNews() {
                           </MenuItem>
                           <MenuItem
                             onClick={() =>
-                              handleEditClick({
+                              handleEditSave({
                                 id,
                                 title,
                                 content,
@@ -324,7 +322,7 @@ export default function AdminListNews() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Batal</Button>
-          <Button onClick={handleSaveEdit}>Simpan</Button>
+          <Button onClick={() => handleEditSave()}>Simpan</Button>
         </DialogActions>
       </Dialog>
     </Container>

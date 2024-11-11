@@ -48,7 +48,7 @@ export default function FileStorageOverview({ data, total, chart, ...other }) {
             offsetY: -40,
           },
           total: {
-            label: `Used of ${fData(total)} / ∞`,
+            label: `Digunakan ${fData(total)} / ∞`,
             color: theme.palette.text.disabled,
             fontSize: theme.typography.body2.fontSize,
             fontWeight: theme.typography.body2.fontWeight,
@@ -79,7 +79,7 @@ export default function FileStorageOverview({ data, total, chart, ...other }) {
 
             <ListItemText
               primary={category.name}
-              secondary={`${category.filesCount} files`}
+              secondary={`${category.filesCount} file`}
               secondaryTypographyProps={{
                 mt: 0.5,
                 component: 'span',

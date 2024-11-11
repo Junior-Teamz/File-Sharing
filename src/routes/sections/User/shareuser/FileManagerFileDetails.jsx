@@ -174,7 +174,7 @@ export default function FIleManagerFileDetails({
       enqueueSnackbar('File berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
-      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      useClient.invalidateQueries({ queryKey: ['folder.admin'] });
     } catch (error) {
       enqueueSnackbar('Gagal menghapus file', { variant: 'error' });
     }

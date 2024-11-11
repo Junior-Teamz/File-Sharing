@@ -86,30 +86,50 @@ export default function FileManagerShareDialogFolder({
   };
 
   const handleSendInvite = () => {
-    if (selectedUser && selectedUser.id && folderId) { // Changed from fileId to folderId
+    if (selectedUser && selectedUser.id && folderId) {
+      const existingPermission = shared.find(
+        (share) => share.userId === selectedUser.id && share.permissions === permissionsOptions[permissions]
+      );
+  
+      if (existingPermission) {
+        enqueueSnackbar('User already has this permission on the folder.', { variant: 'info' });
+        return;
+      }
+  
       setPermissions(
         {
           user_id: selectedUser.id,
           permissions: permissionsOptions[permissions],
-          folder_id: folderId, // Changed from fileId to folderId
+          folder_id: folderId,
         },
         {
           onSuccess: () => {
-            enqueueSnackbar('Invite sent successfully!', { variant: 'success' }); // Show success notification
+            enqueueSnackbar('Invitation sent successfully!', { variant: 'success' });
+            useClient.invalidateQueries({ queryKey: ['favorite.admin'] });
           },
           onError: (error) => {
-            enqueueSnackbar(`Failed to send invite: ${error.message}`, { variant: 'error' }); // Show error notification
+            console.error('Error response:', error); // Log error to check structure
+  
+            if (error.response && error.response.status === 409) {
+              enqueueSnackbar('User already has a permission on this folder. Please use the changePermission endpoint.', { variant: 'error' });
+            } else {
+              const errorMessage = error?.message || 'An unknown error occurred'; // Safely get message
+              enqueueSnackbar(`Failed to send invite: ${errorMessage}`, { variant: 'error' });
+            }
           },
         }
       );
-      setInputSearch(''); // Clear search input after invite
-      setSearchResults([]); // Clear search results after invite
-      setSelectedUser(null); // Clear selected user after invite
-      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      
+      setInputSearch('');
+      setSearchResults([]);
+      setSelectedUser(null);
     } else {
-      enqueueSnackbar('User ID or folder ID is missing.', { variant: 'warning' }); // Show warning notification
+      enqueueSnackbar('User ID or folder ID is missing.', { variant: 'warning' });
     }
   };
+  
+  
+  
 
   return (
     <Dialog fullWidth maxWidth="xs" open={open} onClose={onClose} {...other}>
@@ -150,6 +170,7 @@ export default function FileManagerShareDialogFolder({
                   <FileManagerInvitedItem
                     key={user.id}
                     person={user}
+                    user={user}
                     onClick={() => handleUserSelect(user)} // Ensure onClick works
                   />
                 ))

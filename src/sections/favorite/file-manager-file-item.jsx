@@ -38,6 +38,7 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import FileManagerShareDialog from './file-manager-share-dialog';
 import FileManagerFileDetails from './file-manager-file-details';
 import { useAddFavorite, useRemoveFavorite } from './view/favoritemutation';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function FileManagerFileItem({ file,  selected, onSelect, onDelete, sx, ...other }) {
   const theme = useTheme();
@@ -47,6 +48,7 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
   // Inside your FileRecentItem component
   const { mutateAsync: addFavorite } = useAddFavorite();
   const { mutateAsync: removeFavorite } = useRemoveFavorite();
+  const queryClient = useQueryClient();
 
   const [inviteEmail, setInviteEmail] = useState('');
 
@@ -97,10 +99,12 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
       if (favorite.value) {
         await removeFavorite({ file_id: file.id }); // Pastikan mengirim objek dengan file_id
         enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
+        queryClient.invalidateQueries({ queryKey: ['favorite.admin'] });
       } else {
         // Tambahkan ke favorit
         await addFavorite({ file_id: file.id }); // Pastikan mengirim objek dengan file_id
         enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });
+        queryClient.invalidateQueries({ queryKey: ['favorite.admin'] });
       }
 
       favorite.onToggle();
@@ -142,13 +146,13 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
           }),
         }}
       >
-        <TableCell padding="checkbox">
+        {/* <TableCell padding="checkbox">
           <Checkbox
             checked={selected}
             onDoubleClick={() => console.info('ON DOUBLE CLICK')}
             onClick={onSelect}
           />
-        </TableCell>
+        </TableCell> */}
 
         <TableCell onClick={handleClick}>
           <Stack direction="row" alignItems="center" spacing={2}>

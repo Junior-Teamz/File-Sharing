@@ -142,7 +142,7 @@ export default function FileManagerGridView({
           }}
         >
           {/* Action Toolbar */}
-          <TableSelectedAction
+          {/* <TableSelectedAction
             dense={dense}
             numSelected={selected.length}
             rowCount={dataFiltered.length}
@@ -170,7 +170,7 @@ export default function FileManagerGridView({
               width: 'auto',
               borderRadius: 1.5,
             }}
-          />
+          /> */}
 
           {/* Files Table */}
           <TableContainer
@@ -193,12 +193,12 @@ export default function FileManagerGridView({
                 rowCount={dataFiltered.length}
                 numSelected={selected.length}
                 onSort={onSort}
-                onSelectAllRows={(checked) =>
-                  onSelectAllRows(
-                    checked,
-                    dataFiltered.map((row) => row.id)
-                  )
-                }
+                // onSelectAllRows={(checked) =>
+                //   onSelectAllRows(
+                //     checked,
+                //     dataFiltered.map((row) => row.id)
+                //   )
+                // }
                 sx={{
                   [`& .${tableCellClasses.head}`]: {
                     '&:first-of-type': {

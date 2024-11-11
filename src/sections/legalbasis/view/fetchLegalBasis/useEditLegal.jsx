@@ -1,39 +1,19 @@
 import { useMutation } from '@tanstack/react-query';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
-export const useEditLegal = () => {
+export const useEditLegal = (id) => {
   return useMutation({
     mutationKey: ['edit.legal'],
-    mutationFn: async ({ id, data }) => {
-      if (!id) {
-        throw new Error('Legal ID is required');
-      }
-
+    mutationFn: async (data) => {
       // Create a new FormData object to handle the file upload
       const formData = new FormData();
-
-      // Append regular fields (assuming data is an object)
-      Object.keys(data).forEach(key => {
-        formData.append(key, data[key]);
-      });
-
-      // Make sure to append the file if it exists
-      if (data.file) {
-        formData.append('file', data.file);
-      }
-
-      // Make the PUT request with FormData
-      const response = await axiosInstance.put(
-        `${endpoints.Legal.UpdateLegal}/${id}`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data', // Ensure correct header for file upload
-          },
-        }
-      );
-
-      return response;
+      formData.append('name', data.name);
+      formData.append('file', data.file[0]);
+      formData.append('_method', 'PUT');
+      console.log('INI LOG DARI DATA yang dikirim', data);
+      const response = await axiosInstance.post(`${endpoints.Legal.UpdateLegal}/${id}`, formData);
+      console.log(response.data);
+      return response.data;
     },
   });
 };

@@ -221,12 +221,12 @@ export default function FolderDetail({
 
         await removeFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
         enqueueSnackbar('Folder dihapus dari favorit!', { variant: 'success' });
-        useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+        useClient.invalidateQueries({ queryKey: ['folder.admin'] });
       } else {
         // Otherwise, add it
         await addFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
         enqueueSnackbar('Folder ditambahkan ke favorit!', { variant: 'success' });
-        useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+        useClient.invalidateQueries({ queryKey: ['folder.admin'] });
       }
 
       // Toggle the UI state

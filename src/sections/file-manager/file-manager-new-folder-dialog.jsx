@@ -49,7 +49,7 @@ export default function FileManagerNewFolderDialog({
       enqueueSnackbar('Folder berhasil dibuat');
       handleRemoveAllFiles();
       methods.reset(); // Reset form after successful upload
-      queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      queryClient.invalidateQueries({ queryKey: ['folder.admin'] });
       onClose(); 
     },
     onError: (error) => {

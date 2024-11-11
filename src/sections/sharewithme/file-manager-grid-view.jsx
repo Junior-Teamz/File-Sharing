@@ -153,8 +153,8 @@ export default function FileManagerGridView({
             m: theme.spacing(-2, -3, -3, -3),
           }}
         >
-          {/* Action Toolbar */}
-          <TableSelectedAction
+        
+          {/* <TableSelectedAction
             dense={dense}
             numSelected={selected.length}
             rowCount={dataFiltered.length}
@@ -166,11 +166,11 @@ export default function FileManagerGridView({
             }
             action={
               <>
-                {/* <Tooltip title="Share">
+                <Tooltip title="Share">
                   <IconButton color="primary">
                     <Iconify icon="solar:share-bold" />
                   </IconButton>
-                </Tooltip> */}
+                </Tooltip>
                 <Tooltip title="Delete">
                   <IconButton color="primary" onClick={onOpenConfirm}>
                     <Iconify icon="solar:trash-bin-trash-bold" />
@@ -187,7 +187,7 @@ export default function FileManagerGridView({
               width: 'auto',
               borderRadius: 1.5,
             }}
-          />
+          /> */}
 
           {/* Files Table */}
           <TableContainer
@@ -208,12 +208,12 @@ export default function FileManagerGridView({
                 headLabel={TABLE_HEAD}
                 rowCount={dataFiltered.length}
                 numSelected={selected.length}
-                onSelectAllRows={(checked) =>
-                  onSelectAllItems(
-                    checked,
-                    dataFiltered.map((row) => row.id)
-                  )
-                }
+                // onSelectAllRows={(checked) =>
+                //   onSelectAllItems(
+                //     checked,
+                //     dataFiltered.map((row) => row.id)
+                //   )
+                // }
                 sx={{
                   [`& .${tableCellClasses.head}`]: {
                     '&:first-of-type': {

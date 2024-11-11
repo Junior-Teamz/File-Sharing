@@ -41,7 +41,7 @@ import { useQueryClient } from '@tanstack/react-query';
 // ----------------------------------------------------------------------
 
 export default function FolderDetail({
-  item=[],
+  item = [],
   open,
   favorited,
   onFavorite,
@@ -158,7 +158,7 @@ export default function FolderDetail({
       enqueueSnackbar('Folder berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
-      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      useClient.invalidateQueries({ queryKey: ['folder.admin'] });
     } catch (error) {
       console.error('Error deleting folder:', error);
       enqueueSnackbar('Terjadi kesalahan saat menghapus folder.', { variant: 'error' });
@@ -175,7 +175,7 @@ export default function FolderDetail({
       await removeTagFolder({ folder_id: folder_id, tag_id: tagId }); // Updated to use folder_id
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
       enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
-      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      useClient.invalidateQueries({ queryKey: ['folder.admin'] });
     } catch (error) {
       console.error('Error removing tag:', error);
       enqueueSnackbar('Error removing tag.', { variant: 'error' });
@@ -200,7 +200,7 @@ export default function FolderDetail({
   };
 
   useEffect(() => {
-    favorite.setValue(is_favorite); // Set the state from props or backend response
+    favorite.setValue(is_favorite);
   }, [is_favorite]);
 
   const handleFavoriteToggle = useCallback(async () => {
@@ -212,22 +212,16 @@ export default function FolderDetail({
     setIsLoading(true);
 
     try {
-      // Log folder_id before making the API call
-
       if (favorite.value) {
-        // If already favorited, remove it
-
-        await removeFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
+        await removeFavorite({ folder_id });
         enqueueSnackbar('Folder dihapus dari favorit!', { variant: 'success' });
-        useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+        useClient.invalidateQueries({ queryKey: ['folder.admin'] });
       } else {
-        // Otherwise, add it
-        await addFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
+        await addFavorite({ folder_id });
         enqueueSnackbar('Folder ditambahkan ke favorit!', { variant: 'success' });
-        useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+        useClient.invalidateQueries({ queryKey: ['folder.admin'] });
       }
 
-      // Toggle the UI state
       favorite.onToggle();
     } catch (error) {
       console.error('Error updating favorite status:', error);

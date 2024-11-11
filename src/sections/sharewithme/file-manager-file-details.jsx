@@ -31,6 +31,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import CloseIcon from '@mui/icons-material/Close';
 import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
 import { useIndexTag } from '../tag/view/TagMutation';
+import { useDownloadFile } from '../favorite/view/folderDetail';
 
 // ----------------------------------------------------------------------
 
@@ -58,6 +59,7 @@ export default function FIleManagerFileDetails({
     user,
     instance,
     tags: initialTags,
+    created_at,
     updated_at,
     is_favorite,
     video_url,
@@ -79,6 +81,7 @@ export default function FIleManagerFileDetails({
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
   const useClient = useQueryClient();
+  const { mutateAsync: downloadFile } = useDownloadFile();
 
   const { data: tagData, isLoading, isError } = useIndexTag();
 
@@ -102,6 +105,7 @@ export default function FIleManagerFileDetails({
   const [issLoading, setIsLoading] = useState(false);
 
   const { mutateAsync: deleteFile } = useMutationDeleteFiles();
+  const [isConfirmOpenn, setConfirmOpenn] = useState(false);
 
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value);
@@ -156,7 +160,7 @@ export default function FIleManagerFileDetails({
       enqueueSnackbar('File deleted successfully!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
-      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      useClient.invalidateQueries({ queryKey: ['folder.admin'] });
       // Optionally, call a prop function to refresh the file list
     } catch (error) {
       console.error('Error deleting file:', error);
@@ -191,21 +195,54 @@ export default function FIleManagerFileDetails({
     }
   };
 
-  const handleCopyLink = () => {
-    const fileUrl = item.id; // Ensure this is the correct property for URL
+  const handleDownload = useCallback(async () => {
+    try {
+      const idsToDownload = Array.isArray(item.ids) && item.ids.length ? item.ids : [item.id];
 
-    if (!fileUrl) {
-      enqueueSnackbar('No URL to copy.', { variant: 'warning' });
-      return;
+      const response = await downloadFile(idsToDownload);
+
+      if (response.data) {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', item.name || 'download');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        enqueueSnackbar('Download berhasil!', { variant: 'success' });
+      } else {
+        enqueueSnackbar('Tidak ada data untuk di download!', { variant: 'error' });
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      const errorMessage = error.response?.data?.error || 'Download gagal!';
+      enqueueSnackbar(errorMessage, { variant: 'error' });
     }
+  }, [downloadFile, item, enqueueSnackbar]);
 
-    navigator.clipboard
-      .writeText(fileUrl)
-      .then(() => enqueueSnackbar('Link copied to clipboard!', { variant: 'success' }))
-      .catch((err) => {
-        enqueueSnackbar('Failed to copy link.', { variant: 'error' });
-      });
+  const openConfirmDialogg = () => {
+    setConfirmOpenn(true);
   };
+
+  const closeConfirmDialogg = () => {
+    setConfirmOpenn(false);
+  };
+
+  // const handleCopyLink = () => {
+  //   const fileUrl = item.id; // Ensure this is the correct property for URL
+
+  //   if (!fileUrl) {
+  //     enqueueSnackbar('No URL to copy.', { variant: 'warning' });
+  //     return;
+  //   }
+
+  //   navigator.clipboard
+  //     .writeText(fileUrl)
+  //     .then(() => enqueueSnackbar('Link copied to clipboard!', { variant: 'success' }))
+  //     .catch((err) => {
+  //       enqueueSnackbar('Failed to copy link.', { variant: 'error' });
+  //     });
+  // };
 
   useEffect(() => {
     favorite.setValue(is_favorite);
@@ -311,21 +348,28 @@ export default function FIleManagerFileDetails({
         <>
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Size
+              Ukuran
             </Box>
             {fData(size)}
           </Stack>
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Updated
+              Dibuat
+            </Box>
+            {fDateTime(created_at)}
+          </Stack>
+
+          <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
+            <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
+              Diperbarui
             </Box>
             {fDateTime(updated_at)}
           </Stack>
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Type
+              Tipe
             </Box>
             {fileFormat(type)}
           </Stack>
@@ -434,7 +478,7 @@ export default function FIleManagerFileDetails({
                   component="img"
                   src={file_url}
                   alt={item.name}
-                  onClick={handleOpen} // Open modal for zoomed view
+                  onClick={handleOpen}
                   style={{
                     maxWidth: '100%',
                     height: 'auto',
@@ -451,7 +495,7 @@ export default function FIleManagerFileDetails({
                     opacity: 0,
                     transition: 'opacity 0.3s',
                   }}
-                  onClick={handleOpen} // Open modal for zoom
+                  onClick={handleOpen}
                 >
                   <ZoomInMapIcon />
                 </IconButton>
@@ -535,7 +579,12 @@ export default function FIleManagerFileDetails({
               </audio>
             </Box>
           ) : (
-            <span>Tidak ada preview</span>
+            <span>
+              Tidak ada preview
+              <Button variant="contained" onClick={openConfirmDialogg} sx={{ mt: 2 }}>
+                Download File
+              </Button>
+            </span>
           )}
 
           <Typography variant="subtitle2">{name}</Typography>
@@ -605,7 +654,7 @@ export default function FIleManagerFileDetails({
           {renderShared} */}
 
           <Button fullWidth size="small" color="inherit" variant="outlined" onClick={onClose}>
-            Close
+            Tutup
           </Button>
 
           <Box sx={{ p: 2.5 }}>
@@ -617,7 +666,7 @@ export default function FIleManagerFileDetails({
               startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
               onClick={() => handleOpenConfirmDialog(item.id)}
             >
-              Delete
+              Hapus
             </Button>
           </Box>
         </Stack>
@@ -629,10 +678,23 @@ export default function FIleManagerFileDetails({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseConfirmDialog} color="primary">
-            Cancel
+            Batal
           </Button>
           <Button onClick={handleDeleteFile} color="error">
-            Delete
+            Hapus
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={isConfirmOpenn} onClose={closeConfirmDialogg}>
+        <DialogTitle>Konfirmasi Download</DialogTitle>
+        <DialogContent>Apakah Anda yakin ingin mendownload file ini?</DialogContent>
+        <DialogActions>
+          <Button onClick={closeConfirmDialogg} color="error">
+            Batal
+          </Button>
+          <Button onClick={handleDownload} color="primary" variant="contained">
+            Download
           </Button>
         </DialogActions>
       </Dialog>

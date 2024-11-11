@@ -41,7 +41,7 @@ import { useQueryClient } from '@tanstack/react-query';
 // ----------------------------------------------------------------------
 
 export default function FolderDetail({
-  item=[],
+  item = [],
   open,
   favorited,
   onFavorite,
@@ -130,11 +130,12 @@ export default function FolderDetail({
       if (newTagIds.length > 0) {
         for (const tagId of newTagIds) {
           await addTagFolder.mutateAsync({
-            folder_id: folder_id,
+            folder_id: id,
             tag_id: tagId,
           });
         }
         enqueueSnackbar('Tag berhasil ditambahkan!', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['favorite.admin'] });
       } else {
         enqueueSnackbar('Tidak ada tag baru untuk ditambahkan.', { variant: 'info' });
       }
@@ -153,11 +154,11 @@ export default function FolderDetail({
 
   const handleDeleteFolder = async () => {
     try {
-      await deleteFolder(item.folder_id);
+      await deleteFolder(item.id);
       enqueueSnackbar('Folder berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
-      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      useClient.invalidateQueries({ queryKey: ['favorite.admin'] });
     } catch (error) {
       console.error('Error deleting folder:', error);
       enqueueSnackbar('Terjadi kesalahan saat menghapus folder.', { variant: 'error' });
@@ -171,10 +172,10 @@ export default function FolderDetail({
     }
 
     try {
-      await removeTagFolder({ folder_id: folder_id, tag_id: tagId }); // Updated to use folder_id
+      await removeTagFolder({ folder_id: id, tag_id: tagId }); // Updated to use folder_id
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
       enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
-      useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      useClient.invalidateQueries({ queryKey: ['favorite.admin'] });
     } catch (error) {
       console.error('Error removing tag:', error);
       enqueueSnackbar('Error removing tag.', { variant: 'error' });
@@ -199,11 +200,11 @@ export default function FolderDetail({
   };
 
   useEffect(() => {
-    favorite.setValue(is_favorite); // Set the state from props or backend response
+    favorite.setValue(is_favorite);
   }, [is_favorite]);
 
   const handleFavoriteToggle = useCallback(async () => {
-    if (!folder_id) {
+    if (!id) {
       enqueueSnackbar('Folder ID is required to toggle favorite status!', { variant: 'error' });
       return;
     }
@@ -211,22 +212,16 @@ export default function FolderDetail({
     setIsLoading(true);
 
     try {
-      // Log folder_id before making the API call
-
       if (favorite.value) {
-        // If already favorited, remove it
-
-        await removeFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
+        await removeFavorite({ id });
         enqueueSnackbar('Folder dihapus dari favorit!', { variant: 'success' });
-        useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+        useClient.invalidateQueries({ queryKey: ['favorite.admin'] });
       } else {
-        // Otherwise, add it
-        await addFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
+        await addFavorite({ id });
         enqueueSnackbar('Folder ditambahkan ke favorit!', { variant: 'success' });
-        useClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+        useClient.invalidateQueries({ queryKey: ['favorite.admin'] });
       }
 
-      // Toggle the UI state
       favorite.onToggle();
     } catch (error) {
       console.error('Error updating favorite status:', error);
@@ -459,7 +454,7 @@ export default function FolderDetail({
 
           <FileManagerShareDialogFolder
             open={share.value}
-            folderId={folder_id}
+            folderId={id}
             shared={shared_with}
             inviteEmail={inviteEmail}
             onChangeInvite={handleChangeInvite}
@@ -473,7 +468,7 @@ export default function FolderDetail({
           {renderShared}
 
           <Button fullWidth size="small" color="inherit" variant="outlined" onClick={onClose}>
-            Close
+            Tutuo
           </Button>
 
           <Box sx={{ p: 2.5 }}>
@@ -485,7 +480,7 @@ export default function FolderDetail({
               startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
               onClick={handleOpenConfirmDialog}
             >
-              Delete
+              Hapus
             </Button>
           </Box>
         </Stack>

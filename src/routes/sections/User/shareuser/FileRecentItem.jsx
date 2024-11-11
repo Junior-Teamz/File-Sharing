@@ -95,7 +95,7 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
     try {
       await updateNameFile({ fileId: file.id, data: { name: newFileName } });
       enqueueSnackbar('Nama file berhasil diperbarui!', { variant: 'success' });
-      queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      queryClient.invalidateQueries({ queryKey: ['folder.admin'] });
       queryClient.invalidateQueries({ queryKey: ['detail-folder'] });
       edit.onFalse();
     } catch (error) {

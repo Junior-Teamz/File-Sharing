@@ -66,7 +66,7 @@ export default function FileManagerFileDialog({
       reset();
       setProgress(0);
       onClose();
-      queryClient.invalidateQueries({ queryKey: ['fetch.folder.admin'] });
+      queryClient.invalidateQueries({ queryKey: ['folder.admin'] });
     },
     onError: (error) => {
       enqueueSnackbar(error.message, { variant: 'error' });

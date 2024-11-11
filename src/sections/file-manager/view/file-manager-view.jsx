@@ -24,8 +24,11 @@ import FileManagerFiltersResult from '../file-manager-filters-result';
 import FileManagerNewFolderDialog from '../file-manager-new-folder-dialog';
 import { useFetchFolder } from 'src/sections/overview/app/view/folders';
 import { handleFolderFiles } from 'src/_mock/map/filesFolderApi';
-import { ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
+import { Box, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
 import FileManagerFileDialog from '../FileManagerFileDialog';
+import { alpha, useTheme } from '@mui/material/styles';
+import { bgGradient } from 'src/theme/css';
+
 // ----------------------------------------------------------------------
 
 const defaultFilters = {
@@ -39,6 +42,7 @@ const defaultFilters = {
 
 export default function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
+  const theme = useTheme();
 
   const { data, isLoading } = useFetchFolder();
 
@@ -172,6 +176,33 @@ export default function FileManagerView() {
 
   return (
     <>
+     {/* <Box
+      sx={{
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <Box
+        sx={{
+          ...bgGradient({
+            color: alpha(
+              theme.palette.background.paper,
+              theme.palette.mode === 'light' ? 0.8 : 0.80 // Mengurangi nilai alpha agar warna tidak terlalu terang
+            ),
+            imgUrl: '/assets/background/overlay_3.jpg',
+          }),
+          backgroundPosition: 'center', // Menempatkan background di tengah
+          backgroundSize: 'cover', // Mengatur ukuran background agar menutupi seluruh area
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: -1,
+        }}
+      />
+         </Box> */}
+
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h4">File manajer</Typography>
@@ -276,6 +307,7 @@ export default function FileManagerView() {
           </Button>
         }
       />
+   
     </>
   );
 }

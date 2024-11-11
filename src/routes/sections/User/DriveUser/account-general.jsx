@@ -34,8 +34,7 @@ export default function AccountGeneral() {
 
   const { user } = useContext(AuthContext);
  
-  const instances = user.instances.map((instansi) => instansi.name);
-  
+  const instances = user?.instances?.map((instansi) => instansi.name);
 
   const UpdateUserSchema = Yup.object().shape({
     displayName: Yup.string().required('Nama harus di isi'),

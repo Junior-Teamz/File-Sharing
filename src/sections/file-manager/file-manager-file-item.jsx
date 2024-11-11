@@ -142,13 +142,13 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
           }),
         }}
       >
-        <TableCell padding="checkbox">
+        {/* <TableCell padding="checkbox">
           <Checkbox
             checked={selected}
             onDoubleClick={() => console.info('ON DOUBLE CLICK')}
             onClick={onSelect}
           />
-        </TableCell>
+        </TableCell> */}
 
         <TableCell onClick={handleClick}>
           <Stack direction="row" alignItems="center" spacing={2}>
