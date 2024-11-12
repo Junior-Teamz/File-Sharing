@@ -27,12 +27,12 @@ import {
   useAddFileTag,
   useRemoveTagFile,
   useMutationDeleteFiles,
-  useDownloadFile
+  useDownloadFile,
 } from './view/FetchDriveUser/index';
 
 import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerInvitedItem from './FileManagerInvitedItem';
-import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
+import { useSnackbar } from 'notistack';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Modal } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import CloseIcon from '@mui/icons-material/Close';
@@ -51,7 +51,6 @@ export default function FIleManagerFileDetails({
   onDelete,
   ...other
 }) {
-  const { enqueueSnackbar } = useSnackbar();
   const {
     name,
     size,
@@ -68,41 +67,33 @@ export default function FIleManagerFileDetails({
     tags: initialTags,
     updated_at,
     is_favorite,
+    created_at,
     file_url,
   } = item;
 
   const isFolder = item.type === 'folder';
-
+  const { enqueueSnackbar } = useSnackbar();
   const [isOpen, setIsOpen] = useState(false);
-
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
-
-  // Logic to validate permissions
   const canAddFavorite = permissions === 'view' || permissions === 'edit';
   const canRemoveFavorite = permissions === 'view' || permissions === 'edit';
   const canAddTag = permissions === 'edit';
   const canRemoveTag = permissions === 'edit';
-
-  // Inside your FileRecentItem component
   const { mutateAsync: addFavorite } = useAddFavoriteUser();
   const { mutateAsync: removeFavorite } = useRemoveFavoriteUser();
-
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
   const useClient = useQueryClient();
-
   const toggleTags = useBoolean(true);
   const share = useBoolean();
   const properties = useBoolean(true);
   const [fileIdToDelete, setFileIdToDelete] = useState(null);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
-
   const [inviteEmail, setInviteEmail] = useState('');
-  const favorite = useBoolean(is_favorite); // Set initial value from props
+  const favorite = useBoolean(is_favorite);
   const [issLoading, setIsLoading] = useState(false);
   const [isConfirmOpenn, setConfirmOpenn] = useState(false);
-
   const { data: tagData, isLoading, isError } = useIndexTag();
   const addTagFile = useAddFileTag();
   const { mutateAsync: removeTagFile } = useRemoveTagFile();
@@ -122,7 +113,7 @@ export default function FIleManagerFileDetails({
 
   const handleChangeTags = useCallback((event, newValue) => {
     if (Array.isArray(newValue)) {
-      setTags(newValue.map((tag) => tag.id)); // Assuming newValue is an array of tag objects
+      setTags(newValue.map((tag) => tag.id));
     }
   }, []);
 
@@ -142,7 +133,6 @@ export default function FIleManagerFileDetails({
     }
 
     try {
-      // Determine which tags are new
       const existingTagIds = new Set(initialTags.map((tag) => tag.id));
       const newTagIds = tags.filter((tagId) => !existingTagIds.has(tagId));
 
@@ -154,6 +144,7 @@ export default function FIleManagerFileDetails({
           });
         }
         enqueueSnackbar('Tag berhasil ditambahkan!', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['share.user'] });
       } else {
         enqueueSnackbar('Tidak ada tag yang di tambahkan.', { variant: 'info' });
       }
@@ -169,12 +160,11 @@ export default function FIleManagerFileDetails({
 
   const handleDeleteFile = async () => {
     try {
-      // Kirim file_id sebagai array UUID secara langsung
       await deleteFile({ file_ids: fileIdToDelete });
       enqueueSnackbar('File berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
-      useClient.invalidateQueries({ queryKey: ['folder.admin'] });
+      useClient.invalidateQueries({ queryKey: ['share.user'] });
     } catch (error) {
       enqueueSnackbar('Gagal menghapus file', { variant: 'error' });
     }
@@ -194,6 +184,7 @@ export default function FIleManagerFileDetails({
       await removeTagFile({ file_id: item.id, tag_id: tagId });
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
       enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
+      useClient.invalidateQueries({ queryKey: ['share.user'] });
     } catch (error) {
       enqueueSnackbar('Error menghapus tag.', { variant: 'error' });
     }
@@ -224,12 +215,13 @@ export default function FIleManagerFileDetails({
 
     try {
       if (favorite.value) {
-        await removeFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
+        await removeFavorite({ file_id: id });
         enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['share.user'] });
       } else {
-        // Tambahkan ke favorit
-        await addFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
+        await addFavorite({ file_id: id });
         enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['share.user'] });
       }
 
       favorite.onToggle();
@@ -286,12 +278,6 @@ export default function FIleManagerFileDetails({
         sx={{ typography: 'subtitle2' }}
       >
         Tag
-        {/* <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
-          <Iconify
-            icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
-            sx={{ color: favorite.value ? 'yellow' : 'gray' }}
-          />
-        </IconButton> */}
       </Stack>
 
       {toggleTags.value && (
@@ -321,7 +307,7 @@ export default function FIleManagerFileDetails({
           renderInput={(params) => <TextField {...params} placeholder="Tambahkan tag" />}
         />
       )}
-      <Button onClick={handleSaveTags}>simpan tags</Button>
+      <Button onClick={handleSaveTags}>simpan tag</Button>
     </Stack>
   );
 
@@ -333,7 +319,7 @@ export default function FIleManagerFileDetails({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Properties
+        Properti
         <IconButton size="small" onClick={properties.onToggle}>
           <Iconify
             icon={properties.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
@@ -345,21 +331,28 @@ export default function FIleManagerFileDetails({
         <>
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Size
+              Ukuran
             </Box>
             {fData(size)}
           </Stack>
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Updated
+              Dibuat
+            </Box>
+            {fDateTime(created_at)}
+          </Stack>
+
+          <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
+            <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
+              Diperbarui
             </Box>
             {fDateTime(updated_at)}
           </Stack>
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Type
+              Tipe
             </Box>
             {fileFormat(type)}
           </Stack>
@@ -440,7 +433,7 @@ export default function FIleManagerFileDetails({
             bgcolor: 'background.neutral',
           }}
         >
- {isFolder ? (
+          {isFolder ? (
             <Box
               sx={{
                 width: 50,
@@ -627,7 +620,7 @@ export default function FIleManagerFileDetails({
             )}
           </Stack>
 
-          <FileManagerShareDialog
+          {/* <FileManagerShareDialog
             open={share.value}
             fileId={id}
             shared={shared_with}
@@ -640,13 +633,13 @@ export default function FIleManagerFileDetails({
             }}
           />
 
-          {renderShared}
+          {renderShared} */}
 
           <Button fullWidth size="small" color="inherit" variant="outlined" onClick={onClose}>
-            Close
+            Tutup
           </Button>
 
-          <Box sx={{ p: 2.5 }}>
+          {/* <Box sx={{ p: 2.5 }}>
             <Button
               fullWidth
               variant="soft"
@@ -655,12 +648,12 @@ export default function FIleManagerFileDetails({
               startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
               onClick={() => handleOpenConfirmDialog(item.id)}
             >
-              Delete
+              Hapus
             </Button>
-          </Box>
+          </Box> */}
         </Stack>
       </Scrollbar>
-      <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
+      {/* <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <Typography>Are you sure you want to delete this file?</Typography>
@@ -673,7 +666,7 @@ export default function FIleManagerFileDetails({
             Delete
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
 
       <Dialog open={isConfirmOpenn} onClose={closeConfirmDialogg}>
         <DialogTitle>Konfirmasi Download</DialogTitle>

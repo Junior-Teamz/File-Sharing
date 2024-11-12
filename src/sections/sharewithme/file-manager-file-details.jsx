@@ -45,7 +45,6 @@ export default function FIleManagerFileDetails({
   onDelete,
   ...other
 }) {
-  const { enqueueSnackbar } = useSnackbar(); // Initialize enqueueSnackbar
   const {
     name,
     size,
@@ -66,15 +65,13 @@ export default function FIleManagerFileDetails({
     file_url,
   } = item;
 
+  const { enqueueSnackbar } = useSnackbar();
   const hasPermission = (permissionType) => {
     return shared_with.some(({ permissions }) => permissions.includes(permissionType));
   };
-
   const [isOpen, setIsOpen] = useState(false);
-
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
-
   const isFolder = item.type === 'folder';
   const { mutateAsync: addFavorite } = useAddFavorite();
   const { mutateAsync: removeFavorite } = useRemoveFavorite();
@@ -82,28 +79,15 @@ export default function FIleManagerFileDetails({
   const [availableTags, setAvailableTags] = useState([]);
   const useClient = useQueryClient();
   const { mutateAsync: downloadFile } = useDownloadFile();
-
   const { data: tagData, isLoading, isError } = useIndexTag();
-
-  useEffect(() => {
-    if (!isLoading && !isError && tagData && Array.isArray(tagData.data)) {
-      setAvailableTags(tagData.data);
-    } else if (isError) {
-      console.error('Error fetching tag data:', isError);
-    }
-  }, [tagData, isLoading, isError]);
-
   const toggleTags = useBoolean(true);
   const share = useBoolean();
   const properties = useBoolean(true);
-
   const [fileIdToDelete, setFileIdToDelete] = useState(null);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
-
   const [inviteEmail, setInviteEmail] = useState('');
-  const favorite = useBoolean(is_favorite); // Set initial value from props
+  const favorite = useBoolean(is_favorite);
   const [issLoading, setIsLoading] = useState(false);
-
   const { mutateAsync: deleteFile } = useMutationDeleteFiles();
   const [isConfirmOpenn, setConfirmOpenn] = useState(false);
 
@@ -121,6 +105,14 @@ export default function FIleManagerFileDetails({
     setFileIdToDelete(null);
   };
 
+  useEffect(() => {
+    if (!isLoading && !isError && tagData && Array.isArray(tagData.data)) {
+      setAvailableTags(tagData.data);
+    } else if (isError) {
+      console.error('Error fetching tag data:', isError);
+    }
+  }, [tagData, isLoading, isError]);
+
   const handleSaveTags = async () => {
     if (!addTagFile.mutateAsync) {
       console.error('addTagFile.mutateAsync is not a function');
@@ -128,7 +120,6 @@ export default function FIleManagerFileDetails({
     }
 
     try {
-      // Determine which tags are new
       const existingTagIds = new Set(initialTags.map((tag) => tag.id));
       const newTagIds = tags.filter((tagId) => !existingTagIds.has(tagId));
 
@@ -161,7 +152,6 @@ export default function FIleManagerFileDetails({
       handleCloseConfirmDialog();
       onDelete();
       useClient.invalidateQueries({ queryKey: ['folder.admin'] });
-      // Optionally, call a prop function to refresh the file list
     } catch (error) {
       console.error('Error deleting file:', error);
       enqueueSnackbar('Error deleting file.', { variant: 'error' });
@@ -170,7 +160,7 @@ export default function FIleManagerFileDetails({
 
   const handleChangeTags = useCallback((event, newValue) => {
     if (Array.isArray(newValue)) {
-      setTags(newValue.map((tag) => tag.id)); // Assuming newValue is an array of tag objects
+      setTags(newValue.map((tag) => tag.id));
     }
   }, []);
 
@@ -228,22 +218,6 @@ export default function FIleManagerFileDetails({
     setConfirmOpenn(false);
   };
 
-  // const handleCopyLink = () => {
-  //   const fileUrl = item.id; // Ensure this is the correct property for URL
-
-  //   if (!fileUrl) {
-  //     enqueueSnackbar('No URL to copy.', { variant: 'warning' });
-  //     return;
-  //   }
-
-  //   navigator.clipboard
-  //     .writeText(fileUrl)
-  //     .then(() => enqueueSnackbar('Link copied to clipboard!', { variant: 'success' }))
-  //     .catch((err) => {
-  //       enqueueSnackbar('Failed to copy link.', { variant: 'error' });
-  //     });
-  // };
-
   useEffect(() => {
     favorite.setValue(is_favorite);
   }, [is_favorite]);
@@ -260,11 +234,10 @@ export default function FIleManagerFileDetails({
 
     try {
       if (favorite.value) {
-        await removeFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
+        await removeFavorite({ file_id: id });
         enqueueSnackbar('File berhasil dihapus dari favorit!', { variant: 'success' });
       } else {
-        // Tambahkan ke favorit
-        await addFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
+        await addFavorite({ file_id: id });
         enqueueSnackbar('File berhasil ditambahkan ke favorit', { variant: 'success' });
       }
 
@@ -289,12 +262,6 @@ export default function FIleManagerFileDetails({
         sx={{ typography: 'subtitle2' }}
       >
         Tag
-        {/* <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
-          <Iconify
-            icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
-            sx={{ color: favorite.value ? 'yellow' : 'gray' }}
-          />
-        </IconButton> */}
       </Stack>
 
       {toggleTags.value && (
@@ -302,8 +269,8 @@ export default function FIleManagerFileDetails({
           multiple
           options={availableTags}
           getOptionLabel={(option) => option.name}
-          value={availableTags.filter((tag) => tags.includes(tag.id))} // Display selected tags
-          onChange={handleChangeTags} // Update tags state
+          value={availableTags.filter((tag) => tags.includes(tag.id))} 
+          onChange={handleChangeTags} 
           renderOption={(props, option) => (
             <li {...props} key={option.id}>
               {option.name}
@@ -336,7 +303,7 @@ export default function FIleManagerFileDetails({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Properties
+        Properti
         <IconButton size="small" onClick={properties.onToggle}>
           <Iconify
             icon={properties.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
@@ -439,7 +406,7 @@ export default function FIleManagerFileDetails({
             icon={<Iconify icon="eva:star-outline" />}
             checkedIcon={<Iconify icon="eva:star-fill" />}
             checked={favorite.value}
-            onChange={handleFavoriteToggle} // Toggle favorite state
+            onChange={handleFavoriteToggle} 
           />
         </Stack>
 
@@ -658,7 +625,7 @@ export default function FIleManagerFileDetails({
           </Button>
 
           <Box sx={{ p: 2.5 }}>
-            <Button
+            {/* <Button
               fullWidth
               variant="soft"
               color="error"
@@ -667,12 +634,12 @@ export default function FIleManagerFileDetails({
               onClick={() => handleOpenConfirmDialog(item.id)}
             >
               Hapus
-            </Button>
+            </Button> */}
           </Box>
         </Stack>
       </Scrollbar>
-      <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
-        <DialogTitle>Confirm Delete</DialogTitle>
+      {/* <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
+        <DialogTitle>Konfirmasi Hapus</DialogTitle>
         <DialogContent>
           <Typography>Are you sure you want to delete this file?</Typography>
         </DialogContent>
@@ -684,7 +651,7 @@ export default function FIleManagerFileDetails({
             Hapus
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
 
       <Dialog open={isConfirmOpenn} onClose={closeConfirmDialogg}>
         <DialogTitle>Konfirmasi Download</DialogTitle>

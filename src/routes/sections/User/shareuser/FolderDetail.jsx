@@ -65,6 +65,7 @@ export default function FolderDetail({
     instance,
     tags: initialTags = [],
     updated_at,
+    created_at,
     is_favorite,
   } = item;
 
@@ -153,14 +154,12 @@ export default function FolderDetail({
   };
 
   const handleDeleteFolder = async () => {
-    // Ensure that folderIds is a flat array
-    const flatFolderIds = folderIds.flat(); // Use flat() to remove any nested arrays
-
     try {
-      await deleteFolder({ folder_id: flatFolderIds }); // Updated to use flatFolderIds
+      await deleteFolder({ folder_id: folderIdToDelete });
       enqueueSnackbar('Folder berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
+      useClient.invalidateQueries({ queryKey: ['share.user'] });
     } catch (error) {
       console.error('Error deleting folder:', error);
       enqueueSnackbar('Terjadi kesalahan saat menghapus folder.', { variant: 'error' });
@@ -174,9 +173,10 @@ export default function FolderDetail({
     }
 
     try {
-      await removeTagFolder({ folder_id: folder_id, tag_id: tagId }); // Updated to use folder_id
+      await removeTagFolder({ folder_id: folder_id, tag_id: tagId });
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
       enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
+      useClient.invalidateQueries({ queryKey: ['share.user'] });
     } catch (error) {
       console.error('Error removing tag:', error);
       enqueueSnackbar('Error removing tag.', { variant: 'error' });
@@ -184,10 +184,7 @@ export default function FolderDetail({
   };
 
   const handleCopyLink = () => {
-    const folderUrl = folder_id; // Ensure this is the correct property for URL
-
- 
-
+    const folderUrl = folder_id;
     if (!folderUrl) {
       enqueueSnackbar('No URL to copy.', { variant: 'warning' });
       return;
@@ -203,7 +200,7 @@ export default function FolderDetail({
   };
 
   useEffect(() => {
-    favorite.setValue(is_favorite); // Set the state from props or backend response
+    favorite.setValue(is_favorite);
   }, [is_favorite]);
 
   const handleFavoriteToggle = useCallback(async () => {
@@ -215,21 +212,16 @@ export default function FolderDetail({
     setIsLoading(true);
 
     try {
-      // Log folder_id before making the API call
-   
-
       if (favorite.value) {
-        // If already favorited, remove it
-     
-        await removeFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
+        await removeFavorite({ folder_id });
         enqueueSnackbar('Folder dihapus dari favorit!', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['share.user'] });
       } else {
-    
-        await addFavorite({ folder_id }); // Ensure payload is an object with `folder_id`
+        await addFavorite({ folder_id });
         enqueueSnackbar('Folder ditambahkan ke favorit!', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['share.user'] });
       }
 
-      // Toggle the UI state
       favorite.onToggle();
     } catch (error) {
       console.error('Error updating favorite status:', error);
@@ -247,7 +239,7 @@ export default function FolderDetail({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Tags
+        Tag
         <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
           <Iconify
             icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
@@ -259,9 +251,9 @@ export default function FolderDetail({
       {toggleTags.value && (
         <Autocomplete
           multiple
-          options={availableTags} // Array of tag objects
-          getOptionLabel={(option) => option.name} // Display name
-          value={availableTags.filter((tag) => tags.includes(tag.id))} // Display selected tags
+          options={availableTags} 
+          getOptionLabel={(option) => option.name} 
+          value={availableTags.filter((tag) => tags.includes(tag.id))}
           onChange={handleChangeTags} // Update tags state
           renderOption={(props, option) => (
             <li {...props} key={option.id}>
@@ -283,7 +275,7 @@ export default function FolderDetail({
           renderInput={(params) => <TextField {...params} placeholder="Tambahkan tag" />}
         />
       )}
-      <Button onClick={handleSaveTags}>simpan tags</Button>
+      <Button onClick={handleSaveTags}>simpan tag</Button>
     </Stack>
   );
 
@@ -295,7 +287,7 @@ export default function FolderDetail({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Properties
+        Properti
         <IconButton size="small" onClick={properties.onToggle}>
           <Iconify
             icon={properties.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
@@ -305,23 +297,30 @@ export default function FolderDetail({
 
       {properties.value && (
         <>
-          <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
+     <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Size
+              Ukuran
             </Box>
             {fData(total_size)}
           </Stack>
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Updated
+              Dibuat
+            </Box>
+            {fDateTime(created_at)}
+          </Stack>
+
+          <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
+            <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
+              Diperbarui
             </Box>
             {fDateTime(updated_at)}
           </Stack>
 
           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-              Type
+              Tipe
             </Box>
             {fileFormat(type)}
           </Stack>
@@ -466,7 +465,7 @@ export default function FolderDetail({
             )}
           </Stack>
 
-          <FileManagerShareDialogFolder
+          {/* <FileManagerShareDialogFolder
             open={share.value}
             folderId={folder_id}
             shared={shared_with}
@@ -479,13 +478,13 @@ export default function FolderDetail({
             }}
           />
 
-          {renderShared}
+          {renderShared} */}
 
           <Button fullWidth size="small" color="inherit" variant="outlined" onClick={onClose}>
-            Close
+            Tutup
           </Button>
 
-          <Box sx={{ p: 2.5 }}>
+          {/* <Box sx={{ p: 2.5 }}>
             <Button
               fullWidth
               variant="soft"
@@ -496,10 +495,10 @@ export default function FolderDetail({
             >
               Hapus
             </Button>
-          </Box>
+          </Box> */}
         </Stack>
       </Scrollbar>
-      <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
+      {/* <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
         <DialogTitle>Konfirmasi Hapus</DialogTitle>
         <DialogContent>
           <Typography>Apa kamu yakin hapus folder ini?</Typography>
@@ -512,7 +511,7 @@ export default function FolderDetail({
             Hapus
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
     </Drawer>
   );
 }

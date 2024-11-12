@@ -11,22 +11,26 @@ import Chart, { useChart } from 'src/components/chart';
 export default function AnalyticsWebsiteVisits({ title, subheader, chart, ...other }) {
   const { labels, colors, series, options } = chart;
 
-  // Pastikan semua series menggunakan tipe 'bar'
+  // Ensure all series are of type 'bar'
   const modifiedSeries = series.map((s) => ({
     ...s,
-    type: 'bar', // Set semua tipe series menjadi 'bar'
+    type: 'bar',
   }));
+
+  // Set the chart height conditionally based on the number of series
+  const chartHeight = series.length >= 5 ? 400 : 400;
 
   const chartOptions = useChart({
     colors,
     plotOptions: {
       bar: {
-        columnWidth: '20%', // Menentukan lebar kolom tetap
-        distributed: false, // Membuat setiap batang memiliki lebar yang konsisten
+        columnWidth: '20%',
+        horizontal: true,
+        distributed: false,
       },
     },
     chart: {
-      type: 'bar', // Mengubah seluruh chart menjadi chart batang
+      type: 'bar',
     },
     fill: {
       type: modifiedSeries.map((i) => i.fill),
@@ -34,7 +38,7 @@ export default function AnalyticsWebsiteVisits({ title, subheader, chart, ...oth
     labels,
     xaxis: {
       categories: labels,
-      type: 'category', // Mengatur xaxis sebagai kategori
+      type: 'category',
     },
     tooltip: {
       shared: true,
@@ -42,7 +46,7 @@ export default function AnalyticsWebsiteVisits({ title, subheader, chart, ...oth
       y: {
         formatter: (value) => {
           if (typeof value !== 'undefined') {
-            return `${value.toFixed(0)} `; // Format angka pada tooltip
+            return `${value.toFixed(0)} `;
           }
           return value;
         },
@@ -54,9 +58,8 @@ export default function AnalyticsWebsiteVisits({ title, subheader, chart, ...oth
   return (
     <Card {...other}>
       <CardHeader title={title} subheader={subheader} />
-
       <Box sx={{ p: 3, pb: 1 }}>
-        <Chart dir="ltr" type="bar" series={modifiedSeries} options={chartOptions} height={364} />
+        <Chart dir="ltr" type="bar" series={modifiedSeries} options={chartOptions} height={chartHeight} />
       </Box>
     </Card>
   );

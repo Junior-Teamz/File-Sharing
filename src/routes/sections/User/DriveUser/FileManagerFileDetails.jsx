@@ -34,7 +34,7 @@ import {
 
 import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerInvitedItem from './FileManagerInvitedItem';
-import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
+import { useSnackbar } from 'notistack';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Modal, Tooltip } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import CloseIcon from '@mui/icons-material/Close';
@@ -74,20 +74,14 @@ export default function FIleManagerFileDetails({
   } = item;
 
   const isFolder = item.type === 'folder';
-
   const [isOpen, setIsOpen] = useState(false);
-
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
-
-  // Inside your FileRecentItem component
   const { mutateAsync: addFavorite } = useAddFavoriteUser();
   const { mutateAsync: removeFavorite } = useRemoveFavoriteUser();
-
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
   const useClient = useQueryClient();
-
   const toggleTags = useBoolean(true);
   const share = useBoolean();
   const properties = useBoolean(true);
@@ -95,15 +89,12 @@ export default function FIleManagerFileDetails({
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const { mutateAsync: updateNameFile } = useChangeNameFile();
   const [originalFileType, setOriginalFileType] = useState(item.type);
-
   const [inviteEmail, setInviteEmail] = useState('');
   const favorite = useBoolean(is_favorite);
   const [issLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [newFileName, setNewFileName] = useState(item.name);
-  
   const [isConfirmOpenn, setConfirmOpenn] = useState(false);
-
   const { data: tagData, isLoading, isError } = useIndexTag();
   const addTagFile = useAddFileTag();
   const { mutateAsync: removeTagFile } = useRemoveTagFile();
@@ -211,6 +202,7 @@ export default function FIleManagerFileDetails({
           });
         }
         enqueueSnackbar('Tag berhasil ditambahkan!', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
       } else {
         enqueueSnackbar('Tidak ada tag baru untuk ditambahkan.', { variant: 'info' });
       }
@@ -247,6 +239,7 @@ export default function FIleManagerFileDetails({
       await removeTagFile({ file_id: item.id, tag_id: tagId });
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
       enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
+      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
     } catch (error) {
       enqueueSnackbar('Error removing tag.', { variant: 'error' });
     }
@@ -278,12 +271,13 @@ export default function FIleManagerFileDetails({
 
     try {
       if (favorite.value) {
-        await removeFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
+        await removeFavorite({ file_id: id });
         enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
       } else {
-        // Tambahkan ke favorit
-        await addFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
+        await addFavorite({ file_id: id });
         enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
       }
 
       favorite.onToggle();
@@ -306,13 +300,7 @@ export default function FIleManagerFileDetails({
         justifyContent="space-between"
         sx={{ typography: 'subtitle2' }}
       >
-        Tags
-        {/* <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
-          <Iconify
-            icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
-            sx={{ color: favorite.value ? 'yellow' : 'gray' }}
-          />
-        </IconButton> */}
+        Tag
       </Stack>
 
       {toggleTags.value && (
@@ -320,7 +308,7 @@ export default function FIleManagerFileDetails({
           multiple
           options={availableTags}
           getOptionLabel={(option) => option.name}
-          value={availableTags.filter((tag) => tags.includes(tag.id))} // Display selected tags
+          value={availableTags.filter((tag) => tags.includes(tag.id))}
           onChange={handleChangeTags} // Update tags state
           renderOption={(props, option) => (
             <li {...props} key={option.id}>
@@ -608,10 +596,10 @@ export default function FIleManagerFileDetails({
             <TextField
               value={newFileName}
               onChange={(e) => setNewFileName(e.target.value)}
-              onBlur={handleRename} // Menangani rename saat blur
+              onBlur={handleRename}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  handleRename(); // Menangani rename saat tekan Enter
+                  handleRename(); 
                 }
               }}
               size="small"
@@ -693,7 +681,7 @@ export default function FIleManagerFileDetails({
           {renderShared}
 
           <Button fullWidth size="small" color="inherit" variant="outlined" onClick={onClose}>
-            Close
+            Tutup
           </Button>
 
           <Box sx={{ p: 2.5 }}>
@@ -705,22 +693,22 @@ export default function FIleManagerFileDetails({
               startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
               onClick={() => handleOpenConfirmDialog(item.id)}
             >
-              Delete
+              Hapus
             </Button>
           </Box>
         </Stack>
       </Scrollbar>
       <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
-        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogTitle>Konfirmasi Hapus</DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to delete this file?</Typography>
+          <Typography>Apakah Anda yakin ingin menghapus file ini?</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseConfirmDialog} color="primary">
-            Cancel
+            Batal
           </Button>
-          <Button onClick={handleDeleteFile} color="error">
-            Delete
+          <Button onClick={handleDeleteFile} color="error" variant="contained">
+            Hapus
           </Button>
         </DialogActions>
       </Dialog>

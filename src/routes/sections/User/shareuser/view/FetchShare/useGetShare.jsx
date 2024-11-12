@@ -3,7 +3,7 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 
 export const useGetShare = () => {
   const { data, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ['fetch.share.user'],
+    queryKey: ['share.user'],
     queryFn: async () => {
       const response = await axiosInstance.get(endpoints.GetFileFolderShare.UserShare);
       

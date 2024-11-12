@@ -23,11 +23,9 @@ import Scrollbar from 'src/components/scrollbar';
 import FileThumbnail, { fileFormat } from 'src/components/file-thumbnail';
 import FileManagerShareDialog from './file-manager-share-dialog';
 import FileManagerInvitedItem from './file-manager-invited-item';
-
 import { useIndexTag } from '../tag/view/TagMutation';
-import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
+import { useSnackbar } from 'notistack';
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
-
 import FileManagerShareDialogFolder from './FileManagerShareDialogFolder';
 import {
   useAddTagFolder,
@@ -49,8 +47,7 @@ export default function FolderDetail({
   onClose,
   onDelete,
   ...other
-}) {
-  const { enqueueSnackbar } = useSnackbar(); // Initialize enqueueSnackbar
+}) { 
   const {
     name,
     total_size,
@@ -69,23 +66,19 @@ export default function FolderDetail({
     created_at,
     is_favorite,
   } = item;
-
+  const { enqueueSnackbar } = useSnackbar();
   const { mutateAsync: addFavorite } = useAddFavoriteFolder();
   const { mutateAsync: removeFavorite } = useRemoveFavoriteFolder();
   const useClient = useQueryClient();
-
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
-
   const toggleTags = useBoolean(true);
   const share = useBoolean();
   const properties = useBoolean(true);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
-
   const [inviteEmail, setInviteEmail] = useState('');
   const favorite = useBoolean(is_favorite);
   const [issLoading, setIsLoading] = useState(false);
-
   const { data: tagData, isLoading, isError } = useIndexTag();
   const addTagFolder = useAddTagFolder();
   const { mutateAsync: removeTagFolder } = useRemoveTagFolder();
@@ -124,7 +117,6 @@ export default function FolderDetail({
     }
 
     try {
-      // Determine which tags are new
       const existingTagIds = new Set(initialTags.map((tag) => tag.id));
       const newTagIds = tags.filter((tagId) => !existingTagIds.has(tagId));
 
@@ -136,13 +128,13 @@ export default function FolderDetail({
           });
         }
         enqueueSnackbar('Tag berhasil ditambahkan!', { variant: 'success' });
+        useClient.invalidateQueries({ queryKey: ['folder.admin'] });
       } else {
         enqueueSnackbar('Tidak ada tag baru untuk ditambahkan.', { variant: 'info' });
       }
     } catch (error) {
       console.error('Error adding tags:', error);
       if (error.response && error.response.data.errors) {
-        // Log specific errors from the server
         console.error('Server errors:', error.response.data.errors);
         if (error.response.data.errors.tag_id) {
           enqueueSnackbar('Tag sudah ada dalam folder.', { variant: 'warning' });
@@ -172,7 +164,7 @@ export default function FolderDetail({
     }
 
     try {
-      await removeTagFolder({ folder_id: folder_id, tag_id: tagId }); // Updated to use folder_id
+      await removeTagFolder({ folder_id: folder_id, tag_id: tagId })
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
       enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
       useClient.invalidateQueries({ queryKey: ['folder.admin'] });
@@ -183,7 +175,7 @@ export default function FolderDetail({
   };
 
   const handleCopyLink = () => {
-    const folderUrl = folder_id; // Ensure this is the correct property for URL
+    const folderUrl = folder_id; 
 
     if (!folderUrl) {
       enqueueSnackbar('No URL to copy.', { variant: 'warning' });
@@ -245,10 +237,10 @@ export default function FolderDetail({
       {toggleTags.value && (
         <Autocomplete
           multiple
-          options={availableTags} // Array of tag objects
-          getOptionLabel={(option) => option.name} // Display name
-          value={availableTags.filter((tag) => tags.includes(tag.id))} // Display selected tags
-          onChange={handleChangeTags} // Update tags state
+          options={availableTags}
+          getOptionLabel={(option) => option.name} 
+          value={availableTags.filter((tag) => tags.includes(tag.id))} 
+          onChange={handleChangeTags} 
           renderOption={(props, option) => (
             <li {...props} key={option.id}>
               {option.name}
@@ -475,7 +467,7 @@ export default function FolderDetail({
           {renderShared}
 
           <Button fullWidth size="small" color="inherit" variant="outlined" onClick={onClose}>
-            Close
+            Tutup
           </Button>
 
           <Box sx={{ p: 2.5 }}>
@@ -487,22 +479,22 @@ export default function FolderDetail({
               startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
               onClick={handleOpenConfirmDialog}
             >
-              Delete
+              Hapus
             </Button>
           </Box>
         </Stack>
       </Scrollbar>
       <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
-        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogTitle>Konfirmasi Hapus</DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to delete this file?</Typography>
+          <Typography>Apa anda yakin ingin menghapus folder ini?</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseConfirmDialog} color="primary">
-            Cancel
+            Batal
           </Button>
           <Button onClick={handleDeleteFolder} color="error">
-            Delete
+            Hapus
           </Button>
         </DialogActions>
       </Dialog>

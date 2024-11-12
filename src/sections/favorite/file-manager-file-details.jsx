@@ -32,13 +32,12 @@ import {
   useDownloadFile,
 } from './view/folderDetail/index';
 import { useIndexTag } from '../tag/view/TagMutation';
-import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
+import { useSnackbar } from 'notistack';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Modal, Tooltip } from '@mui/material';
 import { useAddFavorite, useRemoveFavorite } from './view/favoritemutation';
 import { useQueryClient } from '@tanstack/react-query';
 import CloseIcon from '@mui/icons-material/Close';
 import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
-
 
 // ----------------------------------------------------------------------
 
@@ -74,33 +73,25 @@ export default function FIleManagerFileDetails({
   } = item;
 
   const isFolder = item.type === 'folder';
-
   const [isOpen, setIsOpen] = useState(false);
   const [newFileName, setNewFileName] = useState(item.name);
   const [originalFileType, setOriginalFileType] = useState(item.type);
-
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
   const { mutateAsync: updateNameFile } = useChangeNameFile();
-
-  // Inside your FileRecentItem component
   const { mutateAsync: addFavorite } = useAddFavorite();
   const { mutateAsync: removeFavorite } = useRemoveFavorite();
-
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
   const queryClient = useQueryClient();
-
   const toggleTags = useBoolean(true);
   const share = useBoolean();
   const properties = useBoolean(true);
   const [fileIdToDelete, setFileIdToDelete] = useState(null);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
-
   const [inviteEmail, setInviteEmail] = useState('');
   const favorite = useBoolean(is_favorite);
   const [issLoading, setIsLoading] = useState(false);
-
   const { data: tagData, isLoading, isError } = useIndexTag();
   const addTagFile = useAddFileTag();
   const { mutateAsync: removeTagFile } = useRemoveTagFile();
@@ -143,7 +134,6 @@ export default function FIleManagerFileDetails({
 
   const handleSaveTags = async () => {
     try {
-      // Determine which tags are new
       const existingTagIds = new Set(initialTags.map((tag) => tag.id));
       const newTagIds = tags.filter((tagId) => !existingTagIds.has(tagId));
 
@@ -228,8 +218,8 @@ export default function FIleManagerFileDetails({
     try {
       await updateNameFile({ fileId: item.id, data: { name: newFileName } });
       enqueueSnackbar('Nama file berhasil diperbarui!', { variant: 'success' });
-      setIsEditing(false);
       queryClient.invalidateQueries({ queryKey: ['favorite.admin'] });
+      setIsEditing(false);
     } catch (error) {
       enqueueSnackbar('Gagal memperbarui nama file!', { variant: 'error' });
     }
@@ -244,12 +234,11 @@ export default function FIleManagerFileDetails({
 
     try {
       if (favorite.value) {
-        await removeFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
+        await removeFavorite({ file_id: id });
         enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
         queryClient.invalidateQueries({ queryKey: ['favorite.admin'] });
       } else {
-        // Tambahkan ke favorit
-        await addFavorite({ file_id: id }); // Pastikan mengirim objek dengan file_id
+        await addFavorite({ file_id: id });
         enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });
         queryClient.invalidateQueries({ queryKey: ['favorite.admin'] });
       }
@@ -268,7 +257,6 @@ export default function FIleManagerFileDetails({
 
   const [isConfirmOpenn, setConfirmOpenn] = useState(false);
 
-  
   const handleDownload = useCallback(async () => {
     try {
       const idsToDownload = Array.isArray(item.ids) && item.ids.length ? item.ids : [item.id];
@@ -311,12 +299,6 @@ export default function FIleManagerFileDetails({
         sx={{ typography: 'subtitle2' }}
       >
         Tag
-        {/* <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
-          <Iconify
-            icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
-            sx={{ color: favorite.value ? 'yellow' : 'gray' }}
-          />
-        </IconButton> */}
       </Stack>
 
       {toggleTags.value && (
@@ -324,8 +306,8 @@ export default function FIleManagerFileDetails({
           multiple
           options={availableTags}
           getOptionLabel={(option) => option.name}
-          value={availableTags.filter((tag) => tags.includes(tag.id))} // Display selected tags
-          onChange={handleChangeTags} // Update tags state
+          value={availableTags.filter((tag) => tags.includes(tag.id))} 
+          onChange={handleChangeTags} 
           renderOption={(props, option) => (
             <li {...props} key={option.id}>
               {option.name}
@@ -499,7 +481,7 @@ export default function FIleManagerFileDetails({
                   component="img"
                   src={file_url}
                   alt={item.name}
-                  onClick={handleOpen} 
+                  onClick={handleOpen}
                   style={{
                     maxWidth: '100%',
                     height: 'auto',
@@ -516,7 +498,7 @@ export default function FIleManagerFileDetails({
                     opacity: 0,
                     transition: 'opacity 0.3s',
                   }}
-                  onClick={handleOpen} 
+                  onClick={handleOpen}
                 >
                   <ZoomInMapIcon />
                 </IconButton>
@@ -612,10 +594,10 @@ export default function FIleManagerFileDetails({
             <TextField
               value={newFileName}
               onChange={(e) => setNewFileName(e.target.value)}
-              onBlur={handleRename} // Menangani rename saat blur
+              onBlur={handleRename}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  handleRename(); // Menangani rename saat tekan Enter
+                  handleRename(); 
                 }
               }}
               size="small"
@@ -716,7 +698,7 @@ export default function FIleManagerFileDetails({
       </Scrollbar>
 
       <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
-        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogTitle>Konfirmasi Hapus</DialogTitle>
         <DialogContent>
           <Typography>Apakah Anda yakin ingin menghapus file ini?</Typography>
         </DialogContent>
