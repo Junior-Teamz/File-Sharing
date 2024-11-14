@@ -5,7 +5,7 @@ export default function ShareUserPage() {
   return (
     <>
       <Helmet>
-        <title>Shared with me - File Sharing</title>
+        <title>Shared With Me - File Sharing</title>
       </Helmet>
 
       <FileManagerView/>

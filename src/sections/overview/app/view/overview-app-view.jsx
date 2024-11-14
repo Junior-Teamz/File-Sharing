@@ -48,6 +48,7 @@ import { Link } from 'react-router-dom';
 import { AuthContext } from 'src/auth/context/jwt/auth-context';
 import { useIndexTag } from 'src/sections/tag/view/TagMutation';
 import FileManagerFileDialog from 'src/sections/favorite/FileManagerFileDialog';
+
 // theme
 import { bgGradient } from 'src/theme/css';
 import { alpha, useTheme } from '@mui/material/styles';
@@ -251,7 +252,7 @@ export default function OverviewAppView() {
           ...bgGradient({
             color: alpha(
               theme.palette.background.paper,
-              theme.palette.mode === 'light' ? 0.8 : 0.80 // Mengurangi nilai alpha agar warna tidak terlalu terang
+              theme.palette.mode === 'light' ? 0.8 : 0.8 // Mengurangi nilai alpha agar warna tidak terlalu terang
             ),
             imgUrl: '/assets/background/overlay_3.jpg',
           }),
@@ -279,82 +280,12 @@ export default function OverviewAppView() {
               sx={{ mt: 5 }}
             />
 
-            <Dialog open={opened} onClose={handleClosed}>
-              <DialogTitle>Buat Folder</DialogTitle>
-              <DialogContent>
-                <form onSubmit={handleSubmit(Onsubmit)}>
-                  <DialogContentText sx={{ mb: 3 }}>
-                    Silahkan masukkan nama folder yang ingin dibuat disini.
-                  </DialogContentText>
-                  <Stack spacing={2}>
-                    <TextField
-                      autoFocus
-                      margin="dense"
-                      id="name"
-                      name="name"
-                      label="Nama Folder"
-                      type="text"
-                      fullWidth
-                      variant="outlined"
-                      {...register('name')}
-                    />
-                    <FormControl fullWidth margin="dense">
-                      <InputLabel id="tags-label">Tag folder</InputLabel>
-                      <Select
-                        labelId="tags-label"
-                        id="tags"
-                        multiple
-                        value={selectedTags}
-                        onChange={(event) => handleTagChange(event)} // Kirim event langsung
-                        input={<OutlinedInput id="select-multiple-chip" label="Tags" />}
-                        renderValue={(selected) => (
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              flexWrap: 'wrap',
-                              gap: 0.5,
-                              maxHeight: 100,
-                              overflowY: 'auto',
-                            }}
-                          >
-                            {selected?.map((tagId) => {
-                              const tag = tagsData.find((t) => t.id === tagId);
-                              return (
-                                <Chip
-                                  key={tagId}
-                                  label={tag ? tag.name : `Tag ${tagId} tidak di temukan`}
-                                  sx={{ mb: 0.5 }}
-                                />
-                              );
-                            })}
-                          </Box>
-                        )}
-                      >
-                        {isLoadingTags ? (
-                          <MenuItem disabled>Loading...</MenuItem>
-                        ) : tagsData.length > 0 ? (
-                          tagsData.map((tag) => (
-                            <MenuItem key={tag.id} value={tag.id}>
-                              {tag.name}
-                            </MenuItem>
-                          ))
-                        ) : (
-                          <MenuItem disabled>Tidak ada tag yang tersedia</MenuItem>
-                        )}
-                      </Select>
-                    </FormControl>
-                  </Stack>
-                  <DialogActions>
-                    <Button variant="outlined" onClick={handleClosed}>
-                      Cancel
-                    </Button>
-                    <Button variant="outlined" type="submit">
-                      {isPending ? 'Membuat...' : 'Buat'}
-                    </Button>
-                  </DialogActions>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <FileManagerNewFolderDialog
+              title="Buat Folder Baru "
+              onTagChange={handleTagChange}
+              open={opened}
+              onClose={handleClosed}
+            />
           </Grid>
 
           {data.folders.length === 0 ? (
@@ -363,83 +294,6 @@ export default function OverviewAppView() {
             </>
           ) : (
             <Grid xs={12} md={12} lg={12}>
-              <Dialog open={opened} onClose={handleClosed}>
-                <DialogTitle>Buat Folder</DialogTitle>
-                <DialogContent>
-                  <form onSubmit={handleSubmit(Onsubmit)}>
-                    <DialogContentText sx={{ mb: 3 }}>
-                      Silahkan masukkan nama folder yang ingin dibuat disini.
-                    </DialogContentText>
-                    <Stack spacing={2}>
-                      <TextField
-                        autoFocus
-                        margin="dense"
-                        id="name"
-                        name="name"
-                        label="Nama Folder"
-                        type="text"
-                        fullWidth
-                        variant="outlined"
-                        {...register('name')}
-                      />
-                      <FormControl fullWidth margin="dense">
-                        <InputLabel id="tags-label">Tag folder</InputLabel>
-                        <Select
-                          labelId="tags-label"
-                          id="tags"
-                          multiple
-                          value={selectedTags}
-                          onChange={handleTagChange}
-                          input={<OutlinedInput id="select-multiple-chip" label="Tags" />}
-                          renderValue={(selected) => (
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                flexWrap: 'wrap',
-                                gap: 0.5,
-                                maxHeight: 100,
-                                overflowY: 'auto',
-                              }}
-                            >
-                              {selected.map((tagId) => {
-                                const tag = tagsData.find((t) => t.id === tagId);
-                                return (
-                                  <Chip
-                                    key={tagId}
-                                    label={tag ? tag.name : `Tag ${tagId} tidak ditemukan`}
-                                    sx={{ mb: 0.5 }}
-                                  />
-                                );
-                              })}
-                            </Box>
-                          )}
-                        >
-                          {isLoadingTags ? (
-                            <MenuItem disabled>Loading...</MenuItem>
-                          ) : tagsData.length > 0 ? (
-                            tagsData.map((tag) => (
-                              <MenuItem key={tag.id} value={tag.id}>
-                                {tag.name}
-                              </MenuItem>
-                            ))
-                          ) : (
-                            <MenuItem disabled>Tidak ada tag yang tersedia</MenuItem>
-                          )}
-                        </Select>
-                      </FormControl>
-                    </Stack>
-                    <DialogActions>
-                      <Button variant="outlined" onClick={handleClosed}>
-                        Batal
-                      </Button>
-                      <Button variant="outlined" type="submit">
-                        {isPending ? 'Membuat...' : 'Buat'}
-                      </Button>
-                    </DialogActions>
-                  </form>
-                </DialogContent>
-              </Dialog>
-
               <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
                 <DialogContent>
                   <form onSubmit={handleSubmit(handleEditSubmit)}>

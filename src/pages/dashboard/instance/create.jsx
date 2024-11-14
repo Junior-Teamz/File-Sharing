@@ -9,7 +9,7 @@ export default function create() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Create a new instance</title>
+        <title> Dashboard: Buat Instansi Baru</title>
       </Helmet>
 
       <InstanceCreateView />

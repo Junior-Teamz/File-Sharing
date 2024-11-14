@@ -101,6 +101,7 @@ export default function OverviewAnalyticsView() {
   const renderStorageOverview = (
     <FileStorageOverview
       total={totalStorageBytes} 
+      
       chart={{
         series: [totalStorageBytes], 
       }}

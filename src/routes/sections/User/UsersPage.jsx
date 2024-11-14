@@ -5,7 +5,7 @@ export default function UsersPage() {
   return (
     <>
       <Helmet>
-        <title>Dashboard User</title>
+        <title>File Sharing</title>
       </Helmet>
 
       <DriveUser/>

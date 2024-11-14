@@ -51,7 +51,7 @@ export default function AccountPopover() {
       enqueueSnackbar('Logout Berhasil!', { variant: 'success' });
     } catch (error) {
       console.error(error);
-      enqueueSnackbar('Unable to logout!', { variant: 'error' });
+      enqueueSnackbar('Gagal log out!', { variant: 'error' });
     }
   };
 

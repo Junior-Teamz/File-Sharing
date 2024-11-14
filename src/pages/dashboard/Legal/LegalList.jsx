@@ -8,7 +8,7 @@ export default function LegalList() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Legal List</title>
+        <title> Dashboard: Daftar Dasar Hukum</title>
       </Helmet>
 
      <LegalListView/>

@@ -1,3 +1,4 @@
+// src/sections/account/account-general.js
 import * as Yup from 'yup';
 import { useCallback, useContext } from 'react';
 import { useForm } from 'react-hook-form';
@@ -7,49 +8,53 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
 import Grid from '@mui/system/Unstable_Grid/Grid';
 import Typography from '@mui/material/Typography';
 // hooks
-import { useMockedUser } from 'src/hooks/use-mocked-user';
-// utils
-import { fData } from 'src/utils/format-number';
-// assets
-import { countries } from 'src/assets/data';
-// components
-import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
-import FormProvider, {
-  RHFSwitch,
-  RHFTextField,
-  RHFUploadAvatar,
-  RHFAutocomplete,
-} from 'src/components/hook-form';
+import FormProvider, { RHFTextField, RHFUploadAvatar } from 'src/components/hook-form';
 import { AuthContext } from 'src/auth/context/jwt';
+import { useEditUser } from '../user/view/UserManagement';
+import { fData } from 'src/utils/format-number';
 
 // ----------------------------------------------------------------------
 
-export default function AccountGeneral() {
+export default function AccountGeneral({ userId }) {
   const { enqueueSnackbar } = useSnackbar();
+  const { user, refetchUserData } = useContext(AuthContext);
+  const { mutate: editUser, isPending } = useEditUser({
+    onSuccess: () => {
+      enqueueSnackbar('User berhasil di perbarui', { variant: 'success' });
+      methods.reset({
+        displayName: '',
+        email: '',
+        instance_id: '',
+        photoURL: '',
+      });
 
-  const { user } = useContext(AuthContext);
+      refetchUserData();
+      useClient.invalidateQueries({ queryKey: ['list.user'] });
+    },
+    onError: (error) => {
+      enqueueSnackbar('Gagal memperbarui user', { variant: 'error' });
+      console.error('Error update user', error);
+    },
+  });
 
   const instances = user?.instances?.map((instansi) => instansi.name);
 
   const UpdateUserSchema = Yup.object().shape({
-    displayName: Yup.string().required('Nama harus di isi'),
-    photoURL: Yup.mixed().nullable().required('Foto harus di isi'),
-    // isPublic: Yup.boolean(),
+    displayName: Yup.string().nullable(),
+    email: Yup.string().nullable(),
+    instance: Yup.array().nullable(),
+    photoURL: Yup.mixed().nullable(),
   });
 
   const defaultValues = {
-    displayName: user?.name || '',
-    email: user?.email || '',
-    instance: instances,
-    photoURL: user?.photoURL || null,
-    zipCode: user?.zipCode || '',
-
-    // isPublic: user?.isPublic || false,
+    displayName: user?.name || null,
+    email: user?.email || null,
+    instance: user?.instances || null, // Make it nullable
+    photoURL: user?.photo_profile_url || null,
   };
 
   const methods = useForm({
@@ -65,9 +70,11 @@ export default function AccountGeneral() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      enqueueSnackbar('Update success!');
-      console.info('DATA', data);
+      const updatedData = {
+        ...data,
+        user_id: userId, // Gunakan userId dari props
+      };
+      await editUser(updatedData);
     } catch (error) {
       console.error(error);
     }
@@ -76,11 +83,9 @@ export default function AccountGeneral() {
   const handleDrop = useCallback(
     (acceptedFiles) => {
       const file = acceptedFiles[0];
-
       const newFile = Object.assign(file, {
         preview: URL.createObjectURL(file),
       });
-
       if (file) {
         setValue('photoURL', newFile, { shouldValidate: true });
       }
@@ -113,13 +118,6 @@ export default function AccountGeneral() {
                 </Typography>
               }
             />
-
-            {/* <RHFSwitch
-              name="isPublic"
-              labelPlacement="start"
-              label="Public Profile"
-              sx={{ mt: 5 }}
-            /> */}
           </Card>
         </Grid>
 
@@ -136,7 +134,13 @@ export default function AccountGeneral() {
             >
               <RHFTextField name="displayName" label="Nama" />
               <RHFTextField name="email" label="Email" />
-              <RHFTextField name="instance" label="Instansi" />
+              {/* Disable instance field */}
+              <RHFTextField
+                name="instance"
+                label="Instansi"
+                disabled
+                value={instances?.join(', ')}
+              />
             </Box>
 
             <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>

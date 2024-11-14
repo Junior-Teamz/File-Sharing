@@ -34,10 +34,12 @@ import {
 import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerInvitedItem from './FileManagerInvitedItem';
 import { useSnackbar } from 'notistack';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Modal } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Modal, Tooltip } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import CloseIcon from '@mui/icons-material/Close';
 import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
+import EditIcon from '@mui/icons-material/Edit';
+
 
 // ----------------------------------------------------------------------
 
@@ -74,6 +76,7 @@ export default function FIleManagerFileDetails({
   const isFolder = item.type === 'folder';
   const { enqueueSnackbar } = useSnackbar();
   const [isOpen, setIsOpen] = useState(false);
+  const [newFileName, setNewFileName] = useState(item.name);
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
   const { mutateAsync: addFavorite } = useAddFavoriteUser();

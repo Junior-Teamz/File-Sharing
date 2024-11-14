@@ -25,7 +25,7 @@ export default function FileManagerNewFolderDialog({
   title,
   open,
   onClose,
-  refetch = () => {}, 
+  refetch = () => {},
   ...other
 }) {
   const methods = useForm();
@@ -50,7 +50,7 @@ export default function FileManagerNewFolderDialog({
       handleRemoveAllFiles();
       methods.reset(); // Reset form after successful upload
       queryClient.invalidateQueries({ queryKey: ['folder.admin'] });
-      onClose(); 
+      onClose();
     },
     onError: (error) => {
       enqueueSnackbar(error.message, { variant: 'error' });

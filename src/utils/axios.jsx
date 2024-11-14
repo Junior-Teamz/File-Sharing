@@ -96,20 +96,6 @@ export const endpoints = {
     // register: '/api/auth/register/',
   },
 
-  // previewImage: {
-  //   preview: (hashedId) => `/api/file/preview/${hashedId}`,
-  // },
-  previewVideo: {
-    getVideo: '/api/file/videoStream/',
-  },
-  previewImage: {
-    preview: '/api/file/preview/',
-  },
-
-  previewStorage: {
-    storage: '/api/storageSizeUsage',
-  },
-
   //get data di landing page
   Legalbasis: {
     getLegal: '/api/legal_basis/getAllLegalBasis',
@@ -123,6 +109,14 @@ export const endpoints = {
   //user
   Tags: {
     ListTag: '/api/tag/index',
+  },
+
+  updateprofile: {
+    update: '/api/user/update',
+  },
+
+  previewStorage: {
+    storage: '/api/storageSizeUsage',
   },
 
   GetFileFolderShare: {

@@ -45,7 +45,7 @@ export default function FileStorageOverview({ data, total, chart, ...other }) {
             offsetY: 8,
           },
           value: {
-            offsetY: -40,
+            show: false, // Hide the percentage value
           },
           total: {
             label: `Digunakan ${fData(total)} / ∞`,
@@ -67,6 +67,7 @@ export default function FileStorageOverview({ data, total, chart, ...other }) {
     },
     ...options,
   });
+  
 
   return (
     <Card {...other}>

@@ -8,7 +8,7 @@ export default function list() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Instance List</title>
+        <title> Dashboard: Daftar Tag</title>
       </Helmet>
 
      <TagListView/>
