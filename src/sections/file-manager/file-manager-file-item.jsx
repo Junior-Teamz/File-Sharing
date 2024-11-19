@@ -120,15 +120,16 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
       <TableRow
         selected={selected}
         sx={{
+          backgroundColor: 'white', 
           borderRadius: 2,
           [`&.${tableRowClasses.selected}, &:hover`]: {
-            backgroundColor: 'background.paper',
+            backgroundColor: 'unset',
             boxShadow: theme.customShadows.z20,
             transition: theme.transitions.create(['background-color', 'box-shadow'], {
               duration: theme.transitions.duration.shortest,
             }),
             '&:hover': {
-              backgroundColor: 'background.paper',
+              backgroundColor: 'unset',
               boxShadow: theme.customShadows.z20,
             },
           },
@@ -203,7 +204,7 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
             }}
           >
             {file.shared_with?.map((person) => (
-              <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
+              <Avatar key={person.id} alt={person.name} src={person.photo_profile_url} />
             ))}
           </AvatarGroup>
         </TableCell>
@@ -220,7 +221,7 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
             icon={<Iconify icon="eva:star-outline" />}
             checkedIcon={<Iconify icon="eva:star-fill" />}
             checked={favorite.value}
-            onChange={handleFavoriteToggle} // Toggle favorite state
+            onChange={handleFavoriteToggle} 
             sx={{ p: 0.75 }}
           />
         </TableCell>
@@ -251,7 +252,7 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
         }}
       />
 
-      <ConfirmDialog
+      {/* <ConfirmDialog
         open={confirm.value}
         onClose={confirm.onFalse}
         title="Delete"
@@ -261,7 +262,7 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
             Delete
           </Button>
         }
-      />
+      /> */}
     </>
   );
 }

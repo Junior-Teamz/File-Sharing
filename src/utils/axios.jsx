@@ -236,6 +236,7 @@ export const endpoints = {
     create: '/api/admin/users/create_user',
     update: '/api/admin/users/update_user',
     delete: '/api/admin/users/delete_user',
+    password: '/api/admin/users/update_user_password',
     getTotalUser: '/api/admin/users/countTotalUser',
   },
   instance: {

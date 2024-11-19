@@ -137,7 +137,6 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
     }
   }, [downloadFile, file, enqueueSnackbar]);
 
-  // Inside your FileRecentItem component
   const { mutateAsync: addFavorite } = useAddFavorite();
   const { mutateAsync: removeFavorite } = useRemoveFavorite();
 
@@ -160,7 +159,6 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
 
       favorite.onToggle();
 
-      // Refetch queries to get updated data
       useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
       useClient.invalidateQueries({ queryKey: ['detail-folder'] });
     } catch (error) {
@@ -184,14 +182,11 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
         color="warning"
         icon={<Iconify icon="eva:star-outline" />}
         checkedIcon={<Iconify icon="eva:star-fill" />}
-        checked={favorite.value} // This should change based on favorite status
+        checked={favorite.value}
         onChange={handleFavoriteToggle}
       />
 
-      <IconButton
-        color="default"
-        onClick={popover.onOpen} // Open popover on IconButton click
-      >
+      <IconButton color="default" onClick={popover.onOpen}>
         <Iconify icon="eva:more-vertical-fill" />
       </IconButton>
     </Box>
@@ -200,7 +195,6 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
   const renderText = (
     <ListItemText
       onClick={() => {
-        // Cek jika file.type adalah 'folder', jika ya, jangan buka detail
         if (originalFileType !== 'folder') {
           details.onTrue();
         }
@@ -250,7 +244,7 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
       }}
     >
       {file.shared_with?.map((person) => (
-        <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
+        <Avatar key={person.id} alt={person.name} src={person.photo_profile_url} />
       ))}
     </AvatarGroup>
   );
@@ -265,12 +259,12 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
         alignItems={{ xs: 'unset', sm: 'center' }}
         sx={{
           borderRadius: 2,
-          bgcolor: 'unset',
+          bgcolor: 'white',
           cursor: 'pointer',
           position: 'relative',
           p: { xs: 2.5, sm: 2 },
           '&:hover': {
-            bgcolor: 'background.paper',
+            bgcolor: 'unset',
             boxShadow: (theme) => theme.customShadows.z20,
           },
           ...sx,

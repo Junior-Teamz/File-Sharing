@@ -137,7 +137,7 @@ export default function FileManagerFolderItem({
       }}
     >
       {folder.shared_with?.map((person) => (
-        <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
+        <Avatar key={person.id} alt={person.name} src={person.photo_profile_url} />
       ))}
     </AvatarGroup>
   );
@@ -153,11 +153,11 @@ export default function FileManagerFolderItem({
           p: 2.5,
           maxWidth: 222,
           borderRadius: 2,
-          bgcolor: 'unset',
+          bgcolor: 'white',
           cursor: 'pointer',
           position: 'relative',
           ...((checkbox.value || selected) && {
-            bgcolor: 'background.paper',
+            bgcolor: 'unset',
             boxShadow: (theme) => theme.customShadows.z20,
           }),
           ...sx,

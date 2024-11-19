@@ -88,14 +88,15 @@ export default function FileManagerShareDialogFolder({
   const handleSendInvite = () => {
     if (selectedUser && selectedUser.id && folderId) {
       const existingPermission = shared.find(
-        (share) => share.userId === selectedUser.id && share.permissions === permissionsOptions[permissions]
+        (share) =>
+          share.userId === selectedUser.id && share.permissions === permissionsOptions[permissions]
       );
-  
+
       if (existingPermission) {
         enqueueSnackbar('User already has this permission on the folder.', { variant: 'info' });
         return;
       }
-  
+
       setPermissions(
         {
           user_id: selectedUser.id,
@@ -105,13 +106,15 @@ export default function FileManagerShareDialogFolder({
         {
           onSuccess: () => {
             enqueueSnackbar('Invitation sent successfully!', { variant: 'success' });
-            useClient.invalidateQueries({ queryKey: ['favorite.admin'] });
           },
           onError: (error) => {
             console.error('Error response:', error); // Log error to check structure
-  
+
             if (error.response && error.response.status === 409) {
-              enqueueSnackbar('User already has a permission on this folder. Please use the changePermission endpoint.', { variant: 'error' });
+              enqueueSnackbar(
+                'User already has a permission on this folder. Please use the changePermission endpoint.',
+                { variant: 'error' }
+              );
             } else {
               const errorMessage = error?.message || 'An unknown error occurred'; // Safely get message
               enqueueSnackbar(`Failed to send invite: ${errorMessage}`, { variant: 'error' });
@@ -119,17 +122,15 @@ export default function FileManagerShareDialogFolder({
           },
         }
       );
-      
+
       setInputSearch('');
       setSearchResults([]);
       setSelectedUser(null);
+      useClient.invalidateQueries({ queryKey: ['favorite.admin'] });
     } else {
       enqueueSnackbar('User ID or folder ID is missing.', { variant: 'warning' });
     }
   };
-  
-  
-  
 
   return (
     <Dialog fullWidth maxWidth="xs" open={open} onClose={onClose} {...other}>

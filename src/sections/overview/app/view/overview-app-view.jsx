@@ -38,7 +38,7 @@ import { useDeleteFolder, useEditFolder, useFetchFolder, useMutationFolder } fro
 import imageFolder from '/assets/icons/files/ic_folder.svg';
 import FileManagerPanel from 'src/sections/file-manager/file-manager-panel';
 import { paths } from 'src/routes/paths';
-import { useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
 import FileManagerNewFolderDialog from 'src/sections/file-manager/file-manager-new-folder-dialog';
 import { _allFiles, _files, _folders } from 'src/_mock';
@@ -52,10 +52,13 @@ import FileManagerFileDialog from 'src/sections/favorite/FileManagerFileDialog';
 // theme
 import { bgGradient } from 'src/theme/css';
 import { alpha, useTheme } from '@mui/material/styles';
+import { RHFAutocomplete } from 'src/components/hook-form';
 
 export default function OverviewAppView() {
   const theme = useTheme();
+  const methods = useForm();
   const { user } = useContext(AuthContext);
+  const { register, handleSubmit, reset, setValue } = methods;
   const settings = useSettingsContext();
   const { enqueueSnackbar } = useSnackbar();
   const [open, setOpen] = useState(false);
@@ -63,39 +66,25 @@ export default function OverviewAppView() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selected, setSelected] = useState([]);
-  const [selectedTags, setSelectedTags] = useState([]);
+
   const { data: tags = {}, isLoading: isLoadingTags, error: tagsError } = useIndexTag();
   const [editFolderId, setEditFolderId] = useState(null);
-  const { register, handleSubmit, reset, setValue } = useForm();
+
   const [tagsData, setTagsData] = useState([]);
-  // const [tableData, setTableData] = useState(_allFiles);
-  const [tagsInput, setTagsInput] = useState(''); // To handle input as a string
-  const { mutate: CreateFolder, isPending } = useMutationFolder({
-    onSuccess: () => {
-      enqueueSnackbar('Folder berhasil dibuat');
-      reset();
-      refetch();
-      handleClosed();
-    },
-    onError: (error) => {
-      if (error.errors.description) {
-        return enqueueSnackbar(`Gagal membuat folder: ${error.errors.tags}`, { variant: 'error' });
-      }
-    },
-  });
+  const [selectedTags, setSelectedTags] = useState([]);
 
   useEffect(() => {
     if (tags.data && Array.isArray(tags.data)) {
       setTagsData(tags.data);
-    } else if (tagsError) {
-      console.error('Error fetching tags:', tagsError);
+    } else {
+      setTagsData([]);
     }
   }, [tags.data, tagsError]);
 
   const { mutate: deleteFolder, isPending: loadingDelete } = useDeleteFolder({
     onSuccess: () => {
       enqueueSnackbar('Folder berhasil dihapus', { variant: 'success' });
-      setSelected([]); // Reset checkbox
+      setSelected([]);
       refetch();
       handleDeleteConfirmClose();
     },
@@ -107,7 +96,7 @@ export default function OverviewAppView() {
   const { mutate: editFolder, isPending: loadingEditFolder } = useEditFolder({
     onSuccess: () => {
       enqueueSnackbar('Folder berhasil diupdate', { variant: 'success' });
-      setSelected([]); // Reset checkbox
+      setSelected([]);
       refetch();
       handleEditDialogClose();
     },
@@ -116,8 +105,8 @@ export default function OverviewAppView() {
     },
   });
 
-  const { data, isLoading, refetch, isFetching } = useFetchFolder(); // Fetch Folder
-  const files = data?.files || []; // Use optional chaining to safely access files
+  const { data, isLoading, refetch, isFetching } = useFetchFolder();
+  const files = data?.files || [];
 
   if (isLoading || isFetching) {
     return (
@@ -131,12 +120,12 @@ export default function OverviewAppView() {
 
   const handleClickOpen = () => {
     reset();
-    setOpen(true); // Untuk FileManagerNewFolderDialog
+    setOpen(true);
   };
 
   const handleClickOpened = () => {
     reset();
-    setOpened(true); // Untuk dialog pembuatan folder lainnya
+    setOpened(true);
   };
 
   const handleClose = () => setOpen(false);
@@ -144,10 +133,10 @@ export default function OverviewAppView() {
   const handleDeleteConfirmOpen = () => setDeleteConfirmOpen(true);
   const handleDeleteConfirmClose = () => setDeleteConfirmOpen(false);
 
-  const handleEditDialogOpen = async (folderId, folderName, folderTags) => {
+  const handleEditDialogOpen = (folderId, folderName, folderTags) => {
     setEditFolderId(folderId);
     setValue('name', folderName);
-    setSelectedTags(folderTags); // Set selectedTags with the existing tags for the folder
+    setSelectedTags(folderTags);
     setEditDialogOpen(true);
   };
 
@@ -162,82 +151,56 @@ export default function OverviewAppView() {
     });
     setSelected([]);
   };
+
   const handleEditSubmit = (data) => {
-    // Ensure the folder name is valid
     if (!data.name || data.name.trim() === '') {
       enqueueSnackbar('Nama folder harus di isi', {
         variant: 'warning',
-        anchorOrigin: {
-          vertical: 'top',
-          horizontal: 'center',
-        },
+        anchorOrigin: { vertical: 'top', horizontal: 'center' },
       });
       return;
     }
 
-    // Prepare the data to send
+    const validTags = Array.isArray(selectedTags)
+      ? selectedTags.filter((tag) => tagsData.some((existingTag) => existingTag.id === tag.id))
+      : [];
+
     const folderData = {
       name: data.name,
-      tag_ids: selectedTags, // Use tag_ids instead of tags
+      tag_ids: validTags.map((tag) => tag.id),
     };
 
-    // Submit the form
     editFolder({ folderId: editFolderId, data: folderData });
-  };
-
-  const handleSelectAll = (event) => {
-    if (event.target.checked) {
-      const folders = Array.isArray(data?.folders) ? data.folders : [];
-      setSelected(folders.map((folder) => folder.folder_id));
-    } else {
-      setSelected([]);
-    }
-  };
-
-  const handleSelectOne = (event, folderId) => {
-    const selectedIndex = selected.indexOf(folderId);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = [...selected, folderId];
-    } else {
-      newSelected = selected.filter((id) => id !== folderId);
-    }
-
-    setSelected(newSelected);
   };
 
   const handleTagChange = (event) => {
     const value = event.target.value;
+
     if (Array.isArray(value)) {
-      setSelectedTags(value);
+      const validTags = value.filter((tag) =>
+        tagsData.some((existingTag) => existingTag.id === tag.id)
+      );
+      setSelectedTags(validTags);
+    } else if (value && typeof value === 'object' && value.id) {
+      const validTag = tagsData.find((existingTag) => existingTag.id === value.id);
+      if (validTag) {
+        setSelectedTags((prevTags) => [...prevTags, validTag]);
+      }
     } else {
       console.error('Unexpected value type:', value);
     }
   };
-  const Onsubmit = (data) => {
-    // Ensure the folder name is valid
-    if (!data.name || data.name.trim() === '') {
-      enqueueSnackbar('Nama folder harus di isi', {
-        variant: 'warning',
-        anchorOrigin: {
-          vertical: 'top',
-          horizontal: 'center',
-        },
-      });
-      return;
-    }
 
-    // Prepare the data to send
-    const folderData = {
-      name: data.name,
-      tag_ids: selectedTags, // Use tag_ids instead of tags
-    };
+  const handleSelectAll = (event) => {
+    setSelected(event.target.checked ? files.map((file) => file.folder_id) : []);
+  };
 
-    // Submit the form
-    CreateFolder(folderData);
-    reset();
-    setSelectedTags([]);
+  const handleSelectOne = (event, folderId) => {
+    setSelected((prevSelected) =>
+      prevSelected.includes(folderId)
+        ? prevSelected.filter((id) => id !== folderId)
+        : [...prevSelected, folderId]
+    );
   };
 
   return (
@@ -252,13 +215,15 @@ export default function OverviewAppView() {
           ...bgGradient({
             color: alpha(
               theme.palette.background.paper,
-              theme.palette.mode === 'light' ? 0.8 : 0.8 // Mengurangi nilai alpha agar warna tidak terlalu terang
+              theme.palette.mode === 'light' ? 0.8 : 0.8
             ),
             imgUrl: '/assets/background/overlay_3.jpg',
           }),
-          backgroundPosition: 'center', // Menempatkan background di tengah
-          backgroundSize: 'cover', // Mengatur ukuran background agar menutupi seluruh area
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
           position: 'absolute',
+          filter: 'blur(20px)',
+          WebkitFilter: 'blur(20px)',
           top: 0,
           left: 0,
           right: 0,
@@ -295,77 +260,66 @@ export default function OverviewAppView() {
           ) : (
             <Grid xs={12} md={12} lg={12}>
               <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
-                <DialogContent>
+                <FormProvider {...methods}>
                   <form onSubmit={handleSubmit(handleEditSubmit)}>
-                    <DialogContentText sx={{ mb: 3 }}>
-                      Silahkan masukkan nama folder yang ingin diubah disini.
-                    </DialogContentText>
-                    <TextField
-                      autoFocus
-                      margin="dense"
-                      id="name"
-                      name="name"
-                      label="Nama Folder"
-                      type="text"
-                      fullWidth
-                      variant="outlined"
-                      {...register('name')}
-                    />
-                    <FormControl fullWidth margin="dense">
-                      <InputLabel id="tags-label">Tags</InputLabel>
-                      <Select
-                        multiple
-                        labelId="tags-label"
-                        id="tags"
-                        value={selectedTags || []}
-                        onChange={handleTagChange}
-                        input={<OutlinedInput id="select-multiple-chip" label="Tags" />}
-                        renderValue={(selected) => (
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              flexWrap: 'wrap',
-                              gap: 0.5,
-                              maxHeight: 100,
-                              overflowY: 'auto',
+                    <DialogTitle>Edit Folder</DialogTitle>
+
+                    <DialogContent dividers sx={{ pt: 1, pb: 0, border: 'none' }}>
+                      <DialogContentText sx={{ mb: 3 }}>
+                        Silahkan masukkan nama folder yang ingin diubah disini.
+                      </DialogContentText>
+
+                      <TextField
+                        fullWidth
+                        label="Nama Folder"
+                        {...methods.register('name')}
+                        required
+                        margin="dense"
+                      />
+
+                      <FormControl fullWidth margin="dense">
+                        <FormControl fullWidth margin="dense">
+                          <RHFAutocomplete
+                            name="tags"
+                            label="Tags"
+                            multiple
+                            options={tagsData}
+                            getOptionLabel={(option) => option.name}
+                            isOptionEqualToValue={(option, value) => option.id === value.id}
+                            value={tagsData?.filter((tag) => selectedTags?.includes(tag.id))}
+                            onChange={(_, value) => {
+                              setSelectedTags(value.map((tag) => tag.id));
                             }}
-                          >
-                            {selected.map((tagId) => {
-                              const tag = tags.find((t) => t.id === tagId);
-                              return (
-                                <Chip
-                                  key={tagId}
-                                  label={tag ? tag.name : `Tag ${tagId} not found`}
-                                  sx={{ mb: 0.5 }}
-                                />
-                              );
-                            })}
-                          </Box>
-                        )}
-                      >
-                        {isLoadingTags ? (
-                          <MenuItem disabled>Loading...</MenuItem>
-                        ) : tags.length > 0 ? (
-                          tags.map((tag) => (
-                            <MenuItem key={tag.id} value={tag.id}>
-                              {tag.name}
-                            </MenuItem>
-                          ))
-                        ) : (
-                          <MenuItem disabled>No tags available</MenuItem>
-                        )}
-                      </Select>
-                    </FormControl>
+                            renderTags={(value, getTagProps) => {
+                              return value.map((option, index) => (
+                                <Chip label={option.name} {...getTagProps({ index })} />
+                              ));
+                            }}
+                            renderOption={(props, option) => (
+                              <li {...props} key={option.id}>
+                                {option.name}
+                              </li>
+                            )}
+                            loading={isLoadingTags}
+                          />
+                        </FormControl>
+                      </FormControl>
+                    </DialogContent>
+
                     <DialogActions>
                       <Button variant="outlined" onClick={handleEditDialogClose}>
                         Cancel
                       </Button>
-                      <Button variant="outlined" type="submit">
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={loadingEditFolder || loadingEditFolder}
+                      >
                         {loadingEditFolder ? 'Editing' : 'Edit'}
                       </Button>
                     </DialogActions>
                   </form>
-                </DialogContent>
+                </FormProvider>
               </Dialog>
 
               <Dialog open={deleteConfirmOpen} onClose={handleDeleteConfirmClose}>
@@ -457,14 +411,15 @@ export default function OverviewAppView() {
                       >
                         <TableCell padding="checkbox">
                           <Checkbox
-                            checked={selected.indexOf(folder.folder_id) !== -1}
+                            checked={selected.includes(folder.folder_id)}
                             onChange={(event) => handleSelectOne(event, folder.folder_id)}
+                            color="primary"
                           />
                         </TableCell>
                         <TableCell sx={{ alignItems: 'center' }}>{idx + 1}</TableCell>
                         <TableCell sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           <img src={imageFolder} alt="folder" />
-                          {/* Bungkus hanya pada TableCell yang menampilkan nama */}
+
                           <Link
                             to={`file-manager/info/${folder.folder_id}`}
                             style={{ textDecoration: 'none', color: 'inherit' }}
@@ -488,9 +443,9 @@ export default function OverviewAppView() {
             />
             <FileManagerFileDialog
               title="Upload File"
-              open={open} // Use the same state
-              onClose={handleClose} // Ensure the dialog can close properly
-              refetch={refetch} // Tambahkan refetch prop
+              open={open}
+              onClose={handleClose}
+              refetch={refetch}
             />
 
             <Stack spacing={2}>

@@ -176,138 +176,139 @@ export default function FileManagerView() {
 
   return (
     <>
-     {/* <Box
-      sx={{
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
       <Box
         sx={{
-          ...bgGradient({
-            color: alpha(
-              theme.palette.background.paper,
-              theme.palette.mode === 'light' ? 0.8 : 0.80 // Mengurangi nilai alpha agar warna tidak terlalu terang
-            ),
-            imgUrl: '/assets/background/overlay_3.jpg',
-          }),
-          backgroundPosition: 'center', // Menempatkan background di tengah
-          backgroundSize: 'cover', // Mengatur ukuran background agar menutupi seluruh area
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: -1,
+          position: 'relative',
+          overflow: 'hidden',
         }}
-      />
-         </Box> */}
-
-      <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Typography variant="h4">File manajer</Typography>
-          <Button
-            variant="contained"
-            startIcon={<Iconify icon="eva:plus-fill" />}
-            onClick={handleClick}
-          >
-            New
-          </Button>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-            // MenuListProps={{
-            //   sx: { padding: 1 },
-            // }}
-          >
-            <MenuItem
-              onClick={() => {
-                upload.onTrue();
-                handleClose();
-              }}
-              sx={{ padding: '6px 6px' }}
-            >
-              <ListItemIcon>
-                <Iconify icon="eva:cloud-upload-fill" fontSize="large" />
-              </ListItemIcon>
-              <ListItemText primary="Upload File" primaryTypographyProps={{ fontSize: '1rem' }} />
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                create.onTrue();
-                handleClose();
-              }}
-              sx={{ padding: '6px 6px' }}
-            >
-              <ListItemIcon>
-                <Iconify icon="eva:folder-add-fill" fontSize="large" />
-              </ListItemIcon>
-              <ListItemText primary="Buat Folder" primaryTypographyProps={{ fontSize: '1rem' }} />
-            </MenuItem>
-          </Menu>
-        </Stack>
-
-        <Stack
-          spacing={2.5}
+      >
+        <Box
           sx={{
-            my: { xs: 3, md: 5 },
+            ...bgGradient({
+              color: alpha(
+                theme.palette.background.paper,
+                theme.palette.mode === 'light' ? 0.8 : 0.8
+              ),
+              imgUrl: '/assets/background/overlay_3.jpg',
+            }),
+            backgroundPosition: 'center',
+            backgroundSize: 'cover',
+            position: 'absolute',
+            filter: 'blur(20px)',
+            WebkitFilter: 'blur(20px)',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: -1,
           }}
-        >
-          {renderFilters}
+        />
 
-          {canReset && renderResults}
-        </Stack>
+        <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Typography variant="h4">File manajer</Typography>
+            <Button
+              variant="contained"
+              startIcon={<Iconify icon="eva:plus-fill" />}
+              onClick={handleClick}
+            >
+              New
+            </Button>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+              // MenuListProps={{
+              //   sx: { padding: 1 },
+              // }}
+            >
+              <MenuItem
+                onClick={() => {
+                  upload.onTrue();
+                  handleClose();
+                }}
+                sx={{ padding: '6px 6px' }}
+              >
+                <ListItemIcon>
+                  <Iconify icon="eva:cloud-upload-fill" fontSize="large" />
+                </ListItemIcon>
+                <ListItemText primary="Upload File" primaryTypographyProps={{ fontSize: '1rem' }} />
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  create.onTrue();
+                  handleClose();
+                }}
+                sx={{ padding: '6px 6px' }}
+              >
+                <ListItemIcon>
+                  <Iconify icon="eva:folder-add-fill" fontSize="large" />
+                </ListItemIcon>
+                <ListItemText primary="Buat Folder" primaryTypographyProps={{ fontSize: '1rem' }} />
+              </MenuItem>
+            </Menu>
+          </Stack>
 
-        {notFound ? (
-          <EmptyContent filled title="Tidak ada data" sx={{ py: 10 }} />
-        ) : (
-          <FileManagerGridView
-            table={table}
-            data={tableData}
-            dataFiltered={dataFiltered}
-            onDeleteItem={handleDeleteItem}
-            onOpenConfirm={confirm.onTrue}
-          />
-        )}
-      </Container>
-
-      <FileManagerNewFolderDialog
-        title="Buat Folder Baru "
-        onTagChange={handleTagChange}
-        open={upload.value}
-        onClose={upload.onFalse}
-      />
-
-      <FileManagerFileDialog
-        onTagChange={handleTagChange}
-        open={upload.value}
-        onClose={upload.onFalse}
-      />
-
-      <ConfirmDialog
-        open={confirm.value}
-        onClose={confirm.onFalse}
-        title="Delete"
-        content={
-          <>
-            Apakah Anda yakin ingin menghapus? <strong> {table.selected.length} </strong> items?
-          </>
-        }
-        action={
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => {
-              handleDeleteItems();
-              confirm.onFalse();
+          <Stack
+            spacing={2.5}
+            sx={{
+              my: { xs: 3, md: 5 },
             }}
           >
-            Delete
-          </Button>
-        }
-      />
-   
+            {renderFilters}
+
+            {canReset && renderResults}
+          </Stack>
+
+          {notFound ? (
+            <EmptyContent filled title="Tidak ada data" sx={{ py: 10 }} />
+          ) : (
+            <FileManagerGridView
+              table={table}
+              data={tableData}
+              dataFiltered={dataFiltered}
+              onDeleteItem={handleDeleteItem}
+              onOpenConfirm={confirm.onTrue}
+            />
+          )}
+        </Container>
+
+        <FileManagerNewFolderDialog
+          title="Buat Folder Baru "
+          onTagChange={handleTagChange}
+          open={upload.value}
+          onClose={upload.onFalse}
+        />
+
+        <FileManagerFileDialog
+          onTagChange={handleTagChange}
+          open={upload.value}
+          onClose={upload.onFalse}
+        />
+
+        <ConfirmDialog
+          open={confirm.value}
+          onClose={confirm.onFalse}
+          title="Delete"
+          content={
+            <>
+              Apakah Anda yakin ingin menghapus? <strong> {table.selected.length} </strong> items?
+            </>
+          }
+          action={
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                handleDeleteItems();
+                confirm.onFalse();
+              }}
+            >
+              Delete
+            </Button>
+          }
+        />
+      </Box>
     </>
   );
 }

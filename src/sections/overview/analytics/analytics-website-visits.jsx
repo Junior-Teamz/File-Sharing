@@ -11,38 +11,42 @@ import Chart, { useChart } from 'src/components/chart';
 export default function AnalyticsWebsiteVisits({ title, subheader, chart, ...other }) {
   const { labels, colors, series, options } = chart;
 
-  // Ensure all series are of type 'bar'
+  // Modifikasi series agar semua memiliki tipe 'bar'
   const modifiedSeries = series.map((s) => ({
     ...s,
-    type: 'bar',
+    type: 'bar', // Semua series menjadi bar
   }));
 
-  // Set the chart height conditionally based on the number of series
-  const chartHeight = series.length >= 5 ? 400 : 400;
+  const chartHeight = 400; // Tinggi chart tetap
 
   const chartOptions = useChart({
     colors,
     plotOptions: {
       bar: {
-        columnWidth: '20%',
-        horizontal: true,
-        distributed: false,
+        columnWidth: '100%',  // Batang akan memanfaatkan seluruh ruang untuk setiap kategori
+        horizontal: true,     // Batang horizontal (ke kanan)
+        distributed: false,   // Tidak ada distribusi, hanya satu batang per kategori
       },
     },
     chart: {
       type: 'bar',
     },
     fill: {
-      type: modifiedSeries.map((i) => i.fill),
+      type: modifiedSeries.map((i) => i.fill), // Menentukan jenis fill untuk masing-masing series
     },
     labels,
     xaxis: {
       categories: labels,
       type: 'category',
     },
+    yaxis: {
+      title: {
+        text: 'Total', // Judul untuk sumbu Y
+      },
+    },
     tooltip: {
-      shared: true,
-      intersect: false,
+      shared: true, // Menampilkan data dari semua series
+      intersect: false, // Menonaktifkan intersect untuk memungkinkan shared tooltip
       y: {
         formatter: (value) => {
           if (typeof value !== 'undefined') {
@@ -51,7 +55,21 @@ export default function AnalyticsWebsiteVisits({ title, subheader, chart, ...oth
           return value;
         },
       },
+      custom: ({ series, seriesIndex, dataPointIndex, w }) => {
+        const tooltipData = [];
+        // Ambil data untuk setiap series dalam satu batang
+        modifiedSeries.forEach((seriesItem, index) => {
+          const dataValue = series[index][dataPointIndex];
+          tooltipData.push(`${seriesItem.name}: ${dataValue}`);
+        });
+
+        return `<div style="padding: 10px;">
+                  <strong>${labels[dataPointIndex]}</strong><br/>
+                  ${tooltipData.join('<br/>')}
+                </div>`;
+      },
     },
+    stacked: true, // Mengaktifkan opsi stacking untuk membuat satu batang panjang
     ...options,
   });
 

@@ -469,7 +469,7 @@ export default function FolderDetail({
           {renderShared}
 
           <Button fullWidth size="small" color="inherit" variant="outlined" onClick={onClose}>
-            Tutuo
+            Tutup
           </Button>
 
           <Box sx={{ p: 2.5 }}>

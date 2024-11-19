@@ -100,12 +100,10 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
       password_confirmation: data.confirmPassword, // Ensure confirmPassword is included if password is provided
     };
 
-    // Remove password_confirmation if no password change
     if (!data.password) {
       delete userData.password_confirmation;
     }
-
-    // Call editUser with userId and userData
+    
     editUser({ userId: currentUser.id, data: userData });
   };
 

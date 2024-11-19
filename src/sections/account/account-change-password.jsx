@@ -13,11 +13,16 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import { useUpdatePassword } from './view/useUpdatePassword'; // Pastikan ini sesuai dengan path yang benar
+import { AuthContext } from 'src/auth/context/jwt/auth-context';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
 export default function AccountChangePassword() {
   const { enqueueSnackbar } = useSnackbar();
+  const { user } = useAuthContext(AuthContext);
+  const userId = user?.id;
 
   const password = useBoolean();
 
@@ -25,12 +30,9 @@ export default function AccountChangePassword() {
     newPassword: Yup.string()
       .required('Password baru harus di isi')
       .min(8, 'Password minimal 8 karakter'),
-    // .test(
-    //   'no-match',
-    //   'New password must be different than old password',
-    //   (value, { parent }) => value !== parent.oldPassword
-    // ),
-    confirmNewPassword: Yup.string().oneOf([Yup.ref('newPassword')], 'Password tidak sama'),
+    confirmNewPassword: Yup.string()
+      .oneOf([Yup.ref('newPassword')], 'Password tidak sama')
+      .required('Konfirmasi password harus di isi'),
   });
 
   const defaultValues = {
@@ -49,35 +51,35 @@ export default function AccountChangePassword() {
     formState: { isSubmitting },
   } = methods;
 
+  const { mutateAsync: updatePassword } = useUpdatePassword({
+    onSuccess: () => {
+      enqueueSnackbar('Password berhasil diperbarui!', { variant: 'success' });
+      reset(); 
+    },
+    onError: (error) => {
+      console.error(error);
+      enqueueSnackbar('Gagal memperbarui password', { variant: 'error' });
+    },
+  });
+
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      reset();
-      enqueueSnackbar('Update password berhasil!');
-      console.info('DATA', data);
+      const payload = {
+        userId,
+        password: data.newPassword,
+        password_confirmation: data.confirmNewPassword,
+      };
+
+      await updatePassword(payload);
     } catch (error) {
       console.error(error);
+      enqueueSnackbar('Terjadi kesalahan', { variant: 'error' });
     }
   });
 
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
       <Stack component={Card} spacing={3} sx={{ p: 3 }}>
-        {/* <RHFTextField
-          name="oldPassword"
-          type={password.value ? 'text' : 'password'}
-          label="Old Password"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={password.onToggle} edge="end">
-                  <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        /> */}
-
         <RHFTextField
           name="newPassword"
           label="Password baru"

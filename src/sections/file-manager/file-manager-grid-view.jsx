@@ -201,6 +201,7 @@ export default function FileManagerGridView({
                 // }
                 sx={{
                   [`& .${tableCellClasses.head}`]: {
+                    backgroundColor: 'white', 
                     '&:first-of-type': {
                       borderTopLeftRadius: 12,
                       borderBottomLeftRadius: 12,

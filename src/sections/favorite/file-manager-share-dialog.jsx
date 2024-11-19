@@ -14,7 +14,7 @@ import Select from '@mui/material/Select';
 // components
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
-import { useSnackbar } from 'notistack'; // Import useSnackbar
+import { useSnackbar } from 'notistack';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePermissionsFile } from './view/folderDetail';
 import { useFetchUser } from './view/searchUserShare';
@@ -53,7 +53,7 @@ export default function FileManagerShareDialog({
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(inputSearch);
-    }, 300); // Delay of 300ms for the API call
+    }, 1500); // Delay of 300ms for the API call
 
     return () => {
       clearTimeout(handler);
@@ -105,7 +105,7 @@ export default function FileManagerShareDialog({
       setInputSearch(''); // Clear search input after invite
       setSearchResults([]); // Clear search results after invite
       setSelectedUser(null); // Clear selected user after invite
-      useClient.invalidateQueries({queryKey:['fetch.folder']})
+      useClient.invalidateQueries({ queryKey: ['favorite.admin'] });
     } else {
       enqueueSnackbar('User ID or file ID is missing.', { variant: 'warning' }); // Show warning notification
     }
@@ -150,6 +150,7 @@ export default function FileManagerShareDialog({
                   <FileManagerInvitedItem
                     key={user.id}
                     person={user}
+                    user={user}
                     onClick={() => handleUserSelect(user)} // Ensure onClick works
                   />
                 ))
