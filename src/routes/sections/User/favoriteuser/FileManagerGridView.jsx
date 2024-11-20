@@ -36,11 +36,11 @@ import {
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Name' },
-  { id: 'size', label: 'Size', width: 120 },
-  { id: 'type', label: 'Type', width: 120 },
-  { id: 'modifiedAt', label: 'Modified', width: 140 },
-  { id: 'shared', label: 'Shared', align: 'right', width: 140 },
+  { id: 'name', label: 'Nama' },
+  { id: 'size', label: 'Ukuran', width: 120 },
+  { id: 'type', label: 'Tipe', width: 120 },
+  { id: 'modifiedAt', label: 'Difavoritkan', width: 140 },
+  { id: 'shared', label: 'Dibagikan', align: 'right', width: 140 },
   { id: '', width: 88 },
 ];
 
@@ -90,7 +90,7 @@ export default function FileManagerGridView({
   const endIndex = startIndex + rowsPerPage;
   const currentData = dataFiltered
     .filter((i) => i.type !== 'folder')
-    .sort((a, b) => new Date(b.modifiedAt) - new Date(a.modifiedAt))
+    .sort((a, b) => new Date(b.favorited_at) - new Date(a.favorited_at))
     .slice(startIndex, endIndex);
 
   const handleTagChange = useCallback((tags) => {
@@ -135,36 +135,7 @@ export default function FileManagerGridView({
           }}
         >
           {/* Action Toolbar */}
-          <TableSelectedAction
-            dense={dense}
-            numSelected={selected.length}
-            rowCount={dataFiltered.length}
-            onSelectAllRows={(checked) =>
-              onSelectAllRows(
-                checked,
-                dataFiltered.map((row) => row.id)
-              )
-            }
-            action={
-              <>
-                <Tooltip title="Delete">
-                  <IconButton color="primary" onClick={onOpenConfirm}>
-                    <Iconify icon="solar:trash-bin-trash-bold" />
-                  </IconButton>
-                </Tooltip>
-              </>
-            }
-            sx={{
-              pl: 1,
-              pr: 2,
-              top: 16,
-              left: 24,
-              right: 24,
-              width: 'auto',
-              borderRadius: 1.5,
-            }}
-          />
-
+        
           {/* Files Table */}
           <TableContainer
             sx={{
@@ -186,12 +157,7 @@ export default function FileManagerGridView({
                 rowCount={dataFiltered.length}
                 numSelected={selected.length}
                 onSort={onSort}
-                onSelectAllRows={(checked) =>
-                  onSelectAllRows(
-                    checked,
-                    dataFiltered.map((row) => row.id)
-                  )
-                }
+             
                 sx={{
                   [`& .${tableCellClasses.head}`]: {
                     '&:first-of-type': {

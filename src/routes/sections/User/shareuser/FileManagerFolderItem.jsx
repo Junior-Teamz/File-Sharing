@@ -31,6 +31,8 @@ import InfoIcon from '@mui/icons-material/Info';
 import { Link } from 'react-router-dom';
 import FolderDetail from './FolderDetail';
 import FileManagerShareDialogFolder from './FileManagerShareDialogFolder';
+import { Tooltip, Typography } from '@mui/material';
+
 
 // ----------------------------------------------------------------------
 
@@ -140,7 +142,7 @@ export default function FileManagerFolderItem({
         <>
           <Avatar
             alt={folder.user.name}
-            src={folder.user.avatarUrl}
+            src={folder.user.photo_profile_url}
             sx={{ width: 24, height: 24, mr: 1 }} // Menambahkan margin right
           />
           <Tooltip title={folder.user.email}>
@@ -185,7 +187,7 @@ export default function FileManagerFolderItem({
         }}
         {...other}
       >
-        <Link key={folder.id} to={`info/${folder.id}`}>
+        <Link  style={{ textDecoration: 'none', color: 'inherit' }} key={folder.id} to={`folder/${folder.id}`}>
           <Box onMouseEnter={checkbox.onTrue} onMouseLeave={checkbox.onFalse}>
             {renderIcon}
           </Box>

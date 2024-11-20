@@ -92,7 +92,7 @@ export default function AccountGeneral() {
       const response = await editUser({ userId, data: formData });
       enqueueSnackbar('User berhasil diperbarui', { variant: 'success' });
       resetForm({
-        name: response.name || '',
+        name: response.name || '', 
         email: response.email || '',
         instance: response.instances || [],
         photo_profile_url: response.photo_profile_url || '',

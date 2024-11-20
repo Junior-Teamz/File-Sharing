@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
-export const useDeleteFolder = ({ onSuccess, onError }) => {
+export const useDeleteFolder = () => {
   return useMutation({
     mutationKey: ['delete.folder'],
     mutationFn: async (folderId) => {
@@ -18,10 +18,7 @@ export const useDeleteFolder = ({ onSuccess, onError }) => {
         payload // Kirim payload langsung, bukan dalam objek data
       );
 
-   
       return response;
     },
-    onSuccess,
-    onError,
   });
 };

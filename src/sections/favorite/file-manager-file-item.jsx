@@ -125,14 +125,15 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
         selected={selected}
         sx={{
           borderRadius: 2,
+          backgroundColor: 'white', 
           [`&.${tableRowClasses.selected}, &:hover`]: {
-            backgroundColor: 'background.paper',
+            backgroundColor: 'unset',
             boxShadow: theme.customShadows.z20,
             transition: theme.transitions.create(['background-color', 'box-shadow'], {
               duration: theme.transitions.duration.shortest,
             }),
             '&:hover': {
-              backgroundColor: 'background.paper',
+              backgroundColor: 'unset',
               boxShadow: theme.customShadows.z20,
             },
           },

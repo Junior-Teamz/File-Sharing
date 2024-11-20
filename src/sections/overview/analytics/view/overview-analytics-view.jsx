@@ -38,11 +38,15 @@ import {
   useChartFile,
 } from './useFetchChart';
 import { fData } from 'src/utils/format-number';
+// theme
+import { bgGradient } from 'src/theme/css';
+import { alpha, useTheme } from '@mui/material/styles';
 
 // ----------------------------------------------------------------------
 
 export default function OverviewAnalyticsView() {
   const settings = useSettingsContext();
+  const theme = useTheme();
 
   const { data: Users } = useChartUsers();
 
@@ -135,164 +139,191 @@ export default function OverviewAnalyticsView() {
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
-      <Typography
-        variant="h4"
+      <Box
         sx={{
-          mb: { xs: 3, md: 5 },
+          position: 'relative',
+          overflow: 'hidden',
         }}
-      ></Typography>
+      >
+        <Box
+          sx={{
+            ...bgGradient({
+              color: alpha(
+                theme.palette.background.paper,
+                theme.palette.mode === 'light' ? 0.8 : 0.8
+              ),
+              imgUrl: '/assets/background/overlay_3.jpg',
+            }),
+            backgroundPosition: 'center',
+            backgroundSize: 'cover',
+            position: 'absolute',
+            filter: 'blur(20px)',
+            WebkitFilter: 'blur(20px)',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: -1,
+          }}
+        />
+        <Typography
+          variant="h4"
+          sx={{
+            mb: { xs: 3, md: 5 },
+          }}
+        ></Typography>
 
-      <Grid container spacing={3}>
-        <Grid xs={12} sm={6} md={3}>
-          <AnalyticsWidgetSummary
-            title="Seluruh User"
-            total={
-              Users?.total_user_count !== undefined && Users?.total_user_count !== null
-                ? Users.total_user_count
-                : 0
-            }
-            color="info"
-            icon={<img alt="icon" src="/assets/icons/glass/ic_glass_users.png" />}
-          />
-        </Grid>
+        <Grid container spacing={3}>
+          <Grid xs={12} sm={6} md={3}>
+            <AnalyticsWidgetSummary
+              title="Seluruh User"
+              total={
+                Users?.total_user_count !== undefined && Users?.total_user_count !== null
+                  ? Users.total_user_count
+                  : 0
+              }
+              color="info"
+              icon={<img alt="icon" src="/assets/icons/glass/ic_glass_users.png" />}
+            />
+          </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
-          <AnalyticsWidgetSummary
-            title="Total Instansi"
-            total={
-              AllInstances?.instance_count !== undefined && AllInstances?.instance_count !== null
-                ? AllInstances.instance_count
-                : 0
-            }
-            color="warning"
-            icon={<img alt="icon" src="/assets/icons/glass/ic_glass_company.png" />}
-          />
-        </Grid>
+          <Grid xs={12} sm={6} md={3}>
+            <AnalyticsWidgetSummary
+              title="Total Instansi"
+              total={
+                AllInstances?.instance_count !== undefined && AllInstances?.instance_count !== null
+                  ? AllInstances.instance_count
+                  : 0
+              }
+              color="warning"
+              icon={<img alt="icon" src="/assets/icons/glass/ic_glass_company.png" />}
+            />
+          </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
-          <AnalyticsWidgetSummary
-            title="Admin"
-            total={
-              Users?.admin_role_count !== undefined && Users?.admin_role_count !== null
-                ? Users.admin_role_count
-                : 0
-            }
-            color="error"
-            icon={<img alt="icon" src="/assets/icons/glass/ic_glass_admin.png" />}
-          />
-        </Grid>
+          <Grid xs={12} sm={6} md={3}>
+            <AnalyticsWidgetSummary
+              title="Admin"
+              total={
+                Users?.admin_role_count !== undefined && Users?.admin_role_count !== null
+                  ? Users.admin_role_count
+                  : 0
+              }
+              color="error"
+              icon={<img alt="icon" src="/assets/icons/glass/ic_glass_admin.png" />}
+            />
+          </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
-          <AnalyticsWidgetSummary
-            title="User"
-            total={
-              Users?.user_role_count !== undefined && Users?.user_role_count !== null
-                ? Users.user_role_count
-                : 0
-            }
-            color="error"
-            icon={<img alt="icon" src="/assets/icons/glass/ic_glass_user.png" />}
-          />
-        </Grid>
-
-        <Grid xs={12} md={12} lg={12}>
-          <Grid xs={12}>
-            <FormControl fullWidth>
-              <InputLabel>Filter Instansi</InputLabel>
-              <Select
-                value={selectedInstance}
-                onChange={(e) => setSelectedInstance(e.target.value)}
-                MenuProps={{
-                  PaperProps: {
-                    style: {
-                      maxHeight: 200, // Maksimal tinggi dropdown
-                      overflowY: 'auto', // Tambahkan scroll jika melebihi maksimal tinggi
-                    },
-                  },
-                }}
-              >
-                <MenuItem value="all">5 Teratas</MenuItem>
-                {Instances?.data?.map((instance) => (
-                  <MenuItem key={instance.id} value={instance.name}>
-                    {instance.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+          <Grid xs={12} sm={6} md={3}>
+            <AnalyticsWidgetSummary
+              title="User"
+              total={
+                Users?.user_role_count !== undefined && Users?.user_role_count !== null
+                  ? Users.user_role_count
+                  : 0
+              }
+              color="error"
+              icon={<img alt="icon" src="/assets/icons/glass/ic_glass_user.png" />}
+            />
           </Grid>
 
           <Grid xs={12} md={12} lg={12}>
-            <AnalyticsWebsiteVisits
-              title="Statistik Instansi"
-              subheader="Data Instansi dan Total User, File, Folder"
+            <Grid xs={12}>
+              <FormControl fullWidth>
+                <InputLabel>Filter Instansi</InputLabel>
+                <Select
+                  value={selectedInstance}
+                  onChange={(e) => setSelectedInstance(e.target.value)}
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 200, // Maksimal tinggi dropdown
+                        overflowY: 'auto', // Tambahkan scroll jika melebihi maksimal tinggi
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="all">5 Teratas</MenuItem>
+                  {Instances?.data?.map((instance) => (
+                    <MenuItem key={instance.id} value={instance.name}>
+                      {instance.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid xs={12} md={12} lg={12}>
+              <AnalyticsWebsiteVisits
+                title="Statistik Instansi"
+                subheader="Data Instansi dan Total User, File, Folder"
+                chart={{
+                  labels: filteredData?.map((item) => item.name) || [],
+                  series: [
+                    {
+                      name: 'Total All User',
+                      type: 'column',
+                      fill: 'solid',
+                      data: filteredData?.map((item) => item.user_count.user_total) || [],
+                    },
+                    {
+                      name: 'Total Role Admin',
+                      type: 'column',
+                      fill: 'gradient',
+                      data: filteredData?.map((item) => item.user_count.role_admin_total) || [],
+                    },
+                    {
+                      name: 'Total Role User',
+                      type: 'column',
+                      fill: 'solid',
+                      data: filteredData?.map((item) => item.user_count.role_user_total) || [],
+                    },
+                    {
+                      name: 'Total File',
+                      type: 'area',
+                      fill: 'gradient',
+                      data: filteredData?.map((item) => item.file_total) || [],
+                    },
+                    {
+                      name: 'Total Folder',
+                      type: 'line',
+                      fill: 'solid',
+                      data: filteredData?.map((item) => item.folder_total) || [],
+                    },
+                  ],
+                }}
+              />
+            </Grid>
+          </Grid>
+
+          <Grid xs={12} md={6} lg={4}>
+            <Box>{renderStorageOverview}</Box>
+          </Grid>
+
+          <Grid xs={12} md={6} lg={8}>
+            <AnalyticsConversionRates
+              title="Statistik Tag"
+              subheader="Data Tag paling banyak dipakai dan total file, folder di dalam tag"
               chart={{
-                labels: filteredData?.map((item) => item.name) || [],
                 series: [
                   {
-                    name: 'Total All User',
-                    type: 'column',
-                    fill: 'solid',
-                    data: filteredData?.map((item) => item.user_count.user_total) || [],
-                  },
-                  {
-                    name: 'Total Role Admin',
-                    type: 'column',
-                    fill: 'gradient',
-                    data: filteredData?.map((item) => item.user_count.role_admin_total) || [],
-                  },
-                  {
-                    name: 'Total Role User',
-                    type: 'column',
-                    fill: 'solid',
-                    data: filteredData?.map((item) => item.user_count.role_user_total) || [],
+                    name: 'Total Pengguna',
+                    data: chartTag?.data?.map((tag) => tag?.total_usage_count) || [],
                   },
                   {
                     name: 'Total File',
-                    type: 'area',
-                    fill: 'gradient',
-                    data: filteredData?.map((item) => item.file_total) || [],
+                    data: chartTag?.data?.map((tag) => tag?.file_usage_count) || [],
                   },
                   {
                     name: 'Total Folder',
-                    type: 'line',
-                    fill: 'solid',
-                    data: filteredData?.map((item) => item.folder_total) || [],
+                    data: chartTag?.data?.map((tag) => tag?.folder_usage_count) || [],
                   },
                 ],
+                labels: chartTag?.data?.map((tag) => tag?.name) || [],
               }}
             />
           </Grid>
-        </Grid>
 
-        <Grid xs={12} md={6} lg={4}>
-          <Box>{renderStorageOverview}</Box>
-        </Grid>
-
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsConversionRates
-            title="Statistik Tag"
-            subheader="Data Tag paling banyak dipakai dan total file, folder di dalam tag"
-            chart={{
-              series: [
-                {
-                  name: 'Total Pengguna',
-                  data: chartTag?.data?.map((tag) => tag?.total_usage_count) || [],
-                },
-                {
-                  name: 'Total File',
-                  data: chartTag?.data?.map((tag) => tag?.file_usage_count) || [],
-                },
-                {
-                  name: 'Total Folder',
-                  data: chartTag?.data?.map((tag) => tag?.folder_usage_count) || [],
-                },
-              ],
-              labels: chartTag?.data?.map((tag) => tag?.name) || [],
-            }}
-          />
-        </Grid>
-
-        {/* <Grid xs={12} md={6} lg={4}>
+          {/* <Grid xs={12} md={6} lg={4}>
           <AnalyticsCurrentVisits
             title="Current Visits"
             chart={{
@@ -306,10 +337,11 @@ export default function OverviewAnalyticsView() {
           />
         </Grid> */}
 
-        {/* <Grid xs={12} md={6} lg={8}>
+          {/* <Grid xs={12} md={6} lg={8}>
           <AnalyticsNews title="News" list={_analyticPosts} />
         </Grid> */}
-      </Grid>
+        </Grid>
+      </Box>
     </Container>
   );
 }

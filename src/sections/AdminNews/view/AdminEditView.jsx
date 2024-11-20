@@ -7,7 +7,8 @@ import { useParams } from 'react-router-dom';
 
 export default function AdminEditView() {
   const settings = useSettingsContext();
-  const { id } = useParams(); // Mengambil ID dari URL
+  const { id } = useParams();
+  console.log('Editing ID:', id);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -23,8 +24,7 @@ export default function AdminEditView() {
         }}
       />
 
-      {/* Oper ID ke AdminNewsEdit */}
-      <AdminNewsEdit newsId={id} />
+      <AdminNewsEdit NewsId={id} />
     </Container>
   );
 }

@@ -11,73 +11,46 @@ import Chart, { useChart } from 'src/components/chart';
 export default function AnalyticsWebsiteVisits({ title, subheader, chart, ...other }) {
   const { labels, colors, series, options } = chart;
 
-  // Modifikasi series agar semua memiliki tipe 'bar'
+  // Memastikan semua series menggunakan tipe 'bar'
   const modifiedSeries = series.map((s) => ({
     ...s,
-    type: 'bar', // Semua series menjadi bar
+    type: 'bar', // Set semua tipe series menjadi 'bar'
   }));
 
-  const chartHeight = 400; // Tinggi chart tetap
-
   const chartOptions = useChart({
+    ...options, // Menggabungkan opsi bawaan dengan opsi custom
     colors,
     plotOptions: {
       bar: {
-        columnWidth: '100%',  // Batang akan memanfaatkan seluruh ruang untuk setiap kategori
-        horizontal: true,     // Batang horizontal (ke kanan)
-        distributed: false,   // Tidak ada distribusi, hanya satu batang per kategori
+        columnWidth: '20%', // Menentukan lebar kolom tetap
+        distributed: false, // Membuat setiap batang memiliki lebar yang konsisten
       },
     },
     chart: {
-      type: 'bar',
+      type: 'bar', // Mengubah seluruh chart menjadi chart batang
     },
     fill: {
-      type: modifiedSeries.map((i) => i.fill), // Menentukan jenis fill untuk masing-masing series
+      type: modifiedSeries.map((i) => i.fill || 'solid'), // Default ke 'solid' jika tidak ada nilai fill
     },
     labels,
     xaxis: {
       categories: labels,
-      type: 'category',
-    },
-    yaxis: {
-      title: {
-        text: 'Total', // Judul untuk sumbu Y
-      },
+      type: 'category', // Mengatur xaxis sebagai kategori
     },
     tooltip: {
-      shared: true, // Menampilkan data dari semua series
-      intersect: false, // Menonaktifkan intersect untuk memungkinkan shared tooltip
+      shared: true,
+      intersect: false,
       y: {
-        formatter: (value) => {
-          if (typeof value !== 'undefined') {
-            return `${value.toFixed(0)} `;
-          }
-          return value;
-        },
-      },
-      custom: ({ series, seriesIndex, dataPointIndex, w }) => {
-        const tooltipData = [];
-        // Ambil data untuk setiap series dalam satu batang
-        modifiedSeries.forEach((seriesItem, index) => {
-          const dataValue = series[index][dataPointIndex];
-          tooltipData.push(`${seriesItem.name}: ${dataValue}`);
-        });
-
-        return `<div style="padding: 10px;">
-                  <strong>${labels[dataPointIndex]}</strong><br/>
-                  ${tooltipData.join('<br/>')}
-                </div>`;
+        formatter: (value) => (typeof value !== 'undefined' ? `${value.toFixed(0)}` : value),
       },
     },
-    stacked: true, // Mengaktifkan opsi stacking untuk membuat satu batang panjang
-    ...options,
   });
 
   return (
     <Card {...other}>
       <CardHeader title={title} subheader={subheader} />
       <Box sx={{ p: 3, pb: 1 }}>
-        <Chart dir="ltr" type="bar" series={modifiedSeries} options={chartOptions} height={chartHeight} />
+        <Chart dir="ltr" type="bar" series={modifiedSeries} options={chartOptions} height={364} />
       </Box>
     </Card>
   );

@@ -142,13 +142,13 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
           }),
         }}
       >
-        <TableCell padding="checkbox">
+        {/* <TableCell padding="checkbox">
           <Checkbox
             checked={selected}
             onDoubleClick={() => console.info('ON DOUBLE CLICK')}
             onClick={onSelect}
           />
-        </TableCell>
+        </TableCell> */}
 
         <TableCell onClick={handleClick}>
           <Stack direction="row" alignItems="center" spacing={2}>
@@ -177,8 +177,8 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
 
         <TableCell onClick={handleClick} sx={{ whiteSpace: 'nowrap' }}>
           <ListItemText
-            primary={fDateTime(file.updated_at, 'dd MMM yyyy')}
-            secondary={fDateTime(file.updated_at, 'p')}
+            primary={fDateTime(file.favorited_at, 'dd MMM yyyy')}
+            secondary={fDateTime(file.favorited_at, 'p')}
             primaryTypographyProps={{ typography: 'body2' }}
             secondaryTypographyProps={{
               mt: 0.5,
@@ -203,7 +203,7 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
             }}
           >
             {file.shared_with?.map((person) => (
-              <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
+              <Avatar key={person.id} alt={person.name} src={person.photo_profile_url} />
             ))}
           </AvatarGroup>
         </TableCell>

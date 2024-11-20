@@ -37,9 +37,9 @@ import FileThumbnail from 'src/components/file-thumbnail';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerFileDetails from './FileManagerFileDetails';
-import { useAddFavoriteUser,useRemoveFavoriteUser } from './view/FetchFolderUser';
+import { useAddFavoriteUser, useRemoveFavoriteUser } from './view/FetchFolderUser';
 
-export default function FileManagerFileItem({ file,  selected, onSelect, onDelete, sx, ...other }) {
+export default function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ...other }) {
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const { copy } = useCopyToClipboard();
@@ -142,14 +142,6 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
           }),
         }}
       >
-        <TableCell padding="checkbox">
-          <Checkbox
-            checked={selected}
-            onDoubleClick={() => console.info('ON DOUBLE CLICK')}
-            onClick={onSelect}
-          />
-        </TableCell>
-
         <TableCell onClick={handleClick}>
           <Stack direction="row" alignItems="center" spacing={2}>
             <FileThumbnail file={file.type} sx={{ width: 36, height: 36 }} />

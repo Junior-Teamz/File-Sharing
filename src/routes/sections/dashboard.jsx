@@ -75,7 +75,7 @@ export const dashboardRoutes = [
     children: [
       { element: <IndexPage />, index: true },
       { path: 'analytics', element: <OverviewAnalyticsPage /> },
-    
+
       {
         path: 'favorite',
         children: [
@@ -141,9 +141,8 @@ export const dashboardRoutes = [
         path: 'News',
         children: [
           { element: <AdminListNews />, index: true, path: 'list' },
-          { path: 'create', element: <NewsCreateView /> },
-          // { path: 'edit', element: <InstanceEdit /> },
           { path: 'edit/:id', element: <AdminEditView /> },
+          { path: 'create', element: <NewsCreateView /> },
         ],
       },
 

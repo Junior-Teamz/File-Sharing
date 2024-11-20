@@ -33,19 +33,15 @@ import { paths } from 'src/routes/paths';
 import { useDeleteLegal, useFetchLegal, useEditLegal } from './fetchLegalBasis';
 import { useSnackbar } from 'notistack';
 import { useForm } from 'react-hook-form';
-import { Box } from '@mui/system';
 
 export default function LegalListView() {
   const settings = useSettingsContext();
   const { data: legalDocuments, refetch, isLoading } = useFetchLegal();
-  // console.log(legalDocuments.data.id);
   const { register, handleSubmit, setValue } = useForm();
   const deleteLegal = useDeleteLegal();
   const [popover, setPopover] = useState({ open: false, anchorEl: null, currentId: null });
   const idLegal = popover.currentId;
-  const { mutateAsync: editLegal, isLoading: isUpdating } = useEditLegal(idLegal);
-  const { enqueueSnackbar } = useSnackbar();
-
+ 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -59,7 +55,7 @@ export default function LegalListView() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [documentToDelete, setDocumentToDelete] = useState(null); // Simpan dokumen yang akan dihapus
+  const [documentToDelete, setDocumentToDelete] = useState(null);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -76,7 +72,7 @@ export default function LegalListView() {
 
   const confirmDelete = (id) => {
     setDocumentToDelete(id);
-    setDeleteDialogOpen(true); // Buka dialog konfirmasi delete
+    setDeleteDialogOpen(true);
   };
 
   const handleDelete = () => {
@@ -103,6 +99,10 @@ export default function LegalListView() {
     setFileError('');
   };
 
+  const { mutateAsync: editLegal, isLoading: isUpdating } = useEditLegal(
+    idLegal,
+    setEditDialogOpen
+  );
   const handleViewPdfOpen = () => {
     setViewPdfOpen(true);
   };
@@ -116,59 +116,6 @@ export default function LegalListView() {
     setEditDialogOpen(true);
   };
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      // Validasi tipe file
-      const validTypes = [
-        'application/pdf',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/msword',
-      ];
-      if (!validTypes.includes(selectedFile.type)) {
-        setFileError('File harus berupa PDF, DOCX, atau DOC');
-        setFile(null);
-        return;
-      }
-
-      setFile(selectedFile);
-      setFileError(''); // Hapus error jika file dipilih
-      setEditingDocument((prev) => ({
-        ...prev,
-        file: selectedFile,
-        file_name: selectedFile.name, // Memperbarui nama file
-      })); // Memperbarui state dengan file baru
-    }
-  };
-
-  const handleNameChange = (e) => {
-    setEditingDocument({ ...editingDocument, name: e.target.value });
-  };
-
-  // const handleEditAction = async () => {
-  //   // Validasi ID dokumen
-  //   if (!editingDocument || !editingDocument.id) {
-  //     enqueueSnackbar('ID dokumen hukum diperlukan!', { variant: 'error' });
-  //     return;
-  //   }
-
-  //   const { id, name, file_url, file_name, file } = editingDocument;
-
-  //   try {
-  //     const updateData = {
-  //       name: name || undefined,
-  //       file: file ? file : editingDocument.file,
-  //     };
-
-  //     await editLegal({ id: id, data: updateData });
-  //     enqueueSnackbar('Dokumen berhasil diperbarui', { variant: 'success' });
-  //     refetch();
-  //     handleEditDialogClose();
-  //   } catch (error) {
-  //     enqueueSnackbar('Gagal memperbarui dokumen', { variant: 'error' });
-  //   }
-  // };
-
   // Filter and sort documents
   const filteredDocuments = legalDocuments?.data
     ?.filter((doc) => doc.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -176,8 +123,8 @@ export default function LegalListView() {
 
   const onEditSubmit = (data) => {
     editLegal(data);
-    // console.log(data);
   };
+
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
@@ -371,7 +318,7 @@ export default function LegalListView() {
         <DialogTitle id="alert-dialog-title">{'Konfirmasi Hapus'}</DialogTitle>
         <DialogContent>
           <Typography id="alert-dialog-description">
-            Apakah kamu yakin ingin menghapus dasar hukum ini? 
+            Apakah kamu yakin ingin menghapus dasar hukum ini?
           </Typography>
         </DialogContent>
         <DialogActions>

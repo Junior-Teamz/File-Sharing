@@ -10,6 +10,7 @@ import AccountView from './DriveUser/user-account-view';
 import ShareUserPage from './ShareUserPage';
 import FavoritePage from './FavoritePage';
 import { FileManagerDetailUsersFavorite } from './favoriteuser/FileDetail/FileManagerDetailUsers';
+import { FileManagerDetailUsersShare } from './shareuser/FileDetail/FileManagerDetailUsers';
 
 
 export const DashboardUser = [
@@ -32,7 +33,7 @@ export const DashboardUser = [
         path: 'shared-with-me',
         children: [
           { element: <ShareUserPage />, index: 'true' },
-       
+          { path: 'folder/:id', element: <FileManagerDetailUsersShare /> }
         ],
       },
       { path: 'favorite', 

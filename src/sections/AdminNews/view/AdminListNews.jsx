@@ -36,6 +36,7 @@ import { useIndexTag } from 'src/sections/tag/view/TagMutation';
 import { RHFAutocomplete } from 'src/components/hook-form';
 import { useForm, FormProvider } from 'react-hook-form';
 import Chip from '@mui/material/Chip';
+import { Link } from 'react-router-dom';
 
 export default function AdminListNews() {
   const methods = useForm();
@@ -46,7 +47,7 @@ export default function AdminListNews() {
   const { enqueueSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
 
-  const { data: tagsData } = useIndexTag(); // Fetch available tags
+  const { data: tagsData } = useIndexTag();
   const availableTags = tagsData?.data || [];
 
   const [page, setPage] = useState(0);
@@ -90,15 +91,15 @@ export default function AdminListNews() {
         enqueueSnackbar('ID berita tidak ditemukan.', { variant: 'error' });
         return;
       }
-      console.log('Editing news ID:', id); // Debugging ID
+      console.log('Editing news ID:', id);
       setEditingNewsId(id);
       setEditedNews({ title, content, thumbnail_url, status, news_tags_ids });
       setDialogOpen(true);
       setPopoverAnchor(null);
     } else if (editingNewsId && editedNews.title && editedNews.content) {
-      console.log('Saving edited news with ID:', editingNewsId); // Debugging log ID
+      console.log('Saving edited news with ID:', editingNewsId);
       const payload = { id: editingNewsId, ...editedNews };
-      console.log('Payload before sending to API:', payload); // Log payload
+      console.log('Payload before sending to API:', payload);
       try {
         await updateNews.mutateAsync(payload);
         enqueueSnackbar('Berita berhasil diperbarui', { variant: 'success' });
@@ -225,20 +226,15 @@ export default function AdminListNews() {
                           >
                             <Iconify icon="solar:trash-bin-trash-bold" /> Hapus
                           </MenuItem>
-                          <MenuItem
-                            onClick={() =>
-                              handleEditSave({
-                                id,
-                                title,
-                                content,
-                                thumbnail_url,
-                                status,
-                                news_tags_ids,
-                              })
-                            }
+                          <Link
+                            style={{ textDecoration: 'none', color: 'inherit' }}
+                            key={id}
+                            to={`edit/${id}`}
                           >
-                            <Iconify icon="solar:pen-bold" /> Edit
-                          </MenuItem>
+                            <MenuItem>
+                              <Iconify icon="solar:pen-bold" /> Edit
+                            </MenuItem>
+                          </Link>
                         </CustomPopover>
                       </TableCell>
                     </TableRow>

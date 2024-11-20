@@ -25,6 +25,9 @@ import FileManagerFiltersResult from '../file-manager-filters-result';
 import FileManagerNewFolderDialog from '../file-manager-new-folder-dialog';
 import { FavoriteFolderFileAdmin } from 'src/_mock/map/FavoriteFolderFileAdmin';
 import { useGetFolderFavorite } from './fetchFavorite';
+import { alpha, useTheme } from '@mui/material/styles';
+import { bgGradient } from 'src/theme/css';
+import { Box } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -39,6 +42,7 @@ const defaultFilters = {
 
 export default function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
+  const theme = useTheme();
 
   const { FolderFiles } = FavoriteFolderFileAdmin();
 
@@ -160,6 +164,33 @@ export default function FileManagerView() {
 
   return (
     <>
+     <Box
+        sx={{
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        <Box
+          sx={{
+            ...bgGradient({
+              color: alpha(
+                theme.palette.background.paper,
+                theme.palette.mode === 'light' ? 0.8 : 0.8
+              ),
+              imgUrl: '/assets/background/overlay_3.jpg',
+            }),
+            backgroundPosition: 'center',
+            backgroundSize: 'cover',
+            position: 'absolute',
+            filter: 'blur(20px)',
+            WebkitFilter: 'blur(20px)',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: -1,
+          }}
+        />
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h4">Favorit</Typography>
@@ -218,6 +249,7 @@ export default function FileManagerView() {
           </Button>
         }
       />
+      </Box>
     </>
   );
 }

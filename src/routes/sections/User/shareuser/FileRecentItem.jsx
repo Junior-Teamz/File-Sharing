@@ -20,7 +20,6 @@ import TextField from '@mui/material/TextField';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 import { useCopyToClipboard } from 'src/hooks/use-copy-to-clipboard';
-import { useDownloadFile, useChangeNameFile, useMutationDeleteFiles } from './view/folderDetail';
 // utils
 import { fData } from 'src/utils/format-number';
 import { fDateTime } from 'src/utils/format-time';
@@ -33,7 +32,7 @@ import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerFileDetails from './FileManagerFileDetails';
 import { Button } from '@mui/material';
 import { useRemoveFavoriteUser, useAddFavoriteUser } from './view/FetchFolderUser';
-import { useDownloadFile, useChangeNameFile } from './view/FetchDriveUser';
+import { useDownloadFile, useChangeNameFile,useMutationDeleteFiles  } from './view/FetchDriveUser';
 import { useQueryClient } from '@tanstack/react-query';
 
 // ----------------------------------------------------------------------

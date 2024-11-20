@@ -21,17 +21,19 @@ import { Box, Container, Stack } from '@mui/system';
 import InfoIcon from '@mui/icons-material/Info';
 import { enqueueSnackbar } from 'notistack';
 import EmptyContent from 'src/components/empty-content';
-import { useFetchDetailFolderUsers } from '../DriveUser/view/FetchFolderUser/useFetchDetailFolderUser';
 import { paths } from 'src/routes/paths';
-import { useIndexTag } from '../DriveUser/view/TagUser/useIndexTag';
-import { useMutationFolder } from '../DriveUser/view/FetchFolderUser';
-import FileManagerNewDialogParent from '../DriveUser/FileManagerNewDialogParentId';
-import FileRecentItem from '../DriveUser/FileRecentItem';
-import FileManagerPanel from '../DriveUser/FileManagerPanel';
 import { useBoolean } from 'src/hooks/use-boolean';
-import FolderDetail from '../DriveUser/FolderDetail';
+import { useIndexTag } from '../view/TagUser/useIndexTag';
+import { useMutationFolder } from '../view/FetchFolderUser';
+import FileManagerNewDialogParent from '../FileManagerNewDialogParentId';
+import FileRecentItem from '../FileRecentItem';
+import FolderDetail from '../FolderDetail';
+import { useFetchDetailFolderUsers } from '../view/FetchFolderUser/useFetchDetailFolderUser';
+import FileManagerPanel from '../FileManagerPanel';
 
-export const FileManagerDetailUsers = () => {
+
+
+export const FileManagerDetailUsersShare = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 

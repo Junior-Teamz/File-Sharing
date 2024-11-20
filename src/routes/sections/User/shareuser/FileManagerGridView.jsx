@@ -153,42 +153,6 @@ export default function FileManagerGridView({
             m: theme.spacing(-2, -3, -3, -3),
           }}
         >
-          {/* Action Toolbar */}
-          <TableSelectedAction
-            dense={dense}
-            numSelected={selected.length}
-            rowCount={dataFiltered.length}
-            onSelectAllRows={(checked) =>
-              onSelectAllItems(
-                checked,
-                dataFiltered.map((row) => row.id)
-              )
-            }
-            action={
-              <>
-                {/* <Tooltip title="Share">
-                  <IconButton color="primary">
-                    <Iconify icon="solar:share-bold" />
-                  </IconButton>
-                </Tooltip> */}
-                <Tooltip title="Delete">
-                  <IconButton color="primary" onClick={onOpenConfirm}>
-                    <Iconify icon="solar:trash-bin-trash-bold" />
-                  </IconButton>
-                </Tooltip>
-              </>
-            }
-            sx={{
-              pl: 1,
-              pr: 2,
-              top: 16,
-              left: 24,
-              right: 24,
-              width: 'auto',
-              borderRadius: 1.5,
-            }}
-          />
-
           {/* Files Table */}
           <TableContainer
             sx={{
@@ -208,12 +172,7 @@ export default function FileManagerGridView({
                 headLabel={TABLE_HEAD}
                 rowCount={dataFiltered.length}
                 numSelected={selected.length}
-                onSelectAllRows={(checked) =>
-                  onSelectAllItems(
-                    checked,
-                    dataFiltered.map((row) => row.id)
-                  )
-                }
+       
                 sx={{
                   [`& .${tableCellClasses.head}`]: {
                     '&:first-of-type': {

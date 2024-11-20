@@ -180,7 +180,9 @@ export default function FileManagerGridView({
                 //   )
                 // }
                 sx={{
+                  backgroundColor: theme.palette.grey[100],
                   [`& .${tableCellClasses.head}`]: {
+                    backgroundColor: theme.palette.grey[100],
                     '&:first-of-type': {
                       borderTopLeftRadius: 12,
                       borderBottomLeftRadius: 12,
