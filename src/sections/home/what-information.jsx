@@ -270,14 +270,14 @@ export default function InformationAndAnnouncements() {
                         </Typography>
 
                         <Typography
-                          variant="body2"
-                          color="textSecondary"
+                          variant="body1"
                           sx={{
-                            display: { xs: 'none', md: '-webkit-box' },
+                            display: '-webkit-box',
                             WebkitBoxOrient: 'vertical',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
-                            WebkitLineClamp: 2,
+                            WebkitLineClamp: { xs: 1, md: 2 }, 
+                            marginBottom: 2 ,
                           }}
                         >
                           <span dangerouslySetInnerHTML={{ __html: news.content }} />

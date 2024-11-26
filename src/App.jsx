@@ -73,7 +73,7 @@ export default function App() {
         },
       },
     });
-  }, []); // Empty dependency array ensures it only runs once.
+  }, []); 
 
   return (
     <QueryClientProvider client={queryClient}>

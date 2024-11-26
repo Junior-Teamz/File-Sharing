@@ -14,12 +14,37 @@ import { PasswordIcon } from 'src/assets/icons';
 // components
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import { useForgotPassword } from './useForgotPassword';
+import { useSnackbar } from 'notistack';
+import { useState } from 'react';
 
 // ----------------------------------------------------------------------
 
 export default function ClassicForgotPasswordView() {
+  const { enqueueSnackbar } = useSnackbar();
+  const [isDisabled, setIsDisabled] = useState(false);
   const ForgotPasswordSchema = Yup.object().shape({
-    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
+    email: Yup.string()
+      .required('Email harus di isi')
+      .email('Email harus berupa alamat email yang valid'),
+  });
+
+  const { mutate: sendLink } = useForgotPassword({
+    onSuccess: () => {
+      enqueueSnackbar('Permintaan berhasil dikirim', { variant: 'success' });
+    },
+    onError: (error) => {
+      if (error.message) {
+        enqueueSnackbar(error.message, { variant: 'warning' });
+      } else if (error.errors && error.errors.email) {
+        methods.setError('email', {
+          type: 'manual',
+          message: error.errors.email[0],
+        });
+      } else {
+        enqueueSnackbar(`${error.message} ${error.retry_after}`, { variant: 'error' });
+      }
+    },
   });
 
   const defaultValues = {
@@ -36,12 +61,19 @@ export default function ClassicForgotPasswordView() {
     formState: { isSubmitting },
   } = methods;
 
+  const onErrorHandler = (error) => {
+    if (error.message.includes('Silakan coba lagi dalam')) {
+      setIsDisabled(true);
+      const retryAfter = parseInt(error.message.match(/\d+/)[0], 10);
+      setTimeout(() => setIsDisabled(false), retryAfter * 1000);
+    }
+  };
+
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      console.info('DATA', data);
+      sendLink(data);
     } catch (error) {
-      console.error(error);
+      console.error('Submit error:', error);
     }
   });
 
@@ -55,8 +87,9 @@ export default function ClassicForgotPasswordView() {
         type="submit"
         variant="contained"
         loading={isSubmitting}
+        disabled={isSubmitting || isDisabled}
       >
-        Send Request
+        Kirim Permintaan
       </LoadingButton>
 
       <Link
@@ -70,7 +103,7 @@ export default function ClassicForgotPasswordView() {
         }}
       >
         <Iconify icon="eva:arrow-ios-back-fill" width={16} />
-        Return to sign in
+        Kembali ke login
       </Link>
     </Stack>
   );
@@ -80,11 +113,11 @@ export default function ClassicForgotPasswordView() {
       <PasswordIcon sx={{ height: 96 }} />
 
       <Stack spacing={1} sx={{ my: 5 }}>
-        <Typography variant="h3">Forgot your password?</Typography>
+        <Typography variant="h3">Lupa kata sandi?</Typography>
 
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          Please enter the email address associated with your account and We will email you a link
-          to reset your password.
+          Silakan masukkan alamat email yang terkait dengan akun Anda dan kami akan mengirimkan
+          tautan untuk mengatur ulang kata sandi Anda.
         </Typography>
       </Stack>
     </>

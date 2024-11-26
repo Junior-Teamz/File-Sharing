@@ -93,6 +93,8 @@ export const endpoints = {
     login: '/api/login', // for login
     logout: '/api/logout', // for log out
     refreshToken: '/api/refreshToken',
+    sendLinkPassword: '/api/sendLinkResetPassword',
+    resetPassword: '/api/resetPassword',
     // register: '/api/auth/register/',
   },
 

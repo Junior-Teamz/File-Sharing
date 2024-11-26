@@ -21,6 +21,7 @@ import { useRouter } from 'src/routes/hooks';
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { enqueueSnackbar } from 'notistack';
+import { paths } from 'src/routes/paths';
 
 // ----------------------------------------------------------------------
 
@@ -54,10 +55,10 @@ export default function JwtLoginView() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       const response = await login?.(data.email, data.password);
-  
+
       const userRoles = response?.roles;
       const isSuperadmin = response?.is_superadmin ?? false;
-  
+
       if (userRoles?.includes('admin') || isSuperadmin) {
         router.push('/dashboard');
       } else if (userRoles?.includes('user')) {
@@ -65,12 +66,12 @@ export default function JwtLoginView() {
       } else {
         enqueueSnackbar('Role tidak dikenal!', { variant: 'error' });
       }
-  
+
       enqueueSnackbar('Login Berhasil!', { variant: 'success' });
     } catch (error) {
       console.error('Login Error:', error);
       reset();
-  
+
       // Menangani pesan kesalahan spesifik
       if (error.response && error.response.data.errors) {
         // Cek apakah errors adalah string atau objek
@@ -83,12 +84,11 @@ export default function JwtLoginView() {
       } else {
         setErrorMsg('Tidak bisa login! Silakan coba lagi.');
       }
-  
+
       // Pastikan menampilkan snackbar setelah setErrorMsg
       enqueueSnackbar(errorMsg, { variant: 'error' });
     }
   });
-  
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5 }}>
@@ -117,16 +117,16 @@ export default function JwtLoginView() {
         }}
       />
 
-      {/* <Link
+      <Link
         component={RouterLink}
-        href="/forgot-password"
+        href={paths.authDemo.classic.forgotPassword}
         variant="body2"
         color="inherit"
         underline="always"
         sx={{ alignSelf: 'flex-end' }}
       >
         Lupa password?
-      </Link> */}
+      </Link>
 
       <LoadingButton
         fullWidth

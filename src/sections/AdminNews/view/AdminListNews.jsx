@@ -226,15 +226,20 @@ export default function AdminListNews() {
                           >
                             <Iconify icon="solar:trash-bin-trash-bold" /> Hapus
                           </MenuItem>
-                          <Link
-                            style={{ textDecoration: 'none', color: 'inherit' }}
-                            key={id}
-                            to={`edit/${id}`}
+                          <MenuItem
+                            onClick={() =>
+                              handleEditSave({
+                                id,
+                                title,
+                                content,
+                                thumbnail_url,
+                                status,
+                                news_tags_ids,
+                              })
+                            }
                           >
-                            <MenuItem>
-                              <Iconify icon="solar:pen-bold" /> Edit
-                            </MenuItem>
-                          </Link>
+                            <Iconify icon="solar:pen-bold" /> Edit
+                          </MenuItem>
                         </CustomPopover>
                       </TableCell>
                     </TableRow>
