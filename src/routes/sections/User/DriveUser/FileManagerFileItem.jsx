@@ -195,7 +195,7 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
             }}
           >
             {file.shared_with?.map((person) => (
-              <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
+              <Avatar key={person.id} alt={person.name} src={person.photo_profile_url} />
             ))}
           </AvatarGroup>
         </TableCell>

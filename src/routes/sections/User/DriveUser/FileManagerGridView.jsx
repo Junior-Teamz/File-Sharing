@@ -103,11 +103,11 @@ export default function FileManagerGridView({
   return (
     <>
       <Box ref={containerRef}>
-       <FileManagerPanel
+       {/* <FileManagerPanel
           title="Folder"
           collapse={folders.value}
           onCollapse={folders.onToggle}
-        />
+        /> */}
 
         <Collapse in={!folders.value} unmountOnExit>
           <Box
@@ -132,8 +132,8 @@ export default function FileManagerGridView({
         </Collapse>
 
         <Divider sx={{ my: 5, borderStyle: 'dashed' }} />
-
-        <FileManagerPanel title="File"  />
+{/* 
+        <FileManagerPanel title="File"  /> */}
 
         <Box
           sx={{

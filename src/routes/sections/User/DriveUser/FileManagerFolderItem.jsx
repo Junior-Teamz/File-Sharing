@@ -191,7 +191,7 @@ export default function FileManagerFolderItem({
       }}
     >
       {folder.shared_with?.map((person) => (
-        <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
+        <Avatar key={person.id} alt={person.name} src={person.user.photo_profile_url} />
       ))}
     </AvatarGroup>
   );
@@ -218,7 +218,11 @@ export default function FileManagerFolderItem({
         }}
         {...other}
       >
-        <Link key={folder.id} to={`folder/${folder.folder_id}`}>
+        <Link
+          style={{ textDecoration: 'none', color: 'inherit' }}
+          key={folder.id}
+          to={`folder/${folder.folder_id}`}
+        >
           <Box onMouseEnter={checkbox.onTrue} onMouseLeave={checkbox.onFalse}>
             {renderIcon}
           </Box>

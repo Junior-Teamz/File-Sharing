@@ -108,13 +108,14 @@ export const endpoints = {
     getNewsSlug: '/api/news/detail/slug',
   },
 
+  ProfileUser:{
+    update:'/api/user/update',
+    updatePassword:'/api/user/updatePassword',
+  },
+
   //user
   Tags: {
     ListTag: '/api/tag/index',
-  },
-
-  updateprofile: {
-    update: '/api/user/update',
   },
 
   previewStorage: {
@@ -178,6 +179,8 @@ export const endpoints = {
   ChartInstansi: {
     getUserInstansi: '/api/admin/instance/getInstanceUsageStatistic',
     getChartInstansi: '/api/admin/instance/countAll',
+    ChartInstansi: '/api/admin/statistic_superadmin/storageUsagePerInstance',
+
   },
 
   ChartTagFolderAndFile: {

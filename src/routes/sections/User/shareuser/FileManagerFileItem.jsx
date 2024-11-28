@@ -187,7 +187,7 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
               <>
                 <Avatar
                   alt={file.user.name}
-                  src={file.user.avatarUrl}
+                  src={file.user.photo_profile_url}
                   sx={{ width: 24, height: 24, ml: 1 }} // Menambahkan margin right
                 />
                 <Tooltip title={file.user.email}>

@@ -33,7 +33,7 @@ export default function FileManagerNewFolderDialog({
   const { data, isLoading: isLoadingTags } = useIndexTag();
   const tagsData = data?.data || [];
   const [selectedTags, setSelectedTags] = useState([]);
-  const queryClient = useQueryClient();
+  const useClient = useQueryClient();
 
   useEffect(() => {
     if (open) {
@@ -48,12 +48,21 @@ export default function FileManagerNewFolderDialog({
     onSuccess: () => {
       enqueueSnackbar('Folder berhasil dibuat');
       handleRemoveAllFiles();
-      methods.reset(); // Reset form after successful upload
-      queryClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      methods.reset(); 
+      useClient.invalidateQueries({ queryKey: ['folder.user'] });
       onClose(); 
     },
     onError: (error) => {
-      enqueueSnackbar(error.message, { variant: 'error' });
+      // Check if the error has the expected structure
+      if (error.errors && error.errors.name) {
+        // Set form error for the name field
+        methods.setError('name', {
+          type: 'manual',
+          message: error.errors.name[0], // "Instance name already exists."
+        });
+      } else {
+        enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
+      }
     },
   });
 
@@ -61,7 +70,7 @@ export default function FileManagerNewFolderDialog({
     const nameValue = methods.getValues('name');
     // Validate both name and tags
     if (!nameValue || !selectedTags.length) {
-      enqueueSnackbar('Please fill in the required fields: name and tags', { variant: 'warning' });
+      enqueueSnackbar('Silakan isi kolom yang diperlukan: nama dan tag', { variant: 'warning' });
       return;
     }
 
