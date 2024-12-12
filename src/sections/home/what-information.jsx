@@ -3,20 +3,23 @@ import { m } from 'framer-motion';
 import { debounce } from 'lodash';
 // @mui
 import { alpha, useTheme } from '@mui/material/styles';
-import Container from '@mui/material/Container';
-import Grid from '@mui/system/Unstable_Grid/Grid';
-import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Pagination from '@mui/material/Pagination';
-import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
-import CardMedia from '@mui/material/CardMedia';
 import ArticleIcon from '@mui/icons-material/Article';
 import SearchIcon from '@mui/icons-material/Search';
 import EventIcon from '@mui/icons-material/Event';
+import {
+  Grid,
+  Stack,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Button,
+  TextField,
+  Pagination,
+  Box,
+  Chip,
+  CardMedia,
+} from '@mui/material';
 
 // hooks
 import { useFetchNews } from './view/fetchNews/useFetchNews';
@@ -25,7 +28,6 @@ import { useFetchNews } from './view/fetchNews/useFetchNews';
 import { MotionViewport, varFade } from 'src/components/animate';
 import { paths } from 'src/routes/paths';
 import { shadows } from 'src/theme/shadows';
-import { Stack } from '@mui/material';
 
 // theme
 import { bgGradient } from 'src/theme/css';
@@ -174,6 +176,7 @@ export default function InformationAndAnnouncements() {
               borderRadius: 2,
               boxShadow: 3,
               p: 3,
+              mb: 4, 
             }}
           >
             <ArticleIcon fontSize="large" sx={{ mb: 2 }} />
@@ -185,7 +188,7 @@ export default function InformationAndAnnouncements() {
             </Typography>
           </Box>
         ) : (
-          <Grid container spacing={3} justifyContent="center">
+          <Grid container spacing={1} justifyContent="center">
             {filteredNews.map((news) => {
               const formattedDate = new Date(news.created_at).toLocaleDateString('id-ID', {
                 day: 'numeric',
@@ -194,17 +197,18 @@ export default function InformationAndAnnouncements() {
               });
 
               return (
-                <Grid xs={12} sm={6} md={6} key={news.id}>
+                <Grid sx={{mx: 2}} xs={12} sm={6} md={4} key={news.id}>
                   <m.div variants={varFade().inUp}>
                     <Card
                       sx={{
                         transition: '0.3s',
                         backgroundColor: theme.palette.background.paper,
                         boxShadow: shadows,
-                        minHeight: { xs: 'auto', md: '450px' }, // Use minHeight instead of height
+                        minHeight: { xs: 'auto', md: '400px' }, 
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
+                        mb: 3,
                         '&:hover': {
                           boxShadow: `0px 20px 40px ${alpha(theme.palette.primary.main, 0.2)}`,
                         },
@@ -276,8 +280,8 @@ export default function InformationAndAnnouncements() {
                             WebkitBoxOrient: 'vertical',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
-                            WebkitLineClamp: { xs: 1, md: 2 }, 
-                            marginBottom: 2 ,
+                            WebkitLineClamp: { xs: 1, md: 2 },
+                            marginBottom: 2,
                           }}
                         >
                           <span dangerouslySetInnerHTML={{ __html: news.content }} />

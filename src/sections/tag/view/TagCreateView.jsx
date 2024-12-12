@@ -15,7 +15,7 @@ export default function TagCreateView() {
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
-        heading="Create a new tag"
+        heading="Membuat Tag Baru"
         links={[
           {
             name: 'Dashboard',

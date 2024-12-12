@@ -136,7 +136,7 @@ export default function InstanceListView() {
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs
-          heading="List"
+          heading="Daftar Instansi"
           links={[
             { name: 'Dashboard', href: paths.dashboard.root },
             { name: 'Daftar Instansi', href: paths.dashboard.instance.list },
@@ -174,7 +174,7 @@ export default function InstanceListView() {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell align="center">Nomor</TableCell>
+                 
                     <TableCell>Nama</TableCell>
                     <TableCell>Alamat</TableCell>
                     <TableCell align="center">Aksi</TableCell>
@@ -185,7 +185,7 @@ export default function InstanceListView() {
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((instance, idx) => (
                       <TableRow key={instance.id}>
-                        <TableCell align="center">{idx + 1}</TableCell>
+                    
                         <TableCell>{instance.name}</TableCell>
                         <TableCell
                           sx={{

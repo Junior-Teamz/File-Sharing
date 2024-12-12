@@ -26,10 +26,9 @@ export default function AnalyticsConversionRates({ title, subheader, chart, ...o
     },
     plotOptions: {
       bar: {
-        horizontal: false,  // Ubah ke false untuk arah vertikal (Y)
+        horizontal: true,
+        barHeight: '58%',
         borderRadius: 2,
-        distributed: false,
-        columnWidth: '28%', // Atur lebar kolom
       },
     },
     xaxis: {
@@ -51,7 +50,7 @@ export default function AnalyticsConversionRates({ title, subheader, chart, ...o
         <Chart
           type="bar"
           dir="ltr"
-          series={series} // Menampilkan beberapa series
+          series={series}
           options={chartOptions}
           height={364}
         />

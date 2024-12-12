@@ -24,6 +24,9 @@ import FileManagerGridView from '../file-manager-grid-view';
 import FileManagerFiltersResult from '../file-manager-filters-result';
 import FileManagerNewFolderDialog from '../file-manager-new-folder-dialog';
 import { FolderFileShare } from 'src/_mock/map/FolderFileShare';
+import { Box } from '@mui/material';
+import { alpha, useTheme } from '@mui/material/styles';
+import { bgGradient } from 'src/theme/css';
 
 // ----------------------------------------------------------------------
 
@@ -38,6 +41,7 @@ const defaultFilters = {
 
 export default function FileManagerView() {
   const table = useTable({ defaultRowsPerPage: 10 });
+  const theme = useTheme();
 
   const { FolderFiles } = FolderFileShare();
 
@@ -159,57 +163,85 @@ export default function FileManagerView() {
 
   return (
     <>
-      <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Typography variant="h4">Dibagikan kepada saya</Typography>
-        </Stack>
-
-        <Stack
-          spacing={2.5}
+      <Box
+        sx={{
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        <Box
           sx={{
-            my: { xs: 3, md: 5 },
+            ...bgGradient({
+              color: alpha(
+                theme.palette.background.paper,
+                theme.palette.mode === 'light' ? 0.8 : 0.8
+              ),
+              imgUrl: '/assets/background/overlay_3.jpg',
+            }),
+            backgroundPosition: 'center',
+            backgroundSize: 'cover',
+            position: 'absolute',
+            filter: 'blur(20px)',
+            WebkitFilter: 'blur(20px)',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: -1,
           }}
-        >
-          {renderFilters}
+        />
+        <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Typography variant="h4">Dibagikan kepada saya</Typography>
+          </Stack>
 
-          {canReset && renderResults}
-        </Stack>
-
-        {notFound ? (
-          <EmptyContent filled title="No Data" sx={{ py: 10 }} />
-        ) : (
-          <FileManagerGridView
-            table={table}
-            data={tableData}
-            dataFiltered={dataFiltered}
-            onDeleteItem={handleDeleteItem}
-            onOpenConfirm={confirm.onTrue}
-          />
-        )}
-      </Container>
-
-      <ConfirmDialog
-        open={confirm.value}
-        onClose={confirm.onFalse}
-        title="Delete"
-        content={
-          <>
-            Are you sure want to delete <strong> {table.selected.length} </strong> items?
-          </>
-        }
-        action={
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => {
-              handleDeleteItems();
-              confirm.onFalse();
+          <Stack
+            spacing={2.5}
+            sx={{
+              my: { xs: 3, md: 5 },
             }}
           >
-            Delete
-          </Button>
-        }
-      />
+            {renderFilters}
+
+            {canReset && renderResults}
+          </Stack>
+
+          {notFound ? (
+            <EmptyContent filled title="No Data" sx={{ py: 10 }} />
+          ) : (
+            <FileManagerGridView
+              table={table}
+              data={tableData}
+              dataFiltered={dataFiltered}
+              onDeleteItem={handleDeleteItem}
+              onOpenConfirm={confirm.onTrue}
+            />
+          )}
+        </Container>
+
+        <ConfirmDialog
+          open={confirm.value}
+          onClose={confirm.onFalse}
+          title="Delete"
+          content={
+            <>
+              Are you sure want to delete <strong> {table.selected.length} </strong> items?
+            </>
+          }
+          action={
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                handleDeleteItems();
+                confirm.onFalse();
+              }}
+            >
+              Delete
+            </Button>
+          }
+        />
+      </Box>
     </>
   );
 }

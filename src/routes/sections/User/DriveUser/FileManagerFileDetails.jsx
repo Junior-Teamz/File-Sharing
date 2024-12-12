@@ -126,7 +126,7 @@ export default function FIleManagerFileDetails({
       await updateNameFile({ fileId: item.id, data: { name: newFileName } });
       enqueueSnackbar('Nama file berhasil diperbarui!', { variant: 'success' });
       setIsEditing(false);
-      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      useClient.invalidateQueries({ queryKey: ['folder.user'] });
     } catch (error) {
       enqueueSnackbar('Gagal memperbarui nama file!', { variant: 'error' });
     }
@@ -202,7 +202,7 @@ export default function FIleManagerFileDetails({
           });
         }
         enqueueSnackbar('Tag berhasil ditambahkan!', { variant: 'success' });
-        useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+        useClient.invalidateQueries({ queryKey: ['folder.user'] });
       } else {
         enqueueSnackbar('Tidak ada tag baru untuk ditambahkan.', { variant: 'info' });
       }
@@ -223,7 +223,7 @@ export default function FIleManagerFileDetails({
       enqueueSnackbar('File berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
-      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      useClient.invalidateQueries({ queryKey: ['folder.user'] });
     } catch (error) {
       enqueueSnackbar('Gagal menghapus file', { variant: 'error' });
     }
@@ -239,7 +239,7 @@ export default function FIleManagerFileDetails({
       await removeTagFile({ file_id: item.id, tag_id: tagId });
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
       enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
-      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      useClient.invalidateQueries({ queryKey: ['folder.user'] });
     } catch (error) {
       enqueueSnackbar('Error removing tag.', { variant: 'error' });
     }
@@ -273,11 +273,11 @@ export default function FIleManagerFileDetails({
       if (favorite.value) {
         await removeFavorite({ file_id: id });
         enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
-        useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+        useClient.invalidateQueries({ queryKey: ['folder.user'] });
       } else {
         await addFavorite({ file_id: id });
         enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });
-        useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+        useClient.invalidateQueries({ queryKey: ['folder.user'] });
       }
 
       favorite.onToggle();

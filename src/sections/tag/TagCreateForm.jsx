@@ -76,12 +76,12 @@ export default function TagCreateForm() {
                 sm: 'repeat(2, 1fr)',
               }}
             >
-              <RHFTextField name="name" label="Full Name" />
+              <RHFTextField name="name" label="Nama Tag" />
             </Box>
 
             <Stack alignItems="flex-end" sx={{ mt: 3 }}>
               <Button variant="outlined" type="submit">
-                {isPending ? 'Creating Tag...' : 'Create Tag'}
+                {isPending ? 'Buat Tag...' : 'Buat Tag'}
               </Button>
             </Stack>
           </Card>

@@ -8,40 +8,61 @@ import Chart, { useChart } from 'src/components/chart';
 
 // ----------------------------------------------------------------------
 
-export default function AnalyticsWebsiteVisits({ title, subheader, chart, ...other }) {
+export default function AnalyticsWebsiteVisits({ title, subheader, chart, isStorage, ...other }) {
   const { labels, colors, series, options } = chart;
 
-  // Memastikan semua series menggunakan tipe 'bar'
+  // Fungsi untuk mengonversi nilai jika data adalah ukuran storage
+  const formatStorage = (value) => {
+    if (value >= 1e6) {
+      return `${(value / 1e6).toFixed(2)} MB`; // Konversi ke MB jika >= 1,000,000 bytes
+    } else if (value >= 1e3) {
+      return `${(value / 1e3).toFixed(2)} KB`; // Konversi ke KB jika >= 1,000 bytes
+    }
+    return `${value} bytes`; // Nilai default dalam bytes
+  };
+
+  // Fungsi untuk menampilkan nilai secara langsung (untuk total file atau folder)
+  const formatCount = (value) => `${value} items`;
+
+  // Tentukan apakah data adalah storage atau hanya hitungan
+  const dataFormatter = isStorage ? formatStorage : formatCount;
+
   const modifiedSeries = series.map((s) => ({
     ...s,
-    type: 'bar', // Set semua tipe series menjadi 'bar'
+    type: 'bar',
+    data: s.data.map((value) => (isStorage ? value / 1e3 : value)), 
   }));
 
   const chartOptions = useChart({
-    ...options, // Menggabungkan opsi bawaan dengan opsi custom
+    ...options,
     colors,
     plotOptions: {
       bar: {
-        columnWidth: '20%', // Menentukan lebar kolom tetap
-        distributed: false, // Membuat setiap batang memiliki lebar yang konsisten
+        columnWidth: '20%',
+        distributed: false,
       },
     },
     chart: {
-      type: 'bar', // Mengubah seluruh chart menjadi chart batang
+      type: 'bar',
     },
     fill: {
-      type: modifiedSeries.map((i) => i.fill || 'solid'), // Default ke 'solid' jika tidak ada nilai fill
+      type: modifiedSeries.map((i) => i.fill || 'solid'),
     },
     labels,
     xaxis: {
       categories: labels,
-      type: 'category', // Mengatur xaxis sebagai kategori
+      type: 'category',
     },
     tooltip: {
       shared: true,
       intersect: false,
       y: {
-        formatter: (value) => (typeof value !== 'undefined' ? `${value.toFixed(0)}` : value),
+        formatter: (value) => (typeof value !== 'undefined' ? dataFormatter(value * (isStorage ? 1e3 : 1)) : value),
+      },
+    },
+    yaxis: {
+      labels: {
+        formatter: (value) => dataFormatter(value * (isStorage ? 1e3 : 1)),
       },
     },
   });
@@ -60,4 +81,5 @@ AnalyticsWebsiteVisits.propTypes = {
   chart: PropTypes.object,
   subheader: PropTypes.string,
   title: PropTypes.string,
+  isStorage: PropTypes.bool, // Tambahan prop untuk menentukan apakah data adalah storage atau tidak
 };

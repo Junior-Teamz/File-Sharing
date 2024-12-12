@@ -8,6 +8,11 @@ import Divider from '@mui/material/Divider';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import Button from '@mui/material/Button';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -20,6 +25,7 @@ import { useAuthContext } from 'src/auth/hooks';
 import { varHover } from 'src/components/animate';
 import { useSnackbar } from 'src/components/snackbar';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { useState } from 'react';
 
 // ----------------------------------------------------------------------
 
@@ -43,16 +49,27 @@ export default function AccountPopover() {
 
   const popover = usePopover();
 
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const handleLogoutClick = () => {
+    setOpenDialog(true); 
+    popover.onClose();
+  };
+
   const handleLogout = async () => {
     try {
       await logout();
-      popover.onClose();
+      setOpenDialog(false);
       router.replace('/');
       enqueueSnackbar('Logout Berhasil!', { variant: 'success' });
     } catch (error) {
-      console.error(error);
       enqueueSnackbar('Gagal log out!', { variant: 'error' });
+      setOpenDialog(false); 
     }
+  };
+
+  const handleCancel = () => {
+    setOpenDialog(false); 
   };
 
   const handleClickItem = (path) => {
@@ -113,12 +130,27 @@ export default function AccountPopover() {
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <MenuItem
-          onClick={handleLogout}
+          onClick={handleLogoutClick}
           sx={{ m: 1, fontWeight: 'fontWeightBold', color: 'error.main' }}
         >
           Logout
         </MenuItem>
       </CustomPopover>
+
+      <Dialog open={openDialog} onClose={handleCancel}>
+        <DialogTitle>Konfirmasi Logout</DialogTitle>
+        <DialogContent>
+          <Typography>Apakah Anda yakin ingin keluar?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel} color="primary">
+            Batal
+          </Button>
+          <Button onClick={handleLogout} color="error">
+            Keluar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

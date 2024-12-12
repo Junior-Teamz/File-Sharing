@@ -55,6 +55,7 @@ export default function JwtLoginView() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       const response = await login?.(data.email, data.password);
+      // console.log('Login response:', response);
 
       const userRoles = response?.roles;
       const isSuperadmin = response?.is_superadmin ?? false;
@@ -69,30 +70,25 @@ export default function JwtLoginView() {
 
       enqueueSnackbar('Login Berhasil!', { variant: 'success' });
     } catch (error) {
-      console.error('Login Error:', error);
+      // console.error('Login Error:', error);
       reset();
 
-      // Menangani pesan kesalahan spesifik
       if (error.response && error.response.data.errors) {
-        // Cek apakah errors adalah string atau objek
         if (typeof error.response.data.errors === 'string') {
           setErrorMsg(error.response.data.errors);
         } else if (typeof error.response.data.errors === 'object') {
-          // Ambil pesan kesalahan dari objek
           setErrorMsg(Object.values(error.response.data.errors).join(', '));
         }
       } else {
         setErrorMsg('Tidak bisa login! Silakan coba lagi.');
       }
-
-      // Pastikan menampilkan snackbar setelah setErrorMsg
       enqueueSnackbar(errorMsg, { variant: 'error' });
     }
   });
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5 }}>
-      <Typography variant="h4">Sign in to File Sharing</Typography>
+      <Typography variant="h4">Login to File Sharing</Typography>
     </Stack>
   );
 
@@ -122,8 +118,14 @@ export default function JwtLoginView() {
         href={paths.authDemo.classic.forgotPassword}
         variant="body2"
         color="inherit"
-        underline="always"
-        sx={{ alignSelf: 'flex-end' }}
+        underline="none" // Hilangkan underline default
+        sx={{
+          alignSelf: 'flex-end',
+          textDecoration: 'none', // Pastikan tidak ada underline default
+          '&:hover': {
+            textDecoration: 'underline', // Tambahkan underline saat hover
+          },
+        }}
       >
         Lupa password?
       </Link>
@@ -144,8 +146,14 @@ export default function JwtLoginView() {
         href="/"
         variant="body2"
         color="inherit"
-        underline="always"
-        sx={{ alignSelf: 'flex-end' }}
+        underline="none"
+        sx={{
+          alignSelf: 'flex-end',
+          textDecoration: 'none',
+          '&:hover': {
+            textDecoration: 'underline',
+          },
+        }}
       >
         Kembali ke home
       </Link>

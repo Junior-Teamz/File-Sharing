@@ -14,7 +14,7 @@ import { Button, MenuItem } from '@mui/material';
 import { useIndexInstance } from '../instancepages/view/Instance';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
-import { QueryClient, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function UserNewEditForm({ currentUser }) {
   const { enqueueSnackbar } = useSnackbar();

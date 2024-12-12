@@ -38,7 +38,7 @@ export default function FileManagerShareDialogFolder({
   const [inputSearch, setInputSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(inputSearch);
-  const queryClient = useQueryClient();
+  const useClient = useQueryClient();
   const { refetch: searchUsers, isLoading } = useFetchUser({ email: debouncedSearchTerm });
   const { mutate: setPermissions } = usePermissionsFolder();
   const { enqueueSnackbar } = useSnackbar();
@@ -95,18 +95,17 @@ export default function FileManagerShareDialogFolder({
         },
         {
           onSuccess: () => {
+            useClient.invalidateQueries({ queryKey: ['folder.admin'] });
             enqueueSnackbar('Folder Berhasil dikirim!', { variant: 'success' });
-
-            setInputSearch('');
-            setSearchResults([]);
-            setSelectedUser(null);
-            queryClient.invalidateQueries({ queryKey: ['fetch.folder'] });
           },
           onError: (error) => {
             enqueueSnackbar(`Gagal mengirim folder: ${error.message}`, { variant: 'error' });
           },
         }
       );
+      setInputSearch('');
+      setSearchResults([]);
+      setSelectedUser(null);
     } else {
       enqueueSnackbar('User id atau folder id menghilang', { variant: 'warning' });
     }
@@ -129,7 +128,7 @@ export default function FileManagerShareDialogFolder({
         <TextField
           fullWidth
           value={inputSearch}
-          placeholder="Cari pengguna berdasarkan email"
+          placeholder="Cari berdasarkan email"
           onChange={handleInviteChange}
           InputProps={{
             endAdornment: (

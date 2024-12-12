@@ -179,8 +179,11 @@ export const endpoints = {
   ChartInstansi: {
     getUserInstansi: '/api/admin/instance/getInstanceUsageStatistic',
     getChartInstansi: '/api/admin/instance/countAll',
-    ChartInstansi: '/api/admin/statistic_superadmin/storageUsagePerInstance',
+  },
 
+  SuperAdminChart:{
+    Instansi: '/api/admin/statistic_superadmin/storageUsagePerInstance',
+    TagInstansi: '/api/admin/statistic_superadmin/tagUsedByInstance',
   },
 
   ChartTagFolderAndFile: {

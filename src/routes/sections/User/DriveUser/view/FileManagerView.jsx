@@ -181,7 +181,7 @@ export default function FileManagerView() {
             startIcon={<Iconify icon="eva:plus-fill" />}
             onClick={handleClick}
           >
-            New
+           Buat
           </Button>
           <Menu
             anchorEl={anchorEl}

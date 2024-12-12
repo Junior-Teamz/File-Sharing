@@ -33,6 +33,7 @@ import { paths } from 'src/routes/paths';
 import { useDeleteLegal, useFetchLegal, useEditLegal } from './fetchLegalBasis';
 import { useSnackbar } from 'notistack';
 import { useForm } from 'react-hook-form';
+import EmptyContent from 'src/components/empty-content';
 
 export default function LegalListView() {
   const settings = useSettingsContext();
@@ -213,9 +214,13 @@ export default function LegalListView() {
           />
         </Scrollbar>
       ) : (
-        <Paper sx={{ p: 2, textAlign: 'center' }}>
-          <Typography variant="h6">Tidak ada dokumen ditemukan</Typography>
-        </Paper>
+        <EmptyContent
+          filled
+          title="Tidak ada dasar hukum yang tersedia"
+          sx={{
+            py: 10,
+          }}
+        />
       )}
 
       <Dialog

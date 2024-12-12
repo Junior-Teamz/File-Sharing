@@ -27,7 +27,7 @@ export default function AccountGeneral() {
 
   const { mutateAsync: editUser } = useUpdateProfile({
     onSuccess: (updatedUser) => {
-      enqueueSnackbar('User berhasil diperbarui', { variant: 'success' });
+      enqueueSnackbar('Profil berhasil diperbarui', { variant: 'success' });
       resetForm({
         name: updatedUser.name || '',
         email: updatedUser.email || '',
@@ -36,7 +36,7 @@ export default function AccountGeneral() {
       });
     },
     onError: (error) => {
-      enqueueSnackbar('Gagal memperbarui user', { variant: 'error' });
+      enqueueSnackbar('Gagal memperbarui profil', { variant: 'error' });
       console.error('Error update user:', error);
     },
   });
@@ -79,18 +79,23 @@ export default function AccountGeneral() {
 
   const onSubmit = async (data) => {
     const formData = new FormData();
-
     formData.append('name', data.name);
     formData.append('email', data.email);
     formData.append('instance', JSON.stringify(data.instance));
 
     if (data.photo_profile) {
+      console.log('File to upload: ', data.photo_profile);
       formData.append('photo_profile', data.photo_profile);
+    }
+
+    // Log FormData untuk debugging
+    for (let pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
     }
 
     try {
       const response = await editUser({ userId, data: formData });
-      enqueueSnackbar('User berhasil diperbarui', { variant: 'success' });
+      // enqueueSnackbar('Profil berhasil diperbarui', { variant: 'success' });
       resetForm({
         name: response.name || '',
         email: response.email || '',
@@ -98,7 +103,7 @@ export default function AccountGeneral() {
         photo_profile_url: response.photo_profile_url || '',
       });
     } catch (error) {
-      enqueueSnackbar('Gagal memperbarui user', { variant: 'error' });
+      // enqueueSnackbar('Gagal memperbarui user', { variant: 'error' });
       console.error('Error update user:', error);
     }
   };

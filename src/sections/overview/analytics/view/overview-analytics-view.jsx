@@ -36,6 +36,8 @@ import {
   useChartInstances,
   useChartUsers,
   useChartFile,
+  useChartInstancesStorage,
+  useTagInstances,
 } from './useFetchChart';
 import { fData } from 'src/utils/format-number';
 // theme
@@ -54,31 +56,29 @@ export default function OverviewAnalyticsView() {
 
   const { data: File } = useChartFile();
 
+  const { data: TagInstances } = useTagInstances();
+  console.log(TagInstances);
+
   const { data: AllInstances } = useChartInstances();
 
-  const { data: Instances } = useChartUserInstances();
+  const { data: Storage } = useChartInstancesStorage();
 
   const { data: chartTag } = useChartTag();
 
   const [selectedInstance, setSelectedInstance] = useState('all');
 
-  // Sort and filter to get top 5 instances by total user, file, or folder
-  const getTop5Instances = () => {
-    if (!Instances?.data) return [];
-    return [...Instances.data]
-      .sort((a, b) => {
-        const totalA = a.user_count.user_total + a.file_total + a.folder_total;
-        const totalB = b.user_count.user_total + b.file_total + b.folder_total;
-        return totalB - totalA; // Sort descending by the combined total
-      })
-      .slice(0, 5); // Get top 5
+  const getTop5Storage = () => {
+    if (!Storage) return [];
+    return [...Storage]
+      .sort((a, b) => b.storage_usage_raw - a.storage_usage_raw) // Urutkan berdasarkan storage_usage_raw secara descending
+      .slice(0, 5); // Ambil 5 teratas
   };
 
-  // Filter data based on the selected instance
-  const filteredData =
+  // Filter data berdasarkan instance yang dipilih
+  const filteredStorageData =
     selectedInstance === 'all'
-      ? getTop5Instances() // Show top 5 when 'all' is selected
-      : Instances?.data?.filter((instance) => instance.name === selectedInstance);
+      ? getTop5Storage() // Jika 'all', tampilkan Top 5 storage
+      : Storage?.filter((instance) => instance.instance_name === selectedInstance); // Jika spesifik, filter data instansi
 
   function convertToBytes(sizeString) {
     if (!sizeString) return 0;
@@ -186,7 +186,6 @@ export default function OverviewAnalyticsView() {
               icon={<img alt="icon" src="/assets/icons/glass/ic_glass_users.png" />}
             />
           </Grid>
-
           <Grid xs={12} sm={6} md={3}>
             <AnalyticsWidgetSummary
               title="Total Instansi"
@@ -199,7 +198,6 @@ export default function OverviewAnalyticsView() {
               icon={<img alt="icon" src="/assets/icons/glass/ic_glass_company.png" />}
             />
           </Grid>
-
           <Grid xs={12} sm={6} md={3}>
             <AnalyticsWidgetSummary
               title="Admin"
@@ -212,7 +210,6 @@ export default function OverviewAnalyticsView() {
               icon={<img alt="icon" src="/assets/icons/glass/ic_glass_admin.png" />}
             />
           </Grid>
-
           <Grid xs={12} sm={6} md={3}>
             <AnalyticsWidgetSummary
               title="User"
@@ -225,9 +222,8 @@ export default function OverviewAnalyticsView() {
               icon={<img alt="icon" src="/assets/icons/glass/ic_glass_user.png" />}
             />
           </Grid>
-
-          <Grid xs={12} md={12} lg={12}>
-            <Grid xs={12}>
+          <Grid container spacing={2} md={12} lg={12}>
+            <Grid xs={12} md={12} lg={12}>
               <FormControl fullWidth>
                 <InputLabel>Filter Instansi</InputLabel>
                 <Select
@@ -236,60 +232,62 @@ export default function OverviewAnalyticsView() {
                   MenuProps={{
                     PaperProps: {
                       style: {
-                        maxHeight: 200, // Maksimal tinggi dropdown
-                        overflowY: 'auto', // Tambahkan scroll jika melebihi maksimal tinggi
+                        maxHeight: 200,
+                        overflowY: 'auto',
                       },
                     },
                   }}
                 >
                   <MenuItem value="all">5 Teratas</MenuItem>
-                  {Instances?.data?.map((instance) => (
-                    <MenuItem key={instance.id} value={instance.name}>
-                      {instance.name}
+                  {Storage?.map((instance) => (
+                    <MenuItem key={instance.instance_id} value={instance.instance_name}>
+                      {instance.instance_name}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
-
             <Grid xs={12} md={12} lg={12}>
               <AnalyticsWebsiteVisits
-                title="Statistik Instansi"
-                subheader="Data Instansi dan Total User, File, Folder"
+                title="Statistik Penyimpanan"
+                subheader={
+                  selectedInstance === 'all'
+                    ? 'Top 5 Penyimpanan Teratas'
+                    : `Data Instannsi untuk ${selectedInstance}`
+                }
+                isStorage={selectedInstance === 'all'} // Storage hanya berlaku untuk instance 'all'
                 chart={{
-                  labels: filteredData?.map((item) => item.name) || [],
-                  series: [
-                    {
-                      name: 'Total All User',
-                      type: 'column',
-                      fill: 'solid',
-                      data: filteredData?.map((item) => item.user_count.user_total) || [],
-                    },
-                    {
-                      name: 'Total Role Admin',
-                      type: 'column',
-                      fill: 'gradient',
-                      data: filteredData?.map((item) => item.user_count.role_admin_total) || [],
-                    },
-                    {
-                      name: 'Total Role User',
-                      type: 'column',
-                      fill: 'solid',
-                      data: filteredData?.map((item) => item.user_count.role_user_total) || [],
-                    },
-                    {
-                      name: 'Total File',
-                      type: 'area',
-                      fill: 'gradient',
-                      data: filteredData?.map((item) => item.file_total) || [],
-                    },
-                    {
-                      name: 'Total Folder',
-                      type: 'line',
-                      fill: 'solid',
-                      data: filteredData?.map((item) => item.folder_total) || [],
-                    },
-                  ],
+                  labels: filteredStorageData?.map((item) => item.instance_name) || [],
+                  series:
+                    selectedInstance === 'all'
+                      ? [
+                          {
+                            name: 'Penyimpanan Digunakan',
+                            type: 'column',
+                            fill: 'solid',
+                            data: filteredStorageData?.map((item) => item.storage_usage_raw) || [],
+                          },
+                        ]
+                      : [
+                          {
+                            name: 'Total File',
+                            type: 'column',
+                            fill: 'solid',
+                            data: filteredStorageData?.map((item) => item.total_files) || [],
+                          },
+                          {
+                            name: 'Total Folder',
+                            type: 'column',
+                            fill: 'gradient',
+                            data: filteredStorageData?.map((item) => item.total_folders) || [],
+                          },
+                          {
+                            name: 'Penyimpanan Digunakan',
+                            type: 'area',
+                            fill: 'gradient',
+                            data: filteredStorageData?.map((item) => item.storage_usage_raw) || [],
+                          },
+                        ],
                 }}
               />
             </Grid>
@@ -298,27 +296,23 @@ export default function OverviewAnalyticsView() {
           <Grid xs={12} md={6} lg={4}>
             <Box>{renderStorageOverview}</Box>
           </Grid>
-
           <Grid xs={12} md={6} lg={8}>
             <AnalyticsConversionRates
               title="Statistik Tag"
-              subheader="Data Tag paling banyak dipakai dan total file, folder di dalam tag"
+              subheader="Data Tag paling banyak dipakai oleh instansi"
               chart={{
-                series: [
-                  {
-                    name: 'Total Pengguna',
-                    data: chartTag?.data?.map((tag) => tag?.total_usage_count) || [],
-                  },
-                  {
-                    name: 'Total File',
-                    data: chartTag?.data?.map((tag) => tag?.file_usage_count) || [],
-                  },
-                  {
-                    name: 'Total Folder',
-                    data: chartTag?.data?.map((tag) => tag?.folder_usage_count) || [],
-                  },
-                ],
-                labels: chartTag?.data?.map((tag) => tag?.name) || [],
+                series:
+                  TagInstances?.map((tag) => ({
+                    name: tag?.instances?.map((instance) => instance?.instance_name).join(', '),
+                    data: [
+                      tag?.instances?.reduce(
+                        (total, instance) => total + instance?.tag_use_count,
+                        0
+                      ) || 0,
+                    ],
+                  })) || [],
+
+                labels: TagInstances?.map((tag) => tag?.tag_name) || [], // Nama tag sebagai label
               }}
             />
           </Grid>
@@ -336,7 +330,6 @@ export default function OverviewAnalyticsView() {
             }}
           />
         </Grid> */}
-
           {/* <Grid xs={12} md={6} lg={8}>
           <AnalyticsNews title="News" list={_analyticPosts} />
         </Grid> */}

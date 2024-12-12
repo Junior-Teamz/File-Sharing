@@ -185,7 +185,7 @@ export default function SettingsDrawer() {
 
           {renderStretch}
 
-          {renderPresets}
+          {/* {renderPresets} */}
         </Stack>
       </Scrollbar>
 

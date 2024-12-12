@@ -20,6 +20,7 @@ import { SplashScreen } from 'src/components/loading-screen';
 // JWT
 const JwtLoginPage = lazy(() => import('src/pages/auth/jwt/login'));
 const JwtRegisterPage = lazy(() => import('src/pages/auth/jwt/register'));
+const ForgotPasswordClassicPage = lazy(() => import('src/pages/auth-demo/classic/forgot-password'));
 
 // // FIREBASE
 // const FirebaseLoginPage = lazy(() => import('src/pages/auth/firebase/login'));
@@ -89,6 +90,14 @@ const authJwt = {
       element: (
         <AuthClassicLayout>
           <JwtLoginPage />
+        </AuthClassicLayout>
+      ),
+    },
+    {
+      path: 'forgotPassword',
+      element: (
+        <AuthClassicLayout>
+          <ForgotPasswordClassicPage /> 
         </AuthClassicLayout>
       ),
     },

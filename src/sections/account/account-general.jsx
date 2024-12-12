@@ -83,6 +83,7 @@ export default function AccountGeneral() {
     formData.append('name', data.name);
     formData.append('email', data.email);
     formData.append('instance', JSON.stringify(data.instance));
+    formData.append('_method', 'PUT');
 
     if (data.photo_profile) {
       formData.append('photo_profile', data.photo_profile);

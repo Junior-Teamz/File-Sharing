@@ -12,11 +12,14 @@ import Header from './header';
 import NavMini from './nav-mini';
 import NavVertical from './nav-vertical';
 import NavHorizontal from './nav-horizontal';
+import { alpha, useTheme } from '@mui/material/styles';
+import { bgGradient } from 'src/theme/css';
 
 // ----------------------------------------------------------------------
 
 export default function DashboardLayout({ children }) {
   const settings = useSettingsContext();
+  const theme = useTheme();
 
   const lgUp = useResponsive('up', 'lg');
 
@@ -35,7 +38,7 @@ export default function DashboardLayout({ children }) {
   if (isHorizontal) {
     return (
       <>
-      <Header onOpenNav={nav.onTrue} />
+        <Header onOpenNav={nav.onTrue} />
 
         {lgUp ? renderHorizontal : renderNavVertical}
 
@@ -48,6 +51,28 @@ export default function DashboardLayout({ children }) {
     return (
       <>
         <Header onOpenNav={nav.onTrue} />
+
+        <Box
+          sx={{
+            ...bgGradient({
+              color: alpha(
+                theme.palette.background.paper,
+                theme.palette.mode === 'light' ? 0.8 : 0.8
+              ),
+              imgUrl: '/assets/background/overlay_3.jpg',
+            }),
+            backgroundPosition: 'center',
+            backgroundSize: 'cover',
+            position: 'absolute',
+            filter: 'blur(20px)',
+            WebkitFilter: 'blur(20px)',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: -1,
+          }}
+        />
 
         <Box
           sx={{
@@ -66,6 +91,27 @@ export default function DashboardLayout({ children }) {
 
   return (
     <>
+      <Box
+        sx={{
+          ...bgGradient({
+            color: alpha(
+              theme.palette.background.paper,
+              theme.palette.mode === 'light' ? 0.8 : 0.8
+            ),
+            imgUrl: '/assets/background/overlay_3.jpg',
+          }),
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+          position: 'absolute',
+          filter: 'blur(20px)',
+          WebkitFilter: 'blur(20px)',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: -1,
+        }}
+      />
       <Header onOpenNav={nav.onTrue} />
 
       <Box

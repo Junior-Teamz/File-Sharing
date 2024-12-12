@@ -65,7 +65,6 @@ export function AuthProvider({ children }) {
         const response = await axiosInstance.get(endpoints.auth.me);
         const { data: user } = response.data;
 
-       
         dispatch({
           type: 'INITIAL',
           payload: { user, roles: user.roles || [], is_superadmin: user.is_superadmin || false },
@@ -83,31 +82,6 @@ export function AuthProvider({ children }) {
     initialize();
   }, [initialize]);
 
-  const refreshAccessToken = async () => {
-    const { refreshToken } = state;
-    if (!refreshToken) return;
-
-    try {
-      const response = await axiosInstance.post(endpoints.auth.refreshToken, { refreshToken });
-      const { accessToken } = response.data;
-
-      setSession(accessToken);
-      dispatch({
-        type: 'LOGIN',
-        payload: {
-          accessToken,
-          refreshToken,
-          user: state.user,
-          roles: state.roles,
-          is_superadmin: state.is_superadmin,
-        },
-      });
-    } catch (error) {
-      console.error('Failed to refresh token:', error);
-      logout(); // Logout jika refresh token gagal
-    }
-  };
-
   const login = useCallback(async (email, password) => {
     const data = { email, password };
 
@@ -115,8 +89,13 @@ export function AuthProvider({ children }) {
       const response = await axiosInstance.post(endpoints.auth.login, data);
       const { accessToken, roles, is_superadmin, user, refreshToken } = response.data;
 
+      // Set session with accessToken
       setSession(accessToken);
 
+      // Call initialize function directly after login
+      await initialize();
+
+      // Dispatch login action
       dispatch({
         type: 'LOGIN',
         payload: {
@@ -142,7 +121,10 @@ export function AuthProvider({ children }) {
       const response = await axiosInstance.post(endpoints.auth.register, data);
       const { user } = response.data;
 
-      dispatch({ type: 'REGISTER', payload: { user, roles: user.roles || [], is_superadmin: user.is_superadmin || false } });
+      dispatch({
+        type: 'REGISTER',
+        payload: { user, roles: user.roles || [], is_superadmin: user.is_superadmin || false },
+      });
     } catch (error) {
       console.error('Registration Error:', error);
       throw error;
@@ -178,7 +160,6 @@ export function AuthProvider({ children }) {
       login,
       register,
       logout,
-      refreshAccessToken, // Menambahkan refreshAccessToken ke value
     }),
     [login, logout, register, state.user, status]
   );

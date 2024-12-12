@@ -17,7 +17,7 @@ export default function InstanceCreateView() {
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
-        heading="Create a new instance"
+        heading="Buat Instansi Baru"
         links={[
           {
             name: 'Dashboard',
@@ -27,7 +27,7 @@ export default function InstanceCreateView() {
             name: 'Instance List',
             href: paths.dashboard.instance.list,
           },
-          { name: 'Instance Create' },
+          { name: 'Buat Instansi' },
         ]}
         sx={{
           mb: { xs: 3, md: 5 },

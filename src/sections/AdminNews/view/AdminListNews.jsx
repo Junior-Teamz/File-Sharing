@@ -37,6 +37,7 @@ import { RHFAutocomplete } from 'src/components/hook-form';
 import { useForm, FormProvider } from 'react-hook-form';
 import Chip from '@mui/material/Chip';
 import { Link } from 'react-router-dom';
+import EmptyContent from 'src/components/empty-content';
 
 export default function AdminListNews() {
   const methods = useForm();
@@ -154,7 +155,7 @@ export default function AdminListNews() {
 
       <TextField
         variant="outlined"
-        placeholder="Search News..."
+        placeholder="Cari Berita..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         sx={{ mb: 2 }}
@@ -167,7 +168,7 @@ export default function AdminListNews() {
               <TableRow>
                 <TableCell>Thumbnail</TableCell>
                 <TableCell>Judul</TableCell>
-                <TableCell>Isi</TableCell>
+                <TableCell>deskripsi</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell align="right">Aksi</TableCell>
               </TableRow>
@@ -247,7 +248,13 @@ export default function AdminListNews() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={5} align="center">
-                    Tidak ada berita ditemukan.
+                    <EmptyContent
+                      filled
+                      title="Tidak ada berita yang tersedia"
+                      sx={{
+                        py: 10,
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
               )}

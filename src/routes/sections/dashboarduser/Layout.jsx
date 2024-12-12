@@ -12,11 +12,14 @@ import Header from './Header';
 import NavMini from './NavMini';
 import NavVertical from './NavVertical';
 import NavHorizontal from './NavHorizontal';
+import { alpha, useTheme } from '@mui/material/styles';
+import { bgGradient } from 'src/theme/css';
 
 // ----------------------------------------------------------------------
 
 export default function DashboardUserLayout({ children }) {
   const settings = useSettingsContext();
+  const theme = useTheme();
 
   const lgUp = useResponsive('up', 'lg');
 
@@ -66,6 +69,27 @@ export default function DashboardUserLayout({ children }) {
 
   return (
     <>
+     <Box
+          sx={{
+            ...bgGradient({
+              color: alpha(
+                theme.palette.background.paper,
+                theme.palette.mode === 'light' ? 0.8 : 0.8
+              ),
+              imgUrl: '/assets/background/overlay_3.jpg',
+            }),
+            backgroundPosition: 'center',
+            backgroundSize: 'cover',
+            position: 'absolute',
+            filter: 'blur(20px)',
+            WebkitFilter: 'blur(20px)',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: -1,
+          }}
+        />
       <Header onOpenNav={nav.onTrue} />
 
       <Box

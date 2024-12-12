@@ -36,6 +36,7 @@ import { useSnackbar } from 'notistack';
 import CustomPopover from 'src/components/custom-popover';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
+import EmptyContent from 'src/components/empty-content';
 
 export default function TagListView() {
   const settings = useSettingsContext();

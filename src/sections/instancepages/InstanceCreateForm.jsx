@@ -80,9 +80,9 @@ export default function InstanceCreateForm() {
                 sm: 'repeat(2, 1fr)',
               }}
             >
-              <RHFTextField name="name" label="Full Name" />
+              <RHFTextField name="name" label="Nama Instansi" />
 
-              <RHFTextField name="address" label="Address" />
+              <RHFTextField name="address" label="Alamat" />
             </Box>
 
             <Stack alignItems="flex-end" sx={{ mt: 3 }}>

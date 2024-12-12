@@ -33,7 +33,7 @@ export default function FileManagerInvitedItem({person, user, onClick, permissio
         }}
         onClick={onClick} // Handle click event
       >
-        <Avatar alt={user?.name || 'Unknown'} src={user?.avatarUrl} sx={{ mr: 2 }} />
+        <Avatar alt={user?.name || 'Unknown'} src={user?.photo_profile_url} sx={{ mr: 2 }} />
 
         <ListItemText
           primary={user?.name || 'Unknown'}

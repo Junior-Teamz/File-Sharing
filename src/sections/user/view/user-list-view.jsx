@@ -9,6 +9,7 @@ import {
   IconButton,
   TableContainer,
   CircularProgress,
+  Box,
 } from '@mui/material';
 import Scrollbar from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
@@ -34,6 +35,8 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import debounce from 'lodash/debounce';
 import { useIndexInstance } from 'src/sections/instancepages/view/Instance';
 import { useSnackbar } from 'notistack';
+import { alpha, useTheme } from '@mui/material/styles';
+import { bgGradient } from 'src/theme/css';
 
 const TABLE_HEAD = [
   { id: 'name', label: 'Nama', width: 180 },
@@ -55,6 +58,7 @@ const defaultFilters = {
 const allowedRoles = ['user', 'admin'];
 
 export default function UserListView() {
+  const theme = useTheme();
   const table = useTable();
   const settings = useSettingsContext();
   const { enqueueSnackbar } = useSnackbar();
@@ -141,129 +145,156 @@ export default function UserListView() {
 
   return (
     <>
-      <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-        <CustomBreadcrumbs
-          heading="Daftar User"
-          links={[{ name: 'Dashboard', href: paths.dashboard.root }, { name: 'Daftar User' }]}
-          action={
-            <Button
-              component={RouterLink}
-              href={paths.dashboard.user.new}
-              variant="contained"
-              startIcon={<Iconify icon="mingcute:add-line" />}
-            >
-              New User
-            </Button>
-          }
-          sx={{ mb: { xs: 3, md: 5 } }}
+      <Box
+        sx={{
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        <Box
+          sx={{
+            ...bgGradient({
+              color: alpha(
+                theme.palette.background.paper,
+                theme.palette.mode === 'light' ? 0.8 : 0.8
+              ),
+              imgUrl: '/assets/background/overlay_3.jpg',
+            }),
+            backgroundPosition: 'center',
+            backgroundSize: 'cover',
+            position: 'absolute',
+            filter: 'blur(20px)',
+            WebkitFilter: 'blur(20px)',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: -1,
+          }}
         />
-
-        <Card>
-          <UserTableToolbar
-            filters={filters}
-            onFilters={handleFilters}
-            
-            onSearchChange={handleSearchChange}
-            searchTerm={searchTerm}
-            roleOptions={roleOptions}
-            instanceOptions={instanceOptions}
+        <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+          <CustomBreadcrumbs
+            heading="Daftar User"
+            links={[{ name: 'Dashboard', href: paths.dashboard.root }, { name: 'Daftar User' }]}
+            action={
+              <Button
+                component={RouterLink}
+                href={paths.dashboard.user.new}
+                variant="contained"
+                startIcon={<Iconify icon="mingcute:add-line" />}
+              >
+                New User
+              </Button>
+            }
+            sx={{ mb: { xs: 3, md: 5 } }}
           />
 
-          <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-            {isFetching && <CircularProgress sx={{ position: 'absolute', top: 20, right: 20 }} />}
-
-            <TableSelectedAction
-              dense={table.dense}
-              numSelected={table.selected.length}
-              rowCount={tableData.length}
-              onSelectAllRows={(checked) =>
-                table.onSelectAllRows(
-                  checked,
-                  tableData.map((row) => row.id)
-                )
-              }
-              action={
-                <Tooltip title="Delete">
-                  <IconButton color="primary" onClick={confirm.onTrue}>
-                    <Iconify icon="solar:trash-bin-trash-bold" />
-                  </IconButton>
-                </Tooltip>
-              }
+          <Card>
+            <UserTableToolbar
+              filters={filters}
+              onFilters={handleFilters}
+              onSearchChange={handleSearchChange}
+              searchTerm={searchTerm}
+              roleOptions={roleOptions}
+              instanceOptions={instanceOptions}
             />
 
-            <Scrollbar>
-              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                <TableHeadCustom
-                  order={table.order}
-                  orderBy={table.orderBy}
-                  headLabel={TABLE_HEAD}
-                  rowCount={tableData.length}
-                  numSelected={table.selected.length}
-                  onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(
-                      checked,
-                      tableData.map((row) => row.id)
-                    )
-                  }
-                />
+            <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
+              {isFetching && <CircularProgress sx={{ position: 'absolute', top: 20, right: 20 }} />}
 
-                <TableBody>
-                  {dataInPage.map((row) => (
-                    <UserTableRow
-                      key={row.id}
-                      row={row}
-                      selected={table.selected.includes(row.id)}
-                      onSelectRow={() => table.onSelectRow(row.id)}
-                      onDeleteRow={() => handleDeleteRow([row.id])}
-                    />
-                  ))}
+              <TableSelectedAction
+                dense={table.dense}
+                numSelected={table.selected.length}
+                rowCount={tableData.length}
+                onSelectAllRows={(checked) =>
+                  table.onSelectAllRows(
+                    checked,
+                    tableData.map((row) => row.id)
+                  )
+                }
+                action={
+                  <Tooltip title="Delete">
+                    <IconButton color="primary" onClick={confirm.onTrue}>
+                      <Iconify icon="solar:trash-bin-trash-bold" />
+                    </IconButton>
+                  </Tooltip>
+                }
+              />
 
-                  <TableEmptyRows
-                    height={denseHeight}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, tableData.length)}
+              <Scrollbar>
+                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+                  <TableHeadCustom
+                    order={table.order}
+                    orderBy={table.orderBy}
+                    headLabel={TABLE_HEAD}
+                    rowCount={tableData.length}
+                    numSelected={table.selected.length}
+                    onSort={table.onSort}
+                    onSelectAllRows={(checked) =>
+                      table.onSelectAllRows(
+                        checked,
+                        tableData.map((row) => row.id)
+                      )
+                    }
                   />
 
-                  <TableNoData notFound={notFound} />
-                </TableBody>
-              </Table>
-            </Scrollbar>
-          </TableContainer>
+                  <TableBody>
+                    {dataInPage.map((row) => (
+                      <UserTableRow
+                        key={row.id}
+                        row={row}
+                        selected={table.selected.includes(row.id)}
+                        onSelectRow={() => table.onSelectRow(row.id)}
+                        onDeleteRow={() => handleDeleteRow([row.id])}
+                      />
+                    ))}
 
-          <TablePaginationCustom
-            count={dataFiltered.length}
-            page={table.page}
-            rowsPerPage={table.rowsPerPage}
-            onPageChange={table.onChangePage}
-            onRowsPerPageChange={table.onChangeRowsPerPage}
-            dense={table.dense}
-            onChangeDense={table.onChangeDense}
-          />
-        </Card>
-      </Container>
+                    <TableEmptyRows
+                      height={denseHeight}
+                      emptyRows={emptyRows(table.page, table.rowsPerPage, tableData.length)}
+                    />
 
-      <ConfirmDialog
-        open={confirm.value}
-        onClose={confirm.onFalse}
-        title="Delete"
-        content={
-          <div>
-            Apa kamu yakin hapus <strong>{table.selected.length}</strong> User?
-          </div>
-        }
-        action={
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => {
-              handleDeleteRow(table.selected);
-              confirm.onFalse();
-            }}
-          >
-            Hapus
-          </Button>
-        }
-      />
+                    <TableNoData notFound={notFound} />
+                  </TableBody>
+                </Table>
+              </Scrollbar>
+            </TableContainer>
+
+            <TablePaginationCustom
+              count={dataFiltered.length}
+              page={table.page}
+              rowsPerPage={table.rowsPerPage}
+              onPageChange={table.onChangePage}
+              onRowsPerPageChange={table.onChangeRowsPerPage}
+              dense={table.dense}
+              onChangeDense={table.onChangeDense}
+            />
+          </Card>
+        </Container>
+
+        <ConfirmDialog
+          open={confirm.value}
+          onClose={confirm.onFalse}
+          title="Delete"
+          content={
+            <div>
+              Apa kamu yakin hapus <strong>{table.selected.length}</strong> User?
+            </div>
+          }
+          action={
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                handleDeleteRow(table.selected);
+                confirm.onFalse();
+              }}
+            >
+              Hapus
+            </Button>
+          }
+        />
+      </Box>
     </>
   );
 }

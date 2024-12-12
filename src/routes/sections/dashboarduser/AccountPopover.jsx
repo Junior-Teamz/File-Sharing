@@ -8,18 +8,23 @@ import Divider from '@mui/material/Divider';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import Button from '@mui/material/Button';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 // hooks
-import { useMockedUser } from 'src/hooks/use-mocked-user';
-import { AuthContext } from 'src/auth/context/jwt/auth-context'; // Import AuthContext
+import { AuthContext } from 'src/auth/context/jwt/auth-context'; 
 // auth
 import { useAuthContext } from 'src/auth/hooks';
 // components
 import { varHover } from 'src/components/animate';
 import { useSnackbar } from 'src/components/snackbar';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { useState } from 'react';
 
 // ----------------------------------------------------------------------
 
@@ -35,7 +40,7 @@ const OPTIONS = [
 export default function AccountPopover() {
   const router = useRouter();
 
-  const { user } = useAuthContext(AuthContext); // Mengambil data pengguna dari AuthContext
+  const { user } = useAuthContext(AuthContext);
 
   const { logout } = useAuthContext();
 
@@ -43,16 +48,27 @@ export default function AccountPopover() {
 
   const popover = usePopover();
 
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const handleLogoutClick = () => {
+    setOpenDialog(true); 
+    popover.onClose();
+  };
+
   const handleLogout = async () => {
     try {
       await logout();
-      popover.onClose();
+      setOpenDialog(false); 
       router.replace('/');
       enqueueSnackbar('Logout Berhasil!', { variant: 'success' });
     } catch (error) {
-      console.error(error);
-      enqueueSnackbar('Logout error!', { variant: 'error' });
+      enqueueSnackbar('Gagal log out!', { variant: 'error' });
+      setOpenDialog(false); 
     }
+  };
+
+  const handleCancel = () => {
+    setOpenDialog(false); 
   };
 
   const handleClickItem = (path) => {
@@ -79,7 +95,7 @@ export default function AccountPopover() {
         }}
       >
         <Avatar
-          src={user?.photoURL}
+          src={user?.photo_profile_url}
           alt={user?.displayName}
           sx={{
             width: 36,
@@ -113,12 +129,28 @@ export default function AccountPopover() {
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <MenuItem
-          onClick={handleLogout}
+          onClick={handleLogoutClick} 
           sx={{ m: 1, fontWeight: 'fontWeightBold', color: 'error.main' }}
         >
           Logout
         </MenuItem>
       </CustomPopover>
+
+      {/* Logout confirmation dialog */}
+      <Dialog open={openDialog} onClose={handleCancel}>
+        <DialogTitle>Konfirmasi Logout</DialogTitle>
+        <DialogContent>
+          <Typography>Apakah Anda yakin ingin keluar?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel} color="primary">
+            Batal
+          </Button>
+          <Button onClick={handleLogout} color="error">
+            Keluar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
