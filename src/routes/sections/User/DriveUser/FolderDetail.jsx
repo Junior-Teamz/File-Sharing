@@ -61,7 +61,7 @@ export default function FolderDetail({
     modifiedAt,
     email,
     user,
-    folder_id,
+    id,
     instance,
     created_at,
     tags: initialTags = [],
@@ -128,7 +128,7 @@ export default function FolderDetail({
       if (newTagIds.length > 0) {
         for (const tagId of newTagIds) {
           await addTagFolder.mutateAsync({
-            folder_id: folder_id,
+            id: id,
             tag_id: tagId,
           });
         }
@@ -151,7 +151,7 @@ export default function FolderDetail({
 
   const handleDeleteFolder = async () => {
     try {
-      await deleteFolder({ folder_id: folderIdToDelete }); 
+      await deleteFolder({ id: folderIdToDelete }); 
       enqueueSnackbar('Folder berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
@@ -169,7 +169,7 @@ export default function FolderDetail({
     }
 
     try {
-      await removeTagFolder({ folder_id: folder_id, tag_id: tagId }); // Updated to use folder_id
+      await removeTagFolder({ id: id, tag_id: tagId }); // Updated to use id
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
       enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
       useClient.invalidateQueries({ queryKey: ['folder.user'] });
@@ -180,7 +180,7 @@ export default function FolderDetail({
   };
 
   const handleCopyLink = () => {
-    const folderUrl = folder_id; // Ensure this is the correct property for URL
+    const folderUrl = id; // Ensure this is the correct property for URL
 
    
 
@@ -203,7 +203,7 @@ export default function FolderDetail({
   }, [is_favorite]);
 
   const handleFavoriteToggle = useCallback(async () => {
-    if (!folder_id) {
+    if (!id) {
       enqueueSnackbar('Folder ID is required to toggle favorite status!', { variant: 'error' });
       return;
     }
@@ -212,11 +212,11 @@ export default function FolderDetail({
 
     try {
       if (favorite.value) {
-        await removeFavorite({ folder_id }); 
+        await removeFavorite({ id }); 
         enqueueSnackbar('Folder dihapus dari favorit!', { variant: 'success' });
         useClient.invalidateQueries({ queryKey: ['folder.user'] });
       } else {
-        await addFavorite({ folder_id });
+        await addFavorite({ id });
         enqueueSnackbar('Folder ditambahkan ke favorit!', { variant: 'success' });
         useClient.invalidateQueries({ queryKey: ['folder.user'] });
       }
@@ -228,7 +228,7 @@ export default function FolderDetail({
     } finally {
       setIsLoading(false);
     }
-  }, [favorite.value, folder_id, addFavorite, removeFavorite, enqueueSnackbar]);
+  }, [favorite.value, id, addFavorite, removeFavorite, enqueueSnackbar]);
 
   const renderTags = (
     <Stack spacing={1.5}>
@@ -466,7 +466,7 @@ export default function FolderDetail({
 
           <FileManagerShareDialogFolder
             open={share.value}
-            folderId={folder_id}
+            folderId={id}
             shared={shared_with}
             inviteEmail={inviteEmail}
             onChangeInvite={handleChangeInvite}

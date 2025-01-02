@@ -192,7 +192,7 @@ export default function OverviewAppView() {
   };
 
   const handleSelectAll = (event) => {
-    setSelected(event.target.checked ? files.map((file) => file.folder_id) : []);
+    setSelected(event.target.checked ? files.map((file) => file.id) : []);
   };
 
   const handleSelectOne = (event, folderId) => {
@@ -253,7 +253,7 @@ export default function OverviewAppView() {
             />
           </Grid>
 
-          {data.folders?.length === 0 ? (
+          {data.subfolders?.length === 0 ? (
             <>
               <EmptyContent filled title="Folder Kosong" sx={{ py: 10 }} />
             </>
@@ -281,7 +281,7 @@ export default function OverviewAppView() {
                         <FormControl fullWidth margin="dense">
                           <RHFAutocomplete
                             name="tags"
-                            label="Tags"
+                            label="Tags*"
                             multiple
                             options={tagsData}
                             getOptionLabel={(option) => option.name}
@@ -371,7 +371,7 @@ export default function OverviewAppView() {
                                         handleEditDialogOpen(
                                           selected[0],
                                           data?.folders.find(
-                                            (folder) => folder.folder_id === selected[0]
+                                            (folder) => folder.id === selected[0]
                                           )?.name
                                         )
                                       }
@@ -404,15 +404,15 @@ export default function OverviewAppView() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {data?.folders?.map((folder, idx) => (
+                    {data?.subfolders?.map((folder, idx) => (
                       <TableRow
-                        key={folder.folder_id}
-                        selected={selected.indexOf(folder.folder_id) !== -1}
+                        key={folder.id}
+                        selected={selected.indexOf(folder.id) !== -1}
                       >
                         <TableCell padding="checkbox">
                           <Checkbox
-                            checked={selected.includes(folder.folder_id)}
-                            onChange={(event) => handleSelectOne(event, folder.folder_id)}
+                            checked={selected.includes(folder.id)}
+                            onChange={(event) => handleSelectOne(event, folder.id)}
                             color="primary"
                           />
                         </TableCell>
@@ -421,7 +421,7 @@ export default function OverviewAppView() {
                           <img src={imageFolder} alt="folder" />
 
                           <Link
-                            to={`file-manager/info/${folder.folder_id}`}
+                            to={`file-manager/info/${folder.id}`}
                             style={{ textDecoration: 'none', color: 'inherit' }}
                           >
                             {folder.name}

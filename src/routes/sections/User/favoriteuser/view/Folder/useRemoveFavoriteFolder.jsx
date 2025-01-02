@@ -4,8 +4,8 @@ import axiosInstance, { endpoints } from 'src/utils/axios';
 export const useRemoveFavoriteFolder = () => {
   return useMutation({
     mutationKey: ['remove.favorite.folder'],
-    mutationFn: async ({ folder_id }) => {
-      const response = await axiosInstance.delete(`${endpoints.folders.deleteFavoritUser}/${folder_id}`);
+    mutationFn: async ({ id }) => {
+      const response = await axiosInstance.delete(`${endpoints.folders.deleteFavoritUser}/${id}`);
       return response;
     },
   });

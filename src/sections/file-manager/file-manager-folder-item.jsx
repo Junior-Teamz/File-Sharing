@@ -167,7 +167,7 @@ export default function FileManagerFolderItem({
         <Link
           style={{ textDecoration: 'none', color: 'inherit' }}
           key={folder.id}
-          to={`info/${folder.folder_id}`}
+          to={`info/${folder.id}`}
         >
           <Box onMouseEnter={checkbox.onTrue} onMouseLeave={checkbox.onFalse}>
             {renderIcon}

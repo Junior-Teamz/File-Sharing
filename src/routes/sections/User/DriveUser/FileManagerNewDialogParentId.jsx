@@ -80,7 +80,7 @@ export default function FileManagerNewDialogParent({
     }
 
     const formData = new FormData();
-    formData.append('folder_id', id);
+    formData.append('id', id);
 
     files.forEach((file) => {
       formData.append('file[]', file);

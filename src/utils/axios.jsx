@@ -126,7 +126,7 @@ export const endpoints = {
     UserShare: '/api/getSharedFolderAndFile',
   },
   SearchUser: {
-    User: '/api/searchUser',
+    User: '/api/search/user',
   },
   Permissions: {
     PermissionsFile: '/api/permission/file/grantPermission',
@@ -166,7 +166,7 @@ export const endpoints = {
   },
 
   SearchUserAdmin: {
-    User: '/api/admin/searchUser',
+    User: '/api/search/user',
   },
 
   ChartFile: {
@@ -215,7 +215,7 @@ export const endpoints = {
     getFavorit: '/api/admin/file/favorite',
     addFavorit: '/api/admin/file/addToFavorite',
     deleteFavorit: '/api/admin/file/deleteFavorite',
-    generateLink: '/api/admin/file/generateShareLink',
+    generateLink: '/api/admin/file/generate_share_link',
   },
   permission: {
     getPermissionFolder: '/api/admin/permission/folder/grantPermission',
@@ -238,7 +238,7 @@ export const endpoints = {
     getFavorit: '/api/folders/favorite',
     addFavorit: '/api/folders/addToFavorite',
     deleteFavorit: '/api/folders/deleteFavorite',
-    generateLink: '/api/folders/generateShareLink',
+    generateLink: '/api/folders/generate_share_link',
   },
   users: {
     list: '/api/admin/users/list',

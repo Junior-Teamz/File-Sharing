@@ -95,7 +95,7 @@ export default function FileManagerNewFolderDialog({
             <FormControl fullWidth margin="dense">
               <RHFAutocomplete
                 name="tags"
-                label="Tags"
+                label="Tags *"
                 multiple
                 options={tagsData}
                 getOptionLabel={(option) => option.name}

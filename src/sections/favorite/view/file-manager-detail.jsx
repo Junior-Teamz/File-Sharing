@@ -125,7 +125,7 @@ export const FIleManagerDetailFavorite = () => {
   // // Show folder ID when InfoIcon is clicked
   // const handleInfoClick = () => {
   //   if (data && data.folder_info) {
-  //     enqueueSnackbar(`Folder ID: ${data.folder_info.folder_id}`, { variant: 'info' });
+  //     enqueueSnackbar(`Folder ID: ${data.folder_info.id}`, { variant: 'info' });
   //   } else {
   //     enqueueSnackbar('Folder data is not available.', { variant: 'warning' });
   //   }
@@ -310,7 +310,7 @@ export const FIleManagerDetailFavorite = () => {
         ? // Render untuk data folders
           folderss.folders.map((folder) => (
             <FolderDetail
-              key={folder.folder_id}
+              key={folder.id}
               item={{ ...folder, type: 'folder' }}
               favorited={favorite.value}
               onFavorite={favorite.onToggle}
@@ -327,7 +327,7 @@ export const FIleManagerDetailFavorite = () => {
         ? // Render untuk data subfolders
           data.subfolders.map((subfolder) => (
             <FolderDetail
-              key={subfolder.folder_id}
+              key={subfolder.id}
               item={{ ...subfolder, type: 'subfolder' }}
               favorited={favorite.value}
               onFavorite={favorite.onToggle}

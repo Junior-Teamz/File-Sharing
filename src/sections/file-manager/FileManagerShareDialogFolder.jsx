@@ -91,7 +91,7 @@ export default function FileManagerShareDialogFolder({
         {
           user_id: selectedUser.id,
           permissions: permissionsOptions[permissions],
-          folder_id: folderId,
+          id: folderId,
         },
         {
           onSuccess: () => {

@@ -122,7 +122,7 @@ export const FileManagerDetailUsersShare = () => {
   // Show folder ID when InfoIcon is clicked
   const handleInfoClick = () => {
     if (data && data.folder_info) {
-      enqueueSnackbar(`Folder ID: ${data.folder_info.folder_id}`, { variant: 'info' });
+      enqueueSnackbar(`Folder ID: ${data.folder_info.id}`, { variant: 'info' });
     } else {
       enqueueSnackbar('Folder data is not available.', { variant: 'warning' });
     }

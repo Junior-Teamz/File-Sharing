@@ -73,9 +73,9 @@ export default function FileManagerFolderItem({
   }, [folder.is_favorite]);
 
   const handleFavoriteToggle = useCallback(async () => {
-    const folder_id = folder.folder_id; // Ensure folder_id comes from folder object
+    const id = folder.id; // Ensure id comes from folder object
 
-    if (!folder_id) {
+    if (!id) {
       enqueueSnackbar('ID Folder diperlukan untuk mengubah status favorit!', { variant: 'error' });
       return;
     }
@@ -84,10 +84,10 @@ export default function FileManagerFolderItem({
 
     try {
       if (favorite.value) {
-        await removeFavorite({ folder_id });
+        await removeFavorite({ id });
         enqueueSnackbar('Folder dihapus dari favorit!', { variant: 'success' });
       } else {
-        await addFavorite({ folder_id });
+        await addFavorite({ id });
         enqueueSnackbar('Folder ditambahkan ke favorit!', { variant: 'success' });
       }
       favorite.onToggle();
@@ -96,7 +96,7 @@ export default function FileManagerFolderItem({
     } finally {
       setIsLoading(false);
     }
-  }, [favorite.value, folder.folder_id, addFavorite, removeFavorite, enqueueSnackbar]);
+  }, [favorite.value, folder.id, addFavorite, removeFavorite, enqueueSnackbar]);
 
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value);

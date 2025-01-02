@@ -18,6 +18,7 @@ const AboutPage = lazy(() => import('src/pages/about-us'));
 // const ContactPage = lazy(() => import('src/pages/contact-us'));
 const Informasi = lazy(() => import('src/sections/home/home-informasi'));
 const NewsId = lazy(() => import('src/sections/home/NewsId'));
+const ShareFolderFile = lazy(() => import('src/sections/home/ShareFolderFile'));
 // const PricingPage = lazy(() => import('src/pages/pricing'));
 // const PaymentPage = lazy(() => import('src/pages/payment'));
 // const ComingSoonPage = lazy(() => import('src/pages/coming-soon'));
@@ -45,6 +46,7 @@ export const mainRoutes = [
       { path: 'about-us', element: <AboutPage /> },
       { path: 'berita', element: <Informasi /> },
       { path: 'berita/:slug', element: <NewsId /> },
+      { path: 'share/:id', element: <ShareFolderFile /> },
       // { path: 'contact-us', element: <ContactPage /> },
       { path: 'faqs', element: <FaqsPage /> },
     ],

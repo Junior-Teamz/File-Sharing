@@ -47,19 +47,18 @@ export default function FolderDetail({
   onClose,
   onDelete,
   ...other
-}) { 
+}) {
   const {
     name,
     total_size,
     image_url,
-    id,
     type,
     shared,
     shared_with = [],
     modifiedAt,
     email,
     user,
-    folder_id,
+    id,
     instance,
     tags: initialTags = [],
     updated_at,
@@ -123,7 +122,7 @@ export default function FolderDetail({
       if (newTagIds.length > 0) {
         for (const tagId of newTagIds) {
           await addTagFolder.mutateAsync({
-            folder_id: folder_id,
+            id: id,
             tag_id: tagId,
           });
         }
@@ -146,7 +145,7 @@ export default function FolderDetail({
 
   const handleDeleteFolder = async () => {
     try {
-      await deleteFolder(item.folder_id);
+      await deleteFolder(item.id);
       enqueueSnackbar('Folder berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
@@ -164,7 +163,7 @@ export default function FolderDetail({
     }
 
     try {
-      await removeTagFolder({ folder_id: folder_id, tag_id: tagId })
+      await removeTagFolder({ id: id, tag_id: tagId });
       setTags((prevTags) => prevTags.filter((id) => id !== tagId));
       enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
       useClient.invalidateQueries({ queryKey: ['folder.admin'] });
@@ -175,7 +174,7 @@ export default function FolderDetail({
   };
 
   const handleCopyLink = () => {
-    const folderUrl = folder_id; 
+    const folderUrl = id;
 
     if (!folderUrl) {
       enqueueSnackbar('No URL to copy.', { variant: 'warning' });
@@ -196,7 +195,7 @@ export default function FolderDetail({
   }, [is_favorite]);
 
   const handleFavoriteToggle = useCallback(async () => {
-    if (!folder_id) {
+    if (!id) {
       enqueueSnackbar('Folder ID is required to toggle favorite status!', { variant: 'error' });
       return;
     }
@@ -205,11 +204,11 @@ export default function FolderDetail({
 
     try {
       if (favorite.value) {
-        await removeFavorite({ folder_id });
+        await removeFavorite({ id });
         enqueueSnackbar('Folder dihapus dari favorit!', { variant: 'success' });
         useClient.invalidateQueries({ queryKey: ['folder.admin'] });
       } else {
-        await addFavorite({ folder_id });
+        await addFavorite({ id });
         enqueueSnackbar('Folder ditambahkan ke favorit!', { variant: 'success' });
         useClient.invalidateQueries({ queryKey: ['folder.admin'] });
       }
@@ -221,7 +220,7 @@ export default function FolderDetail({
     } finally {
       setIsLoading(false);
     }
-  }, [favorite.value, folder_id, addFavorite, removeFavorite, enqueueSnackbar]);
+  }, [favorite.value, id, addFavorite, removeFavorite, enqueueSnackbar]);
 
   const renderTags = (
     <Stack spacing={1.5}>
@@ -238,9 +237,9 @@ export default function FolderDetail({
         <Autocomplete
           multiple
           options={availableTags}
-          getOptionLabel={(option) => option.name} 
-          value={availableTags.filter((tag) => tags.includes(tag.id))} 
-          onChange={handleChangeTags} 
+          getOptionLabel={(option) => option.name}
+          value={availableTags.filter((tag) => tags.includes(tag.id))}
+          onChange={handleChangeTags}
           renderOption={(props, option) => (
             <li {...props} key={option.id}>
               {option.name}
@@ -453,7 +452,7 @@ export default function FolderDetail({
 
           <FileManagerShareDialogFolder
             open={share.value}
-            folderId={folder_id}
+            folderId={id}
             shared={shared_with}
             inviteEmail={inviteEmail}
             onChangeInvite={handleChangeInvite}
