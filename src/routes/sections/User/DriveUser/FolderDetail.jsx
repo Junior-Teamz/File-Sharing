@@ -54,7 +54,6 @@ export default function FolderDetail({
     name,
     total_size,
     image_url,
-    id,
     type,
     shared,
     shared_with = [],
