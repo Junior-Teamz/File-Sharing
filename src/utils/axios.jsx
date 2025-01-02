@@ -89,7 +89,7 @@ export const fetcher = async (args) => {
 export const endpoints = {
   //auth login, log out, info
   auth: {
-    me: '/api/index', // for info
+    me: '/api/user/index', // for info
     login: '/api/login', // for login
     logout: '/api/logout', // for log out
     refreshToken: '/api/refreshToken',
@@ -100,12 +100,12 @@ export const endpoints = {
 
   //get data di landing page
   Legalbasis: {
-    getLegal: '/api/legal_basis/getAllLegalBasis',
+    getLegal: '/api/public/legal_basis/all',
   },
 
   News: {
-    getNews: '/api/news/getAllNews',
-    getNewsSlug: '/api/news/detail/slug',
+    getNews: '/api/public/news/all',
+    getNewsSlug: '/api/public/news/detail/by_slug',
   },
 
   ProfileUser:{
@@ -155,6 +155,7 @@ export const endpoints = {
     addTag: '/api/folder/addTag',
     removeTag: '/api/folder/removeTag',
   },
+
   //admin
   ChartFolder: {
     getChartFolder: '/api/admin/folder/storageSizeUsage',
@@ -177,7 +178,7 @@ export const endpoints = {
   },
 
   ChartInstansi: {
-    getUserInstansi: '/api/admin/instance/getInstanceUsageStatistic',
+    getUserInstansi: '/api/admin/instances/usage',
     getChartInstansi: '/api/admin/instance/countAll',
   },
 
@@ -221,23 +222,23 @@ export const endpoints = {
     getPermissionFile: '/api/admin/permission/file/grantPermission',
   },
   tag: {
-    create: '/api/admin/tag/create',
-    index: '/api/admin/tag/index',
-    delete: '/api/admin/tag/delete',
-    update: '/api/admin/tag/update',
+    create: '/api/superadmin/tags/create',
+    index: '/api/superadmin/tags/index',
+    delete: '/api/superadmin/tags/delete',
+    update: '/api/superadmin/tags/update',
   },
   folder: {
-    detail: '/api/admin/folder/info/',
-    list: '/api/admin/folder', // folder list
-    create: '/api/admin/folder/create', // create folder
-    delete: '/api/admin/folder/delete', // delete folder
-    edit: '/api/admin/folder/update', // edit folder
-    addTag: '/api/admin/folder/addTag',
-    removeTag: '/api/admin/folder/removeTag',
-    getFavorit: '/api/admin/folder/favorite',
-    addFavorit: '/api/admin/folder/addToFavorite',
-    deleteFavorit: '/api/admin/folder/deleteFavorite',
-    generateLink: '/api/admin/folder/generateShareLink',
+    detail: '/api/folders/info/',
+    list: '/api/folders/all', // folders list
+    create: '/api/folders/create', // create folders
+    delete: '/api/folders/delete', // delete folders
+    edit: '/api/folders/update', // edit folders
+    addTag: '/api/folders/addTag',
+    removeTag: '/api/folders/removeTag',
+    getFavorit: '/api/folders/favorite',
+    addFavorit: '/api/folders/addToFavorite',
+    deleteFavorit: '/api/folders/deleteFavorite',
+    generateLink: '/api/folders/generateShareLink',
   },
   users: {
     list: '/api/admin/users/list',

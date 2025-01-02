@@ -253,7 +253,7 @@ export default function OverviewAppView() {
             />
           </Grid>
 
-          {data.folders.length === 0 ? (
+          {data.folders?.length === 0 ? (
             <>
               <EmptyContent filled title="Folder Kosong" sx={{ py: 10 }} />
             </>
