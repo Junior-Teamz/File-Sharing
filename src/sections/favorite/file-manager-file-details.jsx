@@ -306,8 +306,8 @@ export default function FIleManagerFileDetails({
           multiple
           options={availableTags}
           getOptionLabel={(option) => option.name}
-          value={availableTags.filter((tag) => tags.includes(tag.id))} 
-          onChange={handleChangeTags} 
+          value={availableTags.filter((tag) => tags.includes(tag.id))}
+          onChange={handleChangeTags}
           renderOption={(props, option) => (
             <li {...props} key={option.id}>
               {option.name}
@@ -582,12 +582,9 @@ export default function FIleManagerFileDetails({
               </audio>
             </Box>
           ) : (
-            <span>
-              Tidak ada preview
-              <Button variant="contained" onClick={openConfirmDialogg} sx={{ mt: 2 }}>
-                Download File
-              </Button>
-            </span>
+            <Button variant="contained" onClick={openConfirmDialogg} sx={{ mt: 2 }}>
+              Download File
+            </Button>
           )}
 
           {isEditing ? (
@@ -597,7 +594,7 @@ export default function FIleManagerFileDetails({
               onBlur={handleRename}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  handleRename(); 
+                  handleRename();
                 }
               }}
               size="small"

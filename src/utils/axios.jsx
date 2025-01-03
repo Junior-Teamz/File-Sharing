@@ -110,7 +110,7 @@ export const endpoints = {
 
   ProfileUser:{
     update:'/api/user/update',
-    updatePassword:'/api/user/updatePassword',
+    updatePassword:'/api/user/update_password',
   },
 
   //user
@@ -123,14 +123,14 @@ export const endpoints = {
   },
 
   GetFileFolderShare: {
-    UserShare: '/api/getSharedFolderAndFile',
+    UserShare: '/api//get_shared_folder_and_file',
   },
   SearchUser: {
     User: '/api/search/user',
   },
   Permissions: {
-    PermissionsFile: '/api/permission/file/grantPermission',
-    getPermissionFolder: '/api/permission/folder/grantPermission',
+    PermissionsFile: '/api/permissions/files/grantPermission',
+    getPermissionFolder: '/api/permissions/folders/grantPermission',
   },
   file: {
     upload: '/api/file/upload',
@@ -144,7 +144,7 @@ export const endpoints = {
     change: '/api/file/change_name',
   },
   folders: {
-    detail: '/api/folder/info/',
+    detail: '/api/folders/detail/',
     getFavoritUser: '/api/folder/favorite',
     addFavoritUser: '/api/folder/addToFavorite',
     deleteFavoritUser: '/api/folder/deleteFavorite',
@@ -162,7 +162,7 @@ export const endpoints = {
   },
 
   FolderFileShare: {
-    getShareFolderFile: '/api/admin/getSharedFolderAndFile',
+    getShareFolderFile: '/api/get_shared_folder_and_file',
   },
 
   SearchUserAdmin: {
@@ -192,10 +192,10 @@ export const endpoints = {
   },
 
   Legal: {
-    ListLegal: '/api/legal_basis/getAllLegalBasis',
-    SaveLegal: '/api/admin/legal_basis/save',
-    UpdateLegal: '/api/admin/legal_basis/update',
-    DeleteLegal: '/api/admin/legal_basis/delete',
+    ListLegal: '/api/public/legal_basis/all',
+    SaveLegal: '/api/superadmin/legal_basis/save',
+    UpdateLegal: '/api/superadmin/legal_basis/update',
+    DeleteLegal: '/api/superadmin/legal_basis/delete',
   },
 
   NewsTag: {
@@ -206,20 +206,21 @@ export const endpoints = {
   },
 
   files: {
-    upload: '/api/admin/file/upload',
-    delete: '/api/admin/file/delete',
-    addTag: '/api/admin/file/addTag',
-    removeTag: '/api/admin/file/removeTag',
-    download: '/api/admin/file/download',
-    change: '/api/admin/file/change_name',
-    getFavorit: '/api/admin/file/favorite',
-    addFavorit: '/api/admin/file/addToFavorite',
-    deleteFavorit: '/api/admin/file/deleteFavorite',
-    generateLink: '/api/admin/file/generate_share_link',
+    upload: '/api/files/upload',
+    delete: '/api/files/tag/remove',
+    addTag: '/api/files/tag/add',
+    removeTag: '/api/files/removeTag',
+    download: '/api/files/download',
+    change: '/api/files/change_name',
+    movefile: '/api/files/move',
+    getFavorit: '/api/files/favorite/all',
+    addFavorit: '/api/files/favorite/add',
+    deleteFavorit: '/api/files/favorite/delete',
+    generateLink: '/api/files/generate_share_link',
   },
   permission: {
-    getPermissionFolder: '/api/admin/permission/folder/grantPermission',
-    getPermissionFile: '/api/admin/permission/file/grantPermission',
+    getPermissionFolder: '/api/permissions/folders/grant_permission',
+    getPermissionFile: '/api/permissions/files/grant_permission',
   },
   tag: {
     create: '/api/superadmin/tags/create',
@@ -228,38 +229,39 @@ export const endpoints = {
     update: '/api/superadmin/tags/update',
   },
   folder: {
-    detail: '/api/folders/info/',
+    detail: '/api/folders/detail/',
     list: '/api/folders/all', // folders list
     create: '/api/folders/create', // create folders
     delete: '/api/folders/delete', // delete folders
     edit: '/api/folders/update', // edit folders
     addTag: '/api/folders/addTag',
     removeTag: '/api/folders/removeTag',
-    getFavorit: '/api/folders/favorite',
-    addFavorit: '/api/folders/addToFavorite',
-    deleteFavorit: '/api/folders/deleteFavorite',
+    getFavorit: '/api/folders/favorite/all',
+    addFavorit: '/api/folders/favorite/add',
+    deleteFavorit: '/api/folders/favorite/delete',
     generateLink: '/api/folders/generate_share_link',
   },
   users: {
-    list: '/api/admin/users/list',
-    create: '/api/admin/users/create_user',
-    update: '/api/admin/users/update_user',
-    delete: '/api/admin/users/delete_user',
-    password: '/api/admin/users/update_user_password',
-    getTotalUser: '/api/admin/users/countTotalUser',
+    list: '/api/superadmin/users/list',
+    create: '/api/superadmin/users/create',
+    update: '/api/superadmin/users/update',
+    delete: '/api/superadmin/users/delete',
+    password: '/api/superadmin/users/password',
+    getTotalUser: '/api/superadmin/users/countTotalUser',
+    permissionAdmin: '/api/superadmin/users/admin_permissions',
   },
   instance: {
-    list: '/api/admin/instance/index',
-    create: '/api/admin/instance/create',
-    update: '/api/admin/instance/update',
-    delete: '/api/admin/instance/delete',
+    list: '/api/superadmin/instances/index',
+    create: '/api/superadmin/instances/create',
+    update: '/api/superadmin/instances/update',
+    delete: '/api/superadmin/instances/delete',
   },
   AdminNews: {
-    list: '/api/admin/news/getAllNews',
-    detail: '/api/admin/news/getNewsDetail/',
-    create: '/api/admin/news/create',
-    Update: '/api/admin/news/update',
-    UpdateStatus: '/api/admin/news/update/changeStatus',
-    delete: '/api/admin/news/delete',
+    list: '/api/superadmin/news/all',
+    detail: '/api/superadmin/news/getNewsDetail/',
+    create: '/api/superadmin/news/create',
+    Update: '/api/superadmin/news/update',
+    UpdateStatus: '/api/superadmin/news/update/changeStatus',
+    delete: '/api/superadmin/news/delete',
   },
 };

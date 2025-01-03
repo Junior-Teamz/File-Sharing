@@ -223,12 +223,12 @@ export const FIleManagerDetail = () => {
             {data.files.length > 0 && (
               <Stack spacing={2} sx={{ mt: 5 }}>
                 <Typography sx={{ mb: 2, mt: 5 }}>File</Typography>
-                {data.files.map((file) => (
+                {data.files.map((files) => (
                   <FileRecentItem
-                    key={file.id}
-                    file={file}
+                    key={files.id}
+                    file={files}
                     onRefetch={refetch}
-                    onDelete={() => console.info('DELETE', file.id)}
+                    onDelete={() => console.info('DELETE', files.id)}
                   />
                 ))}
               </Stack>

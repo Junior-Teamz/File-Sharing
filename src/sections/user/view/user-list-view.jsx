@@ -42,7 +42,7 @@ const TABLE_HEAD = [
   { id: 'name', label: 'Nama', width: 180 },
   { id: 'email', label: 'Email', width: 240 },
   { id: 'instance', label: 'Instansi', width: 180 },
-  { id: 'role', label: 'Role', width: 180 },
+  { id: 'roles', label: 'Role', width: 180 },
   { id: 'action', label: 'Aksi', width: 120 },
 ];
 
@@ -50,12 +50,12 @@ const DEBOUNCE_DELAY = 1500;
 
 const defaultFilters = {
   name: '',
-  role: [],
+  roles: [], // Mengganti role menjadi roles
   instances: [],
 };
 
 // Define allowed roles explicitly
-const allowedRoles = ['user', 'admin'];
+const allowedRoles = ['user', 'admin', 'superadmin'];
 
 export default function UserListView() {
   const theme = useTheme();
@@ -129,10 +129,10 @@ export default function UserListView() {
     refetch();
   }, [filters]);
 
-  const handleFilterRole = (selectedRoles) => {
+  const handleFilterRoles = (selectedRoles) => {
     setFilters((prev) => ({
       ...prev,
-      role: selectedRoles,
+      roles: selectedRoles, // Mengganti role menjadi roles
     }));
   };
 
@@ -300,7 +300,7 @@ export default function UserListView() {
 }
 
 function applyFilter({ inputData, comparator, filters = {} }) {
-  const { search, role, instances } = filters;
+  const { search, roles, instances } = filters; // Mengganti role menjadi roles
 
   if (!Array.isArray(inputData)) {
     return [];
@@ -325,11 +325,12 @@ function applyFilter({ inputData, comparator, filters = {} }) {
     );
   }
 
-  if (role.length > 0) {
+  if (roles.length > 0) {
     filteredData = filteredData.filter((user) => {
-      const userRole = typeof user.role === 'string' ? user.role : String(user.role);
-
-      return role.some((selectedRole) => selectedRole.toLowerCase() === userRole.toLowerCase());
+      const userRoles = Array.isArray(user.roles) ? user.roles : [user.roles]; // Memastikan roles adalah array
+      return roles.some((selectedRole) =>
+        userRoles.some((role) => role.toLowerCase() === selectedRole.toLowerCase())
+      );
     });
   }
 

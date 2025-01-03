@@ -63,7 +63,7 @@ export default function FileManagerNewDialogParent({
 
   const { mutate: uploadFiles, isPending: loadingUpload } = useMutationUploadFilesId({
     onSuccess: () => {
-      enqueueSnackbar('Files Uploaded Successfully');
+      enqueueSnackbar('File Berhasil Di Upload');
       handleRemoveAllFiles();
       onClose();
       refetch?.();
@@ -75,7 +75,7 @@ export default function FileManagerNewDialogParent({
 
   const handleUpload = () => {
     if (!files.length) {
-      enqueueSnackbar('Please select files to upload', { variant: 'warning' });
+      enqueueSnackbar('Silakan pilih file yang akan diunggah', { variant: 'warning' });
       return;
     }
 

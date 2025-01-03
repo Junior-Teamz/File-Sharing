@@ -21,7 +21,7 @@ import UserQuickEditForm from './user-quick-edit-form';
 // ----------------------------------------------------------------------
 
 function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, refetch }) {
-  const { name, avatarUrl, instances = [], role, email } = row;
+  const { name, photo_profile_url, instances = [], roles, email } = row;
 
   const confirm = useBoolean();
   const quickEdit = useBoolean();
@@ -37,7 +37,7 @@ function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, refe
         </TableCell>
 
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar alt={name} src={avatarUrl} sx={{ mr: 2 }} />
+          <Avatar alt={name} src={photo_profile_url} sx={{ mr: 2 }} />
           <ListItemText
             primary={name}
             primaryTypographyProps={{ typography: 'body2' }}
@@ -54,11 +54,11 @@ function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, refe
                   {instance.name}
                 </div>
               ))
-            : 'No Instance'}
+            : 'tidak ada instansi'}
         </TableCell>
 
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          {Array.isArray(role) ? role.join(', ') : role}
+          {Array.isArray(roles) ? roles.join(', ') : roles}
         </TableCell>
 
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
@@ -92,7 +92,7 @@ function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, refe
           sx={{ color: 'error.main' }}
         >
           <Iconify icon="solar:trash-bin-trash-bold" />
-          Delete
+          Hapus
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -109,7 +109,7 @@ function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, refe
         open={confirm.value}
         onClose={confirm.onFalse}
         title="Delete"
-        content="Are you sure you want to delete this item?"
+        content="Apakah Anda yakin ingin menghapus pengguna ini?"
         action={
           <Button variant="contained" color="error" onClick={onDeleteRow}>
             Hapus
@@ -134,7 +134,7 @@ UserTableRow.propTypes = {
         address: PropTypes.string,
       })
     ),
-    role: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]).isRequired,
+    roles: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]).isRequired,
     email: PropTypes.string.isRequired,
   }).isRequired,
   selected: PropTypes.bool.isRequired,

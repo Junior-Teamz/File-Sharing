@@ -136,7 +136,7 @@ export default function LegalCreateForm() {
                 onClick={() => reset()}
                 sx={{ minWidth: '150px' }}
               >
-                Reset form
+                Riset form
               </Button>
             </Stack>
           </Card>

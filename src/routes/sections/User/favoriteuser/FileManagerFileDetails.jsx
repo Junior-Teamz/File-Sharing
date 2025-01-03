@@ -40,7 +40,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
 import EditIcon from '@mui/icons-material/Edit';
 
-
 // ----------------------------------------------------------------------
 
 export default function FIleManagerFileDetails({
@@ -588,22 +587,19 @@ export default function FIleManagerFileDetails({
               </audio>
             </Box>
           ) : (
-            <span>
-              Tidak ada preview
-              <Button variant="contained" onClick={openConfirmDialogg} sx={{ mt: 2 }}>
-                Download File
-              </Button>
-            </span>
+            <Button variant="contained" onClick={openConfirmDialogg} sx={{ mt: 2 }}>
+              Download File
+            </Button>
           )}
 
-{isEditing ? (
+          {isEditing ? (
             <TextField
               value={newFileName}
               onChange={(e) => setNewFileName(e.target.value)}
               onBlur={handleRename}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  handleRename(); 
+                  handleRename();
                 }
               }}
               size="small"

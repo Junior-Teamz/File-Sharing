@@ -561,12 +561,9 @@ export default function FIleManagerFileDetails({
               </audio>
             </Box>
           ) : (
-            <span>
-              Tidak ada preview
-              <Button variant="contained" onClick={openConfirmDialogg} sx={{ mt: 2 }}>
-                Download File
-              </Button>
-            </span>
+            <Button variant="contained" onClick={openConfirmDialogg} sx={{ mt: 2 }}>
+              Download File
+            </Button>
           )}
 
           <Typography variant="subtitle2">{name}</Typography>
