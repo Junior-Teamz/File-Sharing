@@ -123,7 +123,7 @@ export const endpoints = {
   },
 
   GetFileFolderShare: {
-    UserShare: '/api//get_shared_folder_and_file',
+    UserShare: '/api/get_shared_folder_and_file',
   },
   SearchUser: {
     User: '/api/search/user',
@@ -133,27 +133,27 @@ export const endpoints = {
     getPermissionFolder: '/api/permissions/folders/grantPermission',
   },
   file: {
-    upload: '/api/file/upload',
-    delete: '/api/file/delete',
-    getFavoritUser: '/api/file/favorite',
-    addFavoritUser: '/api/file/addToFavorite',
-    deleteFavoritUser: '/api/file/deleteFavorite',
-    addTag: '/api/file/addTag',
-    removeTag: '/api/file/removeTag',
-    download: '/api/file/download',
-    change: '/api/file/change_name',
+    upload: '/api/files/upload',
+    delete: '/api/files/delete',
+    getFavoritUser: '/api/files/favorite',
+    addFavoritUser: '/api/files/addToFavorite',
+    deleteFavoritUser: '/api/files/deleteFavorite',
+    addTag: '/api/files/addTag',
+    removeTag: '/api/files/removeTag',
+    download: '/api/files/download',
+    change: '/api/files/change_name',
   },
   folders: {
     detail: '/api/folders/detail/',
-    getFavoritUser: '/api/folder/favorite',
-    addFavoritUser: '/api/folder/addToFavorite',
-    deleteFavoritUser: '/api/folder/deleteFavorite',
-    list: '/api/folder', // folder list
-    create: '/api/folder/create', // create folder
-    delete: '/api/folder/delete', // delete folder
-    edit: '/api/folder/update', // edit folder
-    addTag: '/api/folder/addTag',
-    removeTag: '/api/folder/removeTag',
+    getFavoritUser: '/api/folders/favorite/all',
+    addFavoritUser: '/api/folders/favorite/add',
+    deleteFavoritUser: '/api/folders/favorite/delete',
+    list: '/api/folders/all', // folders list
+    create: '/api/folders/create', // create folders
+    delete: '/api/folders/delete', // delete folders
+    edit: '/api/folders/tag/update', // edit folders
+    addTag: '/api/folders/tag/add',
+    removeTag: '/api/folders/tag/remove',
   },
 
   //admin
@@ -234,8 +234,8 @@ export const endpoints = {
     create: '/api/folders/create', // create folders
     delete: '/api/folders/delete', // delete folders
     edit: '/api/folders/update', // edit folders
-    addTag: '/api/folders/addTag',
-    removeTag: '/api/folders/removeTag',
+    addTag: '/api/folders/tag/add',
+    removeTag: '/api/folders/tag/remove',
     getFavorit: '/api/folders/favorite/all',
     addFavorit: '/api/folders/favorite/add',
     deleteFavorit: '/api/folders/favorite/delete',

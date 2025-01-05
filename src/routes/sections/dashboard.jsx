@@ -75,7 +75,6 @@ export const dashboardRoutes = [
     children: [
       { element: <IndexPage />, index: true },
       { path: 'analytics', element: <OverviewAnalyticsPage /> },
-
       {
         path: 'favorite',
         children: [

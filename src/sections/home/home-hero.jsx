@@ -23,6 +23,7 @@ import Iconify from 'src/components/iconify';
 import { RouterLink } from 'src/routes/components';
 import { MotionContainer, varFade } from 'src/components/animate';
 import PeopleIcon from '@mui/icons-material/People';
+import LoginIcon from '@mui/icons-material/Login';
 import Grid from '@mui/system/Unstable_Grid/Grid';
 
 // ----------------------------------------------------------------------
@@ -121,6 +122,9 @@ const StyledPolygon = styled('div')(({ opacity = 1, anchor = 'left', theme }) =>
 
 export default function HomeHero() {
   const mdUp = useResponsive('up', 'md');
+  const mdDown = useResponsive('down', 'md');
+  const lgUp = useResponsive('up', 'lg');
+  const smUp = useResponsive('down', 'sm');
 
   const theme = useTheme();
 
@@ -191,7 +195,7 @@ export default function HomeHero() {
 
       <m.div variants={varFade().in}>
         <Typography variant="body2" sx={{ textAlign: 'center' }}>
-        Berbagi file dengan cepat dan praktis, kapan saja!
+          Berbagi file dengan cepat dan praktis, kapan saja!
         </Typography>
       </m.div>
 
@@ -214,7 +218,13 @@ export default function HomeHero() {
       </m.div>
 
       <m.div variants={varFade().in}>
-        <Stack spacing={1.5} direction={{ xs: 'column-reverse', sm: 'row' }} sx={{ mb: 5 }}>
+        <Stack
+          spacing={1.5}
+          direction="row"
+          justifyContent="center"
+          alignItems="center"
+          sx={{ mb: 5 }}
+        >
           <Stack alignItems="center" spacing={2}>
             <Button
               component={RouterLink}
@@ -227,35 +237,19 @@ export default function HomeHero() {
               About Us
             </Button>
 
-            {/* <Link
-              color="inherit"
-              variant="caption"
-              target="_blank"
-              rel="noopener"
-              href={paths.freeUI}
-              sx={{
-                textDecoration: 'underline',
-                display: 'inline-flex',
-                alignItems: 'center',
-              }}
-            >
-              <Iconify icon="eva:external-link-fill" width={16} sx={{ mr: 0.5 }} />
-              Get Free Version
-            </Link> */}
+            {mdDown && (
+              <Button
+                component={RouterLink}
+                href={paths.auth.jwt.login}
+                size="large"
+                variant="contained"
+                color="primary"
+                startIcon={<LoginIcon fontSize="medium" />}
+              >
+                Login
+              </Button>
+            )}
           </Stack>
-
-          {/* <Button
-            color="inherit"
-            size="large"
-            variant="outlined"
-            startIcon={<Iconify icon="eva:external-link-fill" width={24} />}
-            target="_blank"
-            rel="noopener"
-            href={paths.figma}
-            sx={{ borderColor: 'text.primary' }}
-          >
-            Design Preview
-          </Button> */}
         </Stack>
       </m.div>
 
@@ -305,7 +299,7 @@ export default function HomeHero() {
         <Box
           component={m.img}
           src={`/assets/images/home/hero/Logo.png`}
-          sx={{ position: 'absolute', mt:10 }}
+          sx={{ position: 'absolute', mt: 10 }}
         />
         {/* <Box
           component={m.img}

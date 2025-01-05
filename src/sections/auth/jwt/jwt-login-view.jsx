@@ -55,11 +55,10 @@ export default function JwtLoginView() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       const response = await login?.(data.email, data.password);
-      // console.log('Login response:', response);
-
+  
       const userRoles = response?.roles;
       const isSuperadmin = response?.is_superadmin ?? false;
-
+  
       if (userRoles?.includes('admin') || isSuperadmin) {
         router.push('/dashboard');
       } else if (userRoles?.includes('user')) {
@@ -67,24 +66,35 @@ export default function JwtLoginView() {
       } else {
         enqueueSnackbar('Role tidak dikenal!', { variant: 'error' });
       }
-
+  
       enqueueSnackbar('Login Berhasil!', { variant: 'success' });
     } catch (error) {
-      // console.error('Login Error:', error);
       reset();
-
-      if (error.response && error.response.data.errors) {
-        if (typeof error.response.data.errors === 'string') {
-          setErrorMsg(error.response.data.errors);
-        } else if (typeof error.response.data.errors === 'object') {
-          setErrorMsg(Object.values(error.response.data.errors).join(', '));
+  
+      let errorMessage = 'Tidak bisa login! Silakan coba lagi.';
+  
+      console.error('Login Error:', error); // Debugging error
+  
+      if (error.response) {
+        console.error('Error Response:', error.response); // Debugging response dari backend
+        const { status, data } = error.response;
+  
+        if (status === 401) {
+          errorMessage = data.message || 'Email atau password salah!';
+        } else if (data.errors) {
+          if (typeof data.errors === 'string') {
+            errorMessage = data.errors;
+          } else if (typeof data.errors === 'object') {
+            errorMessage = Object.values(data.errors).join(', ');
+          }
         }
-      } else {
-        setErrorMsg('Tidak bisa login! Silakan coba lagi.');
       }
-      enqueueSnackbar(errorMsg, { variant: 'error' });
+  
+      setErrorMsg(errorMessage);
+      enqueueSnackbar(errorMessage, { variant: 'error' });
     }
   });
+  
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5 }}>
