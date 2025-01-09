@@ -259,6 +259,13 @@ export const endpoints = {
     update: '/api/superadmin/instances/update',
     delete: '/api/superadmin/instances/delete',
   },
+  Section: {
+    getSection: '/api/superadmin/sections/all',
+    getSectionById: '/api/superadmin/sections/detail',
+    createSection: '/api/superadmin/sections/create',
+    updateSection: '/api/superadmin/sections/update',
+    deleteSection: '/api/superadmin/sections/delete',
+  },
   AdminNews: {
     list: '/api/superadmin/news/all',
     detail: '/api/superadmin/news/getNewsDetail/',

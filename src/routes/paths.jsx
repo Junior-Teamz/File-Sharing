@@ -95,6 +95,12 @@ export const paths = {
         edit: `${ROOTS.DASHBOARD}/user/${MOCK_ID}/edit`,
       },
     },
+    section: {
+      root: `${ROOTS.DASHBOARD}/section`,
+      list: `${ROOTS.DASHBOARD}/section/list`,
+      create: `${ROOTS.DASHBOARD}/section/create`,
+      edit: `${ROOTS.DASHBOARD}/section/edit`,
+    },
     instance: {
       root: `${ROOTS.DASHBOARD}/instance`,
       list: `${ROOTS.DASHBOARD}/instance/list`,

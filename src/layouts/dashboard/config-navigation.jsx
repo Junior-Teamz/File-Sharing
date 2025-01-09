@@ -125,6 +125,19 @@ export function useNavData() {
           },
 
           {
+            title: t('manajemen unit kerja'),
+            path: paths.dashboard.section.list,
+            icon: ICONS.instance,
+            children: [
+              // { title: t('profile'), path: paths.dashboard.user.root },
+              // { title: t('cards'), path: paths.dashboard.user.cards },
+              { title: t('daftar unit kerja'), path: paths.dashboard.section.create },
+              // { title: t('membuat instansi'), path: paths.dashboard.section.list },
+              // { title: t('instance edit'), path: paths.dashboard.instance.edit },
+            ],
+          },
+
+          {
             title: t('manajemen instansi'),
             path: paths.dashboard.instance.root,
             icon: ICONS.instance,

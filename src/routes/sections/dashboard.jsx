@@ -57,6 +57,8 @@ const TagNewsCreateView = lazy(() => import('src/sections/newsTag/view/TagNewsCr
 const TagNewsListView = lazy(() => import('src/sections/newsTag/view/TagNewsListView'));
 const ListHelmetFavorite = lazy(() => import('src/sections/favorite/ListHelmetFavorite'));
 import { FIleManagerDetailFavorite } from 'src/sections/favorite/view/file-manager-detail';
+import list from 'src/pages/dashboard/Sections/list';
+import Create from 'src/pages/dashboard/Sections/create';
 
 // ----------------------------------------------------------------------
 
@@ -101,6 +103,13 @@ export const dashboardRoutes = [
           { path: 'new', element: <UserCreatePage /> },
           { path: ':id/edit', element: <UserEditPage /> },
           { path: 'account', element: <UserAccountPage /> },
+        ],
+      },
+      {
+        path: 'section',
+        children: [
+          { element: <list/>, index: true, path: 'list' },
+          { path: 'create', element: <Create /> },
         ],
       },
       {
