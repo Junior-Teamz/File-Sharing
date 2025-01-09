@@ -99,10 +99,23 @@ export default function AdminListNews() {
       setPopoverAnchor(null);
     } else if (editingNewsId && editedNews.title && editedNews.content) {
       console.log('Saving edited news with ID:', editingNewsId);
-      const payload = { id: editingNewsId, ...editedNews };
-      console.log('Payload before sending to API:', payload);
+  
+      // Gunakan FormData untuk mengirim data
+      const formData = new FormData();
+      formData.append('_method', 'PUT');
+      formData.append('id', editingNewsId); // Pastikan ID ditambahkan
+      formData.append('title', editedNews.title);
+      formData.append('content', editedNews.content);
+      formData.append('thumbnail_url', editedNews.thumbnail_url || '');
+      formData.append('status', editedNews.status);
+      editedNews.news_tags_ids.forEach((tagId, index) => {
+        formData.append(`news_tags_ids[${index}]`, tagId);
+      });
+  
+      console.log('Payload (FormData) before sending to API:', Object.fromEntries(formData.entries()));
+  
       try {
-        await updateNews.mutateAsync(payload);
+        await updateNews.mutateAsync({ id: editingNewsId, data: formData }); // Kirim ID dalam request
         enqueueSnackbar('Berita berhasil diperbarui', { variant: 'success' });
         queryClient.invalidateQueries({ queryKey: ['list.news'] });
         setEditingNewsId(null);
@@ -115,7 +128,7 @@ export default function AdminListNews() {
       enqueueSnackbar('ID berita dan data harus ada untuk memperbarui.', { variant: 'error' });
     }
   };
-
+  
   const handleChangePage = (event, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(+event.target.value);

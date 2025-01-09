@@ -12,6 +12,11 @@ export default function NewsId() {
   const { slug } = useParams();
   const { data: news, isLoading, error } = useFetchNewsSlug(slug);
 
+  // Debug log to check what's inside `news`
+  useEffect(() => {
+    console.log('Fetched News:', news); // Log the fetched news data
+  }, [news]);
+
   const formattedDate = news
     ? new Date(news.created_at).toLocaleDateString('id-ID', {
         day: 'numeric',
@@ -21,11 +26,12 @@ export default function NewsId() {
     : '';
 
   useEffect(() => {
-    if (news) {
+    if (news && news.title) {
       document.title = news.title;
     }
   }, [news]);
 
+  // Show loading spinner while the data is being fetched
   if (isLoading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
@@ -34,10 +40,20 @@ export default function NewsId() {
     );
   }
 
-  if (error || !news) {
-    return <div style={{ textAlign: 'center', padding: '20px' }}>Tidak ada berita!</div>;
+  // Check for error or empty data more thoroughly
+  if (error || !news || !news.title || Object.keys(news).length === 0) {
+    return (
+      <div style={{ textAlign: 'center', padding: '20px' }}>
+        <Typography variant="h4" color="error" gutterBottom>
+          Berita Tidak Ditemukan
+        </Typography>
+        <Typography variant="body1" color="textSecondary">
+          Berita yang Anda cari tidak tersedia atau telah dihapus.
+        </Typography>
+      </div>
+    );
   }
-
+  
   return (
     <>
       <Helmet>
@@ -48,7 +64,6 @@ export default function NewsId() {
         <meta property="og:image" content={news.thumbnail_url} />
         <meta property="og:url" content={window.location.href} />
         <meta property="og:type" content="article" />
-
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={news.title} />
         <meta name="twitter:description" content={news.description} />
@@ -112,7 +127,7 @@ export default function NewsId() {
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
             <Avatar
               alt={news.creator?.name || 'Unknown'}
-              src={news.creator_avatar}
+              src={news.creator?.photo_profile_url}
               sx={{ marginRight: '8px' }}
             />
             <Typography variant="body1" color="textSecondary" sx={{ marginRight: '8px' }}>

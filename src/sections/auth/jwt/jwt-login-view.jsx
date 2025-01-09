@@ -49,16 +49,17 @@ export default function JwtLoginView() {
   const {
     reset,
     handleSubmit,
+    setError, // Menambahkan setError dari react-hook-form
     formState: { isSubmitting },
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       const response = await login?.(data.email, data.password);
-  
+
       const userRoles = response?.roles;
       const isSuperadmin = response?.is_superadmin ?? false;
-  
+
       if (userRoles?.includes('admin') || isSuperadmin) {
         router.push('/dashboard');
       } else if (userRoles?.includes('user')) {
@@ -66,21 +67,21 @@ export default function JwtLoginView() {
       } else {
         enqueueSnackbar('Role tidak dikenal!', { variant: 'error' });
       }
-  
+
       enqueueSnackbar('Login Berhasil!', { variant: 'success' });
     } catch (error) {
-      reset();
-  
+      console.error('Login Error:', error);
+
       let errorMessage = 'Tidak bisa login! Silakan coba lagi.';
-  
-      console.error('Login Error:', error); // Debugging error
-  
+
       if (error.response) {
-        console.error('Error Response:', error.response); // Debugging response dari backend
         const { status, data } = error.response;
-  
+
         if (status === 401) {
           errorMessage = data.message || 'Email atau password salah!';
+          // Set error ke input email dan password
+          setError('email', { type: 'manual', message: errorMessage });
+          setError('password', { type: 'manual', message: '' }); 
         } else if (data.errors) {
           if (typeof data.errors === 'string') {
             errorMessage = data.errors;
@@ -89,12 +90,11 @@ export default function JwtLoginView() {
           }
         }
       }
-  
+
       setErrorMsg(errorMessage);
       enqueueSnackbar(errorMessage, { variant: 'error' });
     }
   });
-  
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5 }}>
@@ -128,12 +128,12 @@ export default function JwtLoginView() {
         href={paths.authDemo.classic.forgotPassword}
         variant="body2"
         color="inherit"
-        underline="none" // Hilangkan underline default
+        underline="none"
         sx={{
           alignSelf: 'flex-end',
-          textDecoration: 'none', // Pastikan tidak ada underline default
+          textDecoration: 'none',
           '&:hover': {
-            textDecoration: 'underline', // Tambahkan underline saat hover
+            textDecoration: 'underline',
           },
         }}
       >
