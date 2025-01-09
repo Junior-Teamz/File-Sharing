@@ -42,7 +42,7 @@ export default function LegalListView() {
   const deleteLegal = useDeleteLegal();
   const [popover, setPopover] = useState({ open: false, anchorEl: null, currentId: null });
   const idLegal = popover.currentId;
- 
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -229,12 +229,8 @@ export default function LegalListView() {
         open={editDialogOpen}
         onClose={handleEditDialogClose}
       >
-        <DialogTitle>Edit Dokumen Hukum</DialogTitle>
+        <DialogTitle>Edit Dokumen Dasar Hukum</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Untuk mengedit dokumen ini, silakan masukkan detail baru.
-          </DialogContentText>
-          {/* <Box component="form" > */}
           <TextField
             autoFocus
             margin="dense"
@@ -254,6 +250,11 @@ export default function LegalListView() {
             name="file"
             {...register('file')}
           />
+          {editingDocument && editingDocument.file_name && !file && (
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              File saat ini: {editingDocument.file_name}
+            </Typography>
+          )}
           <DialogActions>
             <Button onClick={handleEditDialogClose} color="primary">
               Cancel
@@ -262,13 +263,6 @@ export default function LegalListView() {
               {isUpdating ? <CircularProgress size={24} /> : 'Update'}
             </Button>
           </DialogActions>
-          {/* </Box> */}
-          {/* Menampilkan nama file yang sedang digunakan */}
-          {editingDocument && editingDocument.file_name && !file && (
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              File saat ini: {editingDocument.file_name}
-            </Typography>
-          )}
         </DialogContent>
       </Dialog>
 

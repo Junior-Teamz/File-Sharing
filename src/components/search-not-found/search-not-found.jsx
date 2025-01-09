@@ -19,7 +19,7 @@ export default function SearchNotFound({ query, sx, ...other }) {
       </Typography>
 
       <Typography variant="body2">
-        No results found for &nbsp;
+        No  hasil yang ditemukan for &nbsp;
         <strong>&quot;{query}&quot;</strong>.
         <br /> Try checking for typos or using complete words.
       </Typography>

@@ -182,8 +182,8 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
 
         <TableCell onClick={handleClick} sx={{ whiteSpace: 'nowrap' }}>
           <ListItemText
-            primary={fDateTime(file.updated_at, 'dd MMM yyyy')}
-            secondary={fDateTime(file.updated_at, 'p')}
+            primary={fDateTime(file.favorited_at, 'dd MMM yyyy')}
+            secondary={fDateTime(file.favorited_at, 'p')}
             primaryTypographyProps={{ typography: 'body2' }}
             secondaryTypographyProps={{
               mt: 0.5,
@@ -208,7 +208,7 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
             }}
           >
             {file.shared_with?.map((person) => (
-              <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
+              <Avatar key={person.id} alt={person.name} src={person.user.photo_profile_url} />
             ))}
           </AvatarGroup>
         </TableCell>

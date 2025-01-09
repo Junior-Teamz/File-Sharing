@@ -40,7 +40,7 @@ const TABLE_HEAD = [
   { id: 'name', label: 'Nama' },
   { id: 'size', label: 'Ukuran', width: 120 },
   { id: 'type', label: 'Tipe', width: 120 },
-  { id: 'modifiedAt', label: 'Diperbarui', width: 140 },
+  { id: 'modifiedAt', label: 'Difavortkan', width: 140 },
   { id: 'shared', label: 'Dibagikan', align: 'right', width: 140 },
   { id: '', width: 88 },
 ];

@@ -31,7 +31,7 @@ export default function FileManagerFilters({
 }) {
   const popover = usePopover();
 
-  const renderLabel = filters.type.length ? filters.type.slice(0, 2).join(',') : 'All type';
+  const renderLabel = filters.type.length ? filters.type.slice(0, 2).join(',') : 'Semua Tipe';
 
   const handleFilterName = useCallback(
     (event) => {
@@ -171,7 +171,7 @@ export default function FileManagerFilters({
       >
         {!!filters.startDate && !!filters.endDate
           ? shortDateLabel(filters.startDate, filters.endDate)
-          : 'Select Date'}
+          : 'Pilih Tanggal'}
       </Button>
 
       <CustomDateRangePicker
