@@ -126,12 +126,13 @@ export function useNavData() {
 
           {
             title: t('manajemen unit kerja'),
-            path: paths.dashboard.section.list,
+            path: paths.dashboard.section.root,
             icon: ICONS.instance,
             children: [
               // { title: t('profile'), path: paths.dashboard.user.root },
               // { title: t('cards'), path: paths.dashboard.user.cards },
-              { title: t('daftar unit kerja'), path: paths.dashboard.section.create },
+              { title: t('daftar unit kerja'), path: paths.dashboard.section.list },
+              { title: t('buat unit kerja baru'), path: paths.dashboard.section.create },
               // { title: t('membuat instansi'), path: paths.dashboard.section.list },
               // { title: t('instance edit'), path: paths.dashboard.instance.edit },
             ],
