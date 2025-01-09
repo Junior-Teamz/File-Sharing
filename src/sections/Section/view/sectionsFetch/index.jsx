@@ -1,8 +1,4 @@
-import React from 'react'
-
-export default function index() {
-  return (
-    <div>index</div>
-  )
-}
-
+export * from  './useCreateSection'
+export * from  './useDeleteSection'
+export * from  './useGetSection'
+export * from  './useUpdateSection'
