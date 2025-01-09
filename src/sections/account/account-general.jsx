@@ -17,6 +17,8 @@ import { fData } from 'src/utils/format-number';
 import { AuthContext } from 'src/auth/context/jwt/auth-context';
 import { useAuthContext } from 'src/auth/hooks';
 import { CircularProgress, Container } from '@mui/material';
+import { useUpdateProfile } from 'src/routes/sections/User/DriveUser/view/Profile/useUpdateProfile';
+
 
 export default function AccountGeneral() {
   const { enqueueSnackbar } = useSnackbar();
@@ -25,9 +27,9 @@ export default function AccountGeneral() {
 
   const [loading, setLoading] = useState(true);
 
-  const { mutateAsync: editUser } = useEditUser({
+  const { mutateAsync: editUser } = useUpdateProfile({
     onSuccess: (updatedUser) => {
-      enqueueSnackbar('User berhasil diperbarui', { variant: 'success' });
+      enqueueSnackbar('Profil berhasil diperbarui', { variant: 'success' });
       resetForm({
         name: updatedUser.name || '',
         email: updatedUser.email || '',

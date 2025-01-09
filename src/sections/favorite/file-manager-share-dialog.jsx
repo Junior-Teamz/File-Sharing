@@ -155,7 +155,7 @@ export default function FileManagerShareDialog({
                   />
                 ))
               ) : (
-                <p>No users found</p> // Message when no users are found
+                <p>Tidak ada user yang dicari</p> // Message when no users are found
               )}
             </List>
           </Scrollbar>

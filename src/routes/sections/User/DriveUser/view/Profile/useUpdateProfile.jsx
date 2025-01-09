@@ -5,7 +5,7 @@ export const useUpdateProfile = ({ onSuccess, onError, refetch ,reset}) => {
   return useMutation({
     mutationKey: ['edit.user'],
     mutationFn: async ({ userId, data }) => {
-      const response = await axiosInstance.put(`${endpoints.ProfileUser.update}`, data);
+      const response = await axiosInstance.post(`${endpoints.ProfileUser.update}`, data);
       return response.data; 
     },
     onSuccess,

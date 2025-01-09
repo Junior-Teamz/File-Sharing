@@ -9,7 +9,7 @@ export const useDeleteFolder = ({ onSuccess, onError }) => {
       const isArray = Array.isArray(folderId);
 
       const payload = {
-        ids: isArray ? folderId : [folderId], // Ubah nama field sesuai kebutuhan
+        folder_ids: isArray ? folderId : [folderId], // Ubah nama field sesuai kebutuhan
       };
 
       // Mengirim data payload sebagai body request

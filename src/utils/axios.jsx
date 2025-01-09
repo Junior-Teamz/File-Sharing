@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { get, update } from 'lodash';
 import { HOST_API } from 'src/config-global';
 
 // ----------------------------------------------------------------------
@@ -108,9 +109,9 @@ export const endpoints = {
     getNewsSlug: '/api/public/news/detail/by_slug',
   },
 
-  ProfileUser:{
-    update:'/api/user/update',
-    updatePassword:'/api/user/update_password',
+  ProfileUser: {
+    update: '/api/user/update',
+    updatePassword: '/api/user/update_password',
   },
 
   //user
@@ -158,7 +159,7 @@ export const endpoints = {
     removeTag: '/api/folders/tag/remove',
   },
 
-  //admin
+  //admin dan superadmin
   ChartFolder: {
     getChartFolder: '/api/admin/folder/storageSizeUsage',
   },
@@ -184,7 +185,7 @@ export const endpoints = {
     getChartInstansi: '/api/admin/instance/countAll',
   },
 
-  SuperAdminChart:{
+  SuperAdminChart: {
     Instansi: '/api/admin/statistic_superadmin/storageUsagePerInstance',
     TagInstansi: '/api/admin/statistic_superadmin/tagUsedByInstance',
   },
@@ -209,9 +210,9 @@ export const endpoints = {
 
   files: {
     upload: '/api/files/upload',
-    delete: '/api/files/tag/remove',
+    delete: '/api/files/delete',
     addTag: '/api/files/tag/add',
-    removeTag: '/api/files/removeTag',
+    removeTag: '/api/files/tag/remove',
     download: '/api/files/download',
     change: '/api/files/change_name',
     movefile: '/api/files/move',
@@ -265,5 +266,28 @@ export const endpoints = {
     Update: '/api/superadmin/news/update',
     UpdateStatus: '/api/superadmin/news/update/changeStatus',
     delete: '/api/superadmin/news/delete',
+  },
+  adminChart: {
+    getStorageUsage: 'api/admin/statistics/intances/usage',
+    getUserChart: 'api/admin/users/count_all',
+  },
+  Adminusers: {
+    list: '/api/admin/users/list',
+    create: '/api/admin/users/create',
+    update: '/api/admin/users/update',
+    delete: '/api/admin/users/delete',
+    password: '/api/admin/users/update_user_password',
+  },
+  adminSection: {
+    getSection: '/api/admin/sections/all',
+    getSectionById: '/api/admin/sections/detail',
+    createSection: '/api/admin/sections/create',
+    updateSection: '/api/admin/sections/update',
+    deleteSection: '/api/admin/sections/delete',
+  },
+  adminIntances: {
+    getIntances: '/api/admin/instances/index',
+    updatetIntances: '/api/admin/instances/update',
+    deleteIntances: '/api/admin/instances/delete',
   },
 };

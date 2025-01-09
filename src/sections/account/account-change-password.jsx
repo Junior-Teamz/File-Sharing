@@ -13,9 +13,9 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
-import { useUpdatePassword } from './view/useUpdatePassword'; // Pastikan ini sesuai dengan path yang benar
 import { AuthContext } from 'src/auth/context/jwt/auth-context';
 import { useAuthContext } from 'src/auth/hooks';
+import { useUpdatePassword } from 'src/routes/sections/User/DriveUser/view/Profile/useUpdatePassword';
 
 // ----------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ export default function AccountChangePassword() {
   const { mutateAsync: updatePassword } = useUpdatePassword({
     onSuccess: () => {
       enqueueSnackbar('Password berhasil diperbarui!', { variant: 'success' });
-      reset(); 
+      reset();
     },
     onError: (error) => {
       console.error(error);
@@ -63,12 +63,15 @@ export default function AccountChangePassword() {
   });
 
   const onSubmit = handleSubmit(async (data) => {
+    console.log('Form Data:', data); // Tambahkan ini untuk debugging
     try {
       const payload = {
         userId,
         password: data.newPassword,
         password_confirmation: data.confirmNewPassword,
       };
+
+      console.log('Payload:', payload); // Cek apakah payload sudah sesuai
 
       await updatePassword(payload);
     } catch (error) {
@@ -116,7 +119,13 @@ export default function AccountChangePassword() {
           }}
         />
 
-        <LoadingButton type="submit" variant="contained" loading={isSubmitting} sx={{ ml: 'auto' }}>
+        <LoadingButton
+          onSubmit={onSubmit}
+          type="submit"
+          variant="contained"
+          loading={isSubmitting}
+          sx={{ ml: 'auto' }}
+        >
           Simpan Perubahan
         </LoadingButton>
       </Stack>

@@ -133,6 +133,24 @@ export default function FIleManagerFileDetails({
     setFileIdToDelete(null);
   };
 
+  const handleRename = useCallback(async () => {
+    const newFileType = newFileName.split('.').pop();
+
+    if (newFileType !== originalFileType.split('.').pop()) {
+      enqueueSnackbar('Type file tidak boleh diubah!', { variant: 'error' });
+      return;
+    }
+
+    try {
+      await updateNameFile({ fileId: item.id, data: { name: newFileName } });
+      enqueueSnackbar('Nama file berhasil diperbarui!', { variant: 'success' });
+      setIsEditing(false);
+      queryClient.invalidateQueries({ queryKey: ['folder.admin'] });
+    } catch (error) {
+      enqueueSnackbar('Gagal memperbarui nama file!', { variant: 'error' });
+    }
+  }, [item.id, newFileName, originalFileType, updateNameFile, enqueueSnackbar, queryClient]);
+
   const handleDownload = useCallback(async () => {
     try {
       const idsToDownload = Array.isArray(item.ids) && item.ids.length ? item.ids : [item.id];
@@ -232,24 +250,6 @@ export default function FIleManagerFileDetails({
         enqueueSnackbar('Failed to copy link.', { variant: 'error' });
       });
   };
-
-  const handleRename = useCallback(async () => {
-    const newFileType = newFileName.split('.').pop();
-
-    if (newFileType !== originalFileType.split('.').pop()) {
-      enqueueSnackbar('Type file tidak boleh diubah!', { variant: 'error' });
-      return;
-    }
-
-    try {
-      await updateNameFile({ fileId: item.id, data: { name: newFileName } });
-      enqueueSnackbar('Nama file berhasil diperbarui!', { variant: 'success' });
-      setIsEditing(false);
-      queryClient.invalidateQueries({ queryKey: ['folder.admin'] });
-    } catch (error) {
-      enqueueSnackbar('Gagal memperbarui nama file!', { variant: 'error' });
-    }
-  }, [item.id, newFileName, originalFileType, updateNameFile, enqueueSnackbar, queryClient]);
 
   useEffect(() => {
     favorite.setValue(is_favorite);

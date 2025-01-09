@@ -49,15 +49,15 @@ export default function FileManagerShareDialog({
   };
 
   // Effect to debounce input search
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchTerm(inputSearch);
-    }, 300); // Delay of 300ms for the API call
+  // useEffect(() => {
+  //   const handler = setTimeout(() => {
+  //     setDebouncedSearchTerm(inputSearch);
+  //   }, 300); // Delay of 300ms for the API call
 
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [inputSearch]);
+  //   return () => {
+  //     clearTimeout(handler);
+  //   };
+  // }, [inputSearch]);
 
   // Effect to fetch search results when debounced search term changes
   useEffect(() => {
@@ -149,11 +149,11 @@ export default function FileManagerShareDialog({
                   <FileManagerInvitedItem
                     key={user.id}
                     user={user}
-                    onClick={() => handleUserSelect(user)} // Ensure onClick works
+                    onClick={() => handleUserSelect(user)} 
                   />
                 ))
               ) : (
-                <p>No users found</p> // Message when no users are found
+                <p>Tidak ada user yang dicari</p> 
               )}
             </List>
           </Scrollbar>

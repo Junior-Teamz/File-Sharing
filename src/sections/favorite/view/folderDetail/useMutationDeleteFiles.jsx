@@ -11,6 +11,7 @@ export const useMutationDeleteFiles = () => {
       // Buat payload dengan array file_ids
       const payload = {
         file_ids: fileIdsArray,
+        
       };
 
       try {
