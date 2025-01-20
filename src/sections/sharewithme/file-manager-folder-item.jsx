@@ -142,7 +142,7 @@ export default function FileManagerFolderItem({
         <>
           <Avatar
             alt={folder.user.name}
-            src={folder.user.avatarUrl}
+            src={folder.user.photo_profile_url}
             sx={{ width: 24, height: 24, mr: 1 }} // Menambahkan margin right
           />
           <Tooltip title={folder.user.email}>

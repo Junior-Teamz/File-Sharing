@@ -30,7 +30,7 @@ import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material
 
 import {
   useAddTagFolder,
-  useAddFavoriteFolder, 
+  useAddFavoriteFolder,
   useDeleteFolder,
   useRemoveFavoriteFolder,
   useRemoveTagFolder,
@@ -41,7 +41,7 @@ import { useQueryClient } from '@tanstack/react-query';
 // ----------------------------------------------------------------------
 
 export default function FolderDetail({
-  item = {},  
+  item = {},
   open,
   favorited,
   onFavorite,
@@ -61,13 +61,14 @@ export default function FolderDetail({
     email,
     user,
     id,
+    folder_id,
     instance,
     created_at,
     tags: initialTags = [],
     updated_at,
     is_favorite,
   } = item;
-  const { enqueueSnackbar } = useSnackbar(); 
+  const { enqueueSnackbar } = useSnackbar();
   const { mutateAsync: addFavorite } = useAddFavoriteFolder();
   const { mutateAsync: removeFavorite } = useRemoveFavoriteFolder();
   const useClient = useQueryClient();
@@ -150,7 +151,7 @@ export default function FolderDetail({
 
   const handleDeleteFolder = async () => {
     try {
-      await deleteFolder({ id: folderIdToDelete }); 
+      await deleteFolder({ id: folderIdToDelete });
       enqueueSnackbar('Folder berhasil dihapus!', { variant: 'success' });
       handleCloseConfirmDialog();
       onDelete();
@@ -181,8 +182,6 @@ export default function FolderDetail({
   const handleCopyLink = () => {
     const folderUrl = id; // Ensure this is the correct property for URL
 
-   
-
     if (!folderUrl) {
       enqueueSnackbar('No URL to copy.', { variant: 'warning' });
       return;
@@ -198,7 +197,7 @@ export default function FolderDetail({
   };
 
   useEffect(() => {
-    favorite.setValue(is_favorite); 
+    favorite.setValue(is_favorite);
   }, [is_favorite]);
 
   const handleFavoriteToggle = useCallback(async () => {
@@ -211,11 +210,11 @@ export default function FolderDetail({
 
     try {
       if (favorite.value) {
-        await removeFavorite({ id }); 
+        await removeFavorite({ folder_id: id });
         enqueueSnackbar('Folder dihapus dari favorit!', { variant: 'success' });
         useClient.invalidateQueries({ queryKey: ['folder.user'] });
       } else {
-        await addFavorite({ id });
+        await addFavorite({ folder_id: id });
         enqueueSnackbar('Folder ditambahkan ke favorit!', { variant: 'success' });
         useClient.invalidateQueries({ queryKey: ['folder.user'] });
       }
@@ -238,21 +237,15 @@ export default function FolderDetail({
         sx={{ typography: 'subtitle2' }}
       >
         Tag
-        <IconButton onClick={handleFavoriteToggle} disabled={issLoading}>
-          <Iconify
-            icon={favorite.value ? 'eva:heart-fill' : 'eva:heart-outline'}
-            sx={{ color: favorite.value ? 'yellow' : 'gray' }}
-          />
-        </IconButton>
       </Stack>
 
       {toggleTags.value && (
         <Autocomplete
           multiple
-          options={availableTags} 
-          getOptionLabel={(option) => option.name} 
+          options={availableTags}
+          getOptionLabel={(option) => option.name}
           value={availableTags.filter((tag) => tags.includes(tag.id))}
-          onChange={handleChangeTags} 
+          onChange={handleChangeTags}
           renderOption={(props, option) => (
             <li {...props} key={option.id}>
               {option.name}
@@ -295,7 +288,7 @@ export default function FolderDetail({
 
       {properties.value && (
         <>
-           <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
+          <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
               Ukuran
             </Box>

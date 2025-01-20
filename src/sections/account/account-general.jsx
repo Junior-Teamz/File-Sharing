@@ -12,7 +12,6 @@ import Typography from '@mui/material/Typography';
 // hooks
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField, RHFUploadAvatar } from 'src/components/hook-form';
-import { useEditUser } from '../user/view/UserManagement';
 import { fData } from 'src/utils/format-number';
 import { AuthContext } from 'src/auth/context/jwt/auth-context';
 import { useAuthContext } from 'src/auth/hooks';

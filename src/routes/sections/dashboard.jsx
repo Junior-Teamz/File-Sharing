@@ -59,6 +59,7 @@ const ListHelmetFavorite = lazy(() => import('src/sections/favorite/ListHelmetFa
 import { FIleManagerDetailFavorite } from 'src/sections/favorite/view/file-manager-detail';
 import List from 'src/pages/dashboard/Sections/list';
 import Create from 'src/pages/dashboard/Sections/create';
+const ShareFolderFile = lazy(() => import('src/sections/home/ShareFolderFile'));
 
 // ----------------------------------------------------------------------
 
@@ -108,7 +109,7 @@ export const dashboardRoutes = [
       {
         path: 'section',
         children: [
-          { element: <List/>, index: true, path: 'list' },
+          { element: <List />, index: true, path: 'list' },
           { path: 'create', element: <Create /> },
         ],
       },
@@ -163,5 +164,17 @@ export const dashboardRoutes = [
         ],
       },
     ],
+  },
+  {
+    path: 'share/:id',
+    element: (
+      <AuthGuard>
+        <DashboardLayout>
+          <Suspense fallback={<LoadingScreen />}>
+            <ShareFolderFile />
+          </Suspense>
+        </DashboardLayout>
+      </AuthGuard>
+    ),
   },
 ];

@@ -49,16 +49,16 @@ export default function FileManagerShareDialogFolder({
     edit: 'write',
   };
 
-  // Effect to debounce input search
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchTerm(inputSearch);
-    }, 300); // Delay of 300ms for the API call
+  // // Effect to debounce input search
+  // useEffect(() => {
+  //   const handler = setTimeout(() => {
+  //     setDebouncedSearchTerm(inputSearch);
+  //   }, 300); // Delay of 300ms for the API call
 
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [inputSearch]);
+  //   return () => {
+  //     clearTimeout(handler);
+  //   };
+  // }, [inputSearch]);
 
   // Effect to fetch search results when debounced search term changes
   useEffect(() => {
@@ -101,7 +101,7 @@ export default function FileManagerShareDialogFolder({
         {
           user_id: selectedUser.id,
           permissions: permissionsOptions[permissions],
-          id: folderId,
+          folder_id: folderId,
         },
         {
           onSuccess: () => {

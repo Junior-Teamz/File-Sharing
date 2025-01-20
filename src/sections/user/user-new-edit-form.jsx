@@ -1,33 +1,37 @@
 import PropTypes from 'prop-types';
 import * as Yup from 'yup';
 import { useMemo } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useSnackbar } from 'notistack';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Grid from '@mui/system/Unstable_Grid/Grid';
-import FormProvider, { RHFTextField, RHFSelect } from 'src/components/hook-form';
-import { useCreateUser } from './view/UserManagement';
-import { Button, MenuItem } from '@mui/material';
+import FormProvider, { RHFTextField, RHFSelect, RHFAutocomplete } from 'src/components/hook-form';
+import { useCreateUser, usePermissionAdmin } from './view/UserManagement';
+import { Button, Chip, FormControl, MenuItem, TextField } from '@mui/material';
 import { useIndexInstance } from '../instancepages/view/Instance';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 import { useQueryClient } from '@tanstack/react-query';
+import { useGetSection } from '../Section/view/sectionsFetch';
 
 export default function UserNewEditForm({ currentUser }) {
   const { enqueueSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
   const router = useRouter();
-  const { data: instansiList, isLoading: isLoadingInstansi } = useIndexInstance();
+  const { data: instanceList, isLoading: isLoadingInstance } = useIndexInstance();
+  const { data: permissionList = [], isLoading: isLoadingPermission } = usePermissionAdmin();
+  console.log(permissionList);
+  const { data: instanceSections = [], isLoading: isLoadingSection } = useGetSection();
 
   const { mutate: CreateUser, isPending } = useCreateUser({
     onSuccess: () => {
       enqueueSnackbar('User berhasil dibuat', { variant: 'success' });
       reset();
       router.push(paths.dashboard.user.list);
-      queryClient.invalidateQueries({ queryKey: ['list.instansi'] });
+      queryClient.invalidateQueries({ queryKey: ['list.user'] });
     },
     onError: (error) => {
       if (error.errors && error.errors.email) {
@@ -56,8 +60,10 @@ export default function UserNewEditForm({ currentUser }) {
   ];
 
   const NewUserSchema = Yup.object().shape({
-    name: Yup.string().required('Nama harus di isi').max(100, 'Name must be at most 100 characters'),
-    instansi: Yup.string().required('Instansi harus di isi'),
+    name: Yup.string()
+      .required('Nama harus di isi')
+      .max(100, 'Name must be at most 100 characters'),
+    instance_id: Yup.string().required('Instansi harus di isi'),
     email: Yup.string()
       .required('Email harus di isi')
       .email('Email harus berupa alamat email yang valid')
@@ -84,7 +90,11 @@ export default function UserNewEditForm({ currentUser }) {
       password: '',
       confirmPassword: '',
       role: currentUser?.role || '',
-      instansi: currentUser?.instansiId || '',
+      instance_id: currentUser?.instansiId || '',
+      instance_section_id: currentUser?.instance_section_id || '',
+      permissions: Array.isArray(currentUser?.permissions)
+        ? currentUser.permissions.map((p) => p.id)
+        : [],
     }),
     [currentUser]
   );
@@ -94,17 +104,54 @@ export default function UserNewEditForm({ currentUser }) {
     defaultValues,
   });
 
-  const { reset, refetch, handleSubmit } = methods;
+  const {
+    reset,
+    refetch,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = methods;
+  const selectedRole = useWatch({ control: methods.control, name: 'role' });
 
   const onSubmit = async (data) => {
-    const { confirmPassword, ...restData } = data;
-    const payload = {
-      ...restData,
-      password_confirmation: confirmPassword,
-      instance_id: restData.instansi,
-    };
+    const {
+      confirmPassword,
+      photo_profile,
+      instance_id,
+      instance_section_id,
+      permissions,
+      ...restData
+    } = data;
 
-    CreateUser(payload);
+    const validInstanceId = instance_id ? instance_id : null;
+    //     const validInstanceSectionId =
+    //       instance_section_id && instance_section_id !== '0' ? instance_section_id : null;
+    // console.log(validInstanceSectionId)
+    const formData = new FormData();
+    Object.keys(restData).forEach((key) => {
+      if (Array.isArray(restData[key])) {
+        restData[key].forEach((item) => formData.append(key, item));
+      } else {
+        formData.append(key, restData[key]);
+      }
+    });
+
+    // formData.append('permissions', JSON.stringify(data.permissions)); // Menggunakan nama-nama permission
+    permissions.forEach((permission) => {
+      formData.append('permissions[]', permission);
+    });
+
+    if (validInstanceId) {
+      formData.append('instance_id', validInstanceId);
+    }
+
+    formData.append('instance_section_id', instance_section_id);
+    console.log('instance_section_id:', instance_section_id);
+
+    formData.append('password_confirmation', confirmPassword);
+
+    // Submit the form data
+    CreateUser(formData);
   };
 
   return (
@@ -129,14 +176,70 @@ export default function UserNewEditForm({ currentUser }) {
                 <MenuItem value="admin">Admin</MenuItem>
                 <MenuItem value="user">User</MenuItem>
               </RHFSelect>
-              <RHFSelect name="instansi" label="Instansi" disabled={isLoadingInstansi}>
-                {!isLoadingInstansi &&
-                  instansiList?.data?.map((instansi) => (
-                    <MenuItem key={instansi.id} value={instansi.id}>
-                      {instansi.name}
+              <RHFSelect name="instance_id" label="Instansi" disabled={isLoadingInstance}>
+                {!isLoadingInstance &&
+                  instanceList?.data?.map((instance) => (
+                    <MenuItem key={instance.id} value={instance.id}>
+                      {instance.name}
                     </MenuItem>
                   ))}
               </RHFSelect>
+
+              <RHFSelect
+                name="instance_section_id"
+                label="Instance Section"
+                disabled={isLoadingSection}
+              >
+                {!isLoadingSection &&
+                  Array.isArray(instanceSections) &&
+                  instanceSections.map((section) => (
+                    <MenuItem key={section.id} value={section.id}>
+                      {section.nama}
+                    </MenuItem>
+                  ))}
+              </RHFSelect>
+
+              {selectedRole === 'admin' && (
+                <FormControl fullWidth margin="dense">
+                  <RHFAutocomplete
+                    name="permissions"
+                    label="Permissions"
+                    multiple
+                    options={permissionList}
+                    getOptionLabel={(option) => option?.name || 'No name available'}
+                    isOptionEqualToValue={(option, value) => option?.id === value}
+                    onChange={(event, value) => {
+                      setValue(
+                        'permissions',
+                        value.map((p) => (typeof p === 'object' ? p.name : p)) // Hanya ambil name
+                      );
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        error={!!errors.permissions}
+                        helperText={errors.permissions?.message}
+                        variant="outlined"
+                        placeholder="Pilih Permissions"
+                      />
+                    )}
+                    renderTags={(value, getPermissionProps) => (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {value?.map((name, index) => {
+                          const permission = permissionList.find((p) => p.name === name); // Cari permission berdasarkan name
+                          return permission ? (
+                            <Chip
+                              key={name}
+                              label={permission.name}
+                              {...getPermissionProps({ index })}
+                            />
+                          ) : null;
+                        })}
+                      </Box>
+                    )}
+                  />
+                </FormControl>
+              )}
             </Box>
             <Stack alignItems="flex-end" sx={{ mt: 3 }}>
               <Button variant="outlined" type="submit">

@@ -90,7 +90,7 @@ export default function FileManagerShareDialogFolder({
         {
           user_id: selectedUser.id,
           permissions: permissionsOptions[permissions],
-          id: folderId, 
+          folder_id: folderId, 
         },
         {
           onSuccess: () => {
@@ -104,7 +104,7 @@ export default function FileManagerShareDialogFolder({
       setInputSearch(''); 
       setSearchResults([]); 
       setSelectedUser(null); 
-      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      useClient.invalidateQueries({ queryKey: ['folder.user'] });
     } else {
       enqueueSnackbar('User ID or folder ID is missing.', { variant: 'warning' }); 
     }
@@ -147,7 +147,6 @@ export default function FileManagerShareDialogFolder({
                 searchResults.map((user) => (
                   <FileManagerInvitedItem
                     key={user.id}
-                   
                     user={user}
                     onClick={() => handleUserSelect(user)} 
                   />

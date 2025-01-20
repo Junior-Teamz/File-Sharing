@@ -8,7 +8,7 @@ export const handleFolderFiles = () => {
         return { FolderFiles: [], refetch }; // Return refetch along with empty data
     }
 
-    const folderss = data.folders ? data.folders.map((folder) => folder) : [];
+    const folderss = data.subfolders ? data.subfolders.map((folder) => folder) : [];
     const filess = data.files ? data.files.map((file) => file) : [];
     
     const FolderFiles = [...folderss, ...filess];

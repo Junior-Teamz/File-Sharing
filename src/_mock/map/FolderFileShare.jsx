@@ -9,8 +9,8 @@ export const FolderFileShare = () => {
   }
 
   // Access the folders and files properly
-  const folderss = Array.isArray(data.folders.data) ? data.folders.data.map((folder) => folder) : [];
-  const filess = Array.isArray(data.files.data) ? data.files.data.map((file) => file) : [];
+  const folderss = Array.isArray(data.folders) ? data.folders.map((folder) => folder) : [];
+  const filess = Array.isArray(data.files) ? data.files.map((file) => file) : [];
 
   const FolderFiles = [...folderss, ...filess];
 

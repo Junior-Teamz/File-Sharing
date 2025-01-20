@@ -49,15 +49,15 @@ export default function FileManagerShareDialog({
   };
 
   // Effect to debounce input search
-  // useEffect(() => {
-  //   const handler = setTimeout(() => {
-  //     setDebouncedSearchTerm(inputSearch);
-  //   }, 300); // Delay of 300ms for the API call
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(inputSearch);
+    }, 300); // Delay of 300ms for the API call
 
-  //   return () => {
-  //     clearTimeout(handler);
-  //   };
-  // }, [inputSearch]);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [inputSearch]);
 
   // Effect to fetch search results when debounced search term changes
   useEffect(() => {
@@ -104,7 +104,7 @@ export default function FileManagerShareDialog({
       setInputSearch(''); // Clear search input after invite
       setSearchResults([]); // Clear search results after invite
       setSelectedUser(null); // Clear selected user after invite
-      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      useClient.invalidateQueries({ queryKey: ['folder.user'] });
     } else {
       enqueueSnackbar('User ID or file ID is missing.', { variant: 'warning' }); // Show warning notification
     }

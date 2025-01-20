@@ -66,7 +66,7 @@ axiosInstance.interceptors.response.use(
         window.location = '/403'; // Sesuaikan path sesuai kebutuhan
       } else if (error.response.status === 500) {
         // Redirect ke halaman 500
-        window.location = '/500'; // Sesuaikan path sesuai kebutuhan
+        // window.location = '/500'; // Sesuaikan path sesuai kebutuhan
       }
     }
     return Promise.reject((error.response && error.response.data) || 'Something went wrong');
@@ -116,7 +116,7 @@ export const endpoints = {
 
   //user
   Tags: {
-    ListTag: '/api/tag/index',
+    ListTag: '/api/tags/index',
   },
 
   previewStorage: {
@@ -130,8 +130,8 @@ export const endpoints = {
     User: '/api/search/user',
   },
   Permissions: {
-    PermissionsFile: '/api/permissions/files/grantPermission',
-    getPermissionFolder: '/api/permissions/folders/grantPermission',
+    PermissionsFile: '/api/permissions/files/grant_permission',
+    getPermissionFolder: '/api/permissions/folders/grant_permission',
   },
   file: {
     upload: '/api/files/upload',
@@ -260,11 +260,11 @@ export const endpoints = {
     delete: '/api/superadmin/instances/delete',
   },
   Section: {
-    getSection: '/api/superadmin/sections/all',
-    getSectionById: '/api/superadmin/sections/detail',
-    createSection: '/api/superadmin/sections/create',
-    updateSection: '/api/superadmin/sections/update',
-    deleteSection: '/api/superadmin/sections/delete',
+    getSection: '/api/superadmin/instances/sections/all',
+    getSectionById: '/api/superadmin/instances/sections/detail',
+    createSection: '/api/superadmin/instances/sections/create',
+    updateSection: '/api/superadmin/instances/sections/update',
+    deleteSection: '/api/superadmin/instances/sections/delete',
   },
   AdminNews: {
     list: '/api/superadmin/news/all',

@@ -8,8 +8,9 @@ export const FolderFileShareUser = () => {
   }
 
   // Use optional chaining to safely access data
-  const folderss = Array.isArray(data?.folders?.data) ? data.folders.data : [];
-  const filess = Array.isArray(data?.files?.data) ? data.files.data : [];
+  const folderss = data.folders ? data.folders.map((folder) => folder) : [];
+
+  const filess = data.files ? data.files.map((folder) => folder) : [];
 
   const FolderFiles = [...folderss, ...filess];
 

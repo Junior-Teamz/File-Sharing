@@ -53,7 +53,7 @@ export default function FileManagerShareDialog({
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(inputSearch);
-    }, 300); // Delay of 300ms for the API call
+    }, 1000); // Delay of 300ms for the API call
 
     return () => {
       clearTimeout(handler);

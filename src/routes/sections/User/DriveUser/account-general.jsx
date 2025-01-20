@@ -36,7 +36,7 @@ export default function AccountGeneral() {
       });
     },
     onError: (error) => {
-      enqueueSnackbar('Gagal memperbarui profil', { variant: 'error' });
+      enqueueSnackbar('Gagal memperbarui user', { variant: 'error' });
       console.error('Error update user:', error);
     },
   });
@@ -79,23 +79,19 @@ export default function AccountGeneral() {
 
   const onSubmit = async (data) => {
     const formData = new FormData();
+
     formData.append('name', data.name);
     formData.append('email', data.email);
     formData.append('instance', JSON.stringify(data.instance));
+    formData.append('_method', 'PUT');
 
     if (data.photo_profile) {
-      console.log('File to upload: ', data.photo_profile);
       formData.append('photo_profile', data.photo_profile);
-    }
-
-    // Log FormData untuk debugging
-    for (let pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
     }
 
     try {
       const response = await editUser({ userId, data: formData });
-      // enqueueSnackbar('Profil berhasil diperbarui', { variant: 'success' });
+      enqueueSnackbar('User berhasil diperbarui', { variant: 'success' });
       resetForm({
         name: response.name || '',
         email: response.email || '',
@@ -103,7 +99,7 @@ export default function AccountGeneral() {
         photo_profile_url: response.photo_profile_url || '',
       });
     } catch (error) {
-      // enqueueSnackbar('Gagal memperbarui user', { variant: 'error' });
+      enqueueSnackbar('Gagal memperbarui user', { variant: 'error' });
       console.error('Error update user:', error);
     }
   };
@@ -124,13 +120,13 @@ export default function AccountGeneral() {
           return;
         }
 
-        setValue('photo_profile', file, { shouldValidate: true });
-
         const reader = new FileReader();
         reader.onloadend = () => {
           setValue('photo_profile_url', reader.result, { shouldValidate: true });
         };
         reader.readAsDataURL(file);
+
+        setValue('photo_profile', file, { shouldValidate: true });
       }
     },
     [setValue, enqueueSnackbar]
@@ -170,7 +166,7 @@ export default function AccountGeneral() {
                   <br /> max size of {fData(3000000)}
                 </Typography>
               }
-              preview={methods.watch('photo_profile_url') || user?.photo_profile_url?.path}
+              preview={methods.watch('photo_profile_url')}
             />
           </Card>
         </Grid>

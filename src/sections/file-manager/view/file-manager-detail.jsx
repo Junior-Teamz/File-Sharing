@@ -239,7 +239,7 @@ export const FIleManagerDetail = () => {
 
       {/* Create Folder Dialog */}
       <Dialog open={openCreateFolderDialog} onClose={handleCloseCreateFolderDialog}>
-        <DialogTitle>Create Folder</DialogTitle>
+        <DialogTitle>Buat Folder</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 3 }}>Nama folder</DialogContentText>
           <TextField
@@ -291,24 +291,23 @@ export const FIleManagerDetail = () => {
                   </MenuItem>
                 ))
               ) : (
-                <MenuItem disabled>No tags available</MenuItem>
+                <MenuItem disabled>Tidak ada tag tersedia</MenuItem>
               )}
             </Select>
           </FormControl>
         </DialogContent>
         <DialogActions>
           <Button variant="outlined" onClick={handleCloseCreateFolderDialog}>
-            Cancel
+            Batal
           </Button>
           <Button variant="contained" onClick={handleFolderCreate} disabled={isCreating}>
-            Create
+            Buat
           </Button>
         </DialogActions>
       </Dialog>
 
       {folderss.folders
-        ? // Render untuk data folders
-          folderss.folders.map((folder) => (
+        ? folderss.folders.map((folder) => (
             <FolderDetail
               key={folder.id}
               item={{ ...folder, type: 'folder' }}
@@ -324,8 +323,7 @@ export const FIleManagerDetail = () => {
             />
           ))
         : data.folder_info
-        ? // Render untuk data subfolders
-          data.subfolders.map((subfolder) => (
+        ? data.subfolders.map((subfolder) => (
             <FolderDetail
               key={subfolder.id}
               item={{ ...subfolder, type: 'subfolder' }}
@@ -342,7 +340,6 @@ export const FIleManagerDetail = () => {
           ))
         : null}
 
-      {/* Upload File Dialog */}
       <FileManagerNewDialogParent
         title="Upload File"
         open={openUploadDialog}
@@ -351,9 +348,9 @@ export const FIleManagerDetail = () => {
         folderName={folderName}
         onChangeFolderName={(name) => setFolderName(name)}
         refetch={refetch}
-        tags={tagsData} // Ensure 'tagsData' is used here
-        selectedTags={selectedTagIds} // Ensure 'selectedTagIds' is used here
-        onTagChange={handleTagChange} // Ensure 'handleTagChange' is used here
+        tags={tagsData}
+        selectedTags={selectedTagIds}
+        onTagChange={handleTagChange}
       />
     </>
   );

@@ -215,7 +215,11 @@ export default function FileManagerFolderItem({
         }}
         {...other}
       >
-        <Link key={folder.id} to={`folder/${folder.id}`}>
+        <Link
+          style={{ textDecoration: 'none', color: 'inherit' }}
+          key={folder.id}
+          to={`folder/${folder.id}`}
+        >
           <Box onMouseEnter={checkbox.onTrue} onMouseLeave={checkbox.onFalse}>
             {renderIcon}
           </Box>
