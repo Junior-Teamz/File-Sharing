@@ -5,7 +5,7 @@ export const useChartTag = () => {
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['chart.tag'],
     queryFn: async () => {
-      const response = await axiosInstance.get(endpoints.ChartTagFolderAndFile.getChartTag);
+      const response = await axiosInstance.get(endpoints.statistik.tagUsageInstance);
       return response.data; 
     },
   });

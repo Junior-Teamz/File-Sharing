@@ -57,7 +57,6 @@ export default function OverviewAnalyticsView() {
   const { data: File } = useChartFile();
 
   const { data: TagInstances } = useTagInstances();
-  console.log(TagInstances);
 
   const { data: AllInstances } = useChartInstances();
 
@@ -69,38 +68,18 @@ export default function OverviewAnalyticsView() {
 
   const getTop5Storage = () => {
     if (!Storage) return [];
-    return [...Storage]
-      .sort((a, b) => b.storage_usage_raw - a.storage_usage_raw) // Urutkan berdasarkan storage_usage_raw secara descending
-      .slice(0, 5); // Ambil 5 teratas
+    return [...Storage].sort((a, b) => b.storage_usage_raw - a.storage_usage_raw).slice(0, 5);
   };
 
-  // Filter data berdasarkan instance yang dipilih
   const filteredStorageData =
     selectedInstance === 'all'
-      ? getTop5Storage() // Jika 'all', tampilkan Top 5 storage
-      : Storage?.filter((instance) => instance.instance_name === selectedInstance); // Jika spesifik, filter data instansi
+      ? getTop5Storage()
+      : Storage?.filter((instance) => instance.instance_name === selectedInstance);
 
-  function convertToBytes(sizeString) {
-    if (!sizeString) return 0;
-
-    const size = parseFloat(sizeString);
-    if (sizeString.toLowerCase().includes('kb')) {
-      return size * 1024; // Convert KB to bytes
-    } else if (sizeString.toLowerCase().includes('mb')) {
-      return size * 1024 * 1024; // Convert MB to bytes
-    } else if (sizeString.toLowerCase().includes('gb')) {
-      return size * 1024 * 1024 * 1024;
-    }
-    return size;
-  }
-
-  const totalFileStorageBytes = convertToBytes(File?.data?.total_size || '0kb'); // Convert file size to bytes
-  const totalFolderStorageBytes = convertToBytes(data?.data?.formattedSize || '0kb'); // Convert folder size to bytes
+  const totalFileStorageBytes = fData(File?.count_size_all_files || '0kb');
+  const totalFolderStorageBytes = fData(data?.formattedSize || '0kb');
 
   const totalStorageBytes = totalFileStorageBytes + totalFolderStorageBytes;
-
-  // Use fData to format the total storage
-  const totalStorageFormatted = fData(totalStorageBytes);
 
   const renderStorageOverview = (
     <FileStorageOverview
@@ -122,15 +101,17 @@ export default function OverviewAnalyticsView() {
         //   icon: <Box component="img" src="/assets/icons/files/ic_video.svg" />,
         // },
         {
-          name: 'All File',
-          usedStorage: File?.data?.total_size || '0kb',
-          filesCount: File?.data?.total_file,
+          name: 'Semua File',
+          type: 'file',
+          usedStorage: File?.count_size_all_files || '0kb',
+          filesCount: File?.count_all_files,
           icon: <Box component="img" src="/assets/icons/files/ic_document.svg" />,
         },
         {
-          name: 'All Folder',
+          name: 'Semua Folder',
+          type: 'folder',
           usedStorage: data.data?.formattedSize || '0kb',
-          filesCount: 223,
+          filesCount: data?.count_folder,
           icon: <Box component="img" src="/assets/icons/files/ic_folder.svg" />,
         },
       ]}

@@ -5,7 +5,7 @@ export const useTagInstances = () => {
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['tag.instances'],
     queryFn: async () => {
-      const response = await axiosInstance.get(endpoints.SuperAdminChart.TagInstansi);
+      const response = await axiosInstance.get(endpoints.statistik.tagUsageInstance);
       return response.data; 
     },
   });

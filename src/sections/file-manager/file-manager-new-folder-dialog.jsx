@@ -47,28 +47,27 @@ export default function FileManagerNewFolderDialog({
   const { mutate: CreateFolder, isPending: loadingUpload } = useMutationFolder({
     onSuccess: () => {
       enqueueSnackbar('Folder berhasil dibuat');
-      handleRemoveAllFiles();
-      methods.reset(); // Reset form after successful upload
+      methods.reset();
       queryClient.invalidateQueries({ queryKey: ['folder.admin'] });
       onClose();
     },
     onError: (error) => {
-      enqueueSnackbar(error.message, { variant: 'error' });
+      enqueueSnackbar(error.errors, { variant: 'error' });
     },
   });
 
   const handleCreate = () => {
     const nameValue = methods.getValues('name');
-    // Validate both name and tags
+
     if (!nameValue || !selectedTags.length) {
-      enqueueSnackbar('Please fill in the required fields: name and tags', { variant: 'warning' });
+      enqueueSnackbar('Silakan isi kolom nama dan tag', { variant: 'warning' });
       return;
     }
 
     const formData = new FormData();
 
     selectedTags.forEach((tag) => {
-      formData.append('tag_ids[]', tag.id); // Assuming each tag has an id
+      formData.append('tag_ids[]', tag.id);
     });
 
     formData.append('name', nameValue);
@@ -78,10 +77,6 @@ export default function FileManagerNewFolderDialog({
 
   const handleTagChange = (event, newValue) => {
     setSelectedTags(newValue); // Keep track of selected tags
-  };
-
-  const handleRemoveAllFiles = () => {
-    setFiles([]);
   };
 
   return (

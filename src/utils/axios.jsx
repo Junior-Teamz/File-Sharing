@@ -194,6 +194,24 @@ export const endpoints = {
     getChartTag: '/api/admin/tag/getTagUsageStatistic',
   },
 
+  statistik: {
+    getTagUsage: '/api/superadmin/statistics/tags/all_tag_usage',
+    getStorage: 'api/superadmin/statistics/storage_usage',
+    getFolderCount: 'api/superadmin/statistics/all_folder_count',
+    getFileCount: 'api/superadmin/statistics/all_file_count',
+    tagCount: '/api/superadmin/statistics/tags/count_all_tags',
+    instanceUsage: '/api/superadmin/statistics/instances/usage',
+    instanceAll: '/api/superadmin/statistics/instances/count_all_instance',
+    storageUsageInstance: '/api/superadmin/statistics/instances/storage_usage_per_instance',
+    tagUsageInstance: '/api/superadmin/statistics/instances/tags_used_by_instance',
+    userCount: '/api/superadmin/users/count_total',
+  },
+
+  statatistikAdmin: {
+    storageUsageInstance: '/api/admin/statistics/instances/usage',
+    userCount: '/api/superadmin/statistics/users/count_all',
+  },
+
   Legal: {
     ListLegal: '/api/public/legal_basis/all',
     SaveLegal: '/api/superadmin/legal_basis/save',

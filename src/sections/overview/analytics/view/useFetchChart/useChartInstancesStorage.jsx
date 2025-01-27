@@ -5,7 +5,7 @@ export const useChartInstancesStorage = () => {
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['instances.storage'],
     queryFn: async () => {
-      const response = await axiosInstance.get(endpoints.SuperAdminChart.Instansi);
+      const response = await axiosInstance.get(endpoints.statistik.storageUsageInstance);
       return response.data;
     },
   });

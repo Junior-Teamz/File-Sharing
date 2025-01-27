@@ -67,7 +67,6 @@ export default function FileStorageOverview({ data, total, chart, ...other }) {
     },
     ...options,
   });
-  
 
   return (
     <Card {...other}>
@@ -80,7 +79,11 @@ export default function FileStorageOverview({ data, total, chart, ...other }) {
 
             <ListItemText
               primary={category.name}
-              secondary={`${category.filesCount} file`}
+              secondary={
+                category.type === 'folder'
+                  ? `${category.filesCount} folder`
+                  : `${category.filesCount} file`
+              }
               secondaryTypographyProps={{
                 mt: 0.5,
                 component: 'span',

@@ -5,7 +5,7 @@ export const useChartUsers = () => {
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['chart.users'],
     queryFn: async () => {
-      const response = await axiosInstance.get(endpoints.ChartUser.getChartUser);
+      const response = await axiosInstance.get(endpoints.statistik.userCount);
       return response.data; 
     },
   });

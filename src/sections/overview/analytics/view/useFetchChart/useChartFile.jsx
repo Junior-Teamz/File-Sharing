@@ -5,7 +5,7 @@ export const useChartFile = () => {
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['chart.file'],
     queryFn: async () => {
-      const response = await axiosInstance.get(endpoints.ChartFile.getChartFile);
+      const response = await axiosInstance.get(endpoints.statistik.getFileCount);
       return response.data; 
     },
   });

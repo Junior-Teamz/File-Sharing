@@ -5,7 +5,7 @@ export const useChartFolder = () => {
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['chart.folder'],
     queryFn: async () => {
-      const response = await axiosInstance.get(endpoints.ChartFolder.getChartFolder);
+      const response = await axiosInstance.get(endpoints.statistik.getFolderCount);
       return response.data; 
     },
   });
