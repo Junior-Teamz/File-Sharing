@@ -56,13 +56,13 @@ export default function OverviewAnalyticsView() {
 
   const { data: File } = useChartFile();
 
-  const { data: TagInstances } = useTagInstances();
+  const { data: chartTag } = useTagInstances();
 
   const { data: AllInstances } = useChartInstances();
 
   const { data: Storage } = useChartInstancesStorage();
 
-  const { data: chartTag } = useChartTag();
+  const { data: TagInstances } = useChartTag();
 
   const [selectedInstance, setSelectedInstance] = useState('all');
 
@@ -110,7 +110,7 @@ export default function OverviewAnalyticsView() {
         {
           name: 'Semua Folder',
           type: 'folder',
-          usedStorage: data.data?.formattedSize || '0kb',
+          usedStorage: data?.total_size_all_folders || '0kb',
           filesCount: data?.count_folder,
           icon: <Box component="img" src="/assets/icons/files/ic_folder.svg" />,
         },
@@ -282,18 +282,23 @@ export default function OverviewAnalyticsView() {
               title="Statistik Tag"
               subheader="Data Tag paling banyak dipakai oleh instansi"
               chart={{
-                series:
-                  TagInstances?.map((tag) => ({
-                    name: tag?.instances?.map((instance) => instance?.instance_name).join(', '),
-                    data: [
-                      tag?.instances?.reduce(
-                        (total, instance) => total + instance?.tag_use_count,
-                        0
-                      ) || 0,
-                    ],
-                  })) || [],
-
-                labels: TagInstances?.map((tag) => tag?.tag_name) || [], // Nama tag sebagai label
+                series: TagInstances.map((tag) => ({
+                  name:
+                    tag.instances.length > 0
+                      ? tag.instances.map((instance) => instance.instance_name).join(', ')
+                      : 'No Instances', // Nama default jika tidak ada instance
+                  data:
+                    tag.instances.length > 0
+                      ? tag.instances.map((instance) => {
+                          // Pastikan tag_use_count valid
+                          return typeof instance.tag_use_count === 'number' &&
+                            !isNaN(instance.tag_use_count)
+                            ? instance.tag_use_count
+                            : 0;
+                        })
+                      : [0], // Jika tidak ada instance, setel data ke [0]
+                })),
+                labels: TagInstances.map((tag) => tag.tag_name), // Menggunakan nama tag sebagai label
               }}
             />
           </Grid>

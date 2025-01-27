@@ -21,7 +21,11 @@ export default function AnalyticsConversionRates({ title, subheader, chart, ...o
         formatter: (value) => `${fNumber(value)} `,
       },
       title: {
-        formatter: () => '',
+        formatter: (index) => {
+          const tagName = labels[index]; // Mengambil nama tag dari label
+          const instanceNames = series.map((s) => s.name).join(", "); // Menggabungkan nama instansi
+          return `${tagName} - ${instanceNames}`;
+        },
       },
     },
     plotOptions: {
@@ -32,15 +36,16 @@ export default function AnalyticsConversionRates({ title, subheader, chart, ...o
       },
     },
     xaxis: {
-      categories: labels, // Menggunakan label di sumbu X
+      categories: labels, 
     },
-    yaxis: {
-      labels: {
-        formatter: (value) => fNumber(value),
-      },
-    },
+    // yaxis: {
+    //   labels: {
+    //     formatter: (value) => fNumber(value),
+    //   },
+    // },
     ...options,
   });
+  
 
   return (
     <Card {...other}>
