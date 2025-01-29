@@ -74,7 +74,16 @@ export default function TagListView() {
       queryClient.invalidateQueries({ queryKey: ['tag.admin'] });
     },
     onError: (error) => {
-      enqueueSnackbar(`Gagal memperbarui tag: ${error.message}`, { variant: 'error' });
+      const errorMessage = error?.errors?.name?.[0] || 'Terjadi kesalahan';
+      const errorDetails = error.response?.data?.errors;
+
+      if (errorDetails) {
+        Object.keys(errorDetails).forEach((field) => {
+          enqueueSnackbar(`${field}: ${errorDetails[field].join(', ')}`, { variant: 'error' });
+        });
+      } else {
+        enqueueSnackbar(`Gagal memperbarui instansi: ${errorMessage}`, { variant: 'error' });
+      }
     },
   });
 
@@ -314,16 +323,16 @@ export default function TagListView() {
           <TextField
             autoFocus
             margin="dense"
-            label="Tag Name"
+            label="Nama Tag"
             fullWidth
             variant="outlined"
             {...register('name')}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleEditDialogClose}>Cancel</Button>
-          <Button onClick={handleSubmit(handleEditSubmit)} color="primary">
-            Save
+          <Button onClick={handleEditDialogClose}>Batal</Button>
+          <Button onClick={handleSubmit(handleEditSubmit)} variant="contained">
+            Simpan
           </Button>
         </DialogActions>
       </Dialog>

@@ -80,7 +80,7 @@ export default function TagCreateForm() {
             </Box>
 
             <Stack alignItems="flex-end" sx={{ mt: 3 }}>
-              <Button variant="outlined" type="submit">
+              <Button variant="contained" type="submit">
                 {isPending ? 'Buat Tag...' : 'Buat Tag'}
               </Button>
             </Stack>

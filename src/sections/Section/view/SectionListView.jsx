@@ -54,15 +54,15 @@ export default function SectionListView() {
 
   // Fetch tag data
   const { data, isLoading, isFetching, refetch, isError } = useGetSection();
-  console.log(data);
+
   const { mutate: deleteTag, isPending: loadingDelete } = useDeleteSection({
     onSuccess: () => {
       enqueueSnackbar('Unit Kerja Berhasil Dihapus', { variant: 'success' });
       refetch();
-      queryClient.invalidateQueries({ queryKey: ['get.section'] });
+      queryClient.invalidateQueries({ queryKey: ['list.section'] });
     },
     onError: (error) => {
-      enqueueSnackbar(`Gagal menghapus tag: ${error.message}`, { variant: 'error' });
+      enqueueSnackbar(`Gagal menghapus Unit Kerja: ${error.message}`, { variant: 'error' });
     },
   });
 
@@ -71,10 +71,10 @@ export default function SectionListView() {
       enqueueSnackbar('Unit Kerja Berhasil Diperbarui', { variant: 'success' });
       refetch();
       handleEditDialogClose();
-      queryClient.invalidateQueries({ queryKey: ['get.section'] });
+      queryClient.invalidateQueries({ queryKey: ['list.section'] });
     },
     onError: (error) => {
-      enqueueSnackbar(`Gagal memperbarui tag: ${error.message}`, { variant: 'error' });
+      enqueueSnackbar(`Gagal memperbarui Unit Kerja: ${error.message}`, { variant: 'error' });
     },
   });
 
@@ -98,25 +98,39 @@ export default function SectionListView() {
 
   const handleEdit = (id) => {
     const tagToEdit = tags.find((tag) => tag.id === id);
-    if (tagToEdit) {
+    if (tagToEdit && tagToEdit.instance_id) {
       setValue('nama', tagToEdit.nama);
       setPopover((prev) => ({ ...prev, currentId: id }));
       setEditDialogOpen(true);
+
+      // console.log('Editing ID:', popover.currentId);
     } else {
-      enqueueSnackbar('Unit Kerja tidak ditemukan', { variant: 'error' });
+      enqueueSnackbar('Unit Kerja tidak ditemukan atau instance_id tidak valid', {
+        variant: 'error',
+      });
     }
   };
 
   const handleDelete = (id) => {
+    if (!id) {
+      console.error('ID is undefined');
+      return;
+    }
+    console.log('Preparing to delete tag with ID:', id);
     setSelectedTagId(id);
     setDeleteConfirmOpen(true);
     handlePopoverClose();
   };
 
   const confirmDelete = () => {
-    deleteTag(selectedTagId);
-    setDeleteConfirmOpen(false);
-    setSelectedTagId(null);
+    if (selectedTagId) {
+      console.log('Confirming delete for tag with ID:', selectedTagId);
+      deleteTag(selectedTagId);
+      setDeleteConfirmOpen(false);
+      // setSelectedTagId(null);
+    } else {
+      console.error('No ID selected for deletion.');
+    }
   };
 
   const handlePopoverOpen = (event, id) => {
@@ -133,8 +147,16 @@ export default function SectionListView() {
 
   const handleEditSubmit = (data) => {
     if (popover.currentId) {
-      editTag({ tagId: popover.currentId, data });
-      setEditDialogOpen(false);
+      const tagToEdit = tags.find((tag) => tag.id === popover.currentId);
+      if (tagToEdit?.instance_id) {
+        editTag({ id: popover.currentId, data: { new_name: data.nama } });
+        // console.log('Editing ID:', editTag);
+        setEditDialogOpen(false);
+      } else {
+        enqueueSnackbar('instance_id tidak ditemukan, tidak dapat mengedit tag', {
+          variant: 'error',
+        });
+      }
     } else {
       enqueueSnackbar('Id tag tidak ditemukan untuk mengedit tag', { variant: 'error' });
     }
@@ -246,7 +268,7 @@ export default function SectionListView() {
             ) : null}
             {selectedTags.length > 0 && (
               <Button variant="contained" color="error" onClick={handleDeleteSelected}>
-                Delete Selected
+                Hapus yang Dipilih
               </Button>
             )}
           </Toolbar>
@@ -282,8 +304,6 @@ export default function SectionListView() {
                             />
                           </TableCell>
                           <TableCell>{tag.nama}</TableCell>
-                          {/* <TableCell>{tag.instance?.name}</TableCell>
-                          <TableCell>{tag.instance?.address}</TableCell> */}
                           <TableCell align="right">
                             <Tooltip title="More Actions" placement="top">
                               <IconButton onClick={(event) => handlePopoverOpen(event, tag.id)}>
@@ -296,7 +316,7 @@ export default function SectionListView() {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={5} align="center">
-                      <EmptyContent title="Tidak ada data"/>
+                        <EmptyContent title="Tidak ada data" />
                       </TableCell>
                     </TableRow>
                   )}
@@ -324,16 +344,16 @@ export default function SectionListView() {
           <TextField
             autoFocus
             margin="dense"
-            label="Unit Kerja Nama"
+            label="Nama Unit Kerja"
             fullWidth
             variant="outlined"
             {...register('nama')}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleEditDialogClose}>Cancel</Button>
-          <Button onClick={handleSubmit(handleEditSubmit)} color="primary">
-            Save
+          <Button onClick={handleEditDialogClose}>Batal</Button>
+          <Button onClick={handleSubmit(handleEditSubmit)} variant="contained">
+            Simpan
           </Button>
         </DialogActions>
       </Dialog>
@@ -356,13 +376,14 @@ export default function SectionListView() {
         </MenuItem>
         <MenuItem
           onClick={() => {
+            setSelectedTagId(popover.currentId); // Directly setting the currentId to selectedTagId here
             handleDelete(popover.currentId);
             handlePopoverClose();
           }}
           sx={{ color: 'error.main' }}
         >
           <Iconify icon="eva:trash-2-outline" />
-          Delete
+          Hapus
         </MenuItem>
       </CustomPopover>
 

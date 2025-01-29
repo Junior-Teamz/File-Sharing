@@ -86,7 +86,7 @@ export default function InstanceCreateForm() {
             </Box>
 
             <Stack alignItems="flex-end" sx={{ mt: 3 }}>
-              <Button variant="outlined" type="submit">
+              <Button variant="contained" type="submit">
                 {isPending ? 'Creating Instansi...' : 'Buat Instansi'}
               </Button>
             </Stack>

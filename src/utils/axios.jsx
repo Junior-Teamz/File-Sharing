@@ -63,7 +63,7 @@ axiosInstance.interceptors.response.use(
         }
       } else if (error.response.status === 403) {
         // Redirect ke halaman 403
-        window.location = '/403'; // Sesuaikan path sesuai kebutuhan
+        // window.location = '/403'; // Sesuaikan path sesuai kebutuhan
       } else if (error.response.status === 500) {
         // Redirect ke halaman 500
         // window.location = '/500'; // Sesuaikan path sesuai kebutuhan

@@ -18,15 +18,15 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import { useTable, getComparator } from 'src/components/table';
 //
-import FileManagerTable from '../file-manager-table';
 import FileManagerFilters from '../file-manager-filters';
 import FileManagerGridView from '../file-manager-grid-view';
 import FileManagerFiltersResult from '../file-manager-filters-result';
 import FileManagerNewFolderDialog from '../file-manager-new-folder-dialog';
-import { FolderFileShare } from 'src/_mock/map/FolderFileShare';
-import { Box } from '@mui/material';
+import { Box, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
+import FileManagerFileDialog from '../FileManagerFileDialog';
 import { alpha, useTheme } from '@mui/material/styles';
 import { bgGradient } from 'src/theme/css';
+import { FolderFileShare } from 'src/_mock/map/FolderFileShare';
 
 // ----------------------------------------------------------------------
 
@@ -55,17 +55,27 @@ export default function FileManagerView() {
 
   const [view, setView] = useState('list');
 
-  const [tableData, setTableData] = useState(Array.isArray(FolderFiles) ? FolderFiles : []);
+  const [tableData, setTableData] = useState(FolderFiles);
+
+  const [filters, setFilters] = useState(defaultFilters);
+
+  const [selectedTags, setSelectedTags] = useState([]);
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     if (FolderFiles && FolderFiles.length !== tableData.length) {
       setTableData(FolderFiles);
     }
   }, [FolderFiles]);
-
-  const [filters, setFilters] = useState(defaultFilters);
-
-  const [selectedTags, setSelectedTags] = useState([]);
 
   const dateError =
     filters.startDate && filters.endDate
@@ -126,7 +136,7 @@ export default function FileManagerView() {
   }, []);
 
   const handleTagChange = (tags) => {
-    setSelectedTags(tags); // Update the selected tags state
+    setSelectedTags(tags);
   };
 
   const renderFilters = (
@@ -190,9 +200,50 @@ export default function FileManagerView() {
             zIndex: -1,
           }}
         />
+
         <Container maxWidth={settings.themeStretch ? false : 'lg'}>
           <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Typography variant="h4">Dibagikan kepada saya</Typography>
+            <Typography variant="h4">File manajer</Typography>
+            {/* <Button
+              variant="contained"
+              startIcon={<Iconify icon="eva:plus-fill" />}
+              onClick={handleClick}
+            >
+              New
+            </Button> */}
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+              // MenuListProps={{
+              //   sx: { padding: 1 },
+              // }}
+            >
+              <MenuItem
+                onClick={() => {
+                  upload.onTrue();
+                  handleClose();
+                }}
+                sx={{ padding: '6px 6px' }}
+              >
+                <ListItemIcon>
+                  <Iconify icon="eva:cloud-upload-fill" fontSize="large" />
+                </ListItemIcon>
+                <ListItemText primary="Upload File" primaryTypographyProps={{ fontSize: '1rem' }} />
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  create.onTrue();
+                  handleClose();
+                }}
+                sx={{ padding: '6px 6px' }}
+              >
+                <ListItemIcon>
+                  <Iconify icon="eva:folder-add-fill" fontSize="large" />
+                </ListItemIcon>
+                <ListItemText primary="Buat Folder" primaryTypographyProps={{ fontSize: '1rem' }} />
+              </MenuItem>
+            </Menu>
           </Stack>
 
           <Stack
@@ -207,7 +258,7 @@ export default function FileManagerView() {
           </Stack>
 
           {notFound ? (
-            <EmptyContent filled title="No Data" sx={{ py: 10 }} />
+            <EmptyContent filled title="Tidak ada data" sx={{ py: 10 }} />
           ) : (
             <FileManagerGridView
               table={table}
@@ -219,13 +270,26 @@ export default function FileManagerView() {
           )}
         </Container>
 
+        <FileManagerNewFolderDialog
+          title="Buat Folder Baru "
+          onTagChange={handleTagChange}
+          open={upload.value}
+          onClose={upload.onFalse}
+        />
+
+        <FileManagerFileDialog
+          onTagChange={handleTagChange}
+          open={upload.value}
+          onClose={upload.onFalse}
+        />
+
         <ConfirmDialog
           open={confirm.value}
           onClose={confirm.onFalse}
           title="Delete"
           content={
             <>
-              Are you sure want to delete <strong> {table.selected.length} </strong> items?
+              Apakah Anda yakin ingin menghapus? <strong> {table.selected.length} </strong> items?
             </>
           }
           action={
@@ -275,8 +339,8 @@ function applyFilter({ inputData, comparator, filters, dateError }) {
     if (startDate && endDate) {
       inputData = inputData.filter(
         (file) =>
-          fTimestamp(file.createdAt) >= fTimestamp(startDate) &&
-          fTimestamp(file.createdAt) <= fTimestamp(endDate)
+          fTimestamp(file.created_at) >= fTimestamp(startDate) &&
+          fTimestamp(file.created_at) <= fTimestamp(endDate)
       );
     }
   }

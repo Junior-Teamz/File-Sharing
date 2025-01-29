@@ -19,19 +19,25 @@ import { fDateTime } from 'src/utils/format-time';
 import { useBoolean } from 'src/hooks/use-boolean';
 // components
 import Iconify from 'src/components/iconify';
+import EditIcon from '@mui/icons-material/Edit';
 import Scrollbar from 'src/components/scrollbar';
 import FileThumbnail, { fileFormat } from 'src/components/file-thumbnail';
 import FileManagerShareDialog from './file-manager-share-dialog';
 import FileManagerInvitedItem from './file-manager-invited-item';
-import { useSnackbar } from 'notistack'; // Import useSnackbar from notistack
-import { Dialog, DialogActions, DialogContent, DialogTitle, Modal } from '@mui/material';
-import { useMutationDeleteFiles, usePreviewImage } from '../file-manager/view/folderDetail';
-import { useAddFavorite, useRemoveFavorite } from '../file-manager/view/favoritemutation';
+import {
+  useAddFileTag,
+  useRemoveTagFile,
+  useMutationDeleteFiles,
+  useChangeNameFile,
+  useDownloadFile,
+} from './view/folderDetail/index';
+import { useIndexTag } from '../tag/view/TagMutation';
+import { useSnackbar } from 'notistack';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Modal, Tooltip } from '@mui/material';
+import { useAddFavorite, useRemoveFavorite } from './view/favoritemutation';
 import { useQueryClient } from '@tanstack/react-query';
 import CloseIcon from '@mui/icons-material/Close';
 import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
-import { useIndexTag } from '../tag/view/TagMutation';
-import { useDownloadFile } from '../favorite/view/folderDetail';
 
 // ----------------------------------------------------------------------
 
@@ -45,6 +51,7 @@ export default function FIleManagerFileDetails({
   onDelete,
   ...other
 }) {
+  const { enqueueSnackbar } = useSnackbar();
   const {
     name,
     size,
@@ -52,34 +59,40 @@ export default function FIleManagerFileDetails({
     id,
     type,
     shared,
-    shared_with = [],
-    modifiedAt,
+    shared_with,
+    modified_at,
     email,
+    video_url,
     user,
     instance,
     tags: initialTags,
-    created_at,
     updated_at,
+    created_at,
     is_favorite,
-    video_url,
     file_url,
   } = item;
 
-  const { enqueueSnackbar } = useSnackbar();
-  const hasPermission = (permissionType) => {
-    return shared_with.some(({ permissions }) => permissions.includes(permissionType));
-  };
+  const isFolder = item.type === 'folder';
+  // Menyaring elemen dalam array shared_with untuk mencari permission yang sesuai
+  const permission = shared_with.find((item) => item.permissions === 'read');
+  const PermissionRead = permission !== undefined;
+  const PermissionEdit = shared_with.some((item) => item.permissions === 'write');
+  const permissionIcon = shared_with.find(
+    (item) => item.permissions === 'read' || item.permissions === 'write'
+  );
+  const showIcon = !permission;
+  console.log(PermissionRead, PermissionEdit);
   const [isOpen, setIsOpen] = useState(false);
+  const [newFileName, setNewFileName] = useState(item.name);
+  const [originalFileType, setOriginalFileType] = useState(item.type);
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
-  const isFolder = item.type === 'folder';
+  const { mutateAsync: updateNameFile } = useChangeNameFile();
   const { mutateAsync: addFavorite } = useAddFavorite();
   const { mutateAsync: removeFavorite } = useRemoveFavorite();
   const [tags, setTags] = useState(initialTags.map((tag) => tag.id));
   const [availableTags, setAvailableTags] = useState([]);
-  const useClient = useQueryClient();
-  const { mutateAsync: downloadFile } = useDownloadFile();
-  const { data: tagData, isLoading, isError } = useIndexTag();
+  const queryClient = useQueryClient();
   const toggleTags = useBoolean(true);
   const share = useBoolean();
   const properties = useBoolean(true);
@@ -88,11 +101,34 @@ export default function FIleManagerFileDetails({
   const [inviteEmail, setInviteEmail] = useState('');
   const favorite = useBoolean(is_favorite);
   const [issLoading, setIsLoading] = useState(false);
+  const { mutateAsync: downloadFile } = useDownloadFile();
+  const { data: tagData, isLoading, isError } = useIndexTag();
+  const addTagFile = useAddFileTag();
+  const { mutateAsync: removeTagFile } = useRemoveTagFile();
   const { mutateAsync: deleteFile } = useMutationDeleteFiles();
-  const [isConfirmOpenn, setConfirmOpenn] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    setNewFileName(item.name);
+    setOriginalFileType(item.type);
+  }, [item]);
+
+  useEffect(() => {
+    if (!isLoading && !isError && tagData && Array.isArray(tagData.data)) {
+      setAvailableTags(tagData.data);
+    } else if (isError) {
+      console.error('Error fetching tag data:', isError);
+    }
+  }, [tagData, isLoading, isError]);
 
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value);
+  }, []);
+
+  const handleChangeTags = useCallback((event, newValue) => {
+    if (Array.isArray(newValue)) {
+      setTags(newValue.map((tag) => tag.id));
+    }
   }, []);
 
   const handleOpenConfirmDialog = (fileId) => {
@@ -105,85 +141,23 @@ export default function FIleManagerFileDetails({
     setFileIdToDelete(null);
   };
 
-  useEffect(() => {
-    if (!isLoading && !isError && tagData && Array.isArray(tagData.data)) {
-      setAvailableTags(tagData.data);
-    } else if (isError) {
-      console.error('Error fetching tag data:', isError);
-    }
-  }, [tagData, isLoading, isError]);
+  const handleRename = useCallback(async () => {
+    const newFileType = newFileName.split('.').pop();
 
-  const handleSaveTags = async () => {
-    if (!addTagFile.mutateAsync) {
-      console.error('addTagFile.mutateAsync is not a function');
+    if (newFileType !== originalFileType.split('.').pop()) {
+      enqueueSnackbar('Type file tidak boleh diubah!', { variant: 'error' });
       return;
     }
 
     try {
-      const existingTagIds = new Set(initialTags.map((tag) => tag.id));
-      const newTagIds = tags.filter((tagId) => !existingTagIds.has(tagId));
-
-      if (newTagIds.length > 0) {
-        for (const tagId of newTagIds) {
-          await addTagFile.mutateAsync({
-            file_id: item.id,
-            tag_id: tagId,
-          });
-        }
-        enqueueSnackbar('Tag berhasil ditambahkan!', { variant: 'success' });
-      } else {
-        enqueueSnackbar('Tidak ada tag baru untuk ditambahkan.', { variant: 'info' });
-      }
+      await updateNameFile({ fileId: item.id, data: { name: newFileName } });
+      enqueueSnackbar('Nama file berhasil diperbarui!', { variant: 'success' });
+      setIsEditing(false);
+      queryClient.invalidateQueries({ queryKey: ['folder.admin'] });
     } catch (error) {
-      console.error('Error adding tags:', error);
-      if (error.response && error.response.data.errors) {
-        if (error.response.data.errors.tag_id) {
-          enqueueSnackbar('Tag sudah ada di file.', { variant: 'warning' });
-        }
-      }
-      enqueueSnackbar('Error saat menambahkan tag', { variant: 'error' });
+      enqueueSnackbar('Gagal memperbarui nama file!', { variant: 'error' });
     }
-  };
-
-  const handleDeleteFile = async () => {
-    try {
-      await deleteFile({ file_id: fileIdToDelete });
-      enqueueSnackbar('File deleted successfully!', { variant: 'success' });
-      handleCloseConfirmDialog();
-      onDelete();
-      useClient.invalidateQueries({ queryKey: ['folder.admin'] });
-    } catch (error) {
-      console.error('Error deleting file:', error);
-      enqueueSnackbar('Error deleting file.', { variant: 'error' });
-    }
-  };
-
-  const handleChangeTags = useCallback((event, newValue) => {
-    if (Array.isArray(newValue)) {
-      setTags(newValue.map((tag) => tag.id));
-    }
-  }, []);
-
-  const handleRemoveTag = async (tagId) => {
-    if (!hasPermission('edit')) {
-      enqueueSnackbar('Anda tidak memiliki izin untuk menghapus tag.', { variant: 'error' });
-      return;
-    }
-
-    if (tags.length <= 1) {
-      enqueueSnackbar('Kamu harus menyisakan satu tag', { variant: 'warning' });
-      return;
-    }
-
-    try {
-      await removeTagFile({ file_id: item.id, tag_id: tagId });
-      setTags((prevTags) => prevTags.filter((id) => id !== tagId));
-      enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
-    } catch (error) {
-      console.error('Error removing tag:', error);
-      enqueueSnackbar('Error saat menghapus tag.', { variant: 'error' });
-    }
-  };
+  }, [item.id, newFileName, originalFileType, updateNameFile, enqueueSnackbar, queryClient]);
 
   const handleDownload = useCallback(async () => {
     try {
@@ -210,6 +184,114 @@ export default function FIleManagerFileDetails({
     }
   }, [downloadFile, item, enqueueSnackbar]);
 
+  const handleSaveTags = async () => {
+    try {
+      const existingTagIds = new Set(initialTags.map((tag) => tag.id));
+      const newTagIds = tags.filter((tagId) => !existingTagIds.has(tagId));
+
+      if (newTagIds.length > 0) {
+        for (const tagId of newTagIds) {
+          await addTagFile.mutateAsync({
+            file_id: item.id,
+            tag_id: tagId,
+          });
+        }
+        enqueueSnackbar('Tag berhasil ditambahkan!', { variant: 'success' });
+        queryClient.invalidateQueries({ queryKey: ['folder.admin'] });
+      } else {
+        enqueueSnackbar('Tidak ada tag baru untuk ditambahkan.', { variant: 'info' });
+      }
+    } catch (error) {
+      console.error('Error adding tags:', error);
+      if (error.response && error.response.data.errors) {
+        if (error.response.data.errors.tag_id) {
+          enqueueSnackbar('Tag sudah ada di file.', { variant: 'warning' });
+        }
+      }
+      enqueueSnackbar('Error saat menambahkan tag', { variant: 'error' });
+    }
+  };
+
+  const handleDeleteFile = async () => {
+    try {
+      await deleteFile(fileIdToDelete);
+      enqueueSnackbar('File berhasil dihapus!', { variant: 'success' });
+      handleCloseConfirmDialog();
+      onDelete();
+      queryClient.invalidateQueries({ queryKey: ['folder.admin'] });
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      enqueueSnackbar('Gagal menghapus file', { variant: 'error' });
+    }
+  };
+
+  const handleRemoveTag = async (tagId) => {
+    if (tags.length <= 1) {
+      enqueueSnackbar('Kamu harus menyisakan satu tag', { variant: 'warning' });
+      return;
+    }
+
+    try {
+      await removeTagFile({ file_id: item.id, tag_id: tagId });
+      setTags((prevTags) => prevTags.filter((id) => id !== tagId));
+      enqueueSnackbar('Tag berhasil dihapus!', { variant: 'success' });
+      queryClient.invalidateQueries({ queryKey: ['folder.admin'] });
+    } catch (error) {
+      console.error('Error removing tag:', error);
+      enqueueSnackbar('Error removing tag.', { variant: 'error' });
+    }
+  };
+
+  const handleCopyLink = () => {
+    const fileUrl = item.id;
+
+    if (!fileUrl) {
+      enqueueSnackbar('No URL to copy.', { variant: 'warning' });
+      return;
+    }
+
+    navigator.clipboard
+      .writeText(fileUrl)
+      .then(() => enqueueSnackbar('Link copied to clipboard!', { variant: 'success' }))
+      .catch((err) => {
+        console.error('Failed to copy link:', err);
+        enqueueSnackbar('Failed to copy link.', { variant: 'error' });
+      });
+  };
+
+  useEffect(() => {
+    favorite.setValue(is_favorite);
+  }, [is_favorite]);
+
+  const handleFavoriteToggle = useCallback(async () => {
+    setIsLoading(true);
+
+    try {
+      if (favorite.value) {
+        await removeFavorite({ file_id: id });
+        enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
+        queryClient.invalidateQueries({ queryKey: ['folder.admin'] });
+      } else {
+        // Tambahkan ke favorit
+        await addFavorite({ file_id: id });
+        enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });
+        queryClient.invalidateQueries({ queryKey: ['folder.admin'] });
+      }
+
+      favorite.onToggle();
+    } catch (error) {
+      if (error.response && error.response.data.errors && error.response.data.errors.file_id) {
+        enqueueSnackbar('file id harus di isi.', { variant: 'error' });
+      } else {
+        enqueueSnackbar('Error saat menambahkan favorite!', { variant: 'error' });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [favorite.value, id, addFavorite, removeFavorite, enqueueSnackbar]);
+
+  const [isConfirmOpenn, setConfirmOpenn] = useState(false);
+
   const openConfirmDialogg = () => {
     setConfirmOpenn(true);
   };
@@ -218,42 +300,7 @@ export default function FIleManagerFileDetails({
     setConfirmOpenn(false);
   };
 
-  useEffect(() => {
-    favorite.setValue(is_favorite);
-  }, [is_favorite]);
-
-  const handleFavoriteToggle = useCallback(async () => {
-    if (!hasPermission('read') && !hasPermission('edit')) {
-      enqueueSnackbar('Anda tidak memiliki izin untuk mengubah status favorit.', {
-        variant: 'error',
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      if (favorite.value) {
-        await removeFavorite({ file_id: id });
-        enqueueSnackbar('File berhasil dihapus dari favorit!', { variant: 'success' });
-      } else {
-        await addFavorite({ file_id: id });
-        enqueueSnackbar('File berhasil ditambahkan ke favorit', { variant: 'success' });
-      }
-
-      favorite.onToggle();
-    } catch (error) {
-      if (error.response && error.response.data.errors && error.response.data.errors.file_id) {
-        enqueueSnackbar('File ID harus diisi.', { variant: 'error' });
-      } else {
-        enqueueSnackbar('Error saat menambahkan favorit!', { variant: 'error' });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [favorite.value, id, addFavorite, removeFavorite, enqueueSnackbar]);
-
-  const renderTags = (
+  const renderTags = permissionIcon && (
     <Stack spacing={1.5}>
       <Stack
         direction="row"
@@ -291,7 +338,8 @@ export default function FIleManagerFileDetails({
           renderInput={(params) => <TextField {...params} placeholder="Tambahkan tag" />}
         />
       )}
-      <Button onClick={handleSaveTags}>simpan tags</Button>
+
+      <Button onClick={handleSaveTags}>simpan tag</Button>
     </Stack>
   );
 
@@ -350,25 +398,27 @@ export default function FIleManagerFileDetails({
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 2.5 }}>
         <Typography variant="subtitle2"> File dibagikan dengan </Typography>
 
-        <IconButton
-          size="small"
-          color="primary"
-          onClick={share.onTrue}
-          sx={{
-            width: 24,
-            height: 24,
-            bgcolor: 'primary.main',
-            color: 'primary.contrastText',
-            '&:hover': {
-              bgcolor: 'primary.dark',
-            },
-          }}
-        >
-          <Iconify icon="mingcute:add-line" />
-        </IconButton>
+        {PermissionEdit && (
+          <IconButton
+            size="small"
+            color="primary"
+            onClick={share.onTrue}
+            sx={{
+              width: 24,
+              height: 24,
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+              '&:hover': {
+                bgcolor: 'primary.dark',
+              },
+            }}
+          >
+            <Iconify icon="mingcute:add-line" />
+          </IconButton>
+        )}
       </Stack>
 
-      {Array.isArray(shared_with) && shared_with.length > 0 ? (
+      {shared_with.length > 0 ? (
         shared_with.map((share) => (
           <FileManagerInvitedItem
             key={share.user.id}
@@ -409,7 +459,6 @@ export default function FIleManagerFileDetails({
             onChange={handleFavoriteToggle}
           />
         </Stack>
-
         <Stack
           spacing={2.5}
           justifyContent="center"
@@ -551,14 +600,41 @@ export default function FIleManagerFileDetails({
             </Button>
           )}
 
-          <Typography variant="subtitle2">{name}</Typography>
+          {isEditing ? (
+            permissionIcon !== undefined ? null : ( // Sembunyikan TextField jika permission 'read' atau 'write'
+              <TextField
+                value={newFileName}
+                onChange={(e) => setNewFileName(e.target.value)}
+                onBlur={handleRename}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleRename();
+                  }
+                }}
+                size="small"
+                autoFocus
+              />
+            )
+          ) : (
+            <Typography variant="subtitle2">
+              {name}
+              {showIcon && (
+                <Tooltip title="Edit nama file">
+                  <IconButton size="small" onClick={() => setIsEditing(true)}>
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Typography>
+          )}
+
           <Typography variant="body2" color="text.secondary">
             {fData(size)}
           </Typography>
 
-          <Divider sx={{ borderStyle: 'dashed' }} />
+          {/* <Divider sx={{ borderStyle: 'dashed' }} />
 
-          {renderTags}
+          {renderTags} */}
 
           <Divider sx={{ borderStyle: 'dashed' }} />
 
@@ -571,7 +647,7 @@ export default function FIleManagerFileDetails({
             </Stack>
             <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
               <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
-                Name
+                Nama
               </Box>
               {user?.name}
             </Stack>
@@ -592,7 +668,7 @@ export default function FIleManagerFileDetails({
                   key={instanceItem.id}
                   sx={{ typography: 'caption', textTransform: 'capitalize' }}
                 >
-                  <Box component="span" sx={{ width: 50, color: 'text.secondary', mr: 2 }}>
+                  <Box component="span" sx={{ width: 100, color: 'text.secondary', mr: 2 }}>
                     {instanceItem?.name}
                   </Box>
                 </Stack>
@@ -602,27 +678,29 @@ export default function FIleManagerFileDetails({
             )}
           </Stack>
 
-          {/* <FileManagerShareDialog
-            open={share.value}
-            fileId={id}
-            shared={shared_with}
-            inviteEmail={inviteEmail}
-            onChangeInvite={handleChangeInvite}
-            onCopyLink={handleCopyLink}
-            onClose={() => {
-              share.onFalse();
-              setInviteEmail('');
-            }}
-          />
+          {PermissionRead && (
+            <FileManagerShareDialog
+              open={share.value}
+              fileId={id}
+              shared={shared_with}
+              inviteEmail={inviteEmail}
+              onChangeInvite={handleChangeInvite}
+              onCopyLink={handleCopyLink}
+              onClose={() => {
+                share.onFalse();
+                setInviteEmail('');
+              }}
+            />
+          )}
 
-          {renderShared} */}
+          {renderShared}
 
           <Button fullWidth size="small" color="inherit" variant="outlined" onClick={onClose}>
             Tutup
           </Button>
 
           <Box sx={{ p: 2.5 }}>
-            {/* <Button
+            <Button
               fullWidth
               variant="soft"
               color="error"
@@ -631,24 +709,25 @@ export default function FIleManagerFileDetails({
               onClick={() => handleOpenConfirmDialog(item.id)}
             >
               Hapus
-            </Button> */}
+            </Button>
           </Box>
         </Stack>
       </Scrollbar>
-      {/* <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
+
+      <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
         <DialogTitle>Konfirmasi Hapus</DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to delete this file?</Typography>
+          <Typography>Apakah Anda yakin ingin menghapus file ini?</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseConfirmDialog} color="primary">
             Batal
           </Button>
-          <Button onClick={handleDeleteFile} color="error">
+          <Button onClick={handleDeleteFile} color="error" variant="contained">
             Hapus
           </Button>
         </DialogActions>
-      </Dialog> */}
+      </Dialog>
 
       <Dialog open={isConfirmOpenn} onClose={closeConfirmDialogg}>
         <DialogTitle>Konfirmasi Download</DialogTitle>

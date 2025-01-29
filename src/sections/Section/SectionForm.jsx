@@ -86,7 +86,7 @@ export default function SectionForm() {
                 sm: 'repeat(2, 1fr)',
               }}
             >
-              <RHFSelect name="instance_id" label="Instance ID" disabled={isLoading}>
+              <RHFSelect name="instance_id" label="Instansi" disabled={isLoading}>
                 {isLoading ? (
                   <MenuItem value="">Loading...</MenuItem>
                 ) : (
@@ -102,7 +102,7 @@ export default function SectionForm() {
             </Box>
 
             <Stack alignItems="flex-end" sx={{ mt: 3 }}>
-              <Button variant="outlined" type="submit" disabled={isPending}>
+              <Button variant="contained" type="submit" disabled={isPending}>
                 {isPending ? 'Buat Unit Kerja...' : 'Buat Unit Kerja'}
               </Button>
             </Stack>

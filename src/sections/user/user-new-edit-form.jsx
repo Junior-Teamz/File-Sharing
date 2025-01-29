@@ -168,15 +168,15 @@ export default function UserNewEditForm({ currentUser }) {
                 sm: 'repeat(2, 1fr)',
               }}
             >
-              <RHFTextField name="name" label="Nama" />
-              <RHFTextField name="email" label="Email" />
-              <RHFTextField name="password" label="Password" type="password" />
-              <RHFTextField name="confirmPassword" label="Konfirmasi Password" type="password" />
-              <RHFSelect name="role" label="Role">
+              <RHFTextField name="name" label="Nama*" />
+              <RHFTextField name="email" label="Email*" />
+              <RHFTextField name="password" label="Password*" type="password" />
+              <RHFTextField name="confirmPassword" label="Konfirmasi Password*" type="password" />
+              <RHFSelect name="role" label="Role*">
                 <MenuItem value="admin">Admin</MenuItem>
                 <MenuItem value="user">User</MenuItem>
               </RHFSelect>
-              <RHFSelect name="instance_id" label="Instansi" disabled={isLoadingInstance}>
+              <RHFSelect name="instance_id" label="Instansi*" disabled={isLoadingInstance}>
                 {!isLoadingInstance &&
                   instanceList?.data?.map((instance) => (
                     <MenuItem key={instance.id} value={instance.id}>
@@ -187,7 +187,7 @@ export default function UserNewEditForm({ currentUser }) {
 
               <RHFSelect
                 name="instance_section_id"
-                label="Instance Section"
+                label="Unit Kerja*"
                 disabled={isLoadingSection}
               >
                 {!isLoadingSection &&
@@ -203,7 +203,7 @@ export default function UserNewEditForm({ currentUser }) {
                 <FormControl fullWidth margin="dense">
                   <RHFAutocomplete
                     name="permissions"
-                    label="Permissions"
+                    label="Permissions*"
                     multiple
                     options={permissionList}
                     getOptionLabel={(option) => option?.name || 'No name available'}
@@ -220,7 +220,7 @@ export default function UserNewEditForm({ currentUser }) {
                         error={!!errors.permissions}
                         helperText={errors.permissions?.message}
                         variant="outlined"
-                        placeholder="Pilih Permissions"
+                        placeholder="Pilih Permissions*"
                       />
                     )}
                     renderTags={(value, getPermissionProps) => (

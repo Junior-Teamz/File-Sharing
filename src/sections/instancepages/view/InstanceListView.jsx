@@ -51,7 +51,16 @@ export default function InstanceListView() {
       refetch();
     },
     onError: (error) => {
-      enqueueSnackbar(`Gagal menghapus instansi: ${error.message}`, { variant: 'error' });
+      const errorMessage = error.response?.data?.message || 'Terjadi kesalahan';
+      const errorDetails = error.response?.data?.errors;
+
+      if (errorDetails) {
+        Object.keys(errorDetails).forEach((field) => {
+          enqueueSnackbar(`${field}: ${errorDetails[field].join(', ')}`, { variant: 'error' });
+        });
+      } else {
+        enqueueSnackbar(`Gagal menghapus instansi: ${errorMessage}`, { variant: 'error' });
+      }
     },
   });
   const { mutate: editInstansi, isPending: loadingEdit } = useEditInstance({
@@ -61,7 +70,16 @@ export default function InstanceListView() {
       handleEditDialogClose();
     },
     onError: (error) => {
-      enqueueSnackbar(`Gagal memperbarui instansi: ${error.message}`, { variant: 'error' });
+      const errorMessage = error?.errors?.name?.[0] || 'Terjadi kesalahan';
+      const errorDetails = error.response?.data?.errors;
+
+      if (errorDetails) {
+        Object.keys(errorDetails).forEach((field) => {
+          enqueueSnackbar(`${field}: ${errorDetails[field].join(', ')}`, { variant: 'error' });
+        });
+      } else {
+        enqueueSnackbar(`Gagal memperbarui instansi: ${errorMessage}`, { variant: 'error' });
+      }
     },
   });
 
@@ -174,7 +192,6 @@ export default function InstanceListView() {
               <Table>
                 <TableHead>
                   <TableRow>
-                 
                     <TableCell>Nama</TableCell>
                     <TableCell>Alamat</TableCell>
                     <TableCell align="center">Aksi</TableCell>
@@ -185,7 +202,6 @@ export default function InstanceListView() {
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((instance, idx) => (
                       <TableRow key={instance.id}>
-                    
                         <TableCell>{instance.name}</TableCell>
                         <TableCell
                           sx={{
@@ -256,7 +272,7 @@ export default function InstanceListView() {
                 <Button variant="outlined" onClick={handleEditDialogClose}>
                   Batal
                 </Button>
-                <Button variant="outlined" type="submit">
+                <Button variant="contained" type="submit">
                   {loadingEdit ? 'Mengedit' : 'Edit'}
                 </Button>
               </DialogActions>
@@ -292,7 +308,10 @@ export default function InstanceListView() {
             <Iconify icon="eva:edit-fill" />
             Edit
           </MenuItem>
-          <MenuItem onClick={() => handleDeleteOpen(popover.currentId)}>
+          <MenuItem
+            sx={{ color: 'error.main' }}
+            onClick={() => handleDeleteOpen(popover.currentId)}
+          >
             <Iconify icon="eva:trash-2-outline" /> Hapus
           </MenuItem>
         </CustomPopover>

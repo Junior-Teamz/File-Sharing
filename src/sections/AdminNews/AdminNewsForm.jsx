@@ -130,7 +130,7 @@ export default function AdminNewsForm() {
             <Grid container spacing={3}>
               {/* Title Section */}
               <Grid xs={12} sm={6}>
-                <Typography variant="h6">Judul:</Typography>
+                <Typography variant="h6">Judul*</Typography>
                 <TextField
                   fullWidth
                   variant="outlined"
@@ -142,7 +142,7 @@ export default function AdminNewsForm() {
 
               {/* Content Section */}
               <Grid xs={12} sm={6}>
-                <Typography variant="h6">Isi:</Typography>
+                <Typography variant="h6">Deskripsi*</Typography>
                 {editorLoading && (
                   <Box sx={{ textAlign: 'center', mt: 2 }}>
                     <CircularProgress />
@@ -194,7 +194,7 @@ export default function AdminNewsForm() {
               <Grid xs={12} sm={6}>
                 <Box>
                   <Typography variant="h6" sx={{ mb: 1 }}>
-                    Thumbnail:
+                    Thumbnail*
                   </Typography>
 
                   <input
@@ -253,7 +253,7 @@ export default function AdminNewsForm() {
               <Grid xs={12} sm={6}>
                 <RHFSelect
                   name="status"
-                  label="Status"
+                  label="Status Berita*"
                   error={!!errors.status}
                   helperText={errors.status?.message}
                 >
@@ -267,7 +267,7 @@ export default function AdminNewsForm() {
                 <Typography variant="h6">Tag:</Typography>
                 <RHFAutocomplete
                   name="tag"
-                  label="Tag"
+                  label="Tag*"
                   multiple
                   options={tags}
                   getOptionLabel={(option) => option?.name || ''} // Handle undefined options gracefully

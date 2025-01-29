@@ -16,10 +16,19 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 export default function FileManagerInvitedItem({ user, onClick, permissions }) {
   const [currentPermission, setPermission] = useState(permissions || 'view');
+  console.log(permissions);
+  const PermissionRead = permissions === 'read';
+  const PermissionEdit = permissions === 'write';
+  // const permission = permissions.find((item) => item.permissions === 'read');
+  // const PermissionRead = permission !== undefined;
+  // const PermissionEdit = permissions.some((item) => item.permissions === 'write');
 
   const popover = usePopover();
 
   const handleChangePermission = useCallback((newPermission) => {
+    if (PermissionRead || PermissionEdit) {
+      return;
+    }
     setPermission(newPermission);
   }, []);
 
@@ -47,26 +56,28 @@ export default function FileManagerInvitedItem({ user, onClick, permissions }) {
           sx={{ flexGrow: 1, pr: 1 }}
         />
 
-        <Button
-          size="small"
-          color="inherit"
-          endIcon={
-            <Iconify
-              width={20}
-              icon={popover.open ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
-              sx={{ ml: -1 }}
-            />
-          }
-          onClick={popover.onOpen}
-          sx={{
-            flexShrink: 0,
-            ...(popover.open && {
-              bgcolor: 'action.selected',
-            }),
-          }}
-        >
-          Can {currentPermission}
-        </Button>
+        {!PermissionRead && !PermissionEdit && (
+          <Button
+            size="small"
+            color="inherit"
+            endIcon={
+              <Iconify
+                width={20}
+                icon={popover.open ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
+                sx={{ ml: -1 }}
+              />
+            }
+            onClick={popover.onOpen}
+            sx={{
+              flexShrink: 0,
+              ...(popover.open && {
+                bgcolor: 'action.selected',
+              }),
+            }}
+          >
+            Can {currentPermission}
+          </Button>
+        )}
       </ListItem>
 
       <CustomPopover open={popover.open} onClose={popover.onClose} sx={{ width: 160 }}>

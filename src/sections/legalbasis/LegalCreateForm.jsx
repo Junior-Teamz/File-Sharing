@@ -94,8 +94,11 @@ export default function LegalCreateForm() {
             <Typography variant="h4" align="center" gutterBottom>
               buat dasar hukum baru
             </Typography>
-            <Typography variant="body1" align="center" color="textSecondary" sx={{ mb: 3 }}>
+            <Typography variant="body1" align="center" color="textSecondary" >
               Harap berikan nama dan unggah dokumen yang valid(PDF, DOC, DOCX).
+            </Typography>
+            <Typography variant="body1" align="center" color="textSecondary" sx={{ mb: 3 }}>
+             Maximal Ukuran File 5 Mb
             </Typography>
 
             <Box
@@ -107,7 +110,7 @@ export default function LegalCreateForm() {
                 sm: 'repeat(2, 1fr)',
               }}
             >
-              <RHFTextField name="name" label="Document Name" />
+              <RHFTextField name="name" label="Nama Dokumen" />
 
               {/* File upload with icon */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

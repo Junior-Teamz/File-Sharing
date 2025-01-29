@@ -1,4 +1,4 @@
-import { indexShareAdmin } from 'src/sections/sharewithme/fetchShare/indexShareAdmin';
+import { indexShareAdmin } from 'src/sections/sharewithme/view/fetchShare/indexShareAdmin';
 
 export const FolderFileShare = () => {
   const { data, refetch } = indexShareAdmin();

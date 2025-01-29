@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
-export const useUpdateSection = () => {
+export const useUpdateSection = ({ onSuccess, onError }) => {
   return useMutation({
     mutationKey: ['update.section'],
     mutationFn: async ({ id, data }) => {
@@ -12,6 +12,7 @@ export const useUpdateSection = () => {
 
       return response;
     },
-  
+    onSuccess,
+    onError,
   });
 };
