@@ -17,9 +17,8 @@ import { NAV } from '../../../layouts/config-layout';
 import { useNavData } from './UserNavigation';
 import { NavToggleButton } from '../../../layouts/_common';
 
-import Kemen from '../../../../public/logo/kemen3.png'
+import Kemen from '../../../../public/logo/kemen3.png';
 import NavUpgrade from 'src/layouts/_common/nav-upgrade';
-
 
 // ----------------------------------------------------------------------
 
@@ -64,16 +63,11 @@ export default function NavVertical({ openNav, onCloseNav }) {
         }}
       />
 
-      <NavSectionVertical
-        data={navData}
-        config={{
-          currentRole: user?.role || 'admin',
-        }}
-      />
+      <NavSectionVertical data={navData} />
 
       <Box sx={{ flexGrow: 1 }} />
 
-      {/* <NavUpgrade /> */}
+      <NavUpgrade />
     </Scrollbar>
   );
 

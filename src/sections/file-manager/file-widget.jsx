@@ -45,9 +45,9 @@ export default function FileWidget({ title, value, icon, sx, ...other }) {
             color: 'text.disabled',
           }}
         >
-          {fData(value)}
+          Digunakan {fData(value)}
         </Box>
-        / <AllInclusiveIcon />
+        / Dari <AllInclusiveIcon />
       </Stack>
     </Box>
   );

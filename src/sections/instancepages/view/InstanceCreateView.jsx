@@ -24,7 +24,7 @@ export default function InstanceCreateView() {
             href: paths.dashboard.root,
           },
           {
-            name: 'Instance List',
+            name: 'Daftar Instansi',
             href: paths.dashboard.instance.list,
           },
           { name: 'Buat Instansi' },

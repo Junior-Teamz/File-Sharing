@@ -99,7 +99,7 @@ export default function AdminListNews() {
       setPopoverAnchor(null);
     } else if (editingNewsId && editedNews.title && editedNews.content) {
       console.log('Saving edited news with ID:', editingNewsId);
-  
+
       // Gunakan FormData untuk mengirim data
       const formData = new FormData();
       formData.append('_method', 'PUT');
@@ -111,9 +111,12 @@ export default function AdminListNews() {
       editedNews.news_tags_ids.forEach((tagId, index) => {
         formData.append(`news_tags_ids[${index}]`, tagId);
       });
-  
-      console.log('Payload (FormData) before sending to API:', Object.fromEntries(formData.entries()));
-  
+
+      console.log(
+        'Payload (FormData) before sending to API:',
+        Object.fromEntries(formData.entries())
+      );
+
       try {
         await updateNews.mutateAsync({ id: editingNewsId, data: formData }); // Kirim ID dalam request
         enqueueSnackbar('Berita berhasil diperbarui', { variant: 'success' });
@@ -128,7 +131,7 @@ export default function AdminListNews() {
       enqueueSnackbar('ID berita dan data harus ada untuk memperbarui.', { variant: 'error' });
     }
   };
-  
+
   const handleChangePage = (event, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(+event.target.value);
@@ -148,7 +151,7 @@ export default function AdminListNews() {
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
-        heading="List"
+        heading="Daftar Berita"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
           { name: 'Daftar Berita', href: paths.dashboard.AdminNews },

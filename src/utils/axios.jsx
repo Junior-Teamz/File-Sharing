@@ -120,7 +120,7 @@ export const endpoints = {
   },
 
   previewStorage: {
-    storage: '/api/storageSizeUsage',
+    storage: '/api/storage_usage',
   },
 
   GetFileFolderShare: {

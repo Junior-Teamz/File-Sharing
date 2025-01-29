@@ -183,7 +183,7 @@ export default function UserListView() {
                 variant="contained"
                 startIcon={<Iconify icon="mingcute:add-line" />}
               >
-                New User
+                Buat User Baru
               </Button>
             }
             sx={{ mb: { xs: 3, md: 5 } }}

@@ -25,12 +25,12 @@ export default function UserTableFiltersResult({
   };
 
   const handleRemoveRole = (inputValue) => {
-    const newValue = filters.role.filter((item) => item !== inputValue);
+    const newValue = (filters.role || []).filter((item) => item !== inputValue);
     onFilters('role', newValue);
   };
 
   const handleRemoveInstance = (inputValue) => {
-    const newValue = filters.instances.filter((item) => item !== inputValue);
+    const newValue = (filters.instances || []).filter((item) => item !== inputValue);
     onFilters('instances', newValue);
   };
 
@@ -39,7 +39,7 @@ export default function UserTableFiltersResult({
       <Box sx={{ typography: 'body2' }}>
         <strong>{results}</strong>
         <Box component="span" sx={{ color: 'text.secondary', ml: 0.25 }}>
-           hasil yang ditemukan
+          hasil yang ditemukan
         </Box>
       </Box>
 
@@ -50,7 +50,7 @@ export default function UserTableFiltersResult({
           </Block>
         )}
 
-        {!!filters.role.length && (
+        {!!(filters.role?.length) && (
           <Block label="Role:">
             {filters.role.map((item) => (
               <Chip key={item} label={item} size="small" onDelete={() => handleRemoveRole(item)} />
@@ -58,15 +58,10 @@ export default function UserTableFiltersResult({
           </Block>
         )}
 
-        {!!filters.instances.length && (
+        {!!(filters.instances?.length) && (
           <Block label="Instances:">
             {filters.instances.map((item) => (
-              <Chip
-                key={item}
-                label={item}
-                size="small"
-                onDelete={() => handleRemoveInstance(item)}
-              />
+              <Chip key={item} label={item} size="small" onDelete={() => handleRemoveInstance(item)} />
             ))}
           </Block>
         )}
@@ -84,7 +79,11 @@ export default function UserTableFiltersResult({
 }
 
 UserTableFiltersResult.propTypes = {
-  filters: PropTypes.object,
+  filters: PropTypes.shape({
+    status: PropTypes.string,
+    role: PropTypes.arrayOf(PropTypes.string),
+    instances: PropTypes.arrayOf(PropTypes.string),
+  }),
   onFilters: PropTypes.func,
   onResetFilters: PropTypes.func,
   results: PropTypes.number,

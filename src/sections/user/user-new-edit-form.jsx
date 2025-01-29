@@ -242,7 +242,7 @@ export default function UserNewEditForm({ currentUser }) {
               )}
             </Box>
             <Stack alignItems="flex-end" sx={{ mt: 3 }}>
-              <Button variant="outlined" type="submit">
+              <Button variant="contained" type="submit">
                 {isPending ? 'Membuat User...' : 'Buat User'}
               </Button>
             </Stack>

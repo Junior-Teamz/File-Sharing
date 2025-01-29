@@ -86,6 +86,16 @@ function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, refe
       >
         <MenuItem
           onClick={() => {
+            quickEdit.onTrue();
+            popover.onClose();
+          }}
+        >
+          <Iconify icon="solar:pen-bold" />
+          Edit
+        </MenuItem>
+        
+        <MenuItem
+          onClick={() => {
             confirm.onTrue();
             popover.onClose();
           }}
@@ -93,15 +103,6 @@ function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, refe
         >
           <Iconify icon="solar:trash-bin-trash-bold" />
           Hapus
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            quickEdit.onTrue();
-            popover.onClose();
-          }}
-        >
-          <Iconify icon="solar:pen-bold" />
-          Edit
         </MenuItem>
       </CustomPopover>
 

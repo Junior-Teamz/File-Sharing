@@ -1,4 +1,3 @@
-// @mui
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 // hooks
@@ -8,12 +7,13 @@ import { useLocales } from 'src/locales';
 // components
 import FileWidget from 'src/sections/file-manager/file-widget';
 import { storage } from './useFetchStorage';
+import { CircularProgress } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
 export default function NavUpgrade() {
   const { user } = useMockedUser();
-  const { data } = storage(); // Mengambil data penyimpanan
+  const { data, isLoading } = storage(); // Mengambil data penyimpanan, assuming `isLoading` is available
   const { t } = useLocales();
 
   return (
@@ -25,9 +25,11 @@ export default function NavUpgrade() {
       }}
     >
       <Stack alignItems="center">
-        <FileWidget
-          value={data?.formattedSize} 
-        />
+        {isLoading ? (
+          <CircularProgress />
+        ) : (
+          <FileWidget title="Penyimpanan" value={data?.formattedSize} />
+        )}
       </Stack>
     </Stack>
   );

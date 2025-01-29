@@ -46,7 +46,7 @@ export function useNavData() {
         subheader: t('overview'),
         items: [
           {
-            title: t('My Drive'),
+            title: t('Drive Saya'),
             path: paths.dashboarduser.root,
             icon: ICONS.drive,
           },
