@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
-import { AuthContext } from 'src/auth/context/jwt';
+import { AuthContext, AuthProvider } from 'src/auth/context/jwt';
 import { useAuthContext } from 'src/auth/hooks';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 
 export const useIndexInstance = (filters) => {
-  const user = useAuthContext(AuthContext);
+  const user = useAuthContext(AuthProvider);
   const UserRoles = user?.user?.roles || [];
-  // console.log(UserRoles)
-  // console.log(user)
+  console.log(UserRoles)
+  console.log(user)
 
   // Pilih endpoint berdasarkan roles
   const endpoint =

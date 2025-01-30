@@ -107,11 +107,11 @@ export default function FileManagerTableRow({
     }
 
     const payload = { file_id: file.id }; // Create a payload with the required structure
-  
+
     try {
       if (favorite.value) {
         // If currently favorited, call removeFavorite
-       
+
         await removeFavorite(payload, {
           // Pass the entire payload object
           onSuccess: () => {
@@ -123,7 +123,7 @@ export default function FileManagerTableRow({
         });
       } else {
         // If not favorited, call addFavorite
-      
+
         await addFavorite(payload, {
           // Pass the entire payload object
           onSuccess: () => {
@@ -237,7 +237,7 @@ export default function FileManagerTableRow({
           >
             {shared_with &&
               shared_with.map((person) => (
-                <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
+                <Avatar key={person.id} alt={person.name} src={person.photo_profile_url} />
               ))}
           </AvatarGroup>
         </TableCell>

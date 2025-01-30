@@ -40,7 +40,7 @@ export default function UserNewEditForm({ currentUser }) {
           message: error.errors.email[0],
         });
       } else {
-        enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
+        enqueueSnackbar(`Error: ${error.errors}`, { variant: 'error' });
       }
     },
   });
@@ -176,28 +176,32 @@ export default function UserNewEditForm({ currentUser }) {
                 <MenuItem value="admin">Admin</MenuItem>
                 <MenuItem value="user">User</MenuItem>
               </RHFSelect>
-              <RHFSelect name="instance_id" label="Instansi*" disabled={isLoadingInstance}>
-                {!isLoadingInstance &&
-                  instanceList?.data?.map((instance) => (
-                    <MenuItem key={instance.id} value={instance.id}>
-                      {instance.name}
-                    </MenuItem>
-                  ))}
-              </RHFSelect>
+              {selectedRole === 'user' && (
+                <RHFSelect name="instance_id" label="Instansi*" disabled={isLoadingInstance}>
+                  {!isLoadingInstance &&
+                    instanceList?.data?.map((instance) => (
+                      <MenuItem key={instance.id} value={instance.id}>
+                        {instance.name}
+                      </MenuItem>
+                    ))}
+                </RHFSelect>
+              )}
 
-              <RHFSelect
-                name="instance_section_id"
-                label="Unit Kerja*"
-                disabled={isLoadingSection}
-              >
-                {!isLoadingSection &&
-                  Array.isArray(instanceSections) &&
-                  instanceSections.map((section) => (
-                    <MenuItem key={section.id} value={section.id}>
-                      {section.nama}
-                    </MenuItem>
-                  ))}
-              </RHFSelect>
+              {selectedRole === 'user' && (
+                <RHFSelect
+                  name="instance_section_id"
+                  label="Unit Kerja*"
+                  disabled={isLoadingSection}
+                >
+                  {!isLoadingSection &&
+                    Array.isArray(instanceSections) &&
+                    instanceSections.map((section) => (
+                      <MenuItem key={section.id} value={section.id}>
+                        {section.nama}
+                      </MenuItem>
+                    ))}
+                </RHFSelect>
+              )}
 
               {selectedRole === 'admin' && (
                 <FormControl fullWidth margin="dense">
@@ -207,11 +211,11 @@ export default function UserNewEditForm({ currentUser }) {
                     multiple
                     options={permissionList}
                     getOptionLabel={(option) => option?.name || 'No name available'}
-                    isOptionEqualToValue={(option, value) => option?.id === value}
+                    isOptionEqualToValue={(option, value) => option.id === value}
                     onChange={(event, value) => {
                       setValue(
                         'permissions',
-                        value.map((p) => (typeof p === 'object' ? p.name : p)) // Hanya ambil name
+                        value.map((p) => p?.id || p) // Pastikan hanya ID yang dikirim
                       );
                     }}
                     renderInput={(params) => (
@@ -225,11 +229,11 @@ export default function UserNewEditForm({ currentUser }) {
                     )}
                     renderTags={(value, getPermissionProps) => (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {value?.map((name, index) => {
-                          const permission = permissionList.find((p) => p.name === name); // Cari permission berdasarkan name
+                        {value?.map((id, index) => {
+                          const permission = permissionList.find((p) => p.id === id); // Find permission by id
                           return permission ? (
                             <Chip
-                              key={name}
+                              key={id}
                               label={permission.name}
                               {...getPermissionProps({ index })}
                             />

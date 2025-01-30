@@ -5,7 +5,7 @@ export const useEditUser = ({ onSuccess, onError, refetch ,reset}) => {
   return useMutation({
     mutationKey: ['edit.user'],
     mutationFn: async ({ userId, data }) => {
-      const response = await axiosInstance.post(`${endpoints.users.update}/${userId}`, data);
+      const response = await axiosInstance.put(`${endpoints.users.update}/${userId}`, data);
       return response.data; 
     },
     onSuccess,

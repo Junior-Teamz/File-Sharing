@@ -71,7 +71,8 @@ export default function AccountGeneral() {
         name: user.name || '',
         email: user.email || '',
         instance: user.instances || [],
-        photo_profile_url: user.photo_profile_url?.path || '',
+        photo_profile_url: user.photo_profile_url || '',
+        section: user.section || [],
       });
     }
     setLoading(false);
@@ -162,8 +163,8 @@ export default function AccountGeneral() {
                     color: 'text.disabled',
                   }}
                 >
-                  Allowed *.jpeg, *.jpg, *.png,
-                  <br /> max size of {fData(3000000)}
+                  Tipe Gambar *.jpeg, *.jpg, *.png,
+                  <br /> max ukuran file {fData(3000000)}
                 </Typography>
               }
               preview={methods.watch('photo_profile_url')}
@@ -189,6 +190,12 @@ export default function AccountGeneral() {
                 label="Instansi"
                 disabled
                 value={(user.instances || []).map((instansi) => instansi.name).join(', ')}
+              />
+              <RHFTextField
+                name="Section"
+                label="Unit Kerja"
+                disabled
+                value={(user.section || []).map((Section) => Section.name).join(', ')}
               />
             </Box>
 

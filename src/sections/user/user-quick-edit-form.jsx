@@ -5,7 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useSnackbar } from 'src/components/snackbar';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEditUser, usePermissionAdmin } from './view/UserManagement';
+import { useEditUser, usePermissionAdmin, useEditAdmin } from './view/UserManagement';
 import { useGetSection } from '../Section/view/sectionsFetch';
 // @mui
 import {
@@ -90,14 +90,7 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
   const { mutate: editUser, isPending } = useEditUser({
     onSuccess: () => {
       enqueueSnackbar('User berhasil diperbarui', { variant: 'success' });
-
-      // Reset hanya password dan confirmPassword setelah update
-      reset((values) => ({
-        ...values,
-        password: '',
-        confirmPassword: '',
-      }));
-
+      reset({ password: '', confirmPassword: '' });
       if (onRefetch) onRefetch();
       onClose();
       queryClient.invalidateQueries({ queryKey: ['list.user'] });
@@ -105,6 +98,20 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
     onError: (error) => {
       enqueueSnackbar('Terjadi kesalahan saat memperbarui user', { variant: 'error' });
       console.error('Error update user', error);
+    },
+  });
+
+  const { mutate: editAdmin, isPending: isPendingAdmin } = useEditAdmin({
+    onSuccess: () => {
+      enqueueSnackbar('Admin berhasil diperbarui', { variant: 'success' });
+      reset({ password: '', confirmPassword: '' });
+      if (onRefetch) onRefetch();
+      onClose();
+      queryClient.invalidateQueries({ queryKey: ['list.user'] });
+    },
+    onError: (error) => {
+      enqueueSnackbar('Terjadi kesalahan saat memperbarui admin', { variant: 'error' });
+      console.error('Error update admin', error);
     },
   });
 
@@ -134,10 +141,14 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
       ...(data.password
         ? { password: data.password, password_confirmation: data.confirmPassword }
         : {}),
-      permissions: data.permissions, // Include permissions if available
+      permissions: data.permissions.map(String), // Konversi ke string
     };
 
-    editUser({ userId: currentUser.id, data: userData });
+    if (RolesUser) {
+      editAdmin({ userId: currentUser.id, data: userData });
+    } else {
+      editUser({ userId: currentUser.id, data: userData });
+    }
   };
 
   return (
@@ -203,11 +214,11 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
                   multiple
                   options={permissionList}
                   getOptionLabel={(option) => option?.name || 'No name available'}
-                  isOptionEqualToValue={(option, value) => option?.id === value}
+                  isOptionEqualToValue={(option, value) => option.id === value}
                   onChange={(event, value) => {
                     setValue(
                       'permissions',
-                      value.map((p) => (typeof p === 'object' ? p.id : p)) // Store permission ids
+                      value.map((p) => p?.id || p) // Pastikan hanya ID yang dikirim
                     );
                   }}
                   renderInput={(params) => (

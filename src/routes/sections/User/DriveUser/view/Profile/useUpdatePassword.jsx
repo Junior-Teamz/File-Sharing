@@ -5,7 +5,7 @@ export const useUpdatePassword = ({ onSuccess, onError, refetch ,reset}) => {
   return useMutation({
     mutationKey: ['edit.user'],
     mutationFn: async ({  data }) => {
-      const response = await axiosInstance.put(endpoints.ProfileUser.updatePassword, data);
+      const response = await axiosInstance.post(endpoints.ProfileUser.updatePassword, data);
       return response.data; 
     },
     onSuccess,

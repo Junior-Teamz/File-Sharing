@@ -7,14 +7,22 @@ import { useLocales } from 'src/locales';
 // components
 import FileWidget from 'src/sections/file-manager/file-widget';
 import { storage } from './useFetchStorage';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, Box } from '@mui/material'; // Added Box for styling
 
 // ----------------------------------------------------------------------
 
 export default function NavUpgrade() {
   const { user } = useMockedUser();
-  const { data, isLoading } = storage(); // Mengambil data penyimpanan, assuming `isLoading` is available
+  const { data, isLoading, isFetching } = storage(); // Mengambil data penyimpanan, assuming `isLoading` is available
   const { t } = useLocales();
+
+  if (isLoading || isFetching) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Stack
@@ -25,11 +33,7 @@ export default function NavUpgrade() {
       }}
     >
       <Stack alignItems="center">
-        {isLoading ? (
-          <CircularProgress />
-        ) : (
-          <FileWidget title="Penyimpanan" value={data?.formattedSize} />
-        )}
+        <FileWidget title="Penyimpanan" value={data?.formattedSize} />
       </Stack>
     </Stack>
   );

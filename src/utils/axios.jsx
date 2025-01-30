@@ -242,6 +242,10 @@ export const endpoints = {
   permission: {
     getPermissionFolder: '/api/permissions/folders/grant_permission',
     getPermissionFile: '/api/permissions/files/grant_permission',
+    changePermissionFolder: '/api/permissions/folders/change_permission',
+    changePermissionFile: '/api/permissions/files/change_permission',
+    revokePermissionFolder: '/api/permissions/folders/revoke_permission',
+    revoketPermissionFile: '/api/permissions/files/revoke_permission',
   },
   tag: {
     create: '/api/superadmin/tags/create',
@@ -265,7 +269,8 @@ export const endpoints = {
   users: {
     list: '/api/superadmin/users/list',
     create: '/api/superadmin/users/create',
-    update: '/api/superadmin/users/update',
+    update: '/api/superadmin/users/update/role_user',
+    updateAdmin: '/api/superadmin/users/update/role_admin',
     delete: '/api/superadmin/users/delete',
     password: '/api/superadmin/users/password',
     getTotalUser: '/api/superadmin/users/countTotalUser',

@@ -18,6 +18,7 @@ import { useSnackbar } from 'notistack';
 import { useQueryClient } from '@tanstack/react-query';
 import FileManagerInvitedItem from './FileManagerInvitedItem';
 import { usePermissionsFolder,useSearchUser } from './view/FetchDriveUser';
+import FileManagerInvitedItemFolder from './FileManagerInvitedItemFolder';
 
 export default function FileManagerShareDialogFolder({
   shared,
@@ -145,7 +146,7 @@ export default function FileManagerShareDialogFolder({
             <List disablePadding>
               {searchResults.length > 0 ? (
                 searchResults.map((user) => (
-                  <FileManagerInvitedItem
+                  <FileManagerInvitedItemFolder
                     key={user.id}
                     user={user}
                     onClick={() => handleUserSelect(user)} 

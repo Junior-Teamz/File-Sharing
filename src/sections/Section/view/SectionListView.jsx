@@ -62,7 +62,9 @@ export default function SectionListView() {
       queryClient.invalidateQueries({ queryKey: ['list.section'] });
     },
     onError: (error) => {
-      enqueueSnackbar(`Gagal menghapus Unit Kerja: ${error.message}`, { variant: 'error' });
+      const errorDetails = error?.errors;
+
+      enqueueSnackbar(`Gagal memperbarui instansi: ${errorDetails}`, { variant: 'error' });
     },
   });
 
@@ -74,7 +76,20 @@ export default function SectionListView() {
       queryClient.invalidateQueries({ queryKey: ['list.section'] });
     },
     onError: (error) => {
-      enqueueSnackbar(`Gagal memperbarui Unit Kerja: ${error.message}`, { variant: 'error' });
+      if (error.errors) {
+        if (typeof error.errors === 'string') {
+          enqueueSnackbar(`Error: ${error.errors}`, { variant: 'error' });
+        } else {
+          Object.keys(error.errors).forEach((key) => {
+            setError(key, {
+              type: 'manual',
+              message: error.errors[key][0],
+            });
+          });
+        }
+      } else {
+        enqueueSnackbar(`Error: ${error.message}`, { variant: 'error' });
+      }
     },
   });
 
@@ -127,7 +142,7 @@ export default function SectionListView() {
       console.log('Confirming delete for tag with ID:', selectedTagId);
       deleteTag(selectedTagId);
       setDeleteConfirmOpen(false);
-      // setSelectedTagId(null);
+      setSelectedTagId(null);
     } else {
       console.error('No ID selected for deletion.');
     }

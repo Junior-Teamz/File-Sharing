@@ -18,7 +18,6 @@ import { useAuthContext } from 'src/auth/hooks';
 import { CircularProgress, Container } from '@mui/material';
 import { useUpdateProfile } from 'src/routes/sections/User/DriveUser/view/Profile/useUpdateProfile';
 
-
 export default function AccountGeneral() {
   const { enqueueSnackbar } = useSnackbar();
   const { user } = useAuthContext(AuthContext);
@@ -72,7 +71,7 @@ export default function AccountGeneral() {
         name: user.name || '',
         email: user.email || '',
         instance: user.instances || [],
-        photo_profile_url: user.photo_profile_url?.path || '',
+        photo_profile_url: user.photo_profile_url || '',
       });
     }
     setLoading(false);
@@ -94,7 +93,7 @@ export default function AccountGeneral() {
       const response = await editUser({ userId, data: formData });
       enqueueSnackbar('User berhasil diperbarui', { variant: 'success' });
       resetForm({
-        name: response.name || '', 
+        name: response.name || '',
         email: response.email || '',
         instance: response.instances || [],
         photo_profile_url: response.photo_profile_url || '',
@@ -163,8 +162,8 @@ export default function AccountGeneral() {
                     color: 'text.disabled',
                   }}
                 >
-                  Allowed *.jpeg, *.jpg, *.png,
-                  <br /> max size of {fData(3000000)}
+                  Tipe Gambar *.jpeg, *.jpg, *.png,
+                  <br /> max ukuran file {fData(3000000)}
                 </Typography>
               }
               preview={methods.watch('photo_profile_url')}

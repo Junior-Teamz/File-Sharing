@@ -52,7 +52,7 @@ export default function FileManagerShareDialog({
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(inputSearch);
-    }, 300); // Delay of 300ms for the API call
+    }, 1500); // Delay of 300ms for the API call
 
     return () => {
       clearTimeout(handler);
@@ -76,8 +76,8 @@ export default function FileManagerShareDialog({
 
   const handleUserSelect = (user) => {
     setSelectedUser(user);
-    setInputSearch(user.email); // Populate input with selected user's email
-    setPermission('view'); // Reset permission to default
+    setInputSearch(user.email); 
+    setPermission('view'); 
   };
 
   const handlePermissionChange = (event) => {

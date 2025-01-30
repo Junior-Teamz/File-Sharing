@@ -37,6 +37,7 @@ import {
 } from './view/Folder';
 import FileManagerShareDialogFolder from './FileManagerShareDialogFolder';
 import { useQueryClient } from '@tanstack/react-query';
+import FileManagerInvitedItemFolder from './FileManagerInvitedItemFolder';
 
 // ----------------------------------------------------------------------
 
@@ -345,9 +346,10 @@ export default function FolderDetail({
 
       {shared_with.length > 0 ? (
         shared_with.map((share) => (
-          <FileManagerInvitedItem
+          <FileManagerInvitedItemFolder
             key={share.user.id}
             user={share.user}
+            folderId={id}
             permissions={share.permissions}
           />
         ))

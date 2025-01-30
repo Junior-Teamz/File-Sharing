@@ -412,6 +412,7 @@ export default function FIleManagerFileDetails({
           <FileManagerInvitedItem
             key={share.user.id}
             user={share.user}
+            fileId={id}
             permissions={share.permissions}
           />
         ))

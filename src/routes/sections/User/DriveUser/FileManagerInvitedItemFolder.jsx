@@ -11,13 +11,13 @@ import ListItemText from '@mui/material/ListItemText';
 // components
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
-import { useChangePermisionsFile, useRevokePermissionsFile } from './view/FetchDriveUser';
+import { useChangePermisionsFolder, useRevokePermissionsFolder } from './view/FetchDriveUser';
 import { useSnackbar } from 'notistack';
 import { useQueryClient } from '@tanstack/react-query';
 
 // ----------------------------------------------------------------------
 
-export default function FileManagerInvitedItem({ user, fileId, permissions, onClick }) {
+export default function FileManagerInvitedItemFolder({ user, folderId, permissions, onClick }) {
   const [currentPermission, setPermission] = useState(permissions);
   const { enqueueSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
@@ -28,7 +28,7 @@ export default function FileManagerInvitedItem({ user, fileId, permissions, onCl
 
   const popover = usePopover();
 
-  const { mutate: changePermissionsFile } = useChangePermisionsFile({
+  const { mutate: changePermissionsFile } = useChangePermisionsFolder({
     onSuccess: (_, { permissions: newPermission }) => {
       setPermission(newPermission);
       popover.onClose();
@@ -40,7 +40,7 @@ export default function FileManagerInvitedItem({ user, fileId, permissions, onCl
     },
   });
 
-  const { mutate: revokePermissionsFile } = useRevokePermissionsFile({
+  const { mutate: revokePermissionsFile } = useRevokePermissionsFolder({
     onSuccess: () => {
       enqueueSnackbar('Permission berhasil dihapus!', { variant: 'success' });
       queryClient.invalidateQueries({ queryKey: ['folder.user'] });
@@ -53,14 +53,14 @@ export default function FileManagerInvitedItem({ user, fileId, permissions, onCl
 
   const handleChangePermission = useCallback(
     (newPermission) => {
-      changePermissionsFile({ file_id: fileId, user_id: user.id, permissions: newPermission });
+      changePermissionsFile({ folder_id: folderId, user_id: user.id, permissions: newPermission });
     },
-    [changePermissionsFile, fileId, user.id]
+    [changePermissionsFile, folderId, user.id]
   );
 
   const handleRevokePermission = useCallback(() => {
-    revokePermissionsFile({ file_id: fileId, user_id: user.id });
-  }, [revokePermissionsFile, fileId, user.id]);
+    revokePermissionsFile({ folder_id: folderId, user_id: user.id });
+  }, [revokePermissionsFile, folderId, user.id]);
 
   return (
     <>
@@ -138,8 +138,8 @@ export default function FileManagerInvitedItem({ user, fileId, permissions, onCl
   );
 }
 
-FileManagerInvitedItem.propTypes = {
-  fileId: PropTypes.string.isRequired,
+FileManagerInvitedItemFolder.propTypes = {
+  folderId: PropTypes.string.isRequired,
   user: PropTypes.shape({
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,

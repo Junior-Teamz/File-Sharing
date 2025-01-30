@@ -62,7 +62,8 @@ export default function TagListView() {
       queryClient.invalidateQueries({ queryKey: ['tag.admin'] });
     },
     onError: (error) => {
-      enqueueSnackbar(`Gagal menghapus tag: ${error.message}`, { variant: 'error' });
+      const errorDetails = error?.errors;
+      enqueueSnackbar(`Gagal menghapus tag: ${errorDetails}`, { variant: 'error' });
     },
   });
 

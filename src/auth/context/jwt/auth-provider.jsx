@@ -1,8 +1,9 @@
 import PropTypes from 'prop-types';
-import { useEffect, useReducer, useCallback, useMemo } from 'react';
+import { useEffect, useReducer, useCallback, useMemo, useState } from 'react';
 import axiosInstance, { endpoints } from 'src/utils/axios';
 import { AuthContext } from './auth-context';
 import { isValidToken, setSession } from './utils';
+import { useRouter } from 'src/routes/hooks';
 
 // ----------------------------------------------------------------------
 const initialState = {
@@ -53,6 +54,7 @@ const STORAGE_KEY = 'accessToken';
 
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const router = useRouter();
 
   // Initialize the authentication state
   const initialize = useCallback(async () => {
@@ -82,37 +84,53 @@ export function AuthProvider({ children }) {
     initialize();
   }, [initialize]);
 
-  const login = useCallback(async (email, password) => {
-    const data = { email, password };
+  const login = useCallback(
+    async (email, password) => {
+      const data = { email, password };
 
-    try {
-      const response = await axiosInstance.post(endpoints.auth.login, data);
-      const { accessToken, roles, is_superadmin, user, refreshToken } = response.data;
+      try {
+        const response = await axiosInstance.post(endpoints.auth.login, data);
+        const { accessToken, roles, is_superadmin, user, refreshToken } = response.data;
 
-      // Set session with accessToken
-      setSession(accessToken);
+        // Set session with accessToken
+        setSession(accessToken);
 
-      // Call initialize function directly after login
-      await initialize();
+        // Dispatch login action
+        dispatch({
+          type: 'LOGIN',
+          payload: {
+            user,
+            roles,
+            is_superadmin,
+            accessToken,
+            refreshToken,
+          },
+        });
 
-      // Dispatch login action
-      dispatch({
-        type: 'LOGIN',
-        payload: {
-          user,
-          roles,
-          is_superadmin,
-          accessToken,
-          refreshToken,
-        },
-      });
+        console.log(roles);
 
-      return { accessToken, roles, is_superadmin, user };
-    } catch (error) {
-      console.error('Login Error:', error);
-      throw error;
-    }
-  }, []);
+        const userRoles = roles;
+        const isSuperadmin = is_superadmin ?? false;
+
+        console.log(userRoles)
+        console.log(isSuperadmin)
+
+        if (userRoles?.includes('admin') || isSuperadmin) {
+          router.push('/dashboard');
+        } else if (userRoles?.includes('user')) 
+          router.push('/dashboarduser');
+       
+
+        await initialize();
+
+        return { accessToken, roles, is_superadmin, user };
+      } catch (error) {
+        console.error('Login Error:', error);
+        throw error;
+      }
+    },
+    [initialize]
+  );
 
   const register = useCallback(async (email, password, firstName, lastName) => {
     const data = { email, password, firstName, lastName };
