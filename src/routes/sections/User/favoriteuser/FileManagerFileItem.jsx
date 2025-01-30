@@ -38,11 +38,13 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerFileDetails from './FileManagerFileDetails';
 import { useAddFavoriteUser,useRemoveFavoriteUser } from './view/FetchFolderUser';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function FileManagerFileItem({ file,  selected, onSelect, onDelete, sx, ...other }) {
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const { copy } = useCopyToClipboard();
+  const queryClient = useQueryClient();
 
   // Inside your FileRecentItem component
   const { mutateAsync: addFavorite } = useAddFavoriteUser();
@@ -97,10 +99,12 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
       if (favorite.value) {
         await removeFavorite({ file_id: file.id }); // Pastikan mengirim objek dengan file_id
         enqueueSnackbar('File berhasil dihapus dari favorite!', { variant: 'success' });
+        queryClient.invalidateQueries({ queryKey: ['favorite.user'] });
       } else {
         // Tambahkan ke favorit
         await addFavorite({ file_id: file.id }); // Pastikan mengirim objek dengan file_id
         enqueueSnackbar('File berhasil ditambahkan ke favorite', { variant: 'success' });
+        queryClient.invalidateQueries({ queryKey: ['favorite.user'] });
       }
 
       favorite.onToggle();
@@ -203,7 +207,7 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
             }}
           >
             {file.shared_with?.map((person) => (
-              <Avatar key={person.id} alt={person.name} src={person.photo_profile_url} />
+              <Avatar key={person.user.id} alt={person.user.name} src={person.user.photo_profile_url} />
             ))}
           </AvatarGroup>
         </TableCell>

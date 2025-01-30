@@ -18,6 +18,7 @@ import { useSnackbar } from 'notistack';
 import { useQueryClient } from '@tanstack/react-query';
 import FileManagerInvitedItem from './FileManagerInvitedItem';
 import { usePermissionsFolder,useSearchUser } from './view/FetchDriveUser';
+import FileManagerInvitedItemFolder from './FileManagerInvitedItemFolder';
 
 export default function FileManagerShareDialogFolder({
   shared,
@@ -104,7 +105,7 @@ export default function FileManagerShareDialogFolder({
       setInputSearch(''); 
       setSearchResults([]); 
       setSelectedUser(null); 
-      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      useClient.invalidateQueries({ queryKey: ['favorite.user'] });
     } else {
       enqueueSnackbar('User ID or folder ID is missing.', { variant: 'warning' }); 
     }
@@ -145,7 +146,7 @@ export default function FileManagerShareDialogFolder({
             <List disablePadding>
               {searchResults.length > 0 ? (
                 searchResults.map((user) => (
-                  <FileManagerInvitedItem
+                  <FileManagerInvitedItemFolder
                     key={user.id}
                     person={user}
                     onClick={() => handleUserSelect(user)} 

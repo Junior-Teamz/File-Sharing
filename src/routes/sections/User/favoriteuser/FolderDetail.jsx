@@ -37,6 +37,7 @@ import {
 } from './view/Folder';
 import FileManagerShareDialogFolder from './FileManagerShareDialogFolder';
 import { useQueryClient } from '@tanstack/react-query';
+import FileManagerInvitedItemFolder from './FileManagerInvitedItemFolder';
 
 // ----------------------------------------------------------------------
 
@@ -241,9 +242,9 @@ export default function FolderDetail({
       {toggleTags.value && (
         <Autocomplete
           multiple
-          options={availableTags} 
-          getOptionLabel={(option) => option.name} 
-          value={availableTags.filter((tag) => tags.includes(tag.id))} 
+          options={availableTags}
+          getOptionLabel={(option) => option.name}
+          value={availableTags.filter((tag) => tags.includes(tag.id))}
           onChange={handleChangeTags}
           renderOption={(props, option) => (
             <li {...props} key={option.id}>
@@ -287,7 +288,7 @@ export default function FolderDetail({
 
       {properties.value && (
         <>
-        <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
+          <Stack direction="row" sx={{ typography: 'caption', textTransform: 'capitalize' }}>
             <Box component="span" sx={{ width: 80, color: 'text.secondary', mr: 2 }}>
               Ukuran
             </Box>
@@ -344,9 +345,10 @@ export default function FolderDetail({
 
       {shared_with.length > 0 ? (
         shared_with.map((share) => (
-          <FileManagerInvitedItem
+          <FileManagerInvitedItemFolder
             key={share.user.id}
             user={share.user}
+            folderId={id}
             permissions={share.permissions}
           />
         ))

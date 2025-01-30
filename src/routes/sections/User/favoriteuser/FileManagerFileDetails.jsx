@@ -146,7 +146,7 @@ export default function FIleManagerFileDetails({
       await updateNameFile({ fileId: item.id, data: { name: newFileName } });
       enqueueSnackbar('Nama file berhasil diperbarui!', { variant: 'success' });
       setIsEditing(false);
-      useClient.invalidateQueries({ queryKey: ['fetch.folder'] });
+      useClient.invalidateQueries({ queryKey: ['favorite.user'] });
     } catch (error) {
       enqueueSnackbar('Gagal memperbarui nama file!', { variant: 'error' });
     }
@@ -415,6 +415,7 @@ export default function FIleManagerFileDetails({
           <FileManagerInvitedItem
             key={share.user.id}
             user={share.user}
+            fileId={id}
             permissions={share.permissions}
           />
         ))
