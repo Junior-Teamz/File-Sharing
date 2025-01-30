@@ -35,6 +35,9 @@ import FileManagerFileDetails from './file-manager-file-details';
 
 import { Button } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
+import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
+
+import FileManagerPathModal from './file-manager-path-modal';
 
 // ----------------------------------------------------------------------
 
@@ -46,6 +49,7 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
   const [inviteEmail, setInviteEmail] = useState('');
   const [newFileName, setNewFileName] = useState(file.name);
   const popover = usePopover();
+  const move = useBoolean();
   const share = useBoolean();
   const edit = useBoolean();
   const details = useBoolean();
@@ -286,11 +290,11 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
         <MenuItem
           onClick={() => {
             popover.onClose();
-            handleCopy();
+            move.onTrue();
           }}
         >
-          <Iconify icon="eva:link-2-fill" />
-          Copy Link
+          <DriveFileMoveIcon />
+          Pindahkan
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -344,6 +348,15 @@ export default function FileRecentItem({ id, file, onDelete, sx, onRefetch, ...o
         onDelete={() => {
           details.onFalse();
           onDelete();
+        }}
+      />
+
+      <FileManagerPathModal
+        open={move.value}
+        folderId={id}
+        folderName={file.name}
+        onClose={() => {
+          move.onFalse();
         }}
       />
 

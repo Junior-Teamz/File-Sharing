@@ -49,7 +49,6 @@ export const FileManagerDetailUsers = () => {
   // Folder navigation state
   const [folderStack, setFolderStack] = useState([]);
 
-
   const [openCreateFolderDialog, setOpenCreateFolderDialog] = useState(false);
   const [folderName, setFolderName] = useState('');
   const [selectedTagIds, setSelectedTagIds] = useState([]);
@@ -83,8 +82,6 @@ export const FileManagerDetailUsers = () => {
       tag_ids: selectedTagIds,
       parent_id: id,
     };
-
-  
 
     createFolder(folderData);
   };
@@ -194,7 +191,7 @@ export const FileManagerDetailUsers = () => {
         {data.subfolders.length === 0 && data.files.length === 0 ? (
           <>
             <Button variant="contained" onClick={handleOpenCreateFolderDialog}>
-            Buat Folder Baru
+              Buat Folder Baru
             </Button>
             <FileManagerPanel
               title="Upload File"
@@ -207,7 +204,7 @@ export const FileManagerDetailUsers = () => {
         ) : (
           <>
             <Button variant="contained" onClick={handleOpenCreateFolderDialog}>
-            Buat Folder Baru
+              Buat Folder Baru
             </Button>
             <FileManagerPanel
               title="Upload File"
@@ -246,11 +243,9 @@ export const FileManagerDetailUsers = () => {
 
       {/* Create Folder Dialog */}
       <Dialog open={openCreateFolderDialog} onClose={handleCloseCreateFolderDialog}>
-        <DialogTitle>Create Folder</DialogTitle>
+        <DialogTitle>Buat Folder</DialogTitle>
         <DialogContent>
-          <DialogContentText sx={{ mb: 3 }}>
-          Nama folder
-          </DialogContentText>
+          <DialogContentText sx={{ mb: 3 }}>Nama folder</DialogContentText>
           <TextField
             autoFocus
             margin="dense"
@@ -266,7 +261,7 @@ export const FileManagerDetailUsers = () => {
 
           {/* Tag selection */}
           <FormControl fullWidth margin="dense">
-            <InputLabel id="tags-label">Tags</InputLabel>
+            <InputLabel id="tags-label">Tag</InputLabel>
             <Select
               labelId="tags-label"
               id="tags"
@@ -300,21 +295,20 @@ export const FileManagerDetailUsers = () => {
                   </MenuItem>
                 ))
               ) : (
-                <MenuItem disabled>No tags available</MenuItem>
+                <MenuItem disabled>Tidak ada tag tersedia</MenuItem>
               )}
             </Select>
           </FormControl>
         </DialogContent>
         <DialogActions>
           <Button variant="outlined" onClick={handleCloseCreateFolderDialog}>
-            Cancel
+            Batal
           </Button>
           <Button variant="contained" onClick={handleFolderCreate} disabled={isCreating}>
-            Create
+            Buat
           </Button>
         </DialogActions>
       </Dialog>
-
       {/* Upload File Dialog */}
       <FileManagerNewDialogParent
         title="Upload File"

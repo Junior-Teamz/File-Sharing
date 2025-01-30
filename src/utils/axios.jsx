@@ -260,6 +260,8 @@ export const endpoints = {
     delete: '/api/folders/delete', // delete folders
     edit: '/api/folders/update', // edit folders
     addTag: '/api/folders/tag/add',
+    moveFolder: '/api/folders/move',
+    pathFolder: '/api/folders/path',
     removeTag: '/api/folders/tag/remove',
     getFavorit: '/api/folders/favorite/all',
     addFavorit: '/api/folders/favorite/add',

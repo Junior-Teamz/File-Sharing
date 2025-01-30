@@ -73,6 +73,13 @@ export default function FIleManagerFileDetails({
   } = item;
 
   const isFolder = item.type === 'folder';
+  const permission = shared_with.find((item) => item.permissions === 'read');
+  const PermissionRead = permission !== undefined;
+  const PermissionEdit = shared_with.some((item) => item.permissions === 'write');
+  const permissionIcon = shared_with.find(
+    (item) => item.permissions === 'read' || item.permissions === 'write'
+  );
+  const showIcon = !permission;
   const { enqueueSnackbar } = useSnackbar();
   const [isOpen, setIsOpen] = useState(false);
   const [newFileName, setNewFileName] = useState(item.name);
@@ -592,30 +599,34 @@ export default function FIleManagerFileDetails({
               Download File
             </Button>
           )}
-
           {isEditing ? (
-            <TextField
-              value={newFileName}
-              onChange={(e) => setNewFileName(e.target.value)}
-              onBlur={handleRename}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleRename();
-                }
-              }}
-              size="small"
-              autoFocus
-            />
+            permissionIcon !== undefined ? null : ( // Sembunyikan TextField jika permission 'read' atau 'write'
+              <TextField
+                value={newFileName}
+                onChange={(e) => setNewFileName(e.target.value)}
+                onBlur={handleRename}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleRename();
+                  }
+                }}
+                size="small"
+                autoFocus
+              />
+            )
           ) : (
             <Typography variant="subtitle2">
               {name}
-              <Tooltip title="Edit nama file">
-                <IconButton size="small" onClick={() => setIsEditing(true)}>
-                  <EditIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
+              {showIcon && (
+                <Tooltip title="Edit nama file">
+                  <IconButton size="small" onClick={() => setIsEditing(true)}>
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
             </Typography>
           )}
+
           <Typography variant="body2" color="text.secondary">
             {fData(size)}
           </Typography>

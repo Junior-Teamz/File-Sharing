@@ -5,7 +5,14 @@ export const useMutationUploadFilesId = ({ onSuccess, onError }) => {
   return useMutation({
     mutationKey: ['upload.files'],
     mutationFn: async (formData) => {
-      const response = await axiosInstance.post(endpoints.file.upload, formData);
+      const response = await axiosInstance.post(endpoints.file.upload, formData, {
+        onUploadProgress: (progressEvent) => {
+          if (onUploadProgress) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onUploadProgress(percentCompleted);
+          }
+        },
+      });
       return response;
     },
     onSuccess,

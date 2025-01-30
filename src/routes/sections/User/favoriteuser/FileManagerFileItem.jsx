@@ -37,10 +37,10 @@ import FileThumbnail from 'src/components/file-thumbnail';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import FileManagerShareDialog from './FileManagerShareDialog';
 import FileManagerFileDetails from './FileManagerFileDetails';
-import { useAddFavoriteUser,useRemoveFavoriteUser } from './view/FetchFolderUser';
+import { useAddFavoriteUser, useRemoveFavoriteUser } from './view/FetchFolderUser';
 import { useQueryClient } from '@tanstack/react-query';
 
-export default function FileManagerFileItem({ file,  selected, onSelect, onDelete, sx, ...other }) {
+export default function FileManagerFileItem({ file, selected, onSelect, onDelete, sx, ...other }) {
   const theme = useTheme();
   const { enqueueSnackbar } = useSnackbar();
   const { copy } = useCopyToClipboard();
@@ -207,7 +207,11 @@ export default function FileManagerFileItem({ file,  selected, onSelect, onDelet
             }}
           >
             {file.shared_with?.map((person) => (
-              <Avatar key={person.user.id} alt={person.user.name} src={person.user.photo_profile_url} />
+              <Avatar
+                key={person.user.id}
+                alt={person.user.name}
+                src={person.user.photo_profile_url}
+              />
             ))}
           </AvatarGroup>
         </TableCell>
