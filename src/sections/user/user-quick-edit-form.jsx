@@ -126,9 +126,9 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
         role: currentUser.roles || '',
         instance_id: currentUser.instances?.[0]?.id || '', // Ensure to get only the 'id' of the instance
         instance_section_id: currentUser.section?.[0]?.id || '',
-        permissions: Array.isArray(currentUser.permissions)
-          ? currentUser.permissions.map((p) => p.id)
-          : [],
+        // permissions: Array.isArray(currentUser.permissions)
+        //   ? currentUser.permissions.map((p) => p.id)
+        //   : [],
       });
     }
   }, [currentUser, reset]);
@@ -141,7 +141,7 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
       ...(data.password
         ? { password: data.password, password_confirmation: data.confirmPassword }
         : {}),
-      permissions: data.permissions.map(String), // Konversi ke string
+      // permissions: data.permissions.map(String), // Konversi ke string
     };
 
     if (RolesUser) {
@@ -206,7 +206,7 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
             </RHFSelect>
 
             {/* Show Permissions if the user is superadmin or admin */}
-            {RolesUser && (
+            {/* {RolesUser && (
               <FormControl fullWidth margin="dense">
                 <RHFAutocomplete
                   name="permissions"
@@ -246,7 +246,7 @@ export default function UserQuickEditForm({ currentUser, open, onClose, instance
                   )}
                 />
               </FormControl>
-            )}
+            )} */}
 
             <RHFTextField name="password" label="Password" type="password" />
             <RHFTextField name="confirmPassword" label="Konfirmasi Password" type="password" />

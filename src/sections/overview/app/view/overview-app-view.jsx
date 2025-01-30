@@ -370,9 +370,8 @@ export default function OverviewAppView() {
                                       onClick={() =>
                                         handleEditDialogOpen(
                                           selected[0],
-                                          data?.folders.find(
-                                            (folder) => folder.id === selected[0]
-                                          )?.name
+                                          data?.folders.find((folder) => folder.id === selected[0])
+                                            ?.name
                                         )
                                       }
                                       disabled={selected.length !== 1}
@@ -405,10 +404,7 @@ export default function OverviewAppView() {
                   </TableHead>
                   <TableBody>
                     {data?.subfolders?.map((folder, idx) => (
-                      <TableRow
-                        key={folder.id}
-                        selected={selected.indexOf(folder.id) !== -1}
-                      >
+                      <TableRow key={folder.id} selected={selected.indexOf(folder.id) !== -1}>
                         <TableCell padding="checkbox">
                           <Checkbox
                             checked={selected.includes(folder.id)}

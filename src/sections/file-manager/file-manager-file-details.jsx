@@ -146,6 +146,7 @@ export default function FIleManagerFileDetails({
       enqueueSnackbar('Nama file berhasil diperbarui!', { variant: 'success' });
       setIsEditing(false);
       queryClient.invalidateQueries({ queryKey: ['folder.admin'] });
+      queryClient.invalidateQueries({ queryKey: ['folder.detail'] });
     } catch (error) {
       enqueueSnackbar('Gagal memperbarui nama file!', { variant: 'error' });
     }

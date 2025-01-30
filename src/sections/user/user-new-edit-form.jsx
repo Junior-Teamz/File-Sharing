@@ -92,10 +92,10 @@ export default function UserNewEditForm({ currentUser }) {
       role: currentUser?.role || '',
       instance_id: currentUser?.instansiId || '',
       instance_section_id: currentUser?.instance_section_id || '',
-      permissions: Array.isArray(currentUser?.permissions)
-        ? currentUser.permissions.map((p) => p.id)
-        : [],
-    }),
+    //   permissions: Array.isArray(currentUser?.permissions)
+    //     ? currentUser.permissions.map((p) => p.id)
+    //     : [],
+    // }),
     [currentUser]
   );
 
@@ -137,9 +137,9 @@ export default function UserNewEditForm({ currentUser }) {
     });
 
     // formData.append('permissions', JSON.stringify(data.permissions)); // Menggunakan nama-nama permission
-    permissions.forEach((permission) => {
-      formData.append('permissions[]', permission);
-    });
+    // permissions.forEach((permission) => {
+    //   formData.append('permissions[]', permission);
+    // });
 
     if (validInstanceId) {
       formData.append('instance_id', validInstanceId);
@@ -203,7 +203,7 @@ export default function UserNewEditForm({ currentUser }) {
                 </RHFSelect>
               )}
 
-              {selectedRole === 'admin' && (
+              {/* {selectedRole === 'admin' && (
                 <FormControl fullWidth margin="dense">
                   <RHFAutocomplete
                     name="permissions"
@@ -243,7 +243,7 @@ export default function UserNewEditForm({ currentUser }) {
                     )}
                   />
                 </FormControl>
-              )}
+              )} */}
             </Box>
             <Stack alignItems="flex-end" sx={{ mt: 3 }}>
               <Button variant="contained" type="submit">

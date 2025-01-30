@@ -10,7 +10,7 @@ import {
   Button,
   Tabs,
   Tab,
-  IconButton
+  IconButton,
 } from '@mui/material';
 import FolderIcon from '@mui/icons-material/Folder';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -22,13 +22,10 @@ const FileManagerPathModal = ({ open, onClose, folderName }) => {
 
   const folders = [
     { id: 1, name: 'Kas Kelas' },
-    { id: 2, name: 'Logo Smkn 1 Ciomas' },
     { id: 3, name: 'Drive Pengumpulan Cerpen Bahasa indonesia' },
     { id: 4, name: 'Foto' },
     { id: 5, name: 'Video' },
-    { id: 6, name: 'Curug Putri Pelangi' },
     { id: 7, name: 'Classroom' },
-    { id: 8, name: 'Teks Transisi' }
   ];
 
   return (
@@ -38,7 +35,11 @@ const FileManagerPathModal = ({ open, onClose, folderName }) => {
         <div className="text-sm mb-4">
           Lokasi saat ini: <span className="bg-gray-100 px-2 py-1 rounded">{currentLocation}</span>
         </div>
-        <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} className="min-h-0">
+        <Tabs
+          value={tabValue}
+          onChange={(_, newValue) => setTabValue(newValue)}
+          className="min-h-0"
+        >
           <Tab label="Disarankan" className="min-h-0 px-4" />
           <Tab label="Berbintang" className="min-h-0 px-4" />
           <Tab label="Semua lokasi" className="min-h-0 px-4" />
@@ -60,10 +61,10 @@ const FileManagerPathModal = ({ open, onClose, folderName }) => {
               }
             >
               <FolderIcon className="mr-2 text-gray-600" />
-              <ListItemText 
+              <ListItemText
                 primary={folder.name}
                 primaryTypographyProps={{
-                  className: "text-sm"
+                  className: 'text-sm',
                 }}
               />
             </ListItem>

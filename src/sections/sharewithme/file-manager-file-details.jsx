@@ -632,10 +632,10 @@ export default function FIleManagerFileDetails({
             {fData(size)}
           </Typography>
 
-          {/* <Divider sx={{ borderStyle: 'dashed' }} />
-
-          {renderTags} */}
-
+          <Divider sx={{ borderStyle: 'dashed' }} />
+          {PermissionRead && (
+          {renderTags}
+          )}
           <Divider sx={{ borderStyle: 'dashed' }} />
 
           {renderProperties}
@@ -678,7 +678,7 @@ export default function FIleManagerFileDetails({
             )}
           </Stack>
 
-          {PermissionRead && (
+          
             <FileManagerShareDialog
               open={share.value}
               fileId={id}
@@ -691,7 +691,7 @@ export default function FIleManagerFileDetails({
                 setInviteEmail('');
               }}
             />
-          )}
+        
 
           {renderShared}
 
