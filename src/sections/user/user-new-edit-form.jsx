@@ -92,10 +92,8 @@ export default function UserNewEditForm({ currentUser }) {
       role: currentUser?.role || '',
       instance_id: currentUser?.instansiId || '',
       instance_section_id: currentUser?.instance_section_id || '',
-    //   permissions: Array.isArray(currentUser?.permissions)
-    //     ? currentUser.permissions.map((p) => p.id)
-    //     : [],
-    // }),
+   
+    }),
     [currentUser]
   );
 
