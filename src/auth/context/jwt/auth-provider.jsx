@@ -91,6 +91,7 @@ export function AuthProvider({ children }) {
       try {
         const response = await axiosInstance.post(endpoints.auth.login, data);
         const { accessToken, roles, is_superadmin, user, refreshToken } = response.data;
+        sessionStorage.setItem('refresh_token', refreshToken);
 
         // Set session with accessToken
         setSession(accessToken);
@@ -132,33 +133,34 @@ export function AuthProvider({ children }) {
     [initialize]
   );
 
-  const register = useCallback(async (email, password, firstName, lastName) => {
-    const data = { email, password, firstName, lastName };
+  // const register = useCallback(async (email, password, firstName, lastName) => {
+  //   const data = { email, password, firstName, lastName };
 
-    try {
-      const response = await axiosInstance.post(endpoints.auth.register, data);
-      const { user } = response.data;
+  //   try {
+  //     const response = await axiosInstance.post(endpoints.auth.register, data);
+  //     const { user } = response.data;
 
-      dispatch({
-        type: 'REGISTER',
-        payload: { user, roles: user.roles || [], is_superadmin: user.is_superadmin || false },
-      });
-    } catch (error) {
-      console.error('Registration Error:', error);
-      throw error;
-    }
-  }, []);
+  //     dispatch({
+  //       type: 'REGISTER',
+  //       payload: { user, roles: user.roles || [], is_superadmin: user.is_superadmin || false },
+  //     });
+  //   } catch (error) {
+  //     console.error('Registration Error:', error);
+  //     throw error;
+  //   }
+  // }, []);
 
   const logout = useCallback(async () => {
-    const { refreshToken } = state;
+    const token_refresh = sessionStorage.getItem('refresh_token');
 
     try {
       await axiosInstance.post(endpoints.auth.logout, {
-        refreshToken: refreshToken || '',
+        refreshToken : token_refresh
       });
     } catch (error) {
       console.error('Logout Error:', error);
     } finally {
+      sessionStorage.removeItem('refresh_token');
       sessionStorage.removeItem(STORAGE_KEY);
       dispatch({ type: 'LOGOUT' });
     }
@@ -176,10 +178,10 @@ export function AuthProvider({ children }) {
       authenticated: status === 'authenticated',
       unauthenticated: status === 'unauthenticated',
       login,
-      register,
+      // register,
       logout,
     }),
-    [login, logout, register, state.user, status]
+    [login, logout, state.user, status]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;

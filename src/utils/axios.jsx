@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { get, update } from 'lodash';
 import { HOST_API } from 'src/config-global';
 
 // ----------------------------------------------------------------------
@@ -18,18 +17,6 @@ export const setToken = (accessToken) => {
   }
 };
 
-// Function to refresh access_token
-const refreshAccessToken = async (refreshToken) => {
-  if (!refreshToken) {
-    throw new Error('No refresh token available');
-  }
-
-  const response = await axiosInstance.post('/api/refreshToken', { token: refreshToken });
-  const newAccessToken = response.data.accessToken; // Ambil access_token baru
-  setToken(newAccessToken); // Simpan access_token baru
-  return newAccessToken;
-};
-
 // Request interceptor untuk menyisipkan token
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -42,31 +29,17 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor untuk menangani refresh token
+// Response interceptor untuk menangani error
 axiosInstance.interceptors.response.use(
   (res) => res,
-  async (error) => {
-    // Cek status respons
+  (error) => {
     if (error.response) {
-      const originalRequest = error.config; // Simpan request yang gagal
-      const refreshToken = originalRequest.refreshToken; // Ambil refresh_token dari request yang gagal
-      if (error.response.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true; // Tandai request yang sudah dicoba
-
-        try {
-          const newAccessToken = await refreshAccessToken(refreshToken); // Dapatkan access_token baru
-          originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`; // Tambahkan token baru ke header
-          return axiosInstance(originalRequest); // Ulangi request dengan token baru
-        } catch (refreshError) {
-          // Tangani kesalahan saat refresh token
-          return Promise.reject(refreshError);
-        }
-      } else if (error.response.status === 403) {
-        // Redirect ke halaman 403
-        // window.location = '/403'; // Sesuaikan path sesuai kebutuhan
+      if (error.response.status === 403) {
+        // Redirect ke halaman 403 jika diperlukan
+        // window.location = '/403';
       } else if (error.response.status === 500) {
-        // Redirect ke halaman 500
-        // window.location = '/500'; // Sesuaikan path sesuai kebutuhan
+        // Redirect ke halaman 500 jika diperlukan
+        // window.location = '/500';
       }
     }
     return Promise.reject((error.response && error.response.data) || 'Something went wrong');
@@ -79,11 +52,10 @@ export default axiosInstance;
 
 export const fetcher = async (args) => {
   const [url, config] = Array.isArray(args) ? args : [args];
-
   const res = await axiosInstance.get(url, { ...config });
-
   return res.data;
 };
+
 
 // ----------------------------------------------------------------------
 

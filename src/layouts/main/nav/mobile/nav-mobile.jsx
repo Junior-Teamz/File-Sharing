@@ -10,7 +10,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { usePathname } from 'src/routes/hooks';
 // components
 import Logo from 'src/components/logo';
-import SvgColor from 'src/components/svg-color';
+import SvgColor from 'src/components/svg-color';  
 import Scrollbar from 'src/components/scrollbar';
 //
 import NavList from './nav-list';

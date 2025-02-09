@@ -33,9 +33,9 @@ import {
   emptyRows,
 } from 'src/components/table';
 
-import Folderpanel from './Folderpanel';
 import EmptyContent from 'src/components/empty-content';
 import TableShare from 'src/components/table/tableshare';
+import FolderPanel from './FolderPanel';
 
 // ----------------------------------------------------------------------
 
